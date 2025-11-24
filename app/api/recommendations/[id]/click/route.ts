@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { auth, currentUser } from "@clerk/nextjs/server"
 
 import { getSupabaseServerClient } from "@/lib/supabase/server"
@@ -48,9 +48,10 @@ const ensureUserRecord = async (clerkUserId: string) => {
 }
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  context: { params: { id: string } },
 ) {
+  const { params } = context
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
