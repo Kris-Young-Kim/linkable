@@ -1,5 +1,6 @@
 "use client"
 
+import { Fragment } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
@@ -19,7 +20,14 @@ export function HeroSection() {
                 {t("hero.title")} <span className="text-primary">{t("hero.titleHighlight")}</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto lg:mx-0 text-pretty">
-                {t("hero.subtitle")}
+                {t("hero.subtitle")
+                  .split("\n")
+                  .map((line, index, arr) => (
+                    <Fragment key={index}>
+                      {line}
+                      {index < arr.length - 1 && <br />}
+                    </Fragment>
+                  ))}
               </p>
             </div>
 

@@ -14,7 +14,7 @@ export const translations = {
     "hero.title": "AI로 연결하는",
     "hero.titleHighlight": "가능성",
     "hero.subtitle":
-      "ICF & ISO 표준 기반 맞춤형 보조기기 추천. 검증된 방법론으로 전문가 매칭을 경험하세요.",
+      "ICF & ISO 표준 기반 맞춤형 보조기기 추천입니다.\n검증된 방법론으로 전문가 매칭을 경험하세요.",
     "hero.getStarted": "시작하기",
     "hero.learnMore": "자세히 보기",
     "hero.icfCertified": "ICF 인증",
@@ -93,6 +93,10 @@ export const translations = {
     "chat.keyboardShortcuts":
       "Enter로 전송 • Shift+Enter로 줄바꿈 • 음성 입력 가능",
     "chat.backToHome": "홈으로 돌아가기",
+    "chat.loginRequiredTitle": "로그인이 필요합니다",
+    "chat.loginRequiredDescription":
+      "LinkAble 코디네이터와 대화를 이어가려면 계정으로 로그인해 주세요.",
+    "chat.loginRequiredAction": "로그인하고 상담 시작",
     "chat.genericReply":
       "공유해 주셔서 감사합니다. 조금 더 구체적인 활동이나 불편했던 상황이 있다면 알려주세요.",
     "chat.errorResponse":
@@ -310,6 +314,10 @@ export const translations = {
     "chat.keyboardShortcuts":
       "Press Enter to send • Shift+Enter for new line • Voice input available",
     "chat.backToHome": "Go back to home",
+    "chat.loginRequiredTitle": "Sign in required",
+    "chat.loginRequiredDescription":
+      "Please sign in to continue chatting with your LinkAble coordinator.",
+    "chat.loginRequiredAction": "Sign in and continue",
     "chat.genericReply":
       "Thank you for sharing. Could you tell me a bit more about the specific activity or tool that feels challenging?",
     "chat.errorResponse":
@@ -529,6 +537,10 @@ export const translations = {
     "chat.coordinatorMessage": "Able Cordiのメッセージ",
     "chat.keyboardShortcuts": "Enterで送信 • Shift+Enterで改行 • 音声入力可能",
     "chat.backToHome": "ホームに戻る",
+    "chat.loginRequiredTitle": "ログインが必要です",
+    "chat.loginRequiredDescription":
+      "LinkAbleコーディネーターとの対話を続けるには、アカウントにログインしてください。",
+    "chat.loginRequiredAction": "ログインして相談を開始",
     "chat.genericReply":
       "共有ありがとうございます。もう少し具体的な活動や困っている場面があれば教えてください。",
     "chat.errorResponse":

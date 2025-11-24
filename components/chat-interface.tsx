@@ -3,9 +3,11 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+import { useAuth, SignInButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { DisclaimerModal } from "@/components/disclaimer-modal"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-provider"
@@ -19,8 +21,9 @@ interface Message {
 
 export function ChatInterface() {
   const { t } = useLanguage()
+  const { isSignedIn, isLoaded } = useAuth()
 
-  const [showDisclaimer, setShowDisclaimer] = useState(true)
+  const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -37,6 +40,10 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const isAuthResolved = isLoaded
+  const requiresLogin = isAuthResolved && !isSignedIn
+  const shouldShowDisclaimer = Boolean(isSignedIn && !hasAcceptedDisclaimer)
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -46,6 +53,10 @@ export function ChatInterface() {
   }, [messages])
 
   const handleSend = async () => {
+    if (!isSignedIn) {
+      return
+    }
+
     const trimmed = input.trim()
     if (!trimmed) return
 
@@ -132,18 +143,35 @@ export function ChatInterface() {
     console.log("[v0] Photo attachment requested")
   }
   const handleSuggestionClick = (question: string) => {
+    if (requiresLogin) return
     setInput(question)
     textareaRef.current?.focus()
   }
 
   const handleAcceptDisclaimer = () => {
-    setShowDisclaimer(false)
+    setHasAcceptedDisclaimer(true)
     textareaRef.current?.focus()
   }
 
   return (
     <>
-      <DisclaimerModal open={showDisclaimer} onAccept={handleAcceptDisclaimer} />
+      <DisclaimerModal open={shouldShowDisclaimer} onAccept={handleAcceptDisclaimer} />
+
+      <Dialog open={requiresLogin} onOpenChange={() => {}}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>{t("chat.loginRequiredTitle")}</DialogTitle>
+            <DialogDescription>{t("chat.loginRequiredDescription")}</DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <SignInButton mode="modal">
+              <Button size="lg" className="w-full cursor-pointer">
+                {t("chat.loginRequiredAction")}
+              </Button>
+            </SignInButton>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex h-screen flex-col">
         {/* Header */}
@@ -157,7 +185,7 @@ export function ChatInterface() {
               <ArrowLeft className="size-6" />
             </Link>
             <div className="flex items-center gap-3">
-              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent">
                 <Sparkles className="size-6 text-white" aria-hidden="true" />
               </div>
               <div>
@@ -182,7 +210,7 @@ export function ChatInterface() {
               >
                 {message.role === "assistant" && (
                   <div
-                    className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent"
+                    className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent"
                     aria-hidden="true"
                   >
                     <Sparkles className="size-5 text-white" />
@@ -205,7 +233,7 @@ export function ChatInterface() {
             {isTyping && (
               <div className="flex gap-3" role="status" aria-live="polite" aria-label={t("chat.typing")}>
                 <div
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-accent"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent"
                   aria-hidden="true"
                 >
                   <Sparkles className="size-5 text-white" />
@@ -237,6 +265,7 @@ export function ChatInterface() {
                     variant="secondary"
                     size="sm"
                     onClick={() => handleSuggestionClick(question)}
+                    disabled={requiresLogin}
                   >
                     {question}
                   </Button>
@@ -260,6 +289,7 @@ export function ChatInterface() {
                 className="size-14 shrink-0 bg-transparent"
                 onClick={handlePhotoAttach}
                 aria-label={t("chat.attachPhoto")}
+                disabled={requiresLogin}
               >
                 <Paperclip className="size-6" aria-hidden="true" />
               </Button>
@@ -275,6 +305,7 @@ export function ChatInterface() {
                   className="min-h-14 resize-none pr-32 text-lg leading-relaxed"
                   rows={1}
                   aria-label="Message input"
+                  disabled={requiresLogin}
                 />
                 <div className="absolute bottom-2 right-2 flex gap-2">
                   {/* Voice Input Button */}
@@ -286,6 +317,7 @@ export function ChatInterface() {
                     onClick={toggleVoiceRecording}
                     aria-label={isRecording ? t("chat.stopVoiceRecording") : t("chat.startVoiceRecording")}
                     aria-pressed={isRecording}
+                    disabled={requiresLogin}
                   >
                     <Mic className="size-6" aria-hidden="true" />
                   </Button>
@@ -296,9 +328,9 @@ export function ChatInterface() {
                     size="lg"
                     className="size-11"
                     onClick={handleSend}
-                    disabled={!input.trim() || isTyping}
+                    disabled={!input.trim() || isTyping || requiresLogin}
                     aria-label={t("chat.sendMessage")}
-                  >
+                    >
                     <Send className="size-5" aria-hidden="true" />
                   </Button>
                 </div>
