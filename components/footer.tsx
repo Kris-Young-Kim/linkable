@@ -140,13 +140,13 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>{t("footer.copyright")}</p>
           <div className="flex gap-6">
-            <Link href="#" className="hover:text-foreground transition-colors" aria-label="LinkedIn">
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialLinkedIn")}>
               {t("footer.socialLinkedIn")}
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors" aria-label="Twitter">
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialTwitter")}>
               {t("footer.socialTwitter")}
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors" aria-label="Contact">
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialContact")}>
               {t("footer.socialContact")}
             </Link>
           </div>

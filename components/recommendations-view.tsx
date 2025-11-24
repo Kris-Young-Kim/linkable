@@ -73,7 +73,7 @@ export function RecommendationsView({ products, errorMessage }: RecommendationsV
                 <ProductRecommendationCard
                   key={product.id}
                   productName={product.name}
-                  functionalSupport={product.category ?? "Assistive Solution"}
+                  functionalSupport={product.category ?? t("recommendations.defaultCategory")}
                   description={product.description}
                   imageUrl={product.image_url ?? undefined}
                   isoCode={product.iso_code}

@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { Language } from "@/lib/translations"
+import { translations, type Language } from "@/lib/translations"
 
 interface LanguageContextType {
   language: Language
@@ -28,14 +28,19 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("linkable-language") as Language | null
+    const savedDefault = localStorage.getItem("linkable-language-default") as Language | null
 
-    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
-      setLanguageState(savedLanguage)
+    const shouldResetToDefault =
+      !savedLanguage || !SUPPORTED_LANGUAGES.includes(savedLanguage) || savedDefault !== DEFAULT_LANGUAGE
+
+    if (shouldResetToDefault) {
+      setLanguageState(DEFAULT_LANGUAGE)
+      localStorage.setItem("linkable-language", DEFAULT_LANGUAGE)
+      localStorage.setItem("linkable-language-default", DEFAULT_LANGUAGE)
       return
     }
 
-    // Ensure default language is persisted for future visits
-    localStorage.setItem("linkable-language", DEFAULT_LANGUAGE)
+    setLanguageState(savedLanguage)
   }, [])
 
   const setLanguage = (lang: Language) => {
@@ -44,15 +49,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    const { translations } = require("@/lib/translations")
-    const keys = key.split(".")
-    let value: any = translations[language]
-
-    for (const k of keys) {
-      value = value?.[k]
-    }
-
-    return value || key
+    const dictionary = translations[language] as Record<string, string | undefined>
+    return dictionary[key] ?? key
   }
 
   return <LanguageContext.Provider value={{ language, setLanguage, t }}>{children}</LanguageContext.Provider>

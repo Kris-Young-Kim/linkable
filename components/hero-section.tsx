@@ -85,7 +85,7 @@ export function HeroSection() {
             <div className="relative w-full max-w-lg aspect-square">
               <img
                 src="/elderly-person-happily-using-tablet-in-cozy-home-e.jpg"
-                alt="Elderly person happily using tablet in a cozy home environment"
+                alt={t("hero.imageAlt")}
                 className="w-full h-full object-contain rounded-2xl"
               />
               {/* Decorative accent */}

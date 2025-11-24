@@ -15,7 +15,7 @@ export function Header() {
         <Link
           href="/"
           className="flex items-center gap-2 text-xl font-bold text-primary hover:text-primary/90 transition-colors focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-4 rounded-md"
-          aria-label="LinkAble Home"
+          aria-label={t("header.homeAria")}
         >
           <svg
             className="h-8 w-8"
@@ -37,7 +37,7 @@ export function Header() {
         </Link>
 
         {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-8" role="navigation" aria-label="Main navigation">
+        <nav className="hidden md:flex items-center gap-8" role="navigation" aria-label={t("header.navAria")}>
           <Link
             href="#features"
             className="text-base font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-4 rounded-sm px-2 py-1"
