@@ -141,13 +141,13 @@ export function Footer() {
           <p>{t("footer.copyright")}</p>
           <div className="flex gap-6">
             <Link href="#" className="hover:text-foreground transition-colors" aria-label="LinkedIn">
-              LinkedIn
+              {t("footer.socialLinkedIn")}
             </Link>
             <Link href="#" className="hover:text-foreground transition-colors" aria-label="Twitter">
-              Twitter
+              {t("footer.socialTwitter")}
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors" aria-label="Email">
-              Contact
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label="Contact">
+              {t("footer.socialContact")}
             </Link>
           </div>
         </div>

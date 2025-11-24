@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
 import { Sparkles, Star, TrendingUp, Award } from "lucide-react"
+import { useLanguage } from "@/components/language-provider"
 
 // K-IPPA Score data (Before and After)
 const kIppaData = [
@@ -14,22 +15,33 @@ const kIppaData = [
   { category: "After", difficulty: 1, fill: "#0F766E" },
 ]
 
-const chartConfig = {
-  difficulty: {
-    label: "Difficulty Level",
-    color: "#0F766E",
-  },
-}
-
 export function EffectivenessDashboard() {
   const [rating, setRating] = useState(0)
   const [hoveredStar, setHoveredStar] = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const { t } = useLanguage()
+  const ratingMessages: Record<number, string> = {
+    5: t("dashboard.rating.excellent"),
+    4: t("dashboard.rating.great"),
+    3: t("dashboard.rating.good"),
+    2: t("dashboard.rating.ok"),
+    1: t("dashboard.rating.bad"),
+  }
 
   const improvementScore = 3.5
   const beforeScore = 4
   const afterScore = 1
   const improvementPercentage = ((beforeScore - afterScore) / beforeScore) * 100
+
+  const chartConfig = useMemo(
+    () => ({
+      difficulty: {
+        label: t("dashboard.chartDifficultyLabel"),
+        color: "#0F766E",
+      },
+    }),
+    [t],
+  )
 
   const handleSubmitReview = () => {
     setSubmitted(true)
@@ -39,8 +51,8 @@ export function EffectivenessDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold text-foreground">Your Progress Report</h1>
-        <p className="text-muted-foreground text-lg">See how assistive technology improved your daily life</p>
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground">{t("dashboard.progressTitle")}</h1>
+        <p className="text-muted-foreground text-lg">{t("dashboard.progressSubtitle")}</p>
       </div>
 
       {/* Improvement Score - Hero Card */}
@@ -55,10 +67,10 @@ export function EffectivenessDashboard() {
               <div className="text-6xl md:text-7xl font-bold text-primary mb-2">+{improvementScore}</div>
               <div className="text-2xl md:text-3xl font-semibold text-foreground flex items-center justify-center gap-2">
                 <TrendingUp className="size-8 text-emerald-600" />
-                Improvement Score!
+                {t("dashboard.improvementCallout")}
               </div>
               <p className="text-muted-foreground text-lg mt-2">
-                {improvementPercentage.toFixed(0)}% reduction in difficulty
+                {improvementPercentage.toFixed(0)}% {t("dashboard.difficultyReductionLabel")}
               </p>
             </div>
           </div>
@@ -68,10 +80,8 @@ export function EffectivenessDashboard() {
       {/* Score Comparison Chart */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">K-IPPA Score Comparison</CardTitle>
-          <CardDescription className="text-base">
-            Your difficulty level before and after using assistive technology
-          </CardDescription>
+          <CardTitle className="text-2xl">{t("dashboard.comparison")}</CardTitle>
+          <CardDescription className="text-base">{t("dashboard.comparisonDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -81,7 +91,7 @@ export function EffectivenessDashboard() {
                 <XAxis dataKey="category" tick={{ fontSize: 16, fontWeight: 600 }} axisLine={{ stroke: "#94a3b8" }} />
                 <YAxis
                   label={{
-                    value: "Difficulty Level (1-5)",
+                    value: t("dashboard.chartDifficultyLabel"),
                     angle: -90,
                     position: "insideLeft",
                     style: { fontSize: 14 },
@@ -105,7 +115,7 @@ export function EffectivenessDashboard() {
           <div className="mt-8 space-y-6">
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-base font-medium text-muted-foreground">Before: High Difficulty</span>
+                <span className="text-base font-medium text-muted-foreground">{t("dashboard.beforeDifficultyLabel")}</span>
                 <span className="text-base font-bold text-slate-600 dark:text-slate-400">4/5</span>
               </div>
               <Progress value={80} className="h-3 bg-slate-200 dark:bg-slate-800" />
@@ -113,7 +123,7 @@ export function EffectivenessDashboard() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-base font-medium text-primary">After: Low Difficulty</span>
+                <span className="text-base font-medium text-primary">{t("dashboard.afterDifficultyLabel")}</span>
                 <span className="text-base font-bold text-primary">1/5</span>
               </div>
               <Progress
@@ -128,8 +138,8 @@ export function EffectivenessDashboard() {
       {/* Review Input */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">How helpful was this product?</CardTitle>
-          <CardDescription className="text-base">Your feedback helps us improve our recommendations</CardDescription>
+          <CardTitle className="text-2xl">{t("dashboard.ratingQuestion")}</CardTitle>
+          <CardDescription className="text-base">{t("dashboard.ratingHelpText")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {!submitted ? (
@@ -143,7 +153,7 @@ export function EffectivenessDashboard() {
                     onMouseEnter={() => setHoveredStar(star)}
                     onMouseLeave={() => setHoveredStar(0)}
                     className="group transition-transform hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-full p-2"
-                    aria-label={`Rate ${star} out of 5 stars`}
+                    aria-label={`${t("dashboard.ratingAriaPrefix")} ${star} ${t("dashboard.ratingAriaSuffix")}`}
                     style={{ minWidth: "44px", minHeight: "44px" }}
                   >
                     <Star
@@ -160,13 +170,7 @@ export function EffectivenessDashboard() {
               {/* Rating Label */}
               <div className="text-center">
                 {rating > 0 && (
-                  <p className="text-lg font-medium text-foreground animate-in fade-in">
-                    {rating === 5 && "🎉 Excellent! So glad it helped!"}
-                    {rating === 4 && "😊 Great! We are happy to hear that!"}
-                    {rating === 3 && "👍 Good! We will keep improving!"}
-                    {rating === 2 && "😐 Thank you for your feedback"}
-                    {rating === 1 && "😔 We will do better"}
-                  </p>
+                  <p className="text-lg font-medium text-foreground animate-in fade-in">{ratingMessages[rating]}</p>
                 )}
               </div>
 
@@ -179,7 +183,7 @@ export function EffectivenessDashboard() {
                   className="min-h-[44px] px-8 text-base font-semibold"
                   aria-label="Submit your review"
                 >
-                  Submit Review
+                  {t("dashboard.submitReview")}
                 </Button>
               </div>
             </>
@@ -189,9 +193,9 @@ export function EffectivenessDashboard() {
                 <Sparkles className="size-8 text-emerald-600" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">Thank you for your feedback!</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-2">{t("dashboard.ratingThanksTitle")}</h3>
                 <p className="text-muted-foreground text-base">
-                  Your {rating}-star rating helps us improve our services
+                  {t("dashboard.ratingThanksMessage").replace("{rating}", String(rating))}
                 </p>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, ShoppingCart } from "lucide-react"
+import { useLanguage } from "@/components/language-provider"
 
 type ClickSource = "primary" | "secondary"
 
@@ -37,10 +38,11 @@ export function ProductRecommendationCard({
   purchaseLink,
   recommendationId,
 }: ProductRecommendationCardProps) {
+  const { t } = useLanguage()
   const matchPercentage = matchScore ? `${Math.round(matchScore * 100)}%` : null
   const priceDisplay =
     price === null || price === undefined
-      ? "—"
+      ? t("recommendations.noPrice")
       : typeof price === "number"
         ? new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(
             price,
@@ -111,7 +113,7 @@ export function ProductRecommendationCard({
       <CardContent className="pt-6 space-y-4">
         {matchPercentage && (
           <Badge variant="outline" className="text-sm">
-            Match Score {matchPercentage}
+            {t("recommendations.matchScore")} {matchPercentage}
           </Badge>
         )}
         <p className="text-base text-muted-foreground leading-relaxed">{description}</p>
@@ -131,7 +133,9 @@ export function ProductRecommendationCard({
 
         {matchReason && <p className="text-sm text-foreground/80 leading-relaxed">{matchReason}</p>}
 
-        <p className="text-sm font-medium text-foreground">예상 가격: {priceDisplay}</p>
+        <p className="text-sm font-medium text-foreground">
+          {t("recommendations.priceLabel")}: {priceDisplay}
+        </p>
       </CardContent>
 
       <CardFooter className="flex gap-3">
@@ -144,7 +148,7 @@ export function ProductRecommendationCard({
           aria-disabled={isButtonDisabled}
         >
           <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
-          {purchaseLink ? "자세히 보기" : "구매처 준비 중"}
+          {purchaseLink ? t("recommendations.learnMore") : t("recommendations.noLink")}
         </Button>
         <Button
           variant="outline"
@@ -156,7 +160,7 @@ export function ProductRecommendationCard({
           aria-disabled={isButtonDisabled}
         >
           <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
-          {purchaseLink ? "구매하러 가기" : "링크 없음"}
+          {purchaseLink ? t("recommendations.buyNow") : t("recommendations.noLink")}
         </Button>
       </CardFooter>
     </Card>

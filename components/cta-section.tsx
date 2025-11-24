@@ -39,7 +39,7 @@ export function CTASection() {
                 variant="outline"
                 className="min-h-[44px] px-8 text-base font-semibold border-2 bg-transparent"
               >
-                Schedule a Call
+                {t("cta.scheduleCall")}
               </Button>
             </div>
 
@@ -52,7 +52,7 @@ export function CTASection() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Free consultation
+                {t("cta.freeConsultation")}
               </span>
               <span className="flex items-center gap-2">
                 <svg className="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -62,7 +62,7 @@ export function CTASection() {
                     clipRule="evenodd"
                   />
                 </svg>
-                No credit card needed
+                {t("cta.noCard")}
               </span>
               <span className="flex items-center gap-2">
                 <svg className="h-4 w-4 text-primary" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -72,7 +72,7 @@ export function CTASection() {
                     clipRule="evenodd"
                   />
                 </svg>
-                HIPAA compliant
+                {t("cta.hipaa")}
               </span>
             </div>
           </div>

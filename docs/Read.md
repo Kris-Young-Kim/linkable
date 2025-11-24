@@ -28,7 +28,7 @@ Step 4 가치 검증 (Validation) 사용 전/후 수행 난이도 변화를 측�
 🚀 주요 기능 (Key Features)
 
 1. AI 코디네이터 '에이블 코디' (Able Cordi)
-   Gemini 1.5 기반 상담: 의료 용어를 배제하고 기능 중심의 따뜻한 상담 제공.
+   Gemini 2.0 기반 상담: 의료 용어를 배제하고 기능 중심의 따뜻한 상담 제공.
    멀티모달 환경 분석: 집안 사진(문턱, 화장실 등)을 업로드하면 위험 요소를 감지하고 환경 수정 제안.
 2. 스마트 매칭 엔진 (The Link Engine)
    ICF-ISO Mapping: d450(걷기) + e120(단차) → ISO 18 12 10(이동식 경사로) 자동 변환 로직.
@@ -38,7 +38,7 @@ Step 4 가치 검증 (Validation) 사용 전/후 수행 난이도 변화를 측�
    재학습: 축적된 평가 데이터는 AI의 추천 정확도를 높이는 데 재사용.
    🛠 기술 스택 (Tech Stack)
    Frontend (User Activity Layer)
-   Framework: Next.js 14 (App Router)
+   Framework: Next.js 15 (App Router)
    Language: TypeScript
    UI System: Tailwind CSS, Shadcn UI (Radix UI 기반 접근성 준수)
    Accessibility: WCAG 2.1 AA (스크린 리더, 키보드 네비게이션 최적화)

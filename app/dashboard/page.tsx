@@ -1,32 +1,42 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { auth } from "@clerk/nextjs/server"
-import { formatDistanceToNow } from "date-fns"
-import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
-import { getSupabaseServerClient } from "@/lib/supabase/server"
+
+import { DashboardContent, type ConsultationRow } from "@/components/dashboard-content"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { getSupabaseServerClient } from "@/lib/supabase/server"
 
-type RecommendationRow = {
-  id: string
-  product_id: string | null
-  match_reason: string | null
-  is_clicked: boolean | null
-}
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+const pageUrl = `${baseUrl}/dashboard`
+const ogImage = `${baseUrl}/ergonomic-jar-opener-with-rubber-grip.jpg`
 
-type ConsultationRow = {
-  id: string
-  title: string | null
-  status: string | null
-  created_at: string | null
-  updated_at: string | null
-  recommendations: RecommendationRow[] | null
-}
-
-const statusStyle: Record<string, string> = {
-  in_progress: "bg-amber-100 text-amber-800",
-  completed: "bg-emerald-100 text-emerald-800",
-  archived: "bg-slate-200 text-slate-700",
+export const metadata: Metadata = {
+  title: "LinkAble 대시보드 — K-IPPA 효과성 리포트",
+  description:
+    "AI 상담 결과와 보조기기 추천, K-IPPA 효과성 데이터를 한눈에 확인하고 다음 액션을 진행하세요.",
+  alternates: { canonical: pageUrl },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: pageUrl,
+    title: "LinkAble 대시보드",
+    description: "상담 히스토리, 추천 클릭 현황, K-IPPA 개선도를 실시간으로 추적하세요.",
+    images: [
+      {
+        url: ogImage,
+        width: 1200,
+        height: 630,
+        alt: "LinkAble K-IPPA 대시보드 미리보기",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LinkAble 대시보드",
+    description: "AI 추천과 K-IPPA 효과성 데이터를 한곳에서 확인하는 LinkAble 인사이트 센터.",
+    images: [ogImage],
+  },
 }
 
 const fetchDashboardData = async (clerkUserId: string) => {
@@ -92,130 +102,11 @@ export default async function DashboardPage() {
   }
 
   const { consultations } = await fetchDashboardData(userId)
-  const activeConsultations = consultations.filter((item) => item.status === "in_progress")
-  const completedConsultations = consultations.filter((item) => item.status === "completed")
-  const pendingRecommendations = consultations.flatMap((item) => item.recommendations ?? []).filter(
-    (rec) => rec && !rec.is_clicked,
-  )
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-8 md:py-12 space-y-10">
-        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-wide text-muted-foreground">LinkAble Insight Center</p>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">Effectiveness Dashboard</h1>
-            <p className="text-muted-foreground mt-2 text-base">
-              상담 진행 현황과 추천 보조기기 활용도를 한눈에 확인하세요.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild>
-              <Link href="/chat">AI 상담 이어가기</Link>
-            </Button>
-            <Button variant="outline" className="bg-transparent" asChild>
-              <Link href="/recommendations">추천 목록 보기</Link>
-            </Button>
-          </div>
-        </section>
-
-        <EffectivenessDashboard />
-
-        <section className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>상담 타임라인</CardTitle>
-              <CardDescription>최근 상담 상태와 추천 진행 상황을 확인하세요.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {consultations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  아직 상담 기록이 없습니다. 첫 상담을 시작하면 이곳에 타임라인이 표시됩니다.
-                </p>
-              ) : (
-                consultations.map((consultation) => {
-                  const badgeStyle = consultation.status
-                    ? statusStyle[consultation.status] || "bg-slate-200 text-slate-700"
-                    : "bg-slate-200 text-slate-700"
-                  const recommendationCount = consultation.recommendations?.length ?? 0
-                  const unclickedCount = consultation.recommendations?.filter((rec) => !rec.is_clicked).length ?? 0
-
-                  return (
-                    <div
-                      key={consultation.id}
-                      className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <h3 className="text-base font-semibold text-foreground">
-                          {consultation.title || "무제 상담"}
-                        </h3>
-                        <Badge className={badgeStyle}>
-                          {consultation.status === "completed"
-                            ? "완료"
-                            : consultation.status === "in_progress"
-                              ? "진행 중"
-                              : consultation.status ?? "미정"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {consultation.updated_at
-                          ? `${formatDistanceToNow(new Date(consultation.updated_at), { addSuffix: true })} 업데이트`
-                          : "최근 업데이트 없음"}
-                      </p>
-                      <div className="text-xs text-foreground/80">
-                        추천 {recommendationCount}건 · 클릭 대기 {unclickedCount}건
-                      </div>
-                    </div>
-                  )
-                })
-              )}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>다음 단계</CardTitle>
-              <CardDescription>추천 제품 확인, 클릭률 추적, 평가 요청 등을 빠르게 진행하세요.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">진행 중 상담</p>
-                  <p className="text-muted-foreground text-sm">
-                    {activeConsultations.length}개 세션이 답변을 기다리고 있어요
-                  </p>
-                </div>
-                <Badge variant="secondary">{activeConsultations.length}</Badge>
-              </div>
-
-              <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">미클릭 추천</p>
-                  <p className="text-muted-foreground text-sm">{pendingRecommendations.length}개의 추천이 대기 중</p>
-                </div>
-                <Badge variant="outline">{pendingRecommendations.length}</Badge>
-              </div>
-
-              <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">완료된 상담</p>
-                  <p className="text-muted-foreground text-sm">{completedConsultations.length}건의 피드백 가능</p>
-                </div>
-                <Badge className="bg-emerald-100 text-emerald-800">{completedConsultations.length}</Badge>
-              </div>
-
-              <div className="flex flex-wrap gap-3 pt-2">
-                <Button className="flex-1 min-w-[180px]" asChild>
-                  <Link href="/recommendations">추천 확인</Link>
-                </Button>
-                <Button variant="outline" className="flex-1 min-w-[180px] bg-transparent" asChild>
-                  <Link href="/chat">추가 질문하기</Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      </div>
+      <DashboardContent consultations={consultations} />
     </div>
   )
 }
+
