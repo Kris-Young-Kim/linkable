@@ -36,11 +36,11 @@
 
 ## Phase 3 — Matching & UX (Week 3)
 
-- [ ] `core/matching/iso-mapping.ts`: d/e 코드 → ISO 9999 매핑 테이블 작성.
-- [ ] `core/matching/ranking.ts`: 클릭률/등록순 기반 간단 가중치 함수.
-- [ ] `app/api/products/route.ts`: 분석 결과 기반 ISO 검색, 추천 사유 생성, 클릭 로그 기록.
-- [ ] 랜딩/메인 페이지 (`app/(main)/page.tsx`): MRD/PRD 기반 헤더 카피, KPI, CTA, 메타 태그 반영.
-- [ ] 추천 페이지 및 카드 UI (`components/features/product/` + `app/(main)/recommendations`).
+- [x] `core/matching/iso-mapping.ts`: d/e 코드 → ISO 9999 매핑 테이블 작성.
+- [x] `core/matching/ranking.ts`: 클릭률/등록순 기반 간단 가중치 함수.
+- [x] `app/api/products/route.ts`: 분석 결과 기반 ISO 검색, 추천 사유 생성, 클릭 로그 기록.
+- [x] 랜딩/메인 페이지 (`app/(main)/page.tsx`): MRD/PRD 기반 헤더 카피, KPI, CTA, 메타 태그 반영.
+- [x] 추천 페이지 및 카드 UI (`components/features/product/` + `app/(main)/recommendations`).
 - [ ] Dashboard 기본 뼈대 (`app/(main)/dashboard/page.tsx`): 상담 이력/추천 상태 리스트, CTA 버튼.
 
 ### Deliverables
