@@ -1,7 +1,12 @@
+"use client"
+
+import { useCallback, useState } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, ShoppingCart } from "lucide-react"
+
+type ClickSource = "primary" | "secondary"
 
 interface ProductRecommendationCardProps {
   productName: string
@@ -15,6 +20,7 @@ interface ProductRecommendationCardProps {
   matchedIcf?: Array<{ code: string; description: string }>
   price?: number | string | null
   purchaseLink?: string | null
+  recommendationId?: string | null
 }
 
 export function ProductRecommendationCard({
@@ -29,6 +35,7 @@ export function ProductRecommendationCard({
   matchedIcf,
   price,
   purchaseLink,
+  recommendationId,
 }: ProductRecommendationCardProps) {
   const matchPercentage = matchScore ? `${Math.round(matchScore * 100)}%` : null
   const priceDisplay =
@@ -39,6 +46,45 @@ export function ProductRecommendationCard({
             price,
           )
         : price
+
+  const [pendingSource, setPendingSource] = useState<ClickSource | null>(null)
+
+  const handleClick = useCallback(
+    async (source: ClickSource) => {
+      if (!purchaseLink) {
+        return
+      }
+
+      const openLink = () => {
+        window.open(purchaseLink, "_blank", "noopener,noreferrer")
+      }
+
+      if (!recommendationId) {
+        openLink()
+        return
+      }
+
+      setPendingSource(source)
+
+      try {
+        await fetch(`/api/recommendations/${recommendationId}/click`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ source }),
+        })
+      } catch (error) {
+        console.error("[recommendations] click_track_error", error)
+      } finally {
+        setPendingSource(null)
+        openLink()
+      }
+    },
+    [purchaseLink, recommendationId],
+  )
+
+  const isPrimaryPending = pendingSource === "primary"
+  const isSecondaryPending = pendingSource === "secondary"
+  const isButtonDisabled = !purchaseLink
 
   return (
     <Card className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
@@ -89,17 +135,28 @@ export function ProductRecommendationCard({
       </CardContent>
 
       <CardFooter className="flex gap-3">
-        <Button className="flex-1 min-h-[44px]" size="lg" asChild>
-          <a href={purchaseLink || "#"} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
-            자세히 보기
-          </a>
+        <Button
+          className="flex-1 min-h-[44px]"
+          size="lg"
+          type="button"
+          onClick={() => handleClick("primary")}
+          disabled={isButtonDisabled || isPrimaryPending}
+          aria-disabled={isButtonDisabled}
+        >
+          <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
+          {purchaseLink ? "자세히 보기" : "구매처 준비 중"}
         </Button>
-        <Button variant="outline" className="flex-1 min-h-[44px] bg-transparent" size="lg" asChild>
-          <a href={purchaseLink || "#"} target="_blank" rel="noopener noreferrer">
-            <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
-            구매하러 가기
-          </a>
+        <Button
+          variant="outline"
+          className="flex-1 min-h-[44px] bg-transparent"
+          size="lg"
+          type="button"
+          onClick={() => handleClick("secondary")}
+          disabled={isButtonDisabled || isSecondaryPending}
+          aria-disabled={isButtonDisabled}
+        >
+          <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
+          {purchaseLink ? "구매하러 가기" : "링크 없음"}
         </Button>
       </CardFooter>
     </Card>

@@ -23,6 +23,7 @@ type ProductResponse = {
   match_score?: number
   match_label?: string | null
   matched_icf?: Array<{ code: string; description: string }>
+  recommendation_id?: string | null
 }
 
 const getBaseUrl = () => {
@@ -130,6 +131,7 @@ export default async function RecommendationsPage({
                   matchedIcf={product.matched_icf}
                   price={product.price}
                   purchaseLink={product.purchase_link}
+                  recommendationId={product.recommendation_id}
                 />
               ))}
             </div>

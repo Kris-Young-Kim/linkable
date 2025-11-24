@@ -7,6 +7,74 @@ import { logEvent } from "@/lib/logging"
 const supabase = getSupabaseServerClient()
 const MAX_LIMIT = 30
 
+type RecommendationPersistenceItem = {
+  productId: string
+  matchReason?: string | null
+  rank: number
+}
+
+const persistRecommendations = async (
+  consultationId: string,
+  items: RecommendationPersistenceItem[],
+) => {
+  const mapping = new Map<string, string>()
+
+  const { error: deleteError } = await supabase
+    .from("recommendations")
+    .delete()
+    .eq("consultation_id", consultationId)
+
+  if (deleteError) {
+    logEvent({
+      category: "matching",
+      action: "recommendations_cleanup_error",
+      payload: { error: deleteError, consultationId },
+      level: "warn",
+    })
+    return mapping
+  }
+
+  if (items.length === 0) {
+    return mapping
+  }
+
+  const insertPayload = items.map((item) => ({
+    consultation_id: consultationId,
+    product_id: item.productId,
+    match_reason: item.matchReason ?? null,
+    rank: item.rank,
+  }))
+
+  const { data, error } = await supabase
+    .from("recommendations")
+    .insert(insertPayload)
+    .select("id, product_id")
+
+  if (error) {
+    logEvent({
+      category: "matching",
+      action: "recommendations_persist_error",
+      payload: { error, consultationId },
+      level: "error",
+    })
+    return mapping
+  }
+
+  for (const row of data ?? []) {
+    if (row?.product_id && row?.id) {
+      mapping.set(row.product_id as string, row.id as string)
+    }
+  }
+
+  logEvent({
+    category: "matching",
+    action: "recommendations_persisted",
+    payload: { consultationId, count: data?.length ?? 0 },
+  })
+
+  return mapping
+}
+
 const parseIcfCodes = (raw: string | null) =>
   raw
     ?.split(/[,|\s]/)
@@ -129,6 +197,20 @@ export async function GET(request: Request) {
     }
   })
 
+  let recommendationMap: Map<string, string> | null = null
+
+  if (consultationId) {
+    const persistenceItems = ranked
+      .filter((product) => typeof product.id === "string")
+      .map((product, index) => ({
+        productId: product.id as string,
+        matchReason: product.match_reason ?? null,
+        rank: index + 1,
+      }))
+
+    recommendationMap = await persistRecommendations(consultationId, persistenceItems)
+  }
+
   logEvent({
     category: "matching",
     action: "products_retrieved",
@@ -136,7 +218,10 @@ export async function GET(request: Request) {
   })
 
   return NextResponse.json({
-    products: ranked,
+    products: ranked.map((product) => ({
+      ...product,
+      recommendation_id: recommendationMap?.get(product.id as string) ?? null,
+    })),
     icfCodes,
   })
 }
