@@ -1,0 +1,9 @@
+packages:
+  - .
+
+ignoredBuiltDependencies:
+  - '@clerk/shared'
+
+onlyBuiltDependencies:
+  - sharp
+  - '@clerk/shared'
