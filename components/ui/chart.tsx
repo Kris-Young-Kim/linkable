@@ -104,6 +104,15 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip
 
+type TooltipPayloadItem = {
+  color?: string
+  dataKey?: string | number
+  name?: string | number
+  value?: number | string
+  payload?: Record<string, unknown> & { fill?: string }
+  [key: string]: unknown
+}
+
 type TooltipProps = React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
   React.ComponentProps<'div'> & {
     hideLabel?: boolean
@@ -111,9 +120,9 @@ type TooltipProps = React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
     indicator?: 'line' | 'dot' | 'dashed'
     nameKey?: string
     labelKey?: string
+    payload?: TooltipPayloadItem[]
+    label?: string
   }
-
-type TooltipPayloadItem = NonNullable<TooltipProps['payload']>[number]
 const isTooltipPayloadItem = (
   item: TooltipPayloadItem | undefined,
 ): item is TooltipPayloadItem =>
@@ -192,7 +201,7 @@ function ChartTooltipContent({
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
           const indicatorColor =
             color ||
-            getPayloadFill(item) ||
+            (isTooltipPayloadItem(item) ? item.payload?.fill : undefined) ||
             (isTooltipPayloadItem(item) ? item.color : undefined)
 
           return (
@@ -209,7 +218,7 @@ function ChartTooltipContent({
                   item.name,
                   item,
                   index,
-                  isTooltipPayloadItem(item) ? item.payload : undefined,
+                  payload as TooltipPayloadItem[],
                 )
               ) : (
                 <>
@@ -273,11 +282,12 @@ function ChartLegendContent({
   payload,
   verticalAlign = 'bottom',
   nameKey,
-}: React.ComponentProps<'div'> &
-  Pick<RechartsPrimitive.LegendProps, 'payload' | 'verticalAlign'> & {
-    hideIcon?: boolean
-    nameKey?: string
-  }) {
+}: React.ComponentProps<'div'> & {
+  hideIcon?: boolean
+  nameKey?: string
+  payload?: TooltipPayloadItem[]
+  verticalAlign?: 'bottom' | 'top'
+}) {
   const { config } = useChart()
 
   if (!payload?.length) {

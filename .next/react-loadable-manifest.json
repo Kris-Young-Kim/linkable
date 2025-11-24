@@ -1,18 +1,26 @@
 {
   "node_modules\\.pnpm\\@clerk+nextjs@6.35.4_next@1_b8537b39346b682dc0fa788acb85bad9\\node_modules\\@clerk\\nextjs\\dist\\esm\\app-router\\client\\ClerkProvider.js -> ./keyless-creator-reader.js": {
-    "id": "node_modules\\.pnpm\\@clerk+nextjs@6.35.4_next@1_b8537b39346b682dc0fa788acb85bad9\\node_modules\\@clerk\\nextjs\\dist\\esm\\app-router\\client\\ClerkProvider.js -> ./keyless-creator-reader.js",
+    "id": 7975,
     "files": [
-      "static/chunks/_app-pages-browser_node_modules_pnpm_clerk_nextjs_6_35_4_next_1_b8537b39346b682dc0fa788acb85b-231c6b.js"
+      "static/chunks/975.daa07639ea6aaa86.js"
     ]
   },
   "node_modules\\.pnpm\\@clerk+nextjs@6.35.4_next@1_b8537b39346b682dc0fa788acb85bad9\\node_modules\\@clerk\\nextjs\\dist\\esm\\app-router\\client\\keyless-cookie-sync.js -> ../keyless-actions.js": {
-    "id": "node_modules\\.pnpm\\@clerk+nextjs@6.35.4_next@1_b8537b39346b682dc0fa788acb85bad9\\node_modules\\@clerk\\nextjs\\dist\\esm\\app-router\\client\\keyless-cookie-sync.js -> ../keyless-actions.js",
-    "files": []
-  },
-  "node_modules\\.pnpm\\next@15.5.6_react-dom@19.2.0_react@19.2.0__react@19.2.0\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts": {
-    "id": "node_modules\\.pnpm\\next@15.5.6_react-dom@19.2.0_react@19.2.0__react@19.2.0\\node_modules\\next\\dist\\client\\dev\\hot-reloader\\app\\use-websocket.js -> @vercel/turbopack-ecmascript-runtime/browser/dev/hmr-client/hmr-client.ts",
+    "id": 22020,
     "files": [
-      "static/chunks/_app-pages-browser_node_modules_pnpm_next_15_5_6_react-dom_19_2_0_react_19_2_0__react_19_2_0_-728936.js"
+      "static/chunks/20.441335fd7638df2c.js"
+    ]
+  },
+  "node_modules\\.pnpm\\next@15.5.6_react-dom@19.2.0_react@19.2.0__react@19.2.0\\node_modules\\next\\dist\\client\\index.js -> ../pages/_app": {
+    "id": 67809,
+    "files": [
+      "static/chunks/809.753aa60fcd147fbf.js"
+    ]
+  },
+  "node_modules\\.pnpm\\next@15.5.6_react-dom@19.2.0_react@19.2.0__react@19.2.0\\node_modules\\next\\dist\\client\\index.js -> ../pages/_error": {
+    "id": 94172,
+    "files": [
+      "static/chunks/172.643a00ac64bd6360.js"
     ]
   }
 }
