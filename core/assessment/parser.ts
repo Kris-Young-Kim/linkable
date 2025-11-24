@@ -8,8 +8,9 @@ const icfSchema = z.object({
 })
 
 const analysisSchema = z.object({
+  assistant_reply: z.string().optional(),
   icf_analysis: icfSchema,
-  needs: z.string().min(1).optional(),
+  needs: z.string().optional(),
   questions: z.array(z.string()).optional(),
 })
 

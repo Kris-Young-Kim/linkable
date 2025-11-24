@@ -19,14 +19,14 @@
 
 ## Phase 2 — Assessment 엔진 (Week 2)
 
-- [ ] `core/assessment/icf-codes.ts`: ICF Core Set/매핑 데이터 작성.
-- [ ] `core/assessment/prompt-engineering.ts`: Gemini System Prompt + Few-shot, 의료 용어 차단 로직 포함.
-- [ ] `core/assessment/parser.ts`: Gemini JSON 응답 파싱 + zod validation.
-- [ ] `app/api/chat/route.ts`:
+- [x] `core/assessment/icf-codes.ts`: ICF Core Set/매핑 데이터 작성.
+- [x] `core/assessment/prompt-engineering.ts`: Gemini System Prompt + Few-shot, 의료 용어 차단 로직 포함.
+- [x] `core/assessment/parser.ts`: Gemini JSON 응답 파싱 + zod validation.
+- [x] `app/api/chat/route.ts`:
   - Clerk 세션 검증, 사용자 Role 저장.
   - 텍스트/음성/이미지 입력 처리 → Gemini 호출 → 파싱.
   - 분석 결과를 `analysis_results`/`chat_messages` 테이블에 저장, 단계별 로그 남기기.
-- [ ] `components/features/chat/` 구성: `ChatInterface`, `ChatBubble`, STT 버튼, Skeleton, 접근성 속성.
+- [x] `components/features/chat/` 구성: `ChatInterface`, `ChatBubble`, STT 버튼, Skeleton, 접근성 속성.
 
 ### Deliverables
 

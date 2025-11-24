@@ -32,6 +32,8 @@ export function ChatInterface() {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [consultationId, setConsultationId] = useState<string | null>(null)
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -44,31 +46,67 @@ export function ChatInterface() {
   }, [messages])
 
   const handleSend = async () => {
-    if (!input.trim()) return
+    const trimmed = input.trim()
+    if (!trimmed) return
 
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: "user",
-      content: input.trim(),
+      content: trimmed,
       timestamp: new Date(),
     }
 
     setMessages((prev) => [...prev, userMessage])
     setInput("")
     setIsTyping(true)
+    setSuggestedQuestions([])
 
-    // Simulate AI response (replace with actual AI SDK integration)
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: trimmed,
+          consultationId,
+          history: messages.map(({ role, content }) => ({ role, content })),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+
+      const data = await response.json()
+      if (!consultationId && data.consultationId) {
+        setConsultationId(data.consultationId)
+      }
+
+      if (Array.isArray(data.followUpQuestions)) {
+        setSuggestedQuestions(data.followUpQuestions.filter(Boolean))
+      }
+
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: crypto.randomUUID(),
         role: "assistant",
-        content:
-          "Thank you for sharing that information. Based on what you've told me, I can help identify suitable assistive technologies. Could you tell me more about your daily activities that are affected?",
+        content: data.message?.content || t("chat.genericReply"),
         timestamp: new Date(),
       }
+
       setMessages((prev) => [...prev, assistantMessage])
+    } catch (error) {
+      console.error("chat_error", error)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          content: t("chat.errorResponse"),
+          timestamp: new Date(),
+        },
+      ])
+    } finally {
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -91,8 +129,11 @@ export function ChatInterface() {
   }
 
   const handlePhotoAttach = () => {
-    // Implement photo attachment functionality
     console.log("[v0] Photo attachment requested")
+  }
+  const handleSuggestionClick = (question: string) => {
+    setInput(question)
+    textareaRef.current?.focus()
   }
 
   const handleAcceptDisclaimer = () => {
@@ -183,6 +224,23 @@ export function ChatInterface() {
                   </div>
                   <span className="sr-only">{t("chat.typing")}</span>
                 </div>
+              </div>
+            )}
+
+            {suggestedQuestions.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                <p className="w-full text-sm text-muted-foreground">{t("chat.followUpPrompt")}</p>
+                {suggestedQuestions.map((question) => (
+                  <Button
+                    key={question}
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleSuggestionClick(question)}
+                  >
+                    {question}
+                  </Button>
+                ))}
               </div>
             )}
 

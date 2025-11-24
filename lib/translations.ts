@@ -79,6 +79,9 @@ export const translations = {
     "chat.coordinatorMessage": "Able Cordi의 메시지",
     "chat.keyboardShortcuts": "Enter로 전송 • Shift+Enter로 줄바꿈 • 음성 입력 가능",
     "chat.backToHome": "홈으로 돌아가기",
+    "chat.genericReply": "공유해 주셔서 감사합니다. 조금 더 구체적인 활동이나 불편했던 상황이 있다면 알려주세요.",
+    "chat.errorResponse": "잠시 후 다시 시도해 주세요. 연결 상태가 불안정합니다.",
+    "chat.followUpPrompt": "추가로 아래 질문에 답해 주시면 더 정확한 추천이 가능합니다.",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "서비스 이용 약관 안내",
@@ -206,6 +209,9 @@ export const translations = {
     "chat.coordinatorMessage": "Able Cordi's message",
     "chat.keyboardShortcuts": "Press Enter to send • Shift+Enter for new line • Voice input available",
     "chat.backToHome": "Go back to home",
+    "chat.genericReply": "Thank you for sharing. Could you tell me a bit more about the specific activity or tool that feels challenging?",
+    "chat.errorResponse": "Sorry, something went wrong. Please try again in a moment.",
+    "chat.followUpPrompt": "Answering these follow-up questions helps me narrow down the best solution:",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "Service Terms Notice",
@@ -331,6 +337,9 @@ export const translations = {
     "chat.coordinatorMessage": "Able Cordiのメッセージ",
     "chat.keyboardShortcuts": "Enterで送信 • Shift+Enterで改行 • 音声入力可能",
     "chat.backToHome": "ホームに戻る",
+    "chat.genericReply": "共有ありがとうございます。もう少し具体的な活動や困っている場面があれば教えてください。",
+    "chat.errorResponse": "申し訳ありません。しばらくしてからもう一度お試しください。",
+    "chat.followUpPrompt": "以下の質問に答えていただくと、より正確な提案が可能になります。",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "サービス利用規約のお知らせ",
