@@ -9,17 +9,33 @@ interface LanguageContextType {
   t: (key: string) => string
 }
 
+const SUPPORTED_LANGUAGES: Language[] = ["ko", "en", "ja"]
+
+const resolveDefaultLanguage = (): Language => {
+  const envLang = process.env.NEXT_PUBLIC_DEFAULT_LANGUAGE as Language | undefined
+  if (envLang && SUPPORTED_LANGUAGES.includes(envLang)) {
+    return envLang
+  }
+  return "ko"
+}
+
+const DEFAULT_LANGUAGE = resolveDefaultLanguage()
+
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("ko")
+  const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE)
 
   useEffect(() => {
-    // Load saved language from localStorage
-    const savedLanguage = localStorage.getItem("linkable-language") as Language
-    if (savedLanguage && ["ko", "en", "ja"].includes(savedLanguage)) {
+    const savedLanguage = localStorage.getItem("linkable-language") as Language | null
+
+    if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage)) {
       setLanguageState(savedLanguage)
+      return
     }
+
+    // Ensure default language is persisted for future visits
+    localStorage.setItem("linkable-language", DEFAULT_LANGUAGE)
   }, [])
 
   const setLanguage = (lang: Language) => {
