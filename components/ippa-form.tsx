@@ -252,9 +252,10 @@ export function IppaForm({
             </div>
             <p className="text-xs text-muted-foreground">
               {improvement > 0
-                ? t("ippa.improvementPreview", {
-                    percentage: improvementPercentage.toFixed(0),
-                  })
+                ? t("ippa.improvementPreview").replace(
+                    "{percentage}",
+                    improvementPercentage.toFixed(0),
+                  )
                 : t("ippa.noImprovementPreview")}
             </p>
           </div>

@@ -82,10 +82,10 @@ ISO 9999 보조기기 분류 매칭
 - [x] `app/api/ippa/route.ts`: 설문 제출 처리, 계산, DB 저장, 포인트 적립, 로그 남기기.
 - [x] Dashboard 내 K-IPPA 섹션 및 `components/ippa-form.tsx` 폼 UI.
 - [x] +14일 리마인더 트리거 설계 (예: CRON, Edge Scheduler 메모만 우선 작성) - `docs/reminder-trigger-design.md`.
-- [ ] QA & 폴리싱:
-  - 접근성 체크 (키보드, 스크린리더, 색 대비).
-  - SEO 메타 태그 (`app/layout.tsx`) 최종 확인.
-  - 주요 유틸 단위 테스트 or 수동 테스트 시나리오.
+- [x] QA & 폴리싱:
+  - 접근성 체크 (키보드, 스크린리더, 색 대비) — `docs/QA-checklist.md`.
+  - SEO 메타 태그 (`app/layout.tsx`) 최종 확인 — `docs/QA-checklist.md`.
+  - 주요 유틸 단위 테스트/수동 테스트 시나리오 정리 — `docs/QA-checklist.md`.
 
 ### Deliverables
 
