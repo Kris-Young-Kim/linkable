@@ -9,7 +9,7 @@ Activity Analysis 기반 AI 보조공학 큐레이션 & 효과성 검증 플랫�
 
 ![alt text](https://img.shields.io/badge/Next.js-14-black)
 
-![alt text](https://img.shields.io/badge/AI-Gemini_1.5-purple)
+![alt text](https://img.shields.io/badge/AI-Gemini_Flash_Lite_Latest-purple)
 📖 프로젝트 소개 (About)
 LinkAble은 정보의 비대칭으로 인해 자신에게 맞는 보조기기를 찾지 못하는 사용자들을 위해 탄생했습니다.
 단순한 쇼핑몰이 아닙니다. 16년 경력의 보조공학사/작업치료사의 임상 노하우를 AI에 학습시켜, 사용자의 **작업 수행(Occupational Performance)**을 분석하고 최적의 도구를 매칭하는 '디지털 코디네이터' 서비스입니다.
@@ -28,7 +28,7 @@ Step 4 가치 검증 (Validation) 사용 전/후 수행 난이도 변화를 측�
 🚀 주요 기능 (Key Features)
 
 1. AI 코디네이터 '에이블 코디' (Able Cordi)
-   Gemini 2.0 기반 상담: 의료 용어를 배제하고 기능 중심의 따뜻한 상담 제공.
+   Gemini Flash Lite Latest 기반 상담: 의료 용어를 배제하고 기능 중심의 따뜻한 상담 제공.
    멀티모달 환경 분석: 집안 사진(문턱, 화장실 등)을 업로드하면 위험 요소를 감지하고 환경 수정 제안.
 2. 스마트 매칭 엔진 (The Link Engine)
    ICF-ISO Mapping: d450(걷기) + e120(단차) → ISO 18 12 10(이동식 경사로) 자동 변환 로직.
@@ -47,7 +47,7 @@ Step 4 가치 검증 (Validation) 사용 전/후 수행 난이도 변화를 측�
    Auth: Clerk (소셜 로그인 - 카카오, 구글)
    Storage: Supabase Storage (이미지 저장)
    Intelligence (AI Layer)
-   Model: Google Gemini 1.5 Flash / Pro
+   Model: Google Gemini Flash Lite Latest
    Integration: Vercel AI SDK
    Pattern: RAG (Retrieval-Augmented Generation) & Function Calling
    📂 폴더 구조 (Project Structure)

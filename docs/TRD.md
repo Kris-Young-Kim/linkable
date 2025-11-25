@@ -38,7 +38,7 @@ TRD (Technical Requirements Document)
     Auth: Clerk (Middleware를 통한 Route Protection).
     Storage: Supabase Storage (환경 분석용 유저 업로드 이미지).
     2.3 AI Engine (Intelligence Layer)
-    LLM: Google Gemini 1.5 Pro (복합 추론용) / Flash (단순 응답용).
+    LLM: Google Gemini Flash Lite Latest.
     Integration: Vercel AI SDK (ai/rsc, streamText).
     Prompt Engineering: Few-shot Prompting + JSON Mode.
 3.  데이터베이스 설계 및 정책 (Database Schema & Policy)
@@ -59,7 +59,7 @@ TRD (Technical Requirements Document)
     Input: { messages: Message[], context_image?: string }
     Processing (Server Action):
     Clerk 세션 확인.
-    User Input이 들어오면 Gemini 1.5 Flash 호출.
+    User Input이 들어오면 Gemini Flash Lite Latest 호출.
     System Prompt 주입: "의료 용어 금지, ICF 코드 추출, 따뜻한 어조."
     Function Calling (Tool Use): AI가 대화 중 정보가 충분하면 extractICF() 함수를 호출하도록 설정.
     Output: Streaming Text + (분석 완료 시) UI Component (<AnalysisCard />).
