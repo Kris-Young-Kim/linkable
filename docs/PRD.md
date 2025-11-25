@@ -54,7 +54,7 @@ PRD (Product Requirements Document)
    Next.js AI SDK 활용 스트리밍 답변.
    STT(Speech-to-Text): Web Speech API 또는 OpenAI Whisper 활용 음성 입력 버튼.
    Image Input: Gemini Vision API를 통한 환경(문턱, 계단 등) 사진 분석.
-   FR-AI-02 (Prompt Logic - 'Able Cordi'):
+   FR-AI-02 (Prompt Logic - '링커'):
    System Prompt: "너는 16년 차 보조공학 코디네이터야. 의료 용어를 쓰지 말고 기능 중심으로 말해."
    Structured Output: AI 응답은 반드시 아래 JSON 포맷을 포함해야 함 (DB 저장용).
    code
@@ -80,7 +80,7 @@ PRD (Product Requirements Document)
    NFR-DB-01: Supabase RLS(Row Level Security) 정책 적용 (본인 상담 내역만 조회 가능).
    NFR-Sec-01: 개인정보(민감 정보) 암호화 저장.
    5.2 성능 (Performance)
-   NFR-Perf-01: AI 응답 대기 시간 동안 '스켈레톤 UI' 또는 '에이블 코디가 생각 중입니다...' 애니메이션 제공 (체감 대기 시간 감소).
+   NFR-Perf-01: AI 응답 대기 시간 동안 '스켈레톤 UI' 또는 '링커가 생각 중입니다...' 애니메이션 제공 (체감 대기 시간 감소).
    NFR-Perf-02: Vercel Edge Functions 활용하여 Latency 최소화.
    5.3 접근성 (Accessibility - Critical)
    NFR-A11y-01: Semantic HTML 준수 (<button>, <article> 등).

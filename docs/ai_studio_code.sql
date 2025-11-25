@@ -1,7 +1,7 @@
 -- =========================================================
 -- [LinkAble] MVP Database Schema Setup Script
 -- Database: PostgreSQL (Supabase)
--- Author: Able Cordi Team
+-- Author: 링커 Team
 -- =========================================================
 
 -- [1] RESET: 기존 테이블 및 함수 완전 초기화 (개발용)

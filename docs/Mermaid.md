@@ -96,7 +96,7 @@ Version: v1.2 (Activity Analysis Based)
     actor U as 👤 User
     participant FE as 📱 Client (UI)
     participant BE as ⚙️ API (Next.js)
-    participant LLM as 🧠 Gemini (Able Cordi)
+    participant LLM as 🧠 Gemini (링커)
     participant DB as 🗄️ Supabase
 
         Note over U, FE: [Activity 1] 사용자가 불편함을 호소

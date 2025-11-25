@@ -66,7 +66,7 @@ const ogImage = `${baseUrl}/modern-walking-cane-with-led-light.jpg`
 
 export const metadata: Metadata = {
   title: "LinkAble 추천 — 맞춤형 보조기기 리스트",
-  description: "Able Cordi 분석 결과를 바탕으로 ICF·ISO 기준에 맞춘 맞춤형 보조기기 추천을 확인하세요.",
+  description: "링커 분석 결과를 바탕으로 ICF·ISO 기준에 맞춘 맞춤형 보조기기 추천을 확인하세요.",
   alternates: { canonical: pageUrl },
   openGraph: {
     type: "website",

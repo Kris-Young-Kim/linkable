@@ -2,6 +2,24 @@
 
 문서 참고: `docs/DIR.md`, `docs/Mermaid.md`, `docs/Read.md`, `docs/MRD.md`, `docs/PRD.md`, `docs/TRD.md`
 
+## 핵심 기능 흐름 (Core Flow)
+
+```
+사용자 활동 문제 입력 (채팅)
+       ↓
+ICF 분류 추출 (신체기능 b, 활동 d, 참여, 환경요소 e)
+       ↓
+ISO 9999 보조기기 분류 매칭
+       ↓
+쿠팡/유통업체 상품 연결 (아웃링크)
+```
+
+**구현 상태:**
+
+- ✅ Phase 2: 사용자 입력 → ICF 추출 (완료)
+- ✅ Phase 3: ISO 매칭 → 추천 생성 (완료)
+- ⚠️ Phase 3: 쿠팡/유통업체 상품 연결 (부분 완료 - 아웃링크 구현됨, 상품 데이터 수집/동기화 필요)
+
 ## Phase 1 — Foundation & 환경 구축 (Week 1)
 
 - [x] `DIR.md` 구조대로 디렉터리 생성 및 정리 (`core/assessment`, `core/matching`, `core/validation` 등).
@@ -42,12 +60,20 @@
 - [x] 랜딩/메인 페이지 (`app/(main)/page.tsx`): MRD/PRD 기반 헤더 카피, KPI, CTA, 메타 태그 반영.
 - [x] 추천 페이지 및 카드 UI (`components/features/product/` + `app/(main)/recommendations`).
 - [x] Dashboard 기본 뼈대 (`app/(main)/dashboard/page.tsx`): 상담 이력/추천 상태 리스트, CTA 버튼.
+- [x] **상품 데이터 연동 및 관리**:
+  - [x] `lib/integrations/` 디렉터리 생성: 쿠팡/유통업체 API 연동 모듈 구조 설계.
+  - [x] 상품 데이터 수집 전략 수립 (쿠팡 파트너스 API 또는 수동 등록 방식 결정).
+  - [x] `app/api/products/sync/route.ts`: 상품 데이터 동기화 API (선택적, MVP에서는 수동 등록).
+  - [x] `products` 테이블 초기 데이터 입력: ISO 9999 기준 대표 보조기기 샘플 데이터 (최소 20-30개).
+  - [x] `purchase_link` 필드 검증: 아웃링크 연결 테스트 및 링크 유효성 확인 로직.
+  - [x] 상품 카드 클릭 시 쿠팡/네이버 최저가 페이지로 아웃링크 연결 구현 확인.
 
 ### Deliverables
 
 - 분석 → 추천 → 아웃링크까지 흐름 구현
 - 랜딩/추천 UI 정리 (접근성 포함)
 - 클릭/추천 로그 수집
+- **상품 데이터베이스 구축 및 쿠팡/유통업체 연결 검증**
 
 ## Phase 4 — Validation & 하드닝 (Week 4)
 

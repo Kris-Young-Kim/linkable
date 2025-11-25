@@ -27,8 +27,8 @@ Step 3 구매 실행 (Action) 매칭된 ISO 코드를 가진 최적의 상품을
 Step 4 가치 검증 (Validation) 사용 전/후 수행 난이도 변화를 측정하여 K-IPPA 효과성 점수를 산출합니다.
 🚀 주요 기능 (Key Features)
 
-1. AI 코디네이터 '에이블 코디' (Able Cordi)
-   Gemini Flash Lite Latest 기반 상담: 의료 용어를 배제하고 기능 중심의 따뜻한 상담 제공.
+1. AI 코디네이터 '링커' (링커)
+   링커 기반 상담: 의료 용어를 배제하고 기능 중심의 따뜻한 상담 제공.
    멀티모달 환경 분석: 집안 사진(문턱, 화장실 등)을 업로드하면 위험 요소를 감지하고 환경 수정 제안.
 2. 스마트 매칭 엔진 (The Link Engine)
    ICF-ISO Mapping: d450(걷기) + e120(단차) → ISO 18 12 10(이동식 경사로) 자동 변환 로직.
@@ -94,10 +94,10 @@ GOOGLE_GENERATIVE_AI_API_KEY=AIza... 4. Run Development Server
 code
 Bash
 npm run dev
-브라우저에서 http://localhost:3000으로 접속하여 '에이블 코디'를 만나보세요.
+브라우저에서 http://localhost:3000으로 접속하여 '링커'를 만나보세요.
 ⚠️ 안전 및 윤리 가이드 (Safety & Ethics)
 본 서비스는 비의료 건강관리 서비스 가이드라인을 준수합니다.
-Non-Medical: '에이블 코디'는 의사가 아니며, 의학적 진단(Diagnosis)이나 처방(Prescription)을 제공하지 않습니다.
+Non-Medical: '링커'는 의사가 아니며, 의학적 진단(Diagnosis)이나 처방(Prescription)을 제공하지 않습니다.
 Functional Focus: 오직 사용자의 **기능적 불편함(Functional Limitation)**을 보완하기 위한 보조공학적 정보만을 제공합니다.
 Disclaimer: 모든 추천 결과는 참고용이며, 건강상의 중대한 문제는 반드시 전문 의료인과 상의해야 합니다.
 📜 문서 링크 (Documentation)

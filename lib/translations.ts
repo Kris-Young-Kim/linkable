@@ -40,7 +40,7 @@ export const translations = {
     "howItWorks.subtitle": "3단계로 완성되는 맞춤 추천",
     "howItWorks.step1.title": "일상 대화",
     "howItWorks.step1.description":
-      "Able Cordi와 편안한 대화를 통해 일상의 불편함과 필요를 공유하세요.",
+      "링커와 편안한 대화를 통해 일상의 불편함과 필요를 공유하세요.",
     "howItWorks.step2.title": "스마트 분석",
     "howItWorks.step2.description":
       "AI가 ICF 기준으로 상황을 분석하고 가장 적합한 보조기기 옵션을 찾아냅니다.",
@@ -76,12 +76,12 @@ export const translations = {
     "footer.copyright": "© 2025 LinkAble. 모든 권리를 보유하고 있습니다.",
 
     // Chat Interface
-    "chat.title": "Able Cordi",
+    "chat.title": "링커",
     "chat.subtitle": "LinkAble 코디네이터",
     "chat.disclaimer":
       "본 서비스는 보조기기 정보를 제공하며 전문가 조언을 대체하지 않습니다.",
     "chat.initialMessage":
-      "안녕하세요! 저는 Able Cordi, LinkAble 코디네이터입니다. 일상생활에서 겪고 계신 어려움에 대해 이야기해주세요. 고객님께 맞는 솔루션을 찾아드리겠습니다.",
+      "안녕하세요! 저는 링커, LinkAble 코디네이터입니다. 일상생활에서 겪고 계신 어려움에 대해 이야기해주세요. 고객님께 맞는 솔루션을 찾아드리겠습니다.",
     "chat.placeholder": "오늘은 어떤 어려움이 있으신가요?",
     "chat.sendMessage": "메시지 보내기",
     "chat.startVoiceRecording": "음성 녹음 시작",
@@ -89,7 +89,7 @@ export const translations = {
     "chat.attachPhoto": "환경 사진 첨부",
     "chat.typing": "코디네이터가 입력 중입니다",
     "chat.yourMessage": "내 메시지",
-    "chat.coordinatorMessage": "Able Cordi의 메시지",
+    "chat.coordinatorMessage": "링커의 메시지",
     "chat.keyboardShortcuts":
       "Enter로 전송 • Shift+Enter로 줄바꿈 • 음성 입력 가능",
     "chat.backToHome": "홈으로 돌아가기",
@@ -260,7 +260,7 @@ export const translations = {
     "howItWorks.subtitle": "Get personalized recommendations in 3 simple steps",
     "howItWorks.step1.title": "Share Your Story",
     "howItWorks.step1.description":
-      "Have a comfortable conversation with Able Cordi about your daily challenges and needs.",
+      "Have a comfortable conversation with 링커 about your daily challenges and needs.",
     "howItWorks.step2.title": "Smart Analysis",
     "howItWorks.step2.description":
       "AI analyzes your situation using ICF standards to find the most suitable assistive technology options.",
@@ -297,12 +297,12 @@ export const translations = {
     "footer.copyright": "© 2025 LinkAble. All rights reserved.",
 
     // Chat Interface
-    "chat.title": "Able Cordi",
+    "chat.title": "링커",
     "chat.subtitle": "LinkAble Coordinator",
     "chat.disclaimer":
       "This service provides assistive technology information and does not replace advice from qualified specialists.",
     "chat.initialMessage":
-      "Hello! I'm Able Cordi, your LinkAble Coordinator. I'd love to learn about your daily life and any difficulties you're facing. Please share what's on your mind, and I'll help you find solutions that work for you.",
+      "Hello! I'm 링커, your LinkAble Coordinator. I'd love to learn about your daily life and any difficulties you're facing. Please share what's on your mind, and I'll help you find solutions that work for you.",
     "chat.placeholder": "What difficulties are you facing today?",
     "chat.sendMessage": "Send Message",
     "chat.startVoiceRecording": "Start Voice Recording",
@@ -310,7 +310,7 @@ export const translations = {
     "chat.attachPhoto": "Attach photo of your environment",
     "chat.typing": "Coordinator is typing",
     "chat.yourMessage": "Your message",
-    "chat.coordinatorMessage": "Able Cordi's message",
+    "chat.coordinatorMessage": "링커's message",
     "chat.keyboardShortcuts":
       "Press Enter to send • Shift+Enter for new line • Voice input available",
     "chat.backToHome": "Go back to home",
@@ -485,7 +485,7 @@ export const translations = {
     "howItWorks.subtitle": "3つのステップで完成するカスタム推奨",
     "howItWorks.step1.title": "日常の会話",
     "howItWorks.step1.description":
-      "Able Cordiと快適な会話を通じて、日常の不便さとニーズを共有してください。",
+      "링커と快適な会話を通じて、日常の不便さとニーズを共有してください。",
     "howItWorks.step2.title": "スマート分析",
     "howItWorks.step2.description":
       "AIがICF基準で状況を分析し、最適な支援機器のオプションを見つけます。",
@@ -521,12 +521,12 @@ export const translations = {
     "footer.copyright": "© 2025 LinkAble. All rights reserved.",
 
     // Chat Interface
-    "chat.title": "Able Cordi",
+    "chat.title": "링커",
     "chat.subtitle": "LinkAbleコーディネーター",
     "chat.disclaimer":
       "本サービスは支援機器情報を提供し、専門家による助言の代替にはなりません。",
     "chat.initialMessage":
-      "こんにちは！私はAble Cordi、LinkAbleコーディネーターです。日常生活で抱えている困難についてお聞かせください。お客様に合ったソリューションを見つけるお手伝いをいたします。",
+      "こんにちは！私は링커、LinkAbleコーディネーターです。日常生活で抱えている困難についてお聞かせください。お客様に合ったソリューションを見つけるお手伝いをいたします。",
     "chat.placeholder": "今日はどのような困難がありますか？",
     "chat.sendMessage": "メッセージを送信",
     "chat.startVoiceRecording": "音声録音開始",
@@ -534,7 +534,7 @@ export const translations = {
     "chat.attachPhoto": "環境写真を添付",
     "chat.typing": "コーディネーターが入力中",
     "chat.yourMessage": "自分のメッセージ",
-    "chat.coordinatorMessage": "Able Cordiのメッセージ",
+    "chat.coordinatorMessage": "링커のメッセージ",
     "chat.keyboardShortcuts": "Enterで送信 • Shift+Enterで改行 • 音声入力可能",
     "chat.backToHome": "ホームに戻る",
     "chat.loginRequiredTitle": "ログインが必要です",
