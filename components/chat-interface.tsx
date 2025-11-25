@@ -7,7 +7,6 @@ import { useAuth, SignInButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { DisclaimerModal } from "@/components/disclaimer-modal"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-provider"
@@ -157,22 +156,21 @@ export function ChatInterface() {
     <>
       <DisclaimerModal open={shouldShowDisclaimer} onAccept={handleAcceptDisclaimer} />
 
-      <Dialog open={requiresLogin} onOpenChange={() => {}}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>{t("chat.loginRequiredTitle")}</DialogTitle>
-            <DialogDescription>{t("chat.loginRequiredDescription")}</DialogDescription>
-          </DialogHeader>
-          <div className="mt-4">
+      {requiresLogin && (
+        <div className="flex h-screen flex-col items-center justify-center gap-4 p-8">
+          <div className="text-center space-y-4 max-w-md">
+            <h2 className="text-2xl font-semibold">{t("chat.loginRequiredTitle")}</h2>
+            <p className="text-muted-foreground">{t("chat.loginRequiredDescription")}</p>
             <SignInButton mode="modal">
               <Button size="lg" className="w-full cursor-pointer">
                 {t("chat.loginRequiredAction")}
               </Button>
             </SignInButton>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
 
+      {!requiresLogin && (
       <div className="flex h-screen flex-col">
         {/* Header */}
         <header className="border-b border-border bg-card">
@@ -342,6 +340,7 @@ export function ChatInterface() {
           </div>
         </div>
       </div>
+      )}
     </>
   )
 }

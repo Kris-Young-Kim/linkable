@@ -49,9 +49,9 @@ const ensureUserRecord = async (clerkUserId: string) => {
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } },
+  context: { params: Promise<{ id: string }> },
 ) {
-  const { params } = context
+  const params = await context.params
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
