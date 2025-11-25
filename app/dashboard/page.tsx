@@ -79,7 +79,16 @@ const fetchDashboardData = async (clerkUserId: string) => {
     return { consultations: [] as ConsultationRow[] }
   }
 
-  return { consultations: (data as ConsultationRow[]) ?? [] }
+  const normalized =
+    data?.map((consultation) => ({
+      ...consultation,
+      recommendations: consultation.recommendations?.map((rec) => ({
+        ...rec,
+        product: Array.isArray(rec.product) ? rec.product[0] ?? null : rec.product ?? null,
+      })),
+    })) ?? []
+
+  return { consultations: normalized as ConsultationRow[] }
 }
 
 export default async function DashboardPage() {
