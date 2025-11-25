@@ -60,7 +60,14 @@ const fetchDashboardData = async (clerkUserId: string) => {
         status,
         created_at,
         updated_at,
-        recommendations:recommendations(id, product_id, match_reason, is_clicked)
+        recommendations:recommendations(
+          id,
+          product_id,
+          match_reason,
+          is_clicked,
+          created_at,
+          products:product_id(id, name, image_url)
+        )
       `,
     )
     .eq("user_id", userRow.id)

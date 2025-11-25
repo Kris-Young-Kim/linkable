@@ -77,11 +77,11 @@ ISO 9999 보조기기 분류 매칭
 
 ## Phase 4 — Validation & 하드닝 (Week 4)
 
-- [ ] `core/validation/ippa-calculator.ts`: `(pre - post) * importance` 계산 함수.
-- [ ] `core/validation/feedback-analyser.ts`: 간단한 감성 분석/텍스트 요약 틀.
-- [ ] `app/api/ippa/route.ts`: 설문 제출 처리, 계산, DB 저장, 포인트 적립, 로그 남기기.
-- [ ] Dashboard 내 K-IPPA 섹션 및 `app/(main)/dashboard/ippa` 폼 UI (`components/features/ippa/`).
-- [ ] +14일 리마인더 트리거 설계 (예: CRON, Edge Scheduler 메모만 우선 작성).
+- [x] `core/validation/ippa-calculator.ts`: `(pre - post) * importance` 계산 함수.
+- [x] `core/validation/feedback-analyser.ts`: 간단한 감성 분석/텍스트 요약 틀.
+- [x] `app/api/ippa/route.ts`: 설문 제출 처리, 계산, DB 저장, 포인트 적립, 로그 남기기.
+- [x] Dashboard 내 K-IPPA 섹션 및 `components/ippa-form.tsx` 폼 UI.
+- [x] +14일 리마인더 트리거 설계 (예: CRON, Edge Scheduler 메모만 우선 작성) - `docs/reminder-trigger-design.md`.
 - [ ] QA & 폴리싱:
   - 접근성 체크 (키보드, 스크린리더, 색 대비).
   - SEO 메타 태그 (`app/layout.tsx`) 최종 확인.

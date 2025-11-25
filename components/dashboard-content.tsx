@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
+import { IppaForm } from "@/components/ippa-form"
 import { useLanguage } from "@/components/language-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,6 +15,12 @@ export type RecommendationRow = {
   product_id: string | null
   match_reason: string | null
   is_clicked: boolean | null
+  created_at?: string | null
+  products?: {
+    id: string
+    name: string
+    image_url?: string | null
+  } | null
 }
 
 export type ConsultationRow = {
@@ -171,7 +178,107 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
           </CardContent>
         </Card>
       </section>
+
+      {/* K-IPPA 평가 대상 추천 섹션 */}
+      <IppaEvaluationSection consultations={consultations} />
     </div>
+  )
+}
+
+// K-IPPA 평가 대상 추천 섹션
+function IppaEvaluationSection({ consultations }: { consultations: ConsultationRow[] }) {
+  const { t } = useLanguage()
+  const [selectedRecommendation, setSelectedRecommendation] = useState<{
+    id: string
+    productId: string
+    productName?: string
+    problemDescription?: string
+  } | null>(null)
+
+  // 평가 대상 추천 찾기 (클릭되었고, 14일 이상 경과, 아직 평가 안 한 것)
+  const evaluationTargets = useMemo(() => {
+    const now = new Date()
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+
+    return consultations
+      .flatMap((consultation) =>
+        (consultation.recommendations ?? [])
+          .filter((rec) => {
+            if (!rec.is_clicked || !rec.product_id) return false
+            if (!rec.created_at) return false
+            const createdDate = new Date(rec.created_at)
+            return createdDate <= fourteenDaysAgo
+          })
+          .map((rec) => ({
+            ...rec,
+            consultationTitle: consultation.title,
+            problemDescription: consultation.title, // 추후 analysis_results에서 가져올 수 있음
+          })),
+      )
+      .slice(0, 5) // 최대 5개만 표시
+  }, [consultations])
+
+  if (evaluationTargets.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">{t("dashboard.ippaSectionTitle")}</CardTitle>
+          <CardDescription>{t("dashboard.ippaSectionDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {selectedRecommendation ? (
+            <IppaForm
+              recommendationId={selectedRecommendation.id}
+              productId={selectedRecommendation.productId}
+              productName={selectedRecommendation.productName}
+              problemDescription={selectedRecommendation.problemDescription}
+              onSuccess={() => {
+                setSelectedRecommendation(null)
+                // 페이지 새로고침 또는 상태 업데이트
+                window.location.reload()
+              }}
+              onCancel={() => setSelectedRecommendation(null)}
+            />
+          ) : (
+            <>
+              {evaluationTargets.map((rec) => (
+                <div
+                  key={rec.id}
+                  className="rounded-lg border border-border bg-card px-4 py-3 flex items-center justify-between gap-4"
+                >
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-foreground">
+                      {rec.products?.name || t("dashboard.unknownProduct")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rec.match_reason || t("dashboard.noMatchReason")}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() =>
+                      setSelectedRecommendation({
+                        id: rec.id,
+                        productId: rec.product_id!,
+                        productName: rec.products?.name,
+                        problemDescription: rec.problemDescription || undefined,
+                      })
+                    }
+                    aria-label={t("dashboard.startEvaluation")}
+                  >
+                    {t("dashboard.startEvaluation")}
+                  </Button>
+                </div>
+              ))}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </section>
   )
 }
 
