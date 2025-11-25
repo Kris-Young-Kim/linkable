@@ -87,6 +87,16 @@ ISO 9999 보조기기 분류 매칭
   - SEO 메타 태그 (`app/layout.tsx`) 최종 확인 — `docs/QA-checklist.md`.
   - 주요 유틸 단위 테스트/수동 테스트 시나리오 정리 — `docs/QA-checklist.md`.
 
+### 남은 과제 (Post-MVP)
+
+- [ ] 인증 확장 (FR-Auth-02/03): 역할(Role) 선택 UI 및 Clerk 메타데이터 저장.
+- [ ] FR-IPPA-01 자동 알림: recommendations 생성 후 +14일 리마인더 자동 발송(스케줄러/크론).
+- [ ] Analytics & Metrics: 추천 정확도, K-IPPA 참여율 트래킹 및 대시보드 시각화.
+- [ ] MVP 제외 범위 준비:
+  - 결제 연동(PG) 설계 메모.
+  - 관리자용 통계/대시보드.
+  - 커뮤니티 기능(사용자 후기/질문) MVP 범위 정의.
+
 ### Deliverables
 
 - K-IPPA 제출 Loop
