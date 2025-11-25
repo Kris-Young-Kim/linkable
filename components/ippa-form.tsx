@@ -135,7 +135,7 @@ export function IppaForm({
                 </div>
                 {result.pointsEarned > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    {t("ippa.pointsEarned", { points: result.pointsEarned })}
+                    {t("ippa.pointsEarned").replace("{points}", String(result.pointsEarned))}
                   </p>
                 )}
               </div>
