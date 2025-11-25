@@ -16,7 +16,7 @@ export type RecommendationRow = {
   match_reason: string | null
   is_clicked: boolean | null
   created_at?: string | null
-  products?: {
+  product?: {
     id: string
     name: string
     image_url?: string | null
@@ -252,7 +252,7 @@ function IppaEvaluationSection({ consultations }: { consultations: ConsultationR
                 >
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">
-                      {rec.products?.name || t("dashboard.unknownProduct")}
+                      {rec.product?.name || t("dashboard.unknownProduct")}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {rec.match_reason || t("dashboard.noMatchReason")}
@@ -264,7 +264,7 @@ function IppaEvaluationSection({ consultations }: { consultations: ConsultationR
                       setSelectedRecommendation({
                         id: rec.id,
                         productId: rec.product_id!,
-                        productName: rec.products?.name,
+                        productName: rec.product?.name,
                         problemDescription: rec.problemDescription || undefined,
                       })
                     }
