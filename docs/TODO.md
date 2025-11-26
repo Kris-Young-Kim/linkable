@@ -194,13 +194,13 @@ ISO 9999 보조기기 분류 매칭
   - [x] 채팅 인터페이스에 분석 완료 시 자동 표시
     - SSE `analysis` 이벤트 수신 시 자동 렌더링
 
-- [ ] **상담 리포트 페이지** (`app/consultation/report/[id]/page.tsx`):
+- [x] **상담 리포트 페이지** (`app/consultation/report/[id]/page.tsx`):
 
-  - [ ] 상담 요약 및 ICF 분석 결과 전체 표시
-  - [ ] 환경 요소 분석 결과 시각화
-  - [ ] 생성된 추천 목록 링크
-  - [ ] PDF 다운로드 기능 (선택적, `react-pdf` 또는 서버 사이드 생성)
-  - [ ] API 엔드포인트: `GET /api/consultations/[id]`, `GET /api/analysis/[consultationId]`
+  - [x] 상담 요약 및 ICF 분석 결과 전체 표시
+  - [x] 환경 요소 분석 결과 시각화
+  - [x] 생성된 추천 목록 링크
+  - [x] PDF 다운로드 기능 (선택적) — UI에 버튼/가이드 추가, 실제 PDF 생성은 후속 과제
+  - [x] 분석/추천 데이터를 서버 컴포넌트에서 직접 조회 (`supabase` 서비스 클라이언트 활용)
 
 - [ ] **상담 상세 페이지** (`app/consultation/[id]/page.tsx`):
   - [ ] 상담 메시지 전체 히스토리

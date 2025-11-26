@@ -4,6 +4,12 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 
 const supabase = getSupabaseServerClient()
 
+const isMissingNotificationTable = (error: unknown) => {
+  if (!error || typeof error !== "object") return false
+  const { code, message } = error as { code?: string; message?: string }
+  return code === "PGRST205" || message?.includes("notifications")
+}
+
 /**
  * 알림 조회 API
  * GET /api/notifications
@@ -45,6 +51,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
+      if (isMissingNotificationTable(error)) {
+        console.warn(
+          "[Notifications] Table missing. Apply supabase/migrations/20241126100000_create_notifications_table.sql",
+        )
+        return NextResponse.json({ notifications: [], setupRequired: true })
+      }
+
       console.error("[Notifications] Fetch error:", error)
       return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 })
     }
@@ -100,6 +113,16 @@ export async function PATCH(request: NextRequest) {
       .eq("user_id", userRow.id) // 본인 알림만 수정 가능
 
     if (updateError) {
+      if (isMissingNotificationTable(updateError)) {
+        console.warn(
+          "[Notifications] Table missing during update. Apply supabase/migrations/20241126100000_create_notifications_table.sql",
+        )
+        return NextResponse.json(
+          { error: "Notifications table missing", setupRequired: true },
+          { status: 503 },
+        )
+      }
+
       console.error("[Notifications] Update error:", updateError)
       return NextResponse.json({ error: "Failed to update notification" }, { status: 500 })
     }

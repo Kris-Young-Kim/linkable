@@ -43,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="ko">
+      <html lang="ko" data-scroll-behavior="smooth">
         <head>
           {/* Google Tag Manager */}
           <Script

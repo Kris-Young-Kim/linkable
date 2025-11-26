@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/components/language-provider"
 import { LanguageSelector } from "@/components/language-selector"
 import { NotificationsBell } from "@/components/notifications-bell"
-import { useAuth } from "@clerk/nextjs"
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 
 export function Header() {
   const { t } = useLanguage()
@@ -69,17 +69,40 @@ export function Header() {
           )}
         </nav>
 
-        {/* Language Selector, Notifications, and CTA Button */}
+        {/* Language Selector, Auth Actions */}
         <div className="flex items-center gap-2">
           <LanguageSelector />
-          {isSignedIn && <NotificationsBell />}
-          <Button
-            size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-6 font-semibold text-base shadow-sm"
-            asChild
-          >
-            <Link href="/chat">{t("header.startConsultation")}</Link>
-          </Button>
+          <SignedIn>
+            <NotificationsBell />
+            <Button
+              variant="outline"
+              size="lg"
+              className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base"
+              asChild
+            >
+              <Link href="/chat">{t("header.continueConsultation")}</Link>
+            </Button>
+            <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button
+                variant="outline"
+                size="lg"
+                className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base"
+              >
+                {t("header.signIn")}
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
+              >
+                {t("header.signUp")}
+              </Button>
+            </SignUpButton>
+          </SignedOut>
         </div>
       </div>
     </header>

@@ -7,6 +7,9 @@ export const translations = {
     "header.howItWorks": "이용 방법",
     "header.about": "소개",
     "header.startConsultation": "상담 시작하기",
+    "header.continueConsultation": "상담 이어가기",
+    "header.signIn": "로그인",
+    "header.signUp": "회원가입",
     "header.homeAria": "LinkAble 홈으로 이동",
     "header.navAria": "주요 메뉴",
 
@@ -308,6 +311,9 @@ export const translations = {
     "header.howItWorks": "How It Works",
     "header.about": "About",
     "header.startConsultation": "Start Consultation",
+    "header.continueConsultation": "Continue Consultation",
+    "header.signIn": "Sign In",
+    "header.signUp": "Sign Up",
     "header.homeAria": "Go to LinkAble home",
     "header.navAria": "Main navigation",
 
@@ -586,6 +592,9 @@ export const translations = {
     "header.howItWorks": "利用方法",
     "header.about": "紹介",
     "header.startConsultation": "相談開始",
+    "header.continueConsultation": "相談を続ける",
+    "header.signIn": "ログイン",
+    "header.signUp": "新規登録",
     "header.homeAria": "LinkAbleホームに移動",
     "header.navAria": "メインメニュー",
 

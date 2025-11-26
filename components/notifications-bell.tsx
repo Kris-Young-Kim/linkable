@@ -39,9 +39,21 @@ export function NotificationsBell() {
     setIsLoading(true)
     try {
       const response = await fetch("/api/notifications?unreadOnly=false&limit=10")
-      if (!response.ok) return
+      if (!response.ok) {
+        console.warn("[Notifications] API returned non-200", response.status)
+        return
+      }
 
       const data = await response.json()
+      if (data.setupRequired) {
+        console.warn(
+          "[Notifications] Table missing. Apply supabase/migrations/20241126100000_create_notifications_table.sql",
+        )
+        setNotifications([])
+        setUnreadCount(0)
+        return
+      }
+
       const notifs = data.notifications ?? []
       setNotifications(notifs)
       setUnreadCount(notifs.filter((n: Notification) => !n.is_read).length)
@@ -61,11 +73,22 @@ export function NotificationsBell() {
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
-      await fetch("/api/notifications", {
+      const response = await fetch("/api/notifications", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ notificationId, isRead: true }),
       })
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null)
+        if (data?.setupRequired) {
+          console.warn(
+            "[Notifications] Cannot mark as read: notifications table missing. Apply supabase/migrations/20241126100000_create_notifications_table.sql",
+          )
+        }
+        return
+      }
+
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
       )
