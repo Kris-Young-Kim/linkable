@@ -97,7 +97,122 @@ ISO 9999 보조기기 분류 매칭
   - 관리자용 통계/대시보드.
   - 커뮤니티 기능(사용자 후기/질문) MVP 범위 정의.
 
-### Deliverables
+## Phase 5 — 프론트엔드 완성도 향상 (Post-MVP)
+
+### 5.1 멀티모달 입력 기능 구현
+
+- [ ] **STT (음성 입력) 구현**:
+
+  - [ ] Web Speech API 또는 OpenAI Whisper 연동
+  - [ ] `components/chat-interface.tsx`의 `toggleVoiceRecording` 함수 구현
+  - [ ] 음성 인식 중 비주얼 피드백 (파형 애니메이션)
+  - [ ] 브라우저 호환성 체크 및 폴백 처리
+  - 위치: `components/chat-interface.tsx:161-169`
+
+- [ ] **이미지 업로드 (Gemini Vision) 구현**:
+  - [ ] 파일 업로드 UI 컴포넌트 (`components/features/chat/image-upload.tsx`)
+  - [ ] 이미지 미리보기 및 제거 기능
+  - [ ] Gemini Vision API 연동 (`app/api/chat/route.ts`에 `mediaDescription` 처리)
+  - [ ] 이미지 분석 결과 시각화
+  - 위치: `components/chat-interface.tsx:173-174`
+
+### 5.2 스트리밍 응답 구현
+
+- [ ] **Next.js AI SDK 스트리밍**:
+  - [ ] `app/api/chat/route.ts`에서 `streamText` 사용
+  - [ ] `components/chat-interface.tsx`에서 스트리밍 응답 처리
+  - [ ] 실시간 타이핑 인디케이터 개선 ("링커가 생각 중입니다..." 애니메이션)
+  - [ ] 에러 처리 및 재연결 로직
+
+### 5.3 분석 결과 시각화 및 리포트
+
+- [ ] **ICF 분석 결과 시각화 컴포넌트**:
+
+  - [ ] `components/features/analysis/icf-visualization.tsx` 생성
+  - [ ] ICF 코드별 카테고리 표시 (신체기능 b, 활동 d, 환경 e)
+  - [ ] 각 코드 설명 툴팁/모달
+  - [ ] 분석 신뢰도 표시
+  - [ ] 채팅 인터페이스에 분석 완료 시 자동 표시
+
+- [ ] **상담 리포트 페이지** (`app/consultation/report/[id]/page.tsx`):
+
+  - [ ] 상담 요약 및 ICF 분석 결과 전체 표시
+  - [ ] 환경 요소 분석 결과 시각화
+  - [ ] 생성된 추천 목록 링크
+  - [ ] PDF 다운로드 기능 (선택적)
+
+- [ ] **상담 상세 페이지** (`app/consultation/[id]/page.tsx`):
+  - [ ] 상담 메시지 전체 히스토리
+  - [ ] 분석 결과 상세
+  - [ ] 생성된 추천 목록
+  - [ ] K-IPPA 평가 상태
+
+### 5.4 페이지 구조 완성
+
+- [ ] **K-IPPA 전용 페이지** (`app/dashboard/ippa/[recommendationId]/page.tsx`):
+
+  - [ ] 독립 페이지로 K-IPPA 평가
+  - [ ] 알림 링크에서 직접 접근 가능
+  - [ ] 평가 히스토리 확인
+  - [ ] 이전 평가와 비교 기능
+
+- [ ] **추천 상세 페이지** (`app/recommendations/[consultationId]/page.tsx`):
+
+  - [ ] 특정 상담 기반 추천 전용 페이지
+  - [ ] 상담 컨텍스트 표시
+  - [ ] 필터링/정렬 옵션
+  - [ ] 현재 쿼리 파라미터 방식에서 동적 라우트로 전환
+
+- [ ] **대시보드 상담 이력 상세 보기**:
+  - [ ] 상담 카드 클릭 시 상세 페이지로 이동
+  - [ ] 메시지 히스토리 전체 보기
+  - [ ] 분석 결과 재확인
+  - [ ] 추천 재조회 기능
+
+### 5.5 상담 완료 → 추천 페이지 연동
+
+- [ ] **채팅 인터페이스에 추천 CTA 추가**:
+
+  - [ ] ICF 분석 완료 시 "추천 보기" 버튼 표시
+  - [ ] 클릭 시 `/recommendations?consultationId={consultationId}`로 이동
+  - [ ] 추천 생성 상태 표시 (로딩/완료)
+  - 위치: `components/chat-interface.tsx` (ICF 분석 완료 후)
+
+- [ ] **상담 완료 후 자동 추천 생성**:
+
+  - [ ] `app/api/chat/route.ts`에서 ICF 분석 완료 시 추천 자동 생성
+  - [ ] 또는 `app/api/products/route.ts` 호출하여 추천 미리 생성
+  - [ ] 추천 생성 완료 후 채팅에 알림 표시
+
+- [ ] **채팅 내 추천 카드 미리보기** (선택적):
+  - [ ] 채팅 말풍선과 함께 상위 2-3개 추천 카드 표시
+  - [ ] `ProductRecommendationCard` 컴포넌트 재사용
+  - [ ] "더 보기" 버튼으로 전체 추천 페이지 이동
+  - [ ] Mermaid 다이어그램 명세 반영 ("FE->>U: 채팅 말풍선 + 추천 상품 카드 표시")
+
+### 5.6 UX 개선
+
+- [ ] **ICF 코드 상세 설명**:
+
+  - [ ] 코드 클릭 시 설명 툴팁/모달
+  - [ ] 카테고리별 색상 구분 (b=파랑, d=초록, e=주황)
+  - [ ] 관련 ISO 코드 연결 표시
+
+- [ ] **실시간 피드백 개선**:
+  - [ ] AI 응답 생성 중 애니메이션 개선
+  - [ ] "링커가 생각 중입니다..." 메시지 스타일링
+  - [ ] 로딩 스켈레톤 UI 개선
+
+### Deliverables (Phase 5)
+
+- 멀티모달 입력 (STT, 이미지) 완전 구현
+- 스트리밍 응답으로 실시간 상담 경험 개선
+- ICF 분석 결과 시각화 및 리포트 페이지
+- 완전한 페이지 구조 (상담 상세, 리포트, K-IPPA 전용 페이지)
+- **상담 완료 → 추천 페이지 자동 연동 플로우** (핵심 비즈니스 플로우)
+- 향상된 사용자 경험
+
+### Deliverables (Phase 4)
 
 - K-IPPA 제출 Loop
 - 대시보드 Validation UI

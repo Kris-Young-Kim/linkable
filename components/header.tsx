@@ -9,6 +9,7 @@ import { useAuth } from "@clerk/nextjs"
 
 export function Header() {
   const { t } = useLanguage()
+  const { isSignedIn } = useAuth()
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

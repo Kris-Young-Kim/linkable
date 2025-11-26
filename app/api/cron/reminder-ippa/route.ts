@@ -68,13 +68,6 @@ export async function GET(request: NextRequest) {
     let recommendations = queryResult.data
     const fetchError = queryResult.error
 
-    if (evaluatedIds.length > 0 && recommendations) {
-      // 모든 추천을 가져온 후 필터링
-      recommendations = recommendations.filter((r) => !evaluatedIds.includes(r.id))
-    }
-
-    const { data: recommendations, error: fetchError } = await query
-
     if (fetchError) {
       console.error("[Cron] Error fetching recommendations:", fetchError)
       logEvent({
@@ -84,6 +77,11 @@ export async function GET(request: NextRequest) {
         level: "error",
       })
       return NextResponse.json({ error: "Failed to fetch recommendations" }, { status: 500 })
+    }
+
+    // 평가가 제출된 추천 제외
+    if (evaluatedIds.length > 0 && recommendations) {
+      recommendations = recommendations.filter((r) => !evaluatedIds.includes(r.id))
     }
 
     if (!recommendations || recommendations.length === 0) {

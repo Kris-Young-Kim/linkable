@@ -56,20 +56,26 @@ TRD (Technical Requirements Document)
     선생님의 '활동 분석'을 코드로 변환한 로직입니다.
     4.1 [활동 1] AI 상담 및 문제 정의 (Assessment)
     API Endpoint: POST /api/chat
-    Input: { messages: Message[], context_image?: string }
+    Input: { messages: Message[], context_image?: string, mediaDescription?: string }
     Processing (Server Action):
-    Clerk 세션 확인.
-    User Input이 들어오면 Gemini Flash Lite Latest 호출.
-    System Prompt 주입: "의료 용어 금지, ICF 코드 추출, 따뜻한 어조."
-    Function Calling (Tool Use): AI가 대화 중 정보가 충분하면 extractICF() 함수를 호출하도록 설정.
-    Output: Streaming Text + (분석 완료 시) UI Component (<AnalysisCard />).
+    - ✅ Clerk 세션 확인 구현 완료
+    - ✅ User Input 처리 및 Gemini Flash Lite Latest 호출 구현 완료
+    - ✅ System Prompt 주입 구현 완료
+    - ⚠️ Function Calling (Tool Use) 미구현
+    - ⚠️ Streaming Text 응답 미구현 (현재 일반 JSON 응답)
+    - ⚠️ Image Input 처리 미구현 (mediaDescription 파라미터는 있으나 UI 연동 없음)
+    Output: 
+    - 현재: JSON 응답 (text, icfAnalysis, followUpQuestions)
+    - 목표: Streaming Text + (분석 완료 시) UI Component (<AnalysisCard />)
     4.2 [활동 2] ISO 매칭 및 추천 (Intervention)
     Algorithm: Rule-based Mapping (MVP 최적화).
-    AI가 추출한 d-code(활동)와 e-code(환경)를 조합.
-    Ex) d450(걷기) + e120(단차) = Problem Pattern A.
-    DB products 테이블에서 해당 패턴을 해결하는 iso_code 검색.
-    Query: SELECT _ FROM products WHERE iso_code LIKE '18 12%' (경사로).
-    Fallback: 정확한 매칭이 없을 경우, 상위 카테고리(Sub-class) 수준에서 검색.
+    - ✅ AI가 추출한 d-code(활동)와 e-code(환경)를 조합하여 ISO 매칭 구현 완료
+    - ✅ DB products 테이블에서 해당 패턴을 해결하는 iso_code 검색 구현 완료
+    - ✅ Query: SELECT * FROM products WHERE iso_code IN (...) 구현 완료
+    - ✅ Fallback: 정확한 매칭이 없을 경우, 상위 카테고리(Sub-class) 수준에서 검색 구현 완료
+    - ⚠️ 상담 완료 후 추천 페이지로 자동 연동 플로우 미구현
+    - ⚠️ 채팅 인터페이스에 추천 CTA 버튼 미구현
+    - ⚠️ 채팅 내 추천 카드 미리보기 미구현
     4.3 [활동 3] K-IPPA 평가 루프 (Validation)
     API Endpoint: POST /api/ippa/submit
     Logic:
@@ -79,11 +85,20 @@ TRD (Technical Requirements Document)
 5.  프론트엔드 및 접근성 엔지니어링 (Frontend & A11y)
     5.1 컴포넌트 설계 (Shadcn UI 확장)
     ChatInput:
-    마이크 버튼 클릭 시 window.SpeechRecognition 활성화.
-    음성 인식 중 비주얼 피드백(파형 애니메이션) 제공.
+    - ✅ 기본 텍스트 입력 구현 완료
+    - ⚠️ 마이크 버튼 클릭 시 window.SpeechRecognition 활성화 (UI만 존재, 기능 미구현)
+    - ⚠️ 음성 인식 중 비주얼 피드백(파형 애니메이션) 제공 (미구현)
+    - ⚠️ 이미지 업로드 기능 (UI만 존재, Gemini Vision API 연동 미구현)
     ProductCard:
-    스크린 리더 사용자를 위해 aria-label="상품명, 가격, 추천 사유" 형태로 정보 통합 제공.
-    이미지 alt 태그는 DB의 name 필드를 기본으로 하되, AI가 생성한 description을 보조로 활용.
+    - ✅ 기본 카드 UI 구현 완료
+    - ✅ 스크린 리더 사용자를 위해 aria-label 제공
+    - ✅ 이미지 alt 태그 구현 완료
+    ICFVisualization:
+    - ⚠️ ICF 분석 결과 시각화 컴포넌트 미구현
+    - 필요 기능: b/d/e 코드별 분류, 설명 툴팁, 관련 ISO 코드 연결
+    AnalysisCard:
+    - ⚠️ 분석 결과 카드 컴포넌트 미구현
+    - 필요 기능: 분석 요약, ICF 코드 시각화, 환경 요소 분석 결과
     5.2 접근성 체크리스트 (WCAG 2.1 AA)
     Keyboard Nav: 모든 인터랙션(버튼, 링크, 입력창)은 Tab 키로 이동 가능해야 함.
     Focus Ring: Tailwind 클래스 ring-2 ring-offset-2 ring-teal-600 적용.

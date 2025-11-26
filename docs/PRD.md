@@ -38,8 +38,13 @@ PRD (Product Requirements Document)
    Requirement: 추천 사유("문턱 제거를 위해")가 명시된 카드 UI 제공.
    Activity 3: 구매 실행 (Action Phase)
    User Story: "사용자는 가장 저렴하고 빠르게 배송되는 곳에서 구매하고 싶어 한다."
-   Step: 추천 카드를 클릭하면 쿠팡/네이버 최저가 페이지로 이동.
-   Requirement: 아웃링크(Out-link) 방식의 커머스 브릿지 구현.
+   Step 1: ICF 분석 완료 후 채팅 인터페이스에 "추천 보기" CTA 버튼 표시.
+   Step 2: 사용자가 CTA 클릭 시 추천 페이지(`/recommendations?consultationId={id}`)로 이동.
+   Step 3: 추천 카드를 클릭하면 쿠팡/네이버 최저가 페이지로 이동.
+   Requirement: 
+   - 아웃링크(Out-link) 방식의 커머스 브릿지 구현. ✅ 구현 완료
+   - 상담 완료 후 추천 페이지로 자동 연동 플로우. ⚠️ 구현 필요
+   - 채팅 내 추천 카드 미리보기 (선택적). ⚠️ 구현 필요
    Activity 4: 결과 확인 (Feedback Phase)
    User Story: "사용자는 이 기기가 실제로 도움이 되었는지 기록하고 보상받고 싶어 한다."
    Step: 2주 후 알림을 통해 "식사가 얼마나 편해지셨나요?" 설문 응답.
@@ -51,9 +56,11 @@ PRD (Product Requirements Document)
    FR-Auth-03: 초기 설정 시 Role을 메타데이터에 저장.
    4.2 AI 상담 엔진 (AI Core)
    FR-AI-01 (Chat Interface):
-   Next.js AI SDK 활용 스트리밍 답변.
-   STT(Speech-to-Text): Web Speech API 또는 OpenAI Whisper 활용 음성 입력 버튼.
-   Image Input: Gemini Vision API를 통한 환경(문턱, 계단 등) 사진 분석.
+   - ✅ 텍스트 입력 및 기본 채팅 UI 구현 완료
+   - ⚠️ Next.js AI SDK 활용 스트리밍 답변 (구현 필요)
+   - ⚠️ STT(Speech-to-Text): Web Speech API 또는 OpenAI Whisper 활용 음성 입력 버튼 (UI만 존재, 기능 미구현)
+   - ⚠️ Image Input: Gemini Vision API를 통한 환경(문턱, 계단 등) 사진 분석 (UI만 존재, 기능 미구현)
+   - ⚠️ ICF 분석 결과 시각화 컴포넌트 (백엔드 분석 완료, 프론트엔드 표시 미구현)
    FR-AI-02 (Prompt Logic - '링커'):
    System Prompt: "너는 16년 차 보조공학 코디네이터야. 의료 용어를 쓰지 말고 기능 중심으로 말해."
    Structured Output: AI 응답은 반드시 아래 JSON 포맷을 포함해야 함 (DB 저장용).
@@ -65,9 +72,13 @@ PRD (Product Requirements Document)
    "reasoning": "손 떨림을 보정하기 위해 무게감 있는 식사 도구를 추천합니다."
    }
    4.3 매칭 및 추천 시스템 (Recommendation Engine)
-   FR-Match-01 (Filtering): AI가 추출한 iso_code와 DB의 products 테이블 내 iso_code 일치 항목 검색 (SQL Query).
-   FR-Match-02 (Ranking): 유사 상품 노출 시 '클릭률'과 '평점' 가중치 반영 (MVP에서는 랜덤 or 등록순).
-   FR-Match-03 (Display): 상품 카드에 [ISO 인증], [해결 가능 문제] 태그 자동 부착.
+   FR-Match-01 (Filtering): AI가 추출한 iso_code와 DB의 products 테이블 내 iso_code 일치 항목 검색 (SQL Query). ✅ 구현 완료
+   FR-Match-02 (Ranking): 유사 상품 노출 시 '클릭률'과 '평점' 가중치 반영 (MVP에서는 랜덤 or 등록순). ✅ 구현 완료
+   FR-Match-03 (Display): 상품 카드에 [ISO 인증], [해결 가능 문제] 태그 자동 부착. ✅ 구현 완료
+   FR-Match-04 (Consultation Integration): 상담 완료 후 추천 페이지로 자동 연동.
+   - ICF 분석 완료 시 채팅 인터페이스에 "추천 보기" CTA 버튼 표시. ⚠️ 구현 필요
+   - 클릭 시 `/recommendations?consultationId={id}`로 이동. ⚠️ 구현 필요
+   - 채팅 내 추천 카드 미리보기 (상위 2-3개, 선택적). ⚠️ 구현 필요
    4.4 사후 관리 시스템 (K-IPPA Validation)
    FR-IPPA-01 (Trigger): recommendations 테이블 생성일 기준 +14일 뒤 알림 발송.
    FR-IPPA-02 (Survey UI):
@@ -75,6 +86,25 @@ PRD (Product Requirements Document)
    Q2. 중요도 (1~5점 별점).
    Q3. 사용 전 수행 난이도 vs 사용 후 수행 난이도 (슬라이더 UI).
    FR-IPPA-03 (Calculation): 결과 제출 시 (Pre - Post) \* Importance 점수 계산 후 ippa_evaluations 테이블 저장.
+   4.5 분석 결과 리포트 및 상세 페이지
+   FR-Report-01: 상담 리포트 페이지 (`/consultation/report/[id]`)
+   - ICF 분석 결과 전체 시각화 (b, d, e 코드별 분류)
+   - 분석 요약 및 환경 요소 분석 결과 표시
+   - 생성된 추천으로 이어지는 CTA
+   FR-Report-02: 상담 상세 페이지 (`/consultation/[id]`)
+   - 상담 메시지 전체 히스토리
+   - 분석 결과 상세 확인
+   - 생성된 추천 목록 및 상태
+   - K-IPPA 평가 상태
+   FR-Report-03: ICF 코드 상세 설명
+   - 코드 클릭 시 설명 툴팁/모달
+   - 카테고리별 색상 구분
+   - 관련 ISO 코드 연결 표시
+   4.6 K-IPPA 전용 페이지
+   FR-IPPA-04: 독립 K-IPPA 평가 페이지 (`/dashboard/ippa/[recommendationId]`)
+   - 알림 링크에서 직접 접근 가능
+   - 평가 히스토리 확인
+   - 이전 평가와 비교 기능
 5. 비기능 요구사항 (Non-Functional Requirements)
    5.1 데이터베이스 & 보안
    NFR-DB-01: Supabase RLS(Row Level Security) 정책 적용 (본인 상담 내역만 조회 가능).

@@ -32,20 +32,23 @@ Version: v1.2
    │ ├── page.tsx # [Landing] 서비스 소개 및 시작하기
    │ │
    │ ├── consultation/ # [Activity 1] 상담 및 문제 파악
-   │ │ ├── page.tsx # 상담 시작 (초기 진입)
+   │ │ ├── page.tsx # 상담 시작 (초기 진입) ⚠️ 미구현
    │ │ ├── chat/ # AI 채팅 인터페이스
-   │ │ │ └── page.tsx
+   │ │ │ └── page.tsx ✅ 구현 완료
+   │ │ ├── [id]/ # 상담 상세 페이지
+   │ │ │ └── page.tsx ⚠️ 미구현 (메시지 히스토리, 분석 결과 상세)
    │ │ └── report/ # 분석 결과 요약 페이지
-   │ │ └── [id]/page.tsx
+   │ │ └── [id]/page.tsx ⚠️ 미구현 (ICF 분석 결과 시각화)
    │ │
    │ ├── recommendations/ # [Activity 2 & 3] 매칭 및 구매
+   │ │ ├── page.tsx # 추천 리스트 (쿼리 파라미터 방식) ✅ 구현 완료
    │ │ └── [consultationId]/ # 특정 상담 기반 추천 리스트
-   │ │ └── page.tsx
+   │ │ └── page.tsx ⚠️ 미구현 (현재는 쿼리 파라미터 사용)
    │ │
    │ └── dashboard/ # [Activity 4] 사후 관리 및 IPPA
-   │ ├── page.tsx # 마이페이지 (상담 이력)
+   │ ├── page.tsx # 마이페이지 (상담 이력) ✅ 구현 완료
    │ └── ippa/ # K-IPPA 평가 페이지
-   │ └── [recommendationId]/page.tsx
+   │ └── [recommendationId]/page.tsx ⚠️ 미구현 (현재는 대시보드 내 인라인 폼)
    │
    ├── api/ # [Backend] Serverless Functions
    │ ├── chat/ # AI 상담 및 ICF 추출 API
@@ -91,9 +94,20 @@ Version: v1.2
    │
    ├── features/ # [Domain] 기능별 복합 컴포넌트
    │ ├── chat/ # 채팅 관련
-   │ │ ├── chat-bubble.tsx # 말풍선 (User/AI 구분)
-   │ │ ├── chat-input.tsx # 텍스트 + 음성 입력창
-   │ │ └── typing-indicator.tsx
+   │ │ ├── chat-bubble.tsx # 말풍선 (User/AI 구분) ✅ 구현 완료
+   │ │ ├── chat-input.tsx # 텍스트 + 음성 입력창 ⚠️ 텍스트만 구현, STT 미구현
+   │ │ ├── typing-indicator.tsx ⚠️ 기본 구현만, 개선 필요
+   │ │ ├── image-upload.tsx # 이미지 업로드 컴포넌트 ⚠️ 미구현
+   │ │ └── recommendation-cta.tsx # 상담 완료 후 추천 CTA 버튼 ⚠️ 미구현
+   │ │
+   │ ├── analysis/ # 분석 결과 관련
+   │ │ ├── icf-visualization.tsx # ICF 분석 결과 시각화 ⚠️ 미구현
+   │ │ └── analysis-card.tsx # 분석 결과 카드 컴포넌트 ⚠️ 미구현
+   │ │
+   │ ├── product/ # 상품 관련
+   │ │ ├── product-card.tsx # 추천 상품 카드 (이미지, 태그, 구매버튼) ✅ 구현 완료 (components/product-recommendation-card.tsx)
+   │ │ ├── product-preview.tsx # 채팅 내 추천 카드 미리보기 ⚠️ 미구현
+   │ │ └── iso-badge.tsx # ISO 인증 뱃지 ⚠️ 미구현
    │ │
    │ ├── product/ # 상품 관련
    │ │ ├── product-card.tsx # 추천 상품 카드 (이미지, 태그, 구매버튼)

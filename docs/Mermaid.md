@@ -71,9 +71,12 @@ Version: v1.2 (Activity Analysis Based)
         %% Activity 3: Action (구매 행동)
         subgraph "Activity 3: Action"
             Generate_Reason --> Show_Card[Display Product Cards]
-            Show_Card --> User_Click[Click 'Buy Now']
-            User_Click --> OutLink[Redirect to Commerce]
-            OutLink --> Log_Click[Log: Recommendation Clicked]
+            Show_Card --> Show_In_Chat[Show Recommendations in Chat] ⚠️ 미구현
+            Show_In_Chat --> User_Navigate[User Clicks 'View Recommendations'] ⚠️ 미구현
+            User_Navigate --> Show_Card
+            Show_Card --> User_Click[Click 'Buy Now'] ✅ 구현 완료
+            User_Click --> OutLink[Redirect to Commerce] ✅ 구현 완료
+            OutLink --> Log_Click[Log: Recommendation Clicked] ✅ 구현 완료
         end
 
         %% Activity 4: Validation (사후 검증)
@@ -119,11 +122,19 @@ Version: v1.2 (Activity Analysis Based)
         BE->>DB: INSERT into Recommendations
         BE-->>FE: Return { ChatResponse, ProductCards }
 
-        FE->>U: 채팅 말풍선 + 추천 상품 카드 표시
+        Note over FE, U: [현재 구현 상태]
+        FE->>U: 채팅 말풍선 표시 ✅
+        FE->>U: 추천 상품 카드 표시 ⚠️ (미구현 - 추천 페이지로 수동 이동 필요)
+        
+        Note over FE, U: [목표 구현]
+        FE->>U: 채팅 말풍선 + 추천 상품 카드 미리보기 (상위 2-3개)
+        FE->>U: "추천 보기" CTA 버튼 표시
+        U->>FE: CTA 클릭
+        FE->>U: 추천 페이지로 이동 (/recommendations?consultationId={id})
 
         Note over U, FE: [Activity 3] 구매 행동
-        U->>FE: '구매하러 가기' 클릭
-        FE->>U: Open New Tab (Coupang)
+        U->>FE: '구매하러 가기' 클릭 ✅ 구현 완료
+        FE->>U: Open New Tab (Coupang/Naver) ✅ 구현 완료
 
 4.  Entity Relationship Diagram (ERD)
     개요: 데이터베이스 테이블 간의 관계 구조입니다. K-IPPA 평가를 위한 데이터 연결이 핵심입니다.
