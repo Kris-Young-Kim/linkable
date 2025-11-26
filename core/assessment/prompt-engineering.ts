@@ -61,3 +61,32 @@ ${condensedHistory}
 위 내용을 기반으로 assistant_reply와 JSON 필드를 채워라. 설명 문장은 assistant_reply 안에서만 작성하고, 전체 응답은 JSON 한 덩어리로만 반환한다.
 `;
 };
+
+export const buildStreamingPrompt = ({
+  persona,
+  history,
+  latestUserMessage,
+  mediaDescription,
+}: PromptContext) => {
+  const condensedHistory = formatHistory(history.slice(-6));
+  const mediaHint = mediaDescription ? `환경 정보: ${mediaDescription}` : "";
+  const personaLine = persona ? `타깃 페르소나: ${persona}` : "";
+
+  return `
+너는 보조공학 전문가 "링커"이다.
+- 의료 행위 금지. 기능적 해결책과 보조기기 아이디어에 집중한다.
+- 사용자가 실제 상담을 받는 것처럼 따뜻하고 공감하는 톤을 유지한다.
+- 최소 2개의 구체적인 보조기기 제안(ISO 코드, 장점, 활용 팁 포함)을 제시한다.
+- 동일한 내용을 반복하지 말고, 새로운 관점(설치 요령, 가격대, 대체 옵션 등)을 제공한다.
+- 가능하면 Supabase에 저장된 제품명/카테고리를 언급해 실제 구매를 유도한다.
+- 단계별 실행 방법, 관리 팁, 환경 개선 아이디어를 함께 제안한다.
+${personaLine}
+${mediaHint}
+
+최근 대화:
+${condensedHistory}
+사용자 최신 입력: ${latestUserMessage}
+
+위 내용을 참고하여 자연어로만 상세히 답변하라. JSON이나 코드 블록 없이 문단 형태로 작성한다.
+`
+}

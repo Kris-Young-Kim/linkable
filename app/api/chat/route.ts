@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
 import { auth, currentUser } from "@clerk/nextjs/server"
+import { streamText } from "ai"
+import { google } from "@ai-sdk/google"
 
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
-import { buildPrompt } from "@/core/assessment/prompt-engineering"
+import { buildPrompt, buildStreamingPrompt } from "@/core/assessment/prompt-engineering"
 import { parseAnalysis } from "@/core/assessment/parser"
 import { callGemini } from "@/lib/gemini"
 
@@ -164,63 +166,129 @@ export async function POST(request: Request) {
     const consultationId = await createConsultationIfNeeded(
       body.consultationId,
       supabaseUserId,
-      trimmedMessage || "이미지 첨부"
+      trimmedMessage || "이미지 첨부",
     )
 
     await insertChatMessage(consultationId, "user", trimmedMessage || "이미지 첨부")
 
     const history = (body.history ?? []).slice(-6)
-    
-    // 이미지가 있으면 이미지 분석 프롬프트 추가
-    let imageMimeType: string | undefined = body.image?.mimeType || undefined
-
-    const prompt = buildPrompt({
+    const streamingPrompt = buildStreamingPrompt({
       persona: body.persona,
       history: [...history, { role: "user", content: trimmedMessage || "이미지를 첨부했습니다." }],
       latestUserMessage: trimmedMessage || "이미지를 첨부했습니다. 환경을 분석해 주세요.",
       mediaDescription: body.mediaDescription,
     })
 
-    const { rawText, json } = await callGemini(prompt, body.image?.base64, imageMimeType)
+    const encoder = new TextEncoder()
 
-    let assistantReply = ""
-    let parsedAnalysis = null
+    const stream = new ReadableStream({
+      async start(controller) {
+        const sendEvent = (event: string, data: unknown) => {
+          controller.enqueue(
+            encoder.encode(`event:${event}\ndata:${JSON.stringify(data ?? {})}\n\n`),
+          )
+        }
 
-    if (json) {
-      try {
-        parsedAnalysis = parseAnalysis(json)
-        assistantReply = parsedAnalysis.assistant_reply ?? ""
-      } catch (error) {
-        logEvent({
-          category: "consultation",
-          action: "analysis_parse_error",
-          payload: { error, rawText },
-          level: "warn",
-        })
-      }
-    }
+        try {
+          let streamedAssistantReply = ""
 
-    if (!assistantReply) {
-      assistantReply = rawText || FALLBACK_RESPONSE
-    }
+          const result = await streamText({
+            model: google("gemini-flash-lite-latest"),
+            prompt: streamingPrompt,
+            temperature: 0.4,
+            topP: 0.8,
+            onFinish: ({ text }) => {
+              streamedAssistantReply = text ?? streamedAssistantReply
+            },
+            onError: (error) => {
+              logEvent({
+                category: "consultation",
+                action: "chat_stream_error",
+                payload: { error: String(error) },
+                level: "error",
+              })
+            },
+          })
 
-    await insertChatMessage(consultationId, "ai", assistantReply)
-    await upsertAnalysis(consultationId, parsedAnalysis, body.mediaDescription)
+          for await (const delta of result.textStream) {
+            sendEvent("text", { delta })
+          }
 
-    logEvent({
-      category: "consultation",
-      action: "chat_exchange",
-      payload: { consultationId },
+          const structuredPrompt = buildPrompt({
+            persona: body.persona,
+            history: [...history, { role: "user", content: trimmedMessage || "이미지를 첨부했습니다." }],
+            latestUserMessage: trimmedMessage || "이미지를 첨부했습니다. 환경을 분석해 주세요.",
+            mediaDescription: body.mediaDescription,
+          })
+
+          const { rawText, json } = await callGemini(
+            structuredPrompt,
+            body.image?.base64,
+            body.image?.mimeType,
+          )
+
+          let parsedAnalysis = null
+          let assistantReplyForStorage = streamedAssistantReply || rawText || FALLBACK_RESPONSE
+
+          if (json) {
+            try {
+              parsedAnalysis = parseAnalysis(json)
+              if (!assistantReplyForStorage && parsedAnalysis.assistant_reply) {
+                assistantReplyForStorage = parsedAnalysis.assistant_reply
+              }
+            } catch (error) {
+              logEvent({
+                category: "consultation",
+                action: "analysis_parse_error",
+                payload: { error, rawText },
+                level: "warn",
+              })
+            }
+          }
+
+          if (!assistantReplyForStorage) {
+            assistantReplyForStorage = FALLBACK_RESPONSE
+          }
+
+          await insertChatMessage(consultationId, "ai", assistantReplyForStorage)
+          await upsertAnalysis(consultationId, parsedAnalysis, body.mediaDescription)
+
+          logEvent({
+            category: "consultation",
+            action: "chat_exchange",
+            payload: { consultationId },
+          })
+
+          sendEvent("analysis", {
+            consultationId,
+            followUpQuestions: parsedAnalysis?.questions ?? [],
+            icfAnalysis: parsedAnalysis?.icf_analysis ?? null,
+            problemDescription:
+              parsedAnalysis?.needs || trimmedMessage?.slice(0, 120) || "상담 내용을 요약해 주세요.",
+          })
+
+          sendEvent("done", { consultationId })
+          controller.close()
+        } catch (error) {
+          logEvent({
+            category: "consultation",
+            action: "chat_api_error",
+            payload: { error },
+            level: "error",
+          })
+
+          sendEvent("error", { message: "Failed to process request. 잠시 후 다시 시도해 주세요." })
+          controller.close()
+        }
+      },
     })
 
-    return NextResponse.json({
-      consultationId,
-      message: {
-        role: "assistant",
-        content: assistantReply,
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
       },
-      followUpQuestions: parsedAnalysis?.questions ?? [],
-      icfAnalysis: parsedAnalysis?.icf_analysis ?? null,
     })
   } catch (error) {
     logEvent({

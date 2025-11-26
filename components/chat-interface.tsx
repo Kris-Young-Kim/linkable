@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 
 // Web Speech API 타입 정의
 declare global {
@@ -107,6 +107,28 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  const preloadRecommendations = useCallback(async (currentConsultationId: string) => {
+    setShowRecommendationCTA(true)
+    setIsLoadingRecommendations(true)
+
+    try {
+      const recommendationsResponse = await fetch(
+        `/api/products?consultationId=${currentConsultationId}&limit=3`,
+      )
+      if (recommendationsResponse.ok) {
+        const recommendationsData = await recommendationsResponse.json()
+        if (recommendationsData.products && recommendationsData.products.length > 0) {
+          setHasRecommendations(true)
+          setPreviewRecommendations(recommendationsData.products.slice(0, 3))
+        }
+      }
+    } catch (error) {
+      console.error("[chat] Failed to preload recommendations:", error)
+    } finally {
+      setIsLoadingRecommendations(false)
+    }
+  }, [])
+
   const isAuthResolved = isLoaded
   const requiresLogin = isAuthResolved && !isSignedIn
   const shouldShowDisclaimer = Boolean(isSignedIn && !hasAcceptedDisclaimer)
@@ -125,26 +147,41 @@ export function ChatInterface() {
     }
 
     const trimmed = input.trim()
-    if (!trimmed) return
+    if (!trimmed && !selectedImage) return
 
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
-      content: trimmed,
+      content: trimmed || "이미지를 첨부했습니다.",
       timestamp: new Date(),
     }
 
-    setMessages((prev) => [...prev, userMessage])
+    const assistantMessageId = crypto.randomUUID()
+
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      {
+        id: assistantMessageId,
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+      },
+    ])
     setInput("")
     setIsTyping(true)
     setSuggestedQuestions([])
+
+    setShowRecommendationCTA(false)
+    setPreviewRecommendations([])
+    setHasRecommendations(false)
 
     // 첫 메시지인 경우 chat_started 이벤트 추적
     if (messages.length === 1) {
       trackEvent("chat_started")
     }
 
-    // 메시지 전송 이벤트 추적
+    // 메시지 전송 이벤트 추적 (텍스트가 없으면 0으로 기록)
     trackEvent("chat_message_sent", {
       message_length: trimmed.length,
       ...(consultationId && { consultation_id: consultationId }),
@@ -175,87 +212,149 @@ export function ChatInterface() {
           message: trimmed,
           consultationId,
           history: messages.map(({ role, content }) => ({ role, content })),
-          image: imagePayload, // base64 인코딩된 이미지 전송
+          image: imagePayload,
         }),
       })
 
-      // 이미지 전송 후 초기화
       if (selectedImage) {
         handleRemoveImage()
       }
 
-      if (!response.ok) {
+      if (!response.ok || !response.body) {
         throw new Error(await response.text())
       }
 
-      const data = await response.json()
-      if (!consultationId && data.consultationId) {
-        setConsultationId(data.consultationId)
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder("utf-8")
+      let buffer = ""
+
+      const processEvent = async (eventType: string, data?: string) => {
+        if (!data) return
+        switch (eventType) {
+          case "text": {
+            try {
+              const payload = JSON.parse(data) as { delta?: string }
+              if (payload?.delta) {
+                setMessages((prev) =>
+                  prev.map((message) =>
+                    message.id === assistantMessageId
+                      ? { ...message, content: `${message.content}${payload.delta}` }
+                      : message,
+                  ),
+                )
+              }
+            } catch (error) {
+              console.error("[chat] Failed to parse stream delta:", error)
+            }
+            break
+          }
+          case "analysis": {
+            try {
+              const payload = JSON.parse(data) as {
+                consultationId?: string
+                followUpQuestions?: string[]
+                icfAnalysis?: unknown
+                problemDescription?: string
+              }
+
+              if (!consultationId && payload.consultationId) {
+                setConsultationId(payload.consultationId)
+              }
+
+              if (payload.followUpQuestions) {
+                setSuggestedQuestions(payload.followUpQuestions.filter(Boolean))
+              }
+
+              if (payload.icfAnalysis && payload.consultationId) {
+                trackEvent("consultation_completed", {
+                  consultation_id: payload.consultationId,
+                  has_recommendations: true,
+                })
+
+                if (!ippaData && !showIppaForm) {
+                  setShowIppaForm(true)
+                  setProblemDescription(
+                    payload.problemDescription || trimmed.slice(0, 100) || "상담 내용을 요약해 주세요.",
+                  )
+                }
+
+                await preloadRecommendations(payload.consultationId)
+              }
+            } catch (error) {
+              console.error("[chat] Failed to parse analysis payload:", error)
+            }
+            break
+          }
+          case "error": {
+            try {
+              const payload = JSON.parse(data) as { message?: string }
+              setMessages((prev) =>
+                prev.map((message) =>
+                  message.id === assistantMessageId
+                    ? {
+                        ...message,
+                        content: payload.message || t("chat.errorResponse"),
+                      }
+                    : message,
+                ),
+              )
+            } catch {
+              setMessages((prev) =>
+                prev.map((message) =>
+                  message.id === assistantMessageId
+                    ? {
+                        ...message,
+                        content: t("chat.errorResponse"),
+                      }
+                    : message,
+                ),
+              )
+            }
+            break
+          }
+          default:
+            break
+        }
       }
 
-      // ICF 분석이 완료되고 추천이 있을 경우 consultation_completed 이벤트 추적
-      if (data.icfAnalysis && data.consultationId) {
-        trackEvent("consultation_completed", {
-          consultation_id: data.consultationId,
-          has_recommendations: Boolean(data.icfAnalysis),
-        })
-        
-        // ICF 분석 완료 시 K-IPPA 폼 표시 (아직 입력하지 않은 경우)
-        if (!ippaData && !showIppaForm) {
-          setShowIppaForm(true)
-          // 문제 설명 추출 (ICF 분석 요약 또는 첫 메시지)
-          const summary = data.icfAnalysis?.summary || trimmed.slice(0, 100)
-          setProblemDescription(summary)
-        }
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
 
-        // ICF 분석 완료 시 추천 미리 생성 및 CTA 표시
-        const currentConsultationId = data.consultationId
-        setShowRecommendationCTA(true)
-        setIsLoadingRecommendations(true)
-        
-        // 추천 미리 생성 (옵션 A: 프론트엔드에서 호출)
-        try {
-          const recommendationsResponse = await fetch(
-            `/api/products?consultationId=${currentConsultationId}&limit=3`
-          )
-          if (recommendationsResponse.ok) {
-            const recommendationsData = await recommendationsResponse.json()
-            if (recommendationsData.products && recommendationsData.products.length > 0) {
-              setHasRecommendations(true)
-              // 상위 2-3개 추천 카드 미리보기용 데이터 저장
-              setPreviewRecommendations(recommendationsData.products.slice(0, 3))
+        let boundary = buffer.indexOf("\n\n")
+        while (boundary !== -1) {
+          const eventChunk = buffer.slice(0, boundary)
+          buffer = buffer.slice(boundary + 2)
+
+          const lines = eventChunk.split("\n")
+          let eventType = "message"
+          let dataPayload = ""
+
+          for (const line of lines) {
+            if (line.startsWith("event:")) {
+              eventType = line.slice(6).trim()
+            } else if (line.startsWith("data:")) {
+              dataPayload += line.slice(5).trim()
             }
           }
-        } catch (error) {
-          console.error("[chat] Failed to preload recommendations:", error)
-        } finally {
-          setIsLoadingRecommendations(false)
+
+          await processEvent(eventType, dataPayload)
+          boundary = buffer.indexOf("\n\n")
         }
       }
-
-      if (Array.isArray(data.followUpQuestions)) {
-        setSuggestedQuestions(data.followUpQuestions.filter(Boolean))
-      }
-
-      const assistantMessage: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: data.message?.content || t("chat.genericReply"),
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
     } catch (error) {
       console.error("chat_error", error)
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: t("chat.errorResponse"),
-          timestamp: new Date(),
-        },
-      ])
+      setMessages((prev) =>
+        prev.map((message) =>
+          message.id === assistantMessageId
+            ? {
+                ...message,
+                content: t("chat.errorResponse"),
+              }
+            : message,
+        ),
+      )
     } finally {
       setIsTyping(false)
     }

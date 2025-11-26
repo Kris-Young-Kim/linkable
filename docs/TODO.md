@@ -164,19 +164,17 @@ ISO 9999 보조기기 분류 매칭
 
 ### 5.3 스트리밍 응답 구현
 
-- [ ] **Next.js AI SDK 스트리밍**:
-  - [ ] Next.js AI SDK 설치 및 설정
-    - `npm install ai @ai-sdk/google`
-  - [ ] 백엔드 스트리밍
-    - `app/api/chat/route.ts`에서 `streamText` 사용하여 Gemini 응답 스트리밍
-    - `result.toDataStreamResponse()` 반환
-  - [ ] 프론트엔드 스트리밍 처리
-    - `useChat` 훅 사용 (AI SDK) 또는 `fetch`로 스트림 파싱
-    - 실시간 텍스트 업데이트
-  - [ ] 실시간 타이핑 인디케이터 개선
-    - "링커가 생각 중입니다..." 애니메이션
-    - 스켈레톤 UI 개선
-  - [ ] 에러 처리 및 재연결 로직
+- [x] **Next.js AI SDK 스트리밍**:
+  - [x] Next.js AI SDK 설치 및 설정
+    - `pnpm install ai @ai-sdk/google`
+  - [x] 백엔드 스트리밍
+    - `app/api/chat/route.ts`에서 `streamText` + 커스텀 SSE 이벤트로 Gemini 응답 스트리밍
+  - [x] 프론트엔드 스트리밍 처리
+    - `components/chat-interface.tsx`에서 `ReadableStream` + SSE 파싱으로 실시간 텍스트 업데이트
+  - [x] 실시간 타이핑 경험 개선
+    - 기존 인디케이터 유지 + 말풍선 실시간 업데이트로 "링커가 생각 중" 상태를 시각적으로 표현
+  - [x] 에러 처리 및 재연결 로직
+    - SSE 오류 시 즉시 에러 이벤트 수신 후 사용자에게 안내 문구 표시
 
 ### 5.4 분석 결과 시각화 및 리포트
 

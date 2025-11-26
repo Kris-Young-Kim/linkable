@@ -2,7 +2,8 @@ const GEMINI_TEXT_MODEL = "gemini-flash-lite-latest";
 const GEMINI_VISION_MODEL = "gemini-1.5-flash-latest";
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com";
 
-const buildEndpoint = (model: string) => `${GEMINI_BASE_URL}/v1/models/${model}:generateContent`;
+const buildEndpoint = (model: string, useStableApi = false) =>
+  `${GEMINI_BASE_URL}/${useStableApi ? "v1" : "v1beta"}/models/${model}:generateContent`;
 
 type GeminiCandidate = {
   content?: {
@@ -63,7 +64,10 @@ export const callGemini = async (prompt: string, imageBase64?: string, mimeType?
     });
   }
 
-  const endpoint = buildEndpoint(isVisionRequest ? GEMINI_VISION_MODEL : GEMINI_TEXT_MODEL);
+  const endpoint = buildEndpoint(
+    isVisionRequest ? GEMINI_VISION_MODEL : GEMINI_TEXT_MODEL,
+    isVisionRequest, // Vision 모델만 v1 사용
+  );
 
   const response = await fetch(`${endpoint}?key=${apiKey}`, {
     method: "POST",
