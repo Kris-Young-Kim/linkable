@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 
 import { RecommendationsView, type RecommendationProduct } from "@/components/recommendations-view"
 
@@ -46,6 +47,12 @@ export default async function RecommendationsPage({
     limit: typeof resolvedParams.limit === "string" ? resolvedParams.limit : undefined,
   }
 
+  // consultationId가 있으면 동적 라우트로 리다이렉트
+  if (normalizedParams.consultationId) {
+    redirect(`/recommendations/${normalizedParams.consultationId}`)
+  }
+
+  // consultationId가 없으면 기존 방식으로 동작 (ICF 코드 기반 추천)
   let products: RecommendationProduct[] = []
   let errorMessage: string | null = null
 

@@ -694,7 +694,7 @@ export function ChatInterface() {
                       size="lg"
                       className="min-h-[44px] px-8"
                       onClick={() => {
-                        router.push(`/recommendations?consultationId=${consultationId}`)
+                        router.push(`/recommendations/${consultationId}`)
                       }}
                     >
                       <ShoppingBag className="mr-2 size-5" aria-hidden="true" />
@@ -722,7 +722,7 @@ export function ChatInterface() {
                           size="lg"
                           className="min-h-[44px] px-8"
                           onClick={() => {
-                            router.push(`/recommendations?consultationId=${consultationId}`)
+                            router.push(`/recommendations/${consultationId}`)
                           }}
                         >
                           <ShoppingBag className="mr-2 size-5" aria-hidden="true" />
