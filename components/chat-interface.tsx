@@ -23,6 +23,7 @@ interface Message {
 export function ChatInterface() {
   const { t } = useLanguage()
   const { isSignedIn, isLoaded } = useAuth()
+  const router = useRouter()
 
   const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
@@ -41,6 +42,9 @@ export function ChatInterface() {
   const [showIppaForm, setShowIppaForm] = useState(false)
   const [ippaData, setIppaData] = useState<{ importance: number; currentDifficulty: number } | null>(null)
   const [problemDescription, setProblemDescription] = useState<string>("")
+  const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
+  const [hasRecommendations, setHasRecommendations] = useState(false)
+  const [showRecommendationCTA, setShowRecommendationCTA] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -120,6 +124,28 @@ export function ChatInterface() {
           // 문제 설명 추출 (ICF 분석 요약 또는 첫 메시지)
           const summary = data.icfAnalysis?.summary || trimmed.slice(0, 100)
           setProblemDescription(summary)
+        }
+
+        // ICF 분석 완료 시 추천 미리 생성 및 CTA 표시
+        const currentConsultationId = data.consultationId
+        setShowRecommendationCTA(true)
+        setIsLoadingRecommendations(true)
+        
+        // 추천 미리 생성 (옵션 A: 프론트엔드에서 호출)
+        try {
+          const recommendationsResponse = await fetch(
+            `/api/products?consultationId=${currentConsultationId}&limit=3`
+          )
+          if (recommendationsResponse.ok) {
+            const recommendationsData = await recommendationsResponse.json()
+            if (recommendationsData.products && recommendationsData.products.length > 0) {
+              setHasRecommendations(true)
+            }
+          }
+        } catch (error) {
+          console.error("[chat] Failed to preload recommendations:", error)
+        } finally {
+          setIsLoadingRecommendations(false)
         }
       }
 
@@ -339,6 +365,36 @@ export function ChatInterface() {
                     onSkip={handleIppaSkip}
                     problemDescription={problemDescription}
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Recommendation CTA */}
+            {showRecommendationCTA && consultationId && (
+              <div className="flex justify-center px-4 py-6">
+                <div className="w-full max-w-2xl">
+                  <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 text-center">
+                    {isLoadingRecommendations ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                        <p className="text-sm text-muted-foreground">{t("chat.loadingRecommendations")}</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-4">
+                        <p className="text-base font-medium text-foreground">{t("chat.recommendationsReady")}</p>
+                        <Button
+                          size="lg"
+                          className="min-h-[44px] px-8"
+                          onClick={() => {
+                            router.push(`/recommendations?consultationId=${consultationId}`)
+                          }}
+                        >
+                          <ShoppingBag className="mr-2 size-5" aria-hidden="true" />
+                          {t("chat.viewRecommendations")}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

@@ -103,6 +103,9 @@ export const translations = {
       "잠시 후 다시 시도해 주세요. 연결 상태가 불안정합니다.",
     "chat.followUpPrompt":
       "추가로 아래 질문에 답해 주시면 더 정확한 추천이 가능합니다.",
+    "chat.viewRecommendations": "추천 보기",
+    "chat.loadingRecommendations": "추천 생성 중...",
+    "chat.recommendationsReady": "맞춤 추천이 준비되었습니다",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "서비스 이용 약관 안내",
@@ -379,6 +382,9 @@ export const translations = {
       "Sorry, something went wrong. Please try again in a moment.",
     "chat.followUpPrompt":
       "Answering these follow-up questions helps me narrow down the best solution:",
+    "chat.viewRecommendations": "View Recommendations",
+    "chat.loadingRecommendations": "Loading recommendations...",
+    "chat.recommendationsReady": "Your personalized recommendations are ready",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "Service Terms Notice",
@@ -627,6 +633,9 @@ export const translations = {
       "申し訳ありません。しばらくしてからもう一度お試しください。",
     "chat.followUpPrompt":
       "以下の質問に答えていただくと、より正確な提案が可能になります。",
+    "chat.viewRecommendations": "推奨を見る",
+    "chat.loadingRecommendations": "推奨を生成中...",
+    "chat.recommendationsReady": "パーソナライズされた推奨が準備できました",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "サービス利用規約のお知らせ",
