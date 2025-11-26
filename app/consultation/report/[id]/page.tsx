@@ -67,10 +67,11 @@ async function fetchUserRowId(clerkUserId: string) {
   return data.id
 }
 
-export default async function ConsultationReportPage({ params }: { params: { id: string } }) {
+export default async function ConsultationReportPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const { userId } = await auth()
   if (!userId) {
-    redirect(`/sign-in?redirect_url=/consultation/report/${params.id}`)
+    redirect(`/sign-in?redirect_url=/consultation/report/${id}`)
   }
 
   const userRowId = await fetchUserRowId(userId)
@@ -117,7 +118,7 @@ export default async function ConsultationReportPage({ params }: { params: { id:
         )
       `,
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", userRowId)
     .order("created_at", { foreignTable: "chat_messages", ascending: true })
     .maybeSingle()

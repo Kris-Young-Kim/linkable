@@ -96,13 +96,13 @@ export async function GET(request: NextRequest) {
           .order("evaluated_at", { ascending: true })
 
         // K-IPPA 점수 변화 추이 계산
-        const scoreHistory = (ippaEvaluations ?? []).map((eval) => ({
-          date: eval.evaluated_at,
-          effectivenessScore: eval.effectiveness_score ? Number(eval.effectiveness_score) : null,
-          preScore: eval.pre_score ? Number(eval.pre_score) : null,
-          postScore: eval.post_score ? Number(eval.post_score) : null,
-          importance: eval.importance ? Number(eval.importance) : null,
-          recommendationId: eval.recommendation_id,
+        const scoreHistory = (ippaEvaluations ?? []).map((evaluation) => ({
+          date: evaluation.evaluated_at,
+          effectivenessScore: evaluation.effectiveness_score ? Number(evaluation.effectiveness_score) : null,
+          preScore: evaluation.pre_score ? Number(evaluation.pre_score) : null,
+          postScore: evaluation.post_score ? Number(evaluation.post_score) : null,
+          importance: evaluation.importance ? Number(evaluation.importance) : null,
+          recommendationId: evaluation.recommendation_id,
         }))
 
         // 평균 효과성 점수

@@ -100,13 +100,14 @@ export default async function RecommendationsDetailPage({
   params,
   searchParams,
 }: {
-  params: { consultationId: string }
+  params: Promise<{ consultationId: string }>
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const { consultationId } = await params
   const { userId } = await auth()
 
   if (!userId) {
-    redirect(`/sign-in?redirect_url=${encodeURIComponent(`/recommendations/${params.consultationId}`)}`)
+    redirect(`/sign-in?redirect_url=${encodeURIComponent(`/recommendations/${consultationId}`)}`)
   }
 
   const resolvedSearchParams = await searchParams
@@ -114,7 +115,7 @@ export default async function RecommendationsDetailPage({
   const filterBy = typeof resolvedSearchParams.filter === "string" ? resolvedSearchParams.filter : "all"
 
   // 상담 데이터 조회
-  const consultationData = await fetchConsultationData(params.consultationId, userId)
+  const consultationData = await fetchConsultationData(consultationId, userId)
 
   if (!consultationData) {
     return (
@@ -143,7 +144,7 @@ export default async function RecommendationsDetailPage({
   let errorMessage: string | null = null
 
   try {
-    const data = await fetchRecommendations(params.consultationId)
+    const data = await fetchRecommendations(consultationId)
     products = data.products
   } catch (error) {
     console.error("[recommendations] fetch_error", error)
@@ -287,7 +288,7 @@ export default async function RecommendationsDetailPage({
             <RecommendationsViewWithFilters
               products={products}
               errorMessage={errorMessage}
-              consultationId={params.consultationId}
+              consultationId={consultationId}
               initialSort={sortBy}
               initialFilter={filterBy}
             />

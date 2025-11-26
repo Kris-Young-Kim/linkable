@@ -130,15 +130,16 @@ async function fetchRecommendationData(recommendationId: string, clerkUserId: st
 export default async function IppaEvaluationPage({
   params,
 }: {
-  params: { recommendationId: string }
+  params: Promise<{ recommendationId: string }>
 }) {
+  const { recommendationId } = await params
   const { userId } = await auth()
 
   if (!userId) {
-    redirect(`/sign-in?redirect_url=${encodeURIComponent(`/dashboard/ippa/${params.recommendationId}`)}`)
+    redirect(`/sign-in?redirect_url=${encodeURIComponent(`/dashboard/ippa/${recommendationId}`)}`)
   }
 
-  const data = await fetchRecommendationData(params.recommendationId, userId)
+  const data = await fetchRecommendationData(recommendationId, userId)
 
   if (!data) {
     return (
