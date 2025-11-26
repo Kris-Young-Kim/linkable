@@ -19,7 +19,8 @@ export async function GET(request: NextRequest) {
     }
 
     // 관리자 권한 확인
-    const clerkUser = await clerkClient.users.getUser(userId)
+    const client = await clerkClient()
+    const clerkUser = await client.users.getUser(userId)
     const userRole = clerkUser.publicMetadata?.role as string | undefined
     
     if (userRole !== "admin" && userRole !== "expert") {
@@ -43,7 +44,8 @@ export async function GET(request: NextRequest) {
     const usersWithDetails = await Promise.all(
       (users ?? []).map(async (user) => {
         try {
-          const clerkUserData = await clerkClient.users.getUser(user.clerk_id)
+          const client = await clerkClient()
+          const clerkUserData = await client.users.getUser(user.clerk_id)
           return {
             supabaseId: user.id,
             clerkId: user.clerk_id,
