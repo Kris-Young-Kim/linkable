@@ -20,6 +20,53 @@ ISO 9999 보조기기 분류 매칭
 - ✅ Phase 3: ISO 매칭 → 추천 생성 (완료)
 - ⚠️ Phase 3: 쿠팡/유통업체 상품 연결 (부분 완료 - 아웃링크 구현됨, 상품 데이터 수집/동기화 필요)
 
+## 사용자 여정 (User Journey)
+
+### 일반 사용자 여정
+
+```
+홈페이지 (/)
+    ↓
+채팅 시작 (/chat)
+    ↓
+AI 상담 (텍스트/음성/이미지 입력)
+    ↓
+ICF 분석 완료 → 추천 자동 생성
+    ↓
+추천 페이지 (/recommendations?consultationId={id})
+    ↓
+상품 선택 및 구매 (아웃링크)
+    ↓
+[14일 후] K-IPPA 평가 알림
+    ↓
+K-IPPA 평가 제출
+```
+
+### 사용자 대시보드 ("내 상담")
+
+- **목적**: 개인 상담 이력 확인 및 이어서 진행
+- **기능**:
+  - 상담 이력 리스트 (최근 10개)
+  - 각 상담 카드 클릭 시 상세 페이지로 이동 (`/consultation/[id]`)
+  - K-IPPA 평가 대상 추천 표시
+  - 개인 효과성 대시보드 (EffectivenessDashboard)
+- **제외된 기능**: 전체 플랫폼 통계 (관리자 전용)
+
+### 관리자 여정
+
+```
+관리자 로그인 (role: admin 또는 expert)
+    ↓
+관리자 대시보드 (/admin/dashboard)
+    ↓
+- 전체 플랫폼 통계 확인
+- 사용자별 종합 데이터 확인
+  * 사용자 이름, 이메일, 역할
+  * 상담 수, 추천 수, K-IPPA 평가 수
+  * 평균 효과성 점수 및 점수 변화 추이
+  * 포인트 현황
+```
+
 ## Phase 1 — Foundation & 환경 구축 (Week 1)
 
 - [x] `DIR.md` 구조대로 디렉터리 생성 및 정리 (`core/assessment`, `core/matching`, `core/validation` 등).
@@ -60,6 +107,7 @@ ISO 9999 보조기기 분류 매칭
 - [x] 랜딩/메인 페이지 (`app/(main)/page.tsx`): MRD/PRD 기반 헤더 카피, KPI, CTA, 메타 태그 반영.
 - [x] 추천 페이지 및 카드 UI (`components/features/product/` + `app/(main)/recommendations`).
 - [x] Dashboard 기본 뼈대 (`app/(main)/dashboard/page.tsx`): 상담 이력/추천 상태 리스트, CTA 버튼.
+- [x] **사용자 대시보드 재구성**: "내 상담"으로 단순화, 개인 상담 이력 중심으로 변경.
 - [x] **상품 데이터 연동 및 관리**:
   - [x] `lib/integrations/` 디렉터리 생성: 쿠팡/유통업체 API 연동 모듈 구조 설계.
   - [x] 상품 데이터 수집 전략 수립 (쿠팡 파트너스 API 또는 수동 등록 방식 결정).
@@ -92,9 +140,16 @@ ISO 9999 보조기기 분류 매칭
 - [x] 인증 확장 (FR-Auth-02/03): 역할(Role) 선택 UI 및 Clerk 메타데이터 저장.
 - [x] FR-IPPA-01 자동 알림: recommendations 생성 후 +14일 리마인더 자동 발송(스케줄러/크론).
 - [x] Analytics & Metrics: 추천 정확도, K-IPPA 참여율 트래킹 및 대시보드 시각화.
+- [x] **사용자/관리자 기능 분리**:
+  - [x] 사용자 대시보드 재구성: "내 상담"으로 단순화 (개인 상담 이력만 표시)
+  - [x] AnalyticsDashboard를 사용자 대시보드에서 제거
+  - [x] 관리자 페이지 생성 (`/admin/dashboard`)
+  - [x] 관리자 페이지에 전체 플랫폼 통계 표시
+  - [x] 관리자 페이지에 사용자별 종합 데이터 표시 (이름, K-IPPA, 점수 변화 등)
+  - [x] Clerk role 기반 관리자 접근 제어 (admin/expert만 접근)
+  - [x] 헤더에 관리자 링크 자동 표시 (권한 있는 경우만)
 - [ ] MVP 제외 범위 준비:
   - 결제 연동(PG) 설계 메모.
-  - 관리자용 통계/대시보드.
   - 커뮤니티 기능(사용자 후기/질문) MVP 범위 정의.
 
 ## Phase 5 — 프론트엔드 완성도 향상 (Post-MVP)
@@ -210,12 +265,16 @@ ISO 9999 보조기기 분류 매칭
 
 ### 5.5 페이지 구조 완성
 
-- [ ] **K-IPPA 전용 페이지** (`app/dashboard/ippa/[recommendationId]/page.tsx`):
+- [x] **K-IPPA 전용 페이지** (`app/dashboard/ippa/[recommendationId]/page.tsx`):
 
-  - [ ] 독립 페이지로 K-IPPA 평가
-  - [ ] 알림 링크에서 직접 접근 가능 (`/dashboard?evaluate={recommendationId}` 처리)
-  - [ ] 평가 히스토리 확인
-  - [ ] 이전 평가와 비교 기능
+  - [x] 독립 페이지로 K-IPPA 평가
+  - [x] 알림 링크에서 직접 접근 가능 (`/dashboard?evaluate={recommendationId}` 처리)
+  - [x] 평가 히스토리 확인
+  - [x] 이전 평가와 비교 기능
+    - [x] `components/ippa/ippa-history-comparison.tsx` 생성
+    - [x] 최근 평가와 이전 평가 비교 (점수 변화 추이)
+    - [x] 평가 히스토리 목록 표시 (날짜, 점수, 피드백)
+    - [x] 효과성 등급 표시 (우수/양호/보통/미미/없음/악화)
 
 - [ ] **추천 상세 페이지** (`app/recommendations/[consultationId]/page.tsx`):
 
@@ -229,6 +288,34 @@ ISO 9999 보조기기 분류 매칭
   - [x] 메시지 히스토리 전체 보기
   - [x] 분석 결과 재확인 (ICF 시각화/요약 포함)
   - [x] 추천 재조회/CTA 제공
+
+### 5.7 관리자 페이지 및 사용자/관리자 기능 분리
+
+- [x] **사용자 대시보드 재구성**:
+
+  - [x] 제목을 "내 상담"으로 변경
+  - [x] AnalyticsDashboard 제거 (관리자 전용으로 이동)
+  - [x] 개인 상담 이력 중심으로 단순화
+  - [x] 상담 카드 클릭 시 `/consultation/[id]`로 이동하도록 개선
+
+- [x] **관리자 페이지 생성** (`/admin/dashboard`):
+
+  - [x] 관리자 전용 접근 제어 (Clerk role: admin/expert)
+  - [x] 전체 플랫폼 통계 표시 (AnalyticsDashboard 재사용)
+  - [x] 사용자별 종합 데이터 테이블
+    - 사용자 이름, 이메일, 역할
+    - 상담 수 (전체/완료)
+    - 추천 수 (전체/클릭)
+    - K-IPPA 평가 수 및 기록 수
+    - 평균 효과성 점수
+    - 점수 변화 추이 (상승/하락 화살표)
+    - 포인트 현황
+  - [x] 필터링 탭 (전체 사용자 / K-IPPA 평가 완료 / 활성 사용자)
+  - [x] 헤더에 관리자 링크 자동 표시 (권한 있는 경우만)
+
+- [x] **관리자 API 엔드포인트**:
+  - [x] `GET /api/admin/analytics` - 전체 플랫폼 통계
+  - [x] `GET /api/admin/users` - 사용자별 종합 데이터
 
 ### 5.6 UX 개선
 
@@ -250,6 +337,7 @@ ISO 9999 보조기기 분류 매칭
 - ICF 분석 결과 시각화 및 리포트 페이지
 - 완전한 페이지 구조 (상담 상세, 리포트, K-IPPA 전용 페이지)
 - **상담 완료 → 추천 페이지 자동 연동 플로우** (핵심 비즈니스 플로우)
+- **사용자/관리자 기능 분리** (사용자 대시보드 단순화, 관리자 페이지 분리)
 - 향상된 사용자 경험
 
 ### Deliverables (Phase 4)

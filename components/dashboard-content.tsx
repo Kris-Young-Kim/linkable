@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 import { IppaForm } from "@/components/ippa-form"
@@ -40,6 +41,17 @@ const statusStyle: Record<string, string> = {
 
 export function DashboardContent({ consultations }: { consultations: ConsultationRow[] }) {
   const { t, language } = useLanguage()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // 알림 링크에서 ?evaluate={recommendationId} 처리
+  useEffect(() => {
+    const evaluateParam = searchParams.get("evaluate")
+    if (evaluateParam) {
+      // K-IPPA 전용 페이지로 리다이렉트
+      router.replace(`/dashboard/ippa/${evaluateParam}`)
+    }
+  }, [searchParams, router])
 
   const activeConsultations = consultations.filter((item) => item.status === "in_progress")
   const pendingRecommendations = consultations
