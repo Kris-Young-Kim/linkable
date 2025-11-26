@@ -106,6 +106,8 @@ export const translations = {
     "chat.viewRecommendations": "추천 보기",
     "chat.loadingRecommendations": "추천 생성 중...",
     "chat.recommendationsReady": "맞춤 추천이 준비되었습니다",
+    "chat.viewMoreRecommendations": "더 많은 추천 보기",
+    "chat.recommendationPreview": "추천 상품 미리보기",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "서비스 이용 약관 안내",
@@ -385,6 +387,8 @@ export const translations = {
     "chat.viewRecommendations": "View Recommendations",
     "chat.loadingRecommendations": "Loading recommendations...",
     "chat.recommendationsReady": "Your personalized recommendations are ready",
+    "chat.viewMoreRecommendations": "View More Recommendations",
+    "chat.recommendationPreview": "Recommended Products Preview",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "Service Terms Notice",
@@ -636,6 +640,8 @@ export const translations = {
     "chat.viewRecommendations": "推奨を見る",
     "chat.loadingRecommendations": "推奨を生成中...",
     "chat.recommendationsReady": "パーソナライズされた推奨が準備できました",
+    "chat.viewMoreRecommendations": "もっと見る",
+    "chat.recommendationPreview": "推奨製品プレビュー",
 
     // Disclaimer Modal
     "modal.disclaimer.title": "サービス利用規約のお知らせ",

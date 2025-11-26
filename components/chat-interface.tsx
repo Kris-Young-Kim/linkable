@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { DisclaimerModal } from "@/components/disclaimer-modal"
 import { IppaConsultationForm } from "@/components/ippa-consultation-form"
-import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react"
+import { ProductRecommendationCard } from "@/components/product-recommendation-card"
+import { Sparkles, Send, Mic, Paperclip, ArrowLeft, ShoppingBag, Package } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 import { useLanguage } from "@/components/language-provider"
 import { trackEvent } from "@/lib/analytics"
 
@@ -45,6 +47,7 @@ export function ChatInterface() {
   const [isLoadingRecommendations, setIsLoadingRecommendations] = useState(false)
   const [hasRecommendations, setHasRecommendations] = useState(false)
   const [showRecommendationCTA, setShowRecommendationCTA] = useState(false)
+  const [previewRecommendations, setPreviewRecommendations] = useState<any[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -140,6 +143,8 @@ export function ChatInterface() {
             const recommendationsData = await recommendationsResponse.json()
             if (recommendationsData.products && recommendationsData.products.length > 0) {
               setHasRecommendations(true)
+              // 상위 2-3개 추천 카드 미리보기용 데이터 저장
+              setPreviewRecommendations(recommendationsData.products.slice(0, 3))
             }
           }
         } catch (error) {
@@ -369,8 +374,71 @@ export function ChatInterface() {
               </div>
             )}
 
-            {/* Recommendation CTA */}
-            {showRecommendationCTA && consultationId && (
+            {/* Recommendation Preview Cards */}
+            {showRecommendationCTA && consultationId && previewRecommendations.length > 0 && !isLoadingRecommendations && (
+              <div className="flex justify-center px-4 py-6">
+                <div className="w-full max-w-4xl">
+                  <div className="mb-4 text-center">
+                    <p className="text-lg font-semibold text-foreground">{t("chat.recommendationPreview")}</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {previewRecommendations.map((product, index) => (
+                      <div key={product.id || index} className="flex flex-col">
+                        <div className="relative h-48 w-full overflow-hidden rounded-t-lg bg-muted">
+                          {product.image_url ? (
+                            <Image
+                              src={product.image_url}
+                              alt={product.name || t("recommendations.defaultCategory")}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center bg-muted">
+                              <Package className="size-12 text-muted-foreground/50" aria-hidden="true" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 rounded-b-lg border border-t-0 border-border bg-card p-4">
+                          <h3 className="mb-2 line-clamp-2 text-base font-semibold text-foreground">
+                            {product.name || t("recommendations.defaultCategory")}
+                          </h3>
+                          {product.match_reason && (
+                            <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">{product.match_reason}</p>
+                          )}
+                          {product.price && (
+                            <p className="text-sm font-medium text-foreground">
+                              {typeof product.price === "number"
+                                ? new Intl.NumberFormat("ko-KR", {
+                                    style: "currency",
+                                    currency: "KRW",
+                                    maximumFractionDigits: 0,
+                                  }).format(product.price)
+                                : product.price}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 text-center">
+                    <Button
+                      size="lg"
+                      className="min-h-[44px] px-8"
+                      onClick={() => {
+                        router.push(`/recommendations?consultationId=${consultationId}`)
+                      }}
+                    >
+                      <ShoppingBag className="mr-2 size-5" aria-hidden="true" />
+                      {t("chat.viewMoreRecommendations")}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recommendation CTA (Fallback when no preview) */}
+            {showRecommendationCTA && consultationId && previewRecommendations.length === 0 && (
               <div className="flex justify-center px-4 py-6">
                 <div className="w-full max-w-2xl">
                   <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 text-center">
