@@ -22,7 +22,8 @@ async function checkAdminAccess() {
   }
 
   try {
-    const clerkUser = await clerkClient.users.getUser(userId)
+    const client = await clerkClient()
+    const clerkUser = await client.users.getUser(userId)
     const userRole = clerkUser.publicMetadata?.role as string | undefined
     
     if (userRole !== "admin" && userRole !== "expert") {
