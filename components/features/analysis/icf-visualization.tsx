@@ -188,7 +188,7 @@ export function IcfVisualization({ data }: { data: IcfAnalysisBuckets | null }) 
                     </Tooltip>
 
                     {meta && (
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl" aria-describedby={`icf-desc-${code}`}>
                         <DialogHeader>
                           <div className="flex items-center gap-3">
                             <Badge
@@ -205,7 +205,7 @@ export function IcfVisualization({ data }: { data: IcfAnalysisBuckets | null }) 
                             </Badge>
                             <DialogTitle className="text-2xl">{code.toUpperCase()}</DialogTitle>
                           </div>
-                          <DialogDescription className="text-base pt-2">
+                          <DialogDescription id={`icf-desc-${code}`} className="text-base pt-2">
                             {meta.description}
                           </DialogDescription>
                         </DialogHeader>
