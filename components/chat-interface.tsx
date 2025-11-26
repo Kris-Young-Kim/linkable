@@ -61,6 +61,7 @@ import { ProductRecommendationCard } from "@/components/product-recommendation-c
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft, ShoppingBag, Package } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
 import { useLanguage } from "@/components/language-provider"
 import { trackEvent } from "@/lib/analytics"
 
@@ -151,11 +152,11 @@ export function ChatInterface() {
 
     try {
       // 이미지가 있으면 base64로 변환
-      let imageBase64: string | undefined = undefined
+      let imagePayload: { base64: string; mimeType: string } | undefined = undefined
       if (selectedImage) {
         setIsUploadingImage(true)
         try {
-          imageBase64 = await convertImageToBase64(selectedImage)
+          imagePayload = await convertImageToBase64(selectedImage)
           trackEvent("image_uploaded", { file_size: selectedImage.size })
         } catch (error) {
           console.error("[chat] Failed to convert image to base64:", error)
@@ -174,7 +175,7 @@ export function ChatInterface() {
           message: trimmed,
           consultationId,
           history: messages.map(({ role, content }) => ({ role, content })),
-          image: imageBase64, // base64 인코딩된 이미지 전송
+          image: imagePayload, // base64 인코딩된 이미지 전송
         }),
       })
 
@@ -337,14 +338,17 @@ export function ChatInterface() {
     }
   }
 
-  const convertImageToBase64 = (file: File): Promise<string> => {
+  const convertImageToBase64 = (file: File): Promise<{ base64: string; mimeType: string }> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => {
         const result = reader.result as string
-        // data:image/jpeg;base64, 부분 제거하고 base64만 반환
-        const base64 = result.split(",")[1]
-        resolve(base64)
+        const [meta, data] = result.split(",")
+        const mimeMatch = meta.match(/data:(.*);base64/)
+        resolve({
+          base64: data,
+          mimeType: mimeMatch?.[1] ?? file.type ?? "image/jpeg",
+        })
       }
       reader.onerror = reject
       reader.readAsDataURL(file)

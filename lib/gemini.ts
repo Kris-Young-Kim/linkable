@@ -1,6 +1,8 @@
-const GEMINI_MODEL = "gemini-flash-lite-latest";
-// Vision API는 v1을 사용해야 함
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_TEXT_MODEL = "gemini-flash-lite-latest";
+const GEMINI_VISION_MODEL = "gemini-1.5-flash-latest";
+const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com";
+
+const buildEndpoint = (model: string) => `${GEMINI_BASE_URL}/v1/models/${model}:generateContent`;
 
 type GeminiCandidate = {
   content?: {
@@ -50,6 +52,8 @@ export const callGemini = async (prompt: string, imageBase64?: string, mimeType?
     { text: prompt },
   ];
 
+  const isVisionRequest = Boolean(imageBase64 && mimeType);
+
   if (imageBase64 && mimeType) {
     parts.push({
       inlineData: {
@@ -59,7 +63,9 @@ export const callGemini = async (prompt: string, imageBase64?: string, mimeType?
     });
   }
 
-  const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
+  const endpoint = buildEndpoint(isVisionRequest ? GEMINI_VISION_MODEL : GEMINI_TEXT_MODEL);
+
+  const response = await fetch(`${endpoint}?key=${apiKey}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
