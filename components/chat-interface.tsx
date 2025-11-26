@@ -58,6 +58,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { DisclaimerModal } from "@/components/disclaimer-modal"
 import { IppaConsultationForm } from "@/components/ippa-consultation-form"
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
+import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft, ShoppingBag, Package } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -103,6 +104,7 @@ export function ChatInterface() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [icfAnalysis, setIcfAnalysis] = useState<IcfAnalysisBuckets | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -171,6 +173,7 @@ export function ChatInterface() {
     setInput("")
     setIsTyping(true)
     setSuggestedQuestions([])
+    setIcfAnalysis(null)
 
     setShowRecommendationCTA(false)
     setPreviewRecommendations([])
@@ -253,7 +256,7 @@ export function ChatInterface() {
               const payload = JSON.parse(data) as {
                 consultationId?: string
                 followUpQuestions?: string[]
-                icfAnalysis?: unknown
+                icfAnalysis?: IcfAnalysisBuckets | null
                 problemDescription?: string
               }
 
@@ -263,6 +266,11 @@ export function ChatInterface() {
 
               if (payload.followUpQuestions) {
                 setSuggestedQuestions(payload.followUpQuestions.filter(Boolean))
+              }
+
+              if (payload.icfAnalysis) {
+                console.log("[chat] Received ICF analysis:", payload.icfAnalysis)
+                setIcfAnalysis(payload.icfAnalysis)
               }
 
               if (payload.icfAnalysis && payload.consultationId) {
@@ -278,7 +286,9 @@ export function ChatInterface() {
                   )
                 }
 
-                await preloadRecommendations(payload.consultationId)
+                if (payload.consultationId) {
+                  await preloadRecommendations(payload.consultationId)
+                }
               }
             } catch (error) {
               console.error("[chat] Failed to parse analysis payload:", error)
@@ -619,6 +629,15 @@ export function ChatInterface() {
                     onSkip={handleIppaSkip}
                     problemDescription={problemDescription}
                   />
+                </div>
+              </div>
+            )}
+
+            {/* ICF Visualization */}
+            {icfAnalysis && (
+              <div className="flex justify-center">
+                <div className="w-full max-w-2xl">
+                  <IcfVisualization data={icfAnalysis} />
                 </div>
               </div>
             )}

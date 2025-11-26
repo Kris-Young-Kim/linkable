@@ -178,21 +178,21 @@ ISO 9999 보조기기 분류 매칭
 
 ### 5.4 분석 결과 시각화 및 리포트
 
-- [ ] **ICF 분석 결과 시각화 컴포넌트**:
+- [x] **ICF 분석 결과 시각화 컴포넌트**:
 
-  - [ ] `components/features/analysis/icf-visualization.tsx` 생성
-  - [ ] ICF 코드별 카테고리 표시
-    - b (신체기능): 파란색 배지
-    - d (활동): 초록색 배지
-    - e (환경): 주황색 배지
-  - [ ] 각 코드 설명 툴팁/모달
-    - 코드 클릭 시 설명 표시
-    - `core/assessment/icf-codes.ts` 데이터 활용
-  - [ ] 관련 ISO 코드 연결 표시
-    - 매칭된 ISO 코드 표시
-  - [ ] 분석 신뢰도 표시 (선택적)
-  - [ ] 채팅 인터페이스에 분석 완료 시 자동 표시
-    - ICF 분석 완료 시 자동으로 컴포넌트 렌더링
+  - [x] `components/features/analysis/icf-visualization.tsx` 생성
+  - [x] ICF 코드별 카테고리 표시
+    - b (신체기능): 파란색 계열 배지
+    - d (활동): 초록색 계열 배지
+    - e (환경): 주황색 계열 배지
+  - [x] 각 코드 설명 툴팁/모달
+    - `core/assessment/icf-codes.ts` 데이터 기반 설명 노출
+  - [x] 관련 ISO 코드 연결 표시
+    - `isoHints` 배열을 칩 형태로 렌더링
+  - [x] 분석 신뢰도 표시 (선택적)
+    - 추출된 코드 수 기반의 간단한 Confidence 스코어
+  - [x] 채팅 인터페이스에 분석 완료 시 자동 표시
+    - SSE `analysis` 이벤트 수신 시 자동 렌더링
 
 - [ ] **상담 리포트 페이지** (`app/consultation/report/[id]/page.tsx`):
 
