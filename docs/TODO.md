@@ -90,8 +90,8 @@ ISO 9999 보조기기 분류 매칭
 ### 남은 과제 (Post-MVP)
 
 - [x] 인증 확장 (FR-Auth-02/03): 역할(Role) 선택 UI 및 Clerk 메타데이터 저장.
-- [ ] FR-IPPA-01 자동 알림: recommendations 생성 후 +14일 리마인더 자동 발송(스케줄러/크론).
-- [ ] Analytics & Metrics: 추천 정확도, K-IPPA 참여율 트래킹 및 대시보드 시각화.
+- [x] FR-IPPA-01 자동 알림: recommendations 생성 후 +14일 리마인더 자동 발송(스케줄러/크론).
+- [x] Analytics & Metrics: 추천 정확도, K-IPPA 참여율 트래킹 및 대시보드 시각화.
 - [ ] MVP 제외 범위 준비:
   - 결제 연동(PG) 설계 메모.
   - 관리자용 통계/대시보드.

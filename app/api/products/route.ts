@@ -138,6 +138,26 @@ export async function GET(request: Request) {
         ? await fetchAnalysisIcfCodes(consultationId)
         : []
 
+  // K-IPPA 데이터 가져오기 (상담 단계에서 수집한 중요도, 현재 난이도)
+  let ippaData: { importance?: number; currentDifficulty?: number } | null = null
+  if (consultationId) {
+    const { data: analysisData } = await supabase
+      .from("analysis_results")
+      .select("icf_codes")
+      .eq("consultation_id", consultationId)
+      .single()
+
+    if (analysisData?.icf_codes) {
+      const icfCodesObj = analysisData.icf_codes as Record<string, unknown>
+      if (icfCodesObj.ippa_consultation) {
+        ippaData = icfCodesObj.ippa_consultation as {
+          importance?: number
+          currentDifficulty?: number
+        }
+      }
+    }
+  }
+
   const isoMatches = getIsoMatches(icfCodes)
   const isoCodes = isoMatches.map((match) => match.isoCode)
 
@@ -175,7 +195,15 @@ export async function GET(request: Request) {
 
   const rankingInput = (data ?? []).map((product) => {
     const isoMatch = isoMatches.find((match) => match.isoCode === product.iso_code)
-    const matchScore = isoMatch?.score ?? (icfCodes.length > 0 ? 0.35 : 0.5)
+    let matchScore = isoMatch?.score ?? (icfCodes.length > 0 ? 0.35 : 0.5)
+
+    // K-IPPA 중요도 기반 가중치 적용
+    if (ippaData?.importance) {
+      // 중요도가 높을수록 매칭 점수에 가중치 적용
+      // 중요도 1-5를 0.8-1.2 범위로 변환
+      const importanceMultiplier = 0.8 + (ippaData.importance - 1) * 0.1 // 1->0.8, 5->1.2
+      matchScore = Math.min(matchScore * importanceMultiplier, 1.0)
+    }
 
     return {
       product,

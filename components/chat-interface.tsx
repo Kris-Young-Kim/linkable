@@ -7,6 +7,7 @@ import { useAuth, SignInButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { DisclaimerModal } from "@/components/disclaimer-modal"
+import { IppaConsultationForm } from "@/components/ippa-consultation-form"
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-provider"
@@ -37,6 +38,9 @@ export function ChatInterface() {
   const [isRecording, setIsRecording] = useState(false)
   const [consultationId, setConsultationId] = useState<string | null>(null)
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([])
+  const [showIppaForm, setShowIppaForm] = useState(false)
+  const [ippaData, setIppaData] = useState<{ importance: number; currentDifficulty: number } | null>(null)
+  const [problemDescription, setProblemDescription] = useState<string>("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -109,6 +113,14 @@ export function ChatInterface() {
           consultation_id: data.consultationId,
           has_recommendations: Boolean(data.icfAnalysis),
         })
+        
+        // ICF 분석 완료 시 K-IPPA 폼 표시 (아직 입력하지 않은 경우)
+        if (!ippaData && !showIppaForm) {
+          setShowIppaForm(true)
+          // 문제 설명 추출 (ICF 분석 요약 또는 첫 메시지)
+          const summary = data.icfAnalysis?.summary || trimmed.slice(0, 100)
+          setProblemDescription(summary)
+        }
       }
 
       if (Array.isArray(data.followUpQuestions)) {
@@ -170,6 +182,33 @@ export function ChatInterface() {
   const handleAcceptDisclaimer = () => {
     setHasAcceptedDisclaimer(true)
     textareaRef.current?.focus()
+  }
+
+  const handleIppaComplete = async (data: { importance: number; currentDifficulty: number }) => {
+    setIppaData(data)
+    setShowIppaForm(false)
+
+    // K-IPPA 데이터를 서버에 저장
+    if (consultationId) {
+      try {
+        await fetch("/api/consultations/ippa", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            consultationId,
+            importance: data.importance,
+            currentDifficulty: data.currentDifficulty,
+          }),
+        })
+        console.log("[Chat] K-IPPA data saved")
+      } catch (error) {
+        console.error("[Chat] Failed to save K-IPPA data:", error)
+      }
+    }
+  }
+
+  const handleIppaSkip = () => {
+    setShowIppaForm(false)
   }
 
   return (
@@ -288,6 +327,19 @@ export function ChatInterface() {
                     {question}
                   </Button>
                 ))}
+              </div>
+            )}
+
+            {/* K-IPPA Consultation Form */}
+            {showIppaForm && (
+              <div className="flex justify-center">
+                <div className="w-full max-w-2xl">
+                  <IppaConsultationForm
+                    onComplete={handleIppaComplete}
+                    onSkip={handleIppaSkip}
+                    problemDescription={problemDescription}
+                  />
+                </div>
               </div>
             )}
 

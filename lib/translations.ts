@@ -166,6 +166,15 @@ export const translations = {
     "ippa.interpretation.none": "변화 없음",
     "ippa.interpretation.worse": "악화됨",
 
+    // K-IPPA Consultation (상담 단계)
+    "ippa.consultation.title": "문제 이해를 돕기 위한 간단한 질문",
+    "ippa.consultation.description": "더 정확한 추천을 위해 몇 가지 정보를 알려주세요",
+    "ippa.consultation.currentDifficulty": "현재 난이도",
+    "ippa.consultation.importanceHelp": "이 문제가 일상생활에서 얼마나 중요한지 선택해주세요 (1=낮음, 5=매우 높음)",
+    "ippa.consultation.difficultyHelp": "현재 이 활동을 수행하는 것이 얼마나 어려운지 선택해주세요 (1=쉬움, 5=매우 어려움)",
+    "ippa.consultation.submit": "확인",
+    "ippa.consultation.skip": "건너뛰기",
+
     // Onboarding / Role Selection
     "onboarding.title": "역할을 선택해주세요",
     "onboarding.subtitle": "LinkAble이 더 나은 서비스를 제공하기 위해 필요합니다",
@@ -404,6 +413,15 @@ export const translations = {
     "dashboard.neutral": "Neutral",
     "dashboard.satisfied": "Satisfied",
     "dashboard.verySatisfied": "Very Satisfied",
+
+    // K-IPPA Consultation (상담 단계)
+    "ippa.consultation.title": "Quick Questions to Better Understand Your Needs",
+    "ippa.consultation.description": "Please share a few details to help us provide more accurate recommendations",
+    "ippa.consultation.currentDifficulty": "Current Difficulty",
+    "ippa.consultation.importanceHelp": "How important is this problem in your daily life? (1=Low, 5=Very High)",
+    "ippa.consultation.difficultyHelp": "How difficult is it to perform this activity currently? (1=Easy, 5=Very Difficult)",
+    "ippa.consultation.submit": "Confirm",
+    "ippa.consultation.skip": "Skip",
 
     // Onboarding / Role Selection
     "onboarding.title": "Please select your role",
@@ -673,6 +691,15 @@ export const translations = {
     "ippa.interpretation.minimal": "最小限の改善",
     "ippa.interpretation.none": "変化なし",
     "ippa.interpretation.worse": "悪化",
+
+    // K-IPPA Consultation (상담 단계)
+    "ippa.consultation.title": "ニーズをよりよく理解するための簡単な質問",
+    "ippa.consultation.description": "より正確な推奨を提供するために、いくつかの情報を教えてください",
+    "ippa.consultation.currentDifficulty": "現在の難易度",
+    "ippa.consultation.importanceHelp": "この問題が日常生活でどれほど重要か選択してください（1=低い、5=非常に高い）",
+    "ippa.consultation.difficultyHelp": "現在この活動を実行することがどれほど困難か選択してください（1=簡単、5=非常に困難）",
+    "ippa.consultation.submit": "確認",
+    "ippa.consultation.skip": "スキップ",
 
     // Onboarding / Role Selection
     "onboarding.title": "役割を選択してください",

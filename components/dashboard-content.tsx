@@ -5,6 +5,7 @@ import { useMemo, useState } from "react"
 
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 import { IppaForm } from "@/components/ippa-form"
+import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { useLanguage } from "@/components/language-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -96,6 +97,11 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
             <Link href="/recommendations">{t("dashboard.actionRecommendations")}</Link>
           </Button>
         </div>
+      </section>
+
+      {/* Analytics & Metrics 섹션 */}
+      <section>
+        <AnalyticsDashboard />
       </section>
 
       <EffectivenessDashboard />

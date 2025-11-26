@@ -4,6 +4,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/components/language-provider"
 import { LanguageSelector } from "@/components/language-selector"
+import { NotificationsBell } from "@/components/notifications-bell"
+import { useAuth } from "@clerk/nextjs"
 
 export function Header() {
   const { t } = useLanguage()
@@ -56,11 +58,20 @@ export function Header() {
           >
             {t("header.about")}
           </Link>
+          {isSignedIn && (
+            <Link
+              href="/dashboard"
+              className="text-base font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-4 rounded-sm px-2 py-1"
+            >
+              대시보드
+            </Link>
+          )}
         </nav>
 
-        {/* Language Selector and CTA Button */}
+        {/* Language Selector, Notifications, and CTA Button */}
         <div className="flex items-center gap-2">
           <LanguageSelector />
+          {isSignedIn && <NotificationsBell />}
           <Button
             size="lg"
             className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-6 font-semibold text-base shadow-sm"
