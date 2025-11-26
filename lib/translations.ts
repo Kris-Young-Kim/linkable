@@ -99,6 +99,7 @@ export const translations = {
     "chat.imageTooLarge": "이미지 크기는 5MB 이하여야 합니다.",
     "chat.imageConversionError": "이미지 변환 중 오류가 발생했습니다. 다시 시도해 주세요.",
     "chat.typing": "코디네이터가 입력 중입니다",
+    "chat.thinking": "링커가 생각 중입니다...",
     "chat.yourMessage": "내 메시지",
     "chat.coordinatorMessage": "링커의 메시지",
     "chat.keyboardShortcuts":
@@ -405,6 +406,7 @@ export const translations = {
     "chat.imageTooLarge": "Image size must be 5MB or less.",
     "chat.imageConversionError": "An error occurred while converting the image. Please try again.",
     "chat.typing": "Coordinator is typing",
+    "chat.thinking": "링커 is thinking...",
     "chat.yourMessage": "Your message",
     "chat.coordinatorMessage": "링커's message",
     "chat.keyboardShortcuts":
@@ -680,6 +682,7 @@ export const translations = {
     "chat.imageTooLarge": "画像サイズは5MB以下である必要があります。",
     "chat.imageConversionError": "画像変換中にエラーが発生しました。もう一度お試しください。",
     "chat.typing": "コーディネーターが入力中",
+    "chat.thinking": "링커が考えています...",
     "chat.yourMessage": "自分のメッセージ",
     "chat.coordinatorMessage": "링커のメッセージ",
     "chat.keyboardShortcuts": "Enterで送信 • Shift+Enterで改行 • 音声入力可能",

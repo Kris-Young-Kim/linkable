@@ -5,7 +5,10 @@ import { useMemo } from "react"
 import { icfCoreSet } from "@/core/assessment/icf-codes"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { useLanguage } from "@/components/language-provider"
+import { Info } from "lucide-react"
 
 type IcfCategoryKey = "b" | "d" | "e"
 
@@ -117,42 +120,138 @@ export function IcfVisualization({ data }: { data: IcfAnalysisBuckets | null }) 
               {category.codes.map((code) => {
                 const meta = findIcfMeta(code)
                 return (
-                  <div key={`${category.key}-${code}`} className="rounded-xl border border-border/60 bg-background/80 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-base font-semibold text-foreground">
-                          {code.toUpperCase()}
-                          {meta ? ` · ${meta.description}` : ""}
-                        </p>
-                        {!meta && (
-                          <p className="text-sm text-muted-foreground">
-                            {t("icfVisualization.unknownCode")}
-                          </p>
-                        )}
-                      </div>
-                      <Badge variant="secondary" className="text-xs uppercase tracking-wide">
-                        {category.key}
-                      </Badge>
-                    </div>
+                  <Dialog key={`${category.key}-${code}`}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <DialogTrigger asChild>
+                          <button
+                            className="w-full rounded-xl border border-border/60 bg-background/80 p-4 text-left transition-all hover:border-primary/40 hover:bg-background hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                            aria-label={`${code.toUpperCase()} 코드 상세 정보 보기`}
+                          >
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-base font-semibold text-foreground">
+                                    {code.toUpperCase()}
+                                  </p>
+                                  {meta && (
+                                    <Info className="size-4 text-muted-foreground" aria-hidden="true" />
+                                  )}
+                                </div>
+                                {meta ? (
+                                  <p className="mt-1 text-sm text-muted-foreground">{meta.description}</p>
+                                ) : (
+                                  <p className="mt-1 text-sm text-muted-foreground">
+                                    {t("icfVisualization.unknownCode")}
+                                  </p>
+                                )}
+                              </div>
+                              <Badge
+                                variant="secondary"
+                                className={cn(
+                                  "text-xs uppercase tracking-wide",
+                                  category.key === "b"
+                                    ? "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100"
+                                    : category.key === "d"
+                                      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100"
+                                      : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100",
+                                )}
+                              >
+                                {category.key}
+                              </Badge>
+                            </div>
 
-                    {meta?.isoHints?.length ? (
-                      <div className="mt-3 text-sm text-muted-foreground">
-                        <p className="mb-1 font-medium text-foreground/80">
-                          {t("icfVisualization.isoHints")}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {meta.isoHints.map((hint) => (
-                            <span
-                              key={`${code}-${hint}`}
-                              className="rounded-full border border-dashed border-border/80 bg-background px-3 py-1 text-xs font-medium"
+                            {meta?.isoHints?.length ? (
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                {meta.isoHints.slice(0, 3).map((hint) => (
+                                  <Badge
+                                    key={`${code}-${hint}`}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    ISO {hint}
+                                  </Badge>
+                                ))}
+                                {meta.isoHints.length > 3 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{meta.isoHints.length - 3}
+                                  </Badge>
+                                )}
+                              </div>
+                            ) : null}
+                          </button>
+                        </DialogTrigger>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>클릭하여 상세 정보 보기</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    {meta && (
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <div className="flex items-center gap-3">
+                            <Badge
+                              className={cn(
+                                "text-sm uppercase",
+                                category.key === "b"
+                                  ? "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-100"
+                                  : category.key === "d"
+                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-100"
+                                    : "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-100",
+                              )}
                             >
-                              ISO {hint}
-                            </span>
-                          ))}
+                              {category.key}
+                            </Badge>
+                            <DialogTitle className="text-2xl">{code.toUpperCase()}</DialogTitle>
+                          </div>
+                          <DialogDescription className="text-base pt-2">
+                            {meta.description}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 pt-4">
+                          <div>
+                            <p className="text-sm font-semibold text-muted-foreground mb-2">
+                              카테고리
+                            </p>
+                            <p className="text-sm text-foreground">
+                              {category.key === "b"
+                                ? "신체 기능 (Body Functions)"
+                                : category.key === "d"
+                                  ? "활동 및 참여 (Activities and Participation)"
+                                  : "환경 요소 (Environmental Factors)"}
+                            </p>
+                          </div>
+                          {meta.isoHints && meta.isoHints.length > 0 && (
+                            <div>
+                              <p className="text-sm font-semibold text-muted-foreground mb-2">
+                                {t("icfVisualization.isoHints")}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {meta.isoHints.map((hint) => (
+                                  <Badge
+                                    key={hint}
+                                    variant="secondary"
+                                    className="text-sm px-3 py-1"
+                                  >
+                                    ISO 9999: {hint}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                이 ICF 코드와 관련된 ISO 9999 보조기기 분류 코드입니다.
+                              </p>
+                            </div>
+                          )}
+                          <div className="pt-4 border-t border-border">
+                            <p className="text-xs text-muted-foreground">
+                              ICF(국제 기능·장애·건강 분류)는 세계보건기구(WHO)에서 개발한 건강 및 장애 관련 상태를 분류하는 체계입니다.
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
-                  </div>
+                      </DialogContent>
+                    )}
+                  </Dialog>
                 )
               })}
             </div>

@@ -59,6 +59,7 @@ import { DisclaimerModal } from "@/components/disclaimer-modal"
 import { IppaConsultationForm } from "@/components/ippa-consultation-form"
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
+import { TypingIndicator } from "@/components/chat/typing-indicator"
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft, ShoppingBag, Package } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -577,30 +578,7 @@ export function ChatInterface() {
               </div>
             ))}
 
-            {isTyping && (
-              <div className="flex gap-3" role="status" aria-live="polite" aria-label={t("chat.typing")}>
-                <div
-                  className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent"
-                  aria-hidden="true"
-                >
-                  <Sparkles className="size-5 text-white" />
-                </div>
-                <div className="max-w-[75%] rounded-2xl bg-blue-50 px-5 py-4 dark:bg-blue-950">
-                  <div className="flex gap-1">
-                    <span
-                      className="size-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]"
-                      aria-hidden="true"
-                    ></span>
-                    <span
-                      className="size-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]"
-                      aria-hidden="true"
-                    ></span>
-                    <span className="size-2 animate-bounce rounded-full bg-muted-foreground" aria-hidden="true"></span>
-                  </div>
-                  <span className="sr-only">{t("chat.typing")}</span>
-                </div>
-              </div>
-            )}
+            {isTyping && <TypingIndicator />}
 
             {suggestedQuestions.length > 0 && (
               <div className="flex flex-wrap gap-2">
