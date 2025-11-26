@@ -5,7 +5,6 @@ import { useMemo, useState } from "react"
 
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 import { IppaForm } from "@/components/ippa-form"
-import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { useLanguage } from "@/components/language-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -86,8 +85,8 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
       <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm uppercase tracking-wide text-muted-foreground">{t("dashboard.tagline")}</p>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("dashboard.title")}</h1>
-          <p className="text-muted-foreground mt-2 text-base">{t("dashboard.heroDescription")}</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">내 상담</h1>
+          <p className="text-muted-foreground mt-2 text-base">나의 상담 이력을 확인하고 이어서 진행할 수 있습니다.</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <Button asChild>
@@ -97,11 +96,6 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
             <Link href="/recommendations">{t("dashboard.actionRecommendations")}</Link>
           </Button>
         </div>
-      </section>
-
-      {/* Analytics & Metrics 섹션 */}
-      <section>
-        <AnalyticsDashboard />
       </section>
 
       <EffectivenessDashboard />
@@ -125,9 +119,10 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
                 const unclickedCount = consultation.recommendations?.filter((rec) => !rec.is_clicked).length ?? 0
 
                 return (
-                  <div
+                  <Link
                     key={consultation.id}
-                    className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5"
+                    href={`/consultation/${consultation.id}`}
+                    className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5 hover:bg-muted/50 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="text-base font-semibold text-foreground">
@@ -139,7 +134,7 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
                     <div className="text-xs text-foreground/80">
                       {recommendationSummary(recommendationCount, unclickedCount)}
                     </div>
-                  </div>
+                  </Link>
                 )
               })
             )}

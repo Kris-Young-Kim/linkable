@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/components/language-provider"
 import { LanguageSelector } from "@/components/language-selector"
 import { NotificationsBell } from "@/components/notifications-bell"
+import { AdminLink } from "@/components/admin-link"
 import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs"
 
 export function Header() {
@@ -73,6 +74,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <LanguageSelector />
           <SignedIn>
+            <AdminLink />
             <NotificationsBell />
             <Button
               variant="outline"

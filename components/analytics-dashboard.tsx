@@ -28,7 +28,11 @@ interface AnalyticsMetrics {
   averageEffectiveness: number
 }
 
-export function AnalyticsDashboard() {
+interface AnalyticsDashboardProps {
+  apiEndpoint?: string
+}
+
+export function AnalyticsDashboard({ apiEndpoint = "/api/analytics" }: AnalyticsDashboardProps = {}) {
   const { t } = useLanguage()
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -39,7 +43,7 @@ export function AnalyticsDashboard() {
       setIsLoading(true)
       setError(null)
       try {
-        const response = await fetch("/api/analytics")
+        const response = await fetch(apiEndpoint)
         if (!response.ok) {
           throw new Error("Failed to fetch analytics")
         }
@@ -54,7 +58,7 @@ export function AnalyticsDashboard() {
     }
 
     fetchAnalytics()
-  }, [])
+  }, [apiEndpoint])
 
   if (isLoading) {
     return (
