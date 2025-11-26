@@ -10,6 +10,7 @@ import { DisclaimerModal } from "@/components/disclaimer-modal"
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-provider"
+import { trackEvent } from "@/lib/analytics"
 
 interface Message {
   id: string
@@ -71,6 +72,17 @@ export function ChatInterface() {
     setIsTyping(true)
     setSuggestedQuestions([])
 
+    // 첫 메시지인 경우 chat_started 이벤트 추적
+    if (messages.length === 1) {
+      trackEvent("chat_started")
+    }
+
+    // 메시지 전송 이벤트 추적
+    trackEvent("chat_message_sent", {
+      message_length: trimmed.length,
+      ...(consultationId && { consultation_id: consultationId }),
+    })
+
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
@@ -89,6 +101,14 @@ export function ChatInterface() {
       const data = await response.json()
       if (!consultationId && data.consultationId) {
         setConsultationId(data.consultationId)
+      }
+
+      // ICF 분석이 완료되고 추천이 있을 경우 consultation_completed 이벤트 추적
+      if (data.icfAnalysis && data.consultationId) {
+        trackEvent("consultation_completed", {
+          consultation_id: data.consultationId,
+          has_recommendations: Boolean(data.icfAnalysis),
+        })
       }
 
       if (Array.isArray(data.followUpQuestions)) {

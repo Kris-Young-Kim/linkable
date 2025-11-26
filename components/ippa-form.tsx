@@ -9,6 +9,7 @@ import { Slider } from "@/components/ui/slider"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, CheckCircle2, AlertCircle } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
+import { trackEvent } from "@/lib/analytics"
 
 export type IppaFormProps = {
   recommendationId?: string
@@ -83,6 +84,16 @@ export function IppaForm({
       })
       setSubmitted(true)
       onSuccess?.(data.result)
+
+      // GA4 이벤트 추적
+      if (data.evaluationId) {
+        trackEvent("ippa_submitted", {
+          evaluation_id: data.evaluationId,
+          product_id: productId,
+          effectiveness_score: data.result.effectivenessScore,
+          points_earned: data.pointsEarned || 0,
+        })
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred")
     } finally {

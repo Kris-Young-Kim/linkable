@@ -44,6 +44,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="ko">
         <head>
+          {/* Google Tag Manager */}
           <Script
             id="gtm-base"
             strategy="afterInteractive"
@@ -53,6 +54,23 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-5JDT98J9');`,
+            }}
+          />
+          {/* Google Analytics 4 (gtag.js) */}
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-EV15PW3ERH'}`}
+            strategy="afterInteractive"
+          />
+          <Script
+            id="ga4-init"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-EV15PW3ERH'}');
+              `,
             }}
           />
         </head>

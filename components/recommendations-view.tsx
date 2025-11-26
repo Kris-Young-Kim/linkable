@@ -1,11 +1,14 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
+import { trackEvent } from "@/lib/analytics"
 
 export type RecommendationProduct = {
   id: string
@@ -30,6 +33,18 @@ type RecommendationsViewProps = {
 
 export function RecommendationsView({ products, errorMessage }: RecommendationsViewProps) {
   const { t } = useLanguage()
+  const searchParams = useSearchParams()
+
+  // 추천 목록 조회 이벤트 추적
+  useEffect(() => {
+    if (products.length > 0) {
+      const consultationId = searchParams.get("consultationId")
+      trackEvent("recommendations_viewed", {
+        count: products.length,
+        ...(consultationId && { consultation_id: consultationId }),
+      })
+    }
+  }, [products.length, searchParams])
 
   return (
     <div className="min-h-screen bg-background">

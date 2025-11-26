@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, ShoppingCart } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
+import { trackEvent } from "@/lib/analytics"
 
 type ClickSource = "primary" | "secondary"
 
@@ -73,6 +74,13 @@ export function ProductRecommendationCard({
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ source }),
+        })
+
+        // GA4 이벤트 추적
+        trackEvent("product_clicked", {
+          product_name: productName,
+          recommendation_id: recommendationId,
+          source: source,
         })
       } catch (error) {
         console.error("[recommendations] click_track_error", error)
