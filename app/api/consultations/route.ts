@@ -27,6 +27,9 @@ async function ensureUserRecord(clerkUserId: string) {
     `${clerkUserId}@linkable.local`
 
   const fullName = user?.fullName ?? user?.username ?? null
+  
+  // Clerk 메타데이터에서 role 가져오기 (있으면)
+  const role = (user?.publicMetadata?.role as string) || "user"
 
   const { data: insertData, error: insertError } = await supabase
     .from("users")
@@ -34,6 +37,7 @@ async function ensureUserRecord(clerkUserId: string) {
       clerk_id: clerkUserId,
       email,
       name: fullName,
+      role,
     })
     .select("id")
     .single()

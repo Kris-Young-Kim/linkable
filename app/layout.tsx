@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { LanguageProvider } from "@/components/language-provider";
+import { RoleGuard } from "@/components/role-guard";
 import "./globals.css";
 
 const inter = Inter({
@@ -83,7 +84,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               style={{ display: "none", visibility: "hidden" }}
             />
           </noscript>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <RoleGuard>{children}</RoleGuard>
+          </LanguageProvider>
           <Analytics />
         </body>
       </html>

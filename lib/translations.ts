@@ -166,6 +166,17 @@ export const translations = {
     "ippa.interpretation.none": "변화 없음",
     "ippa.interpretation.worse": "악화됨",
 
+    // Onboarding / Role Selection
+    "onboarding.title": "역할을 선택해주세요",
+    "onboarding.subtitle": "LinkAble이 더 나은 서비스를 제공하기 위해 필요합니다",
+    "onboarding.role.user.title": "사용자 (당사자)",
+    "onboarding.role.user.description": "보조기기를 직접 사용하시는 분입니다",
+    "onboarding.role.manager.title": "보호자 / 전문가",
+    "onboarding.role.manager.description": "다른 사람을 대신하여 보조기기를 찾아주시는 분입니다",
+    "onboarding.continue": "계속하기",
+    "onboarding.selecting": "저장 중...",
+    "onboarding.error": "역할 저장 중 오류가 발생했습니다. 다시 시도해주세요.",
+
     // Recommendations
     "recommendations.title": "추천 보조기기",
     "recommendations.subtitle": "고객님의 필요에 맞춰 선별된 제품들입니다",
@@ -393,6 +404,17 @@ export const translations = {
     "dashboard.neutral": "Neutral",
     "dashboard.satisfied": "Satisfied",
     "dashboard.verySatisfied": "Very Satisfied",
+
+    // Onboarding / Role Selection
+    "onboarding.title": "Please select your role",
+    "onboarding.subtitle": "This helps LinkAble provide better service",
+    "onboarding.role.user.title": "User (Self)",
+    "onboarding.role.user.description": "You are the person who will use the assistive technology",
+    "onboarding.role.manager.title": "Caregiver / Professional",
+    "onboarding.role.manager.description": "You are helping someone else find assistive technology",
+    "onboarding.continue": "Continue",
+    "onboarding.selecting": "Saving...",
+    "onboarding.error": "An error occurred while saving your role. Please try again.",
 
     // Recommendations
     "recommendations.title": "Recommended Products",
@@ -651,6 +673,17 @@ export const translations = {
     "ippa.interpretation.minimal": "最小限の改善",
     "ippa.interpretation.none": "変化なし",
     "ippa.interpretation.worse": "悪化",
+
+    // Onboarding / Role Selection
+    "onboarding.title": "役割を選択してください",
+    "onboarding.subtitle": "LinkAbleがより良いサービスを提供するために必要です",
+    "onboarding.role.user.title": "ユーザー（本人）",
+    "onboarding.role.user.description": "支援技術を直接使用される方です",
+    "onboarding.role.manager.title": "保護者 / 専門家",
+    "onboarding.role.manager.description": "他の方のために支援技術を探されている方です",
+    "onboarding.continue": "続ける",
+    "onboarding.selecting": "保存中...",
+    "onboarding.error": "役割の保存中にエラーが発生しました。もう一度お試しください。",
 
     // Recommendations
     "recommendations.title": "推奨支援機器",
