@@ -18,6 +18,7 @@ type ChatRequestBody = {
   consultationId?: string
   persona?: string
   mediaDescription?: string
+  image?: string // base64 인코딩된 이미지
 }
 
 const supabase = getSupabaseServerClient()
@@ -151,25 +152,38 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as ChatRequestBody
   const trimmedMessage = body.message?.trim()
 
-  if (!trimmedMessage) {
-    return NextResponse.json({ error: "message is required" }, { status: 400 })
+  if (!trimmedMessage && !body.image) {
+    return NextResponse.json({ error: "message or image is required" }, { status: 400 })
   }
 
   try {
     const supabaseUserId = await ensureUserRecord(userId)
-    const consultationId = await createConsultationIfNeeded(body.consultationId, supabaseUserId, trimmedMessage)
+    const consultationId = await createConsultationIfNeeded(
+      body.consultationId,
+      supabaseUserId,
+      trimmedMessage || "이미지 첨부"
+    )
 
-    await insertChatMessage(consultationId, "user", trimmedMessage)
+    await insertChatMessage(consultationId, "user", trimmedMessage || "이미지 첨부")
 
     const history = (body.history ?? []).slice(-6)
+    
+    // 이미지가 있으면 이미지 분석 프롬프트 추가
+    let imageMimeType: string | undefined = undefined
+    if (body.image) {
+      // base64 데이터에서 MIME 타입 추출 (data:image/jpeg;base64, 형식인 경우)
+      // 또는 기본값으로 image/jpeg 사용
+      imageMimeType = "image/jpeg" // 기본값, 필요시 확장자에 따라 변경 가능
+    }
+
     const prompt = buildPrompt({
       persona: body.persona,
-      history: [...history, { role: "user", content: trimmedMessage }],
-      latestUserMessage: trimmedMessage,
+      history: [...history, { role: "user", content: trimmedMessage || "이미지를 첨부했습니다." }],
+      latestUserMessage: trimmedMessage || "이미지를 첨부했습니다. 환경을 분석해 주세요.",
       mediaDescription: body.mediaDescription,
     })
 
-    const { rawText, json } = await callGemini(prompt)
+    const { rawText, json } = await callGemini(prompt, body.image, imageMimeType)
 
     let assistantReply = ""
     let parsedAnalysis = null

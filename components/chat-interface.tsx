@@ -3,6 +3,55 @@
 import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
+
+// Web Speech API 타입 정의
+declare global {
+  interface Window {
+    SpeechRecognition: typeof SpeechRecognition
+    webkitSpeechRecognition: typeof SpeechRecognition
+  }
+}
+
+interface SpeechRecognition extends EventTarget {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  maxAlternatives: number
+  start(): void
+  stop(): void
+  abort(): void
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null
+  onend: (() => void) | null
+}
+
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList
+  resultIndex: number
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string
+  message?: string
+}
+
+interface SpeechRecognitionResultList {
+  length: number
+  item(index: number): SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionResult {
+  length: number
+  item(index: number): SpeechRecognitionAlternative
+  [index: number]: SpeechRecognitionAlternative
+  isFinal: boolean
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string
+  confidence: number
+}
 import { useAuth, SignInButton } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -39,6 +88,8 @@ export function ChatInterface() {
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+  const [isSpeechSupported, setIsSpeechSupported] = useState(false)
   const [consultationId, setConsultationId] = useState<string | null>(null)
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([])
   const [showIppaForm, setShowIppaForm] = useState(false)
@@ -48,6 +99,10 @@ export function ChatInterface() {
   const [hasRecommendations, setHasRecommendations] = useState(false)
   const [showRecommendationCTA, setShowRecommendationCTA] = useState(false)
   const [previewRecommendations, setPreviewRecommendations] = useState<any[]>([])
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -95,6 +150,23 @@ export function ChatInterface() {
     })
 
     try {
+      // 이미지가 있으면 base64로 변환
+      let imageBase64: string | undefined = undefined
+      if (selectedImage) {
+        setIsUploadingImage(true)
+        try {
+          imageBase64 = await convertImageToBase64(selectedImage)
+          trackEvent("image_uploaded", { file_size: selectedImage.size })
+        } catch (error) {
+          console.error("[chat] Failed to convert image to base64:", error)
+          alert(t("chat.imageConversionError"))
+          setIsUploadingImage(false)
+          return
+        } finally {
+          setIsUploadingImage(false)
+        }
+      }
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -102,8 +174,14 @@ export function ChatInterface() {
           message: trimmed,
           consultationId,
           history: messages.map(({ role, content }) => ({ role, content })),
+          image: imageBase64, // base64 인코딩된 이미지 전송
         }),
       })
+
+      // 이미지 전송 후 초기화
+      if (selectedImage) {
+        handleRemoveImage()
+      }
 
       if (!response.ok) {
         throw new Error(await response.text())
@@ -190,19 +268,87 @@ export function ChatInterface() {
   }
 
   const toggleVoiceRecording = () => {
-    setIsRecording(!isRecording)
-    // Implement STT functionality here
+    if (!isSpeechSupported) {
+      // 브라우저가 음성 인식을 지원하지 않는 경우
+      alert(t("chat.sttNotSupported"))
+      return
+    }
+
+    if (!recognition) {
+      console.error("[STT] Speech recognition not initialized")
+      return
+    }
+
     if (!isRecording) {
-      // Start recording
-      console.log("[v0] Voice recording started")
+      // 음성 인식 시작
+      try {
+        recognition.start()
+        setIsRecording(true)
+        trackEvent("stt_started", {})
+      } catch (error) {
+        console.error("[STT] Failed to start recognition:", error)
+        setIsRecording(false)
+      }
     } else {
-      // Stop recording and process
-      console.log("[v0] Voice recording stopped")
+      // 음성 인식 중지
+      recognition.stop()
+      setIsRecording(false)
     }
   }
 
   const handlePhotoAttach = () => {
-    console.log("[v0] Photo attachment requested")
+    fileInputRef.current?.click()
+  }
+
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // 파일 타입 검증
+    if (!file.type.startsWith("image/")) {
+      alert(t("chat.imageInvalidType"))
+      return
+    }
+
+    // 파일 크기 제한 (5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    if (file.size > maxSize) {
+      alert(t("chat.imageTooLarge"))
+      return
+    }
+
+    setSelectedImage(file)
+
+    // 미리보기 생성
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+
+    trackEvent("image_selected", { file_size: file.size, file_type: file.type })
+  }
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const convertImageToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result as string
+        // data:image/jpeg;base64, 부분 제거하고 base64만 반환
+        const base64 = result.split(",")[1]
+        resolve(base64)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
   }
   const handleSuggestionClick = (question: string) => {
     if (requiresLogin) return
@@ -474,6 +620,46 @@ export function ChatInterface() {
         {/* Input Area */}
         <div className="border-t border-border bg-card p-4">
           <div className="mx-auto max-w-3xl">
+            {/* Image Preview */}
+            {imagePreview && selectedImage && (
+              <div className="mb-3 flex items-center gap-3 rounded-lg border border-border bg-muted/50 p-3">
+                <div className="relative size-16 shrink-0 overflow-hidden rounded-md">
+                  <Image
+                    src={imagePreview}
+                    alt={selectedImage.name}
+                    fill
+                    className="object-cover"
+                    sizes="64px"
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="truncate text-sm font-medium text-foreground">{selectedImage.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(selectedImage.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleRemoveImage}
+                  aria-label={t("chat.removeImage")}
+                >
+                  ×
+                </Button>
+              </div>
+            )}
+
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageSelect}
+              className="hidden"
+              aria-label={t("chat.attachPhoto")}
+            />
+
             <div className="flex gap-2">
               {/* Photo Attachment Button */}
               <Button
@@ -483,7 +669,7 @@ export function ChatInterface() {
                 className="size-14 shrink-0 bg-transparent"
                 onClick={handlePhotoAttach}
                 aria-label={t("chat.attachPhoto")}
-                disabled={requiresLogin}
+                disabled={requiresLogin || isUploadingImage}
               >
                 <Paperclip className="size-6" aria-hidden="true" />
               </Button>

@@ -1,5 +1,6 @@
 const GEMINI_MODEL = "gemini-flash-lite-latest";
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+// Vision API는 v1을 사용해야 함
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent`;
 
 type GeminiCandidate = {
   content?: {
@@ -38,10 +39,24 @@ const extractJson = (text: string) => {
   }
 };
 
-export const callGemini = async (prompt: string) => {
+export const callGemini = async (prompt: string, imageBase64?: string, mimeType?: string) => {
   const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (!apiKey) {
     throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is not configured");
+  }
+
+  // 이미지가 있으면 Vision API 형식으로 parts 구성
+  const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [
+    { text: prompt },
+  ];
+
+  if (imageBase64 && mimeType) {
+    parts.push({
+      inlineData: {
+        mimeType: mimeType,
+        data: imageBase64,
+      },
+    });
   }
 
   const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
@@ -53,7 +68,7 @@ export const callGemini = async (prompt: string) => {
       contents: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          parts: parts,
         },
       ],
       generationConfig: {

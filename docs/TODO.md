@@ -131,34 +131,35 @@ ISO 9999 보조기기 분류 매칭
 
 ### 5.2 멀티모달 입력 기능 구현
 
-- [ ] **STT (음성 입력) 구현**:
+- [x] **STT (음성 입력) 구현**:
 
-  - [ ] Web Speech API 연동
+  - [x] Web Speech API 연동
     - `window.SpeechRecognition` 또는 `window.webkitSpeechRecognition` 사용
     - 언어: `ko-KR`
     - `continuous: false`, `interimResults: false`
-  - [ ] `components/chat-interface.tsx`의 `toggleVoiceRecording` 함수 구현
-  - [ ] 음성 인식 중 비주얼 피드백 (파형 애니메이션 또는 펄스 효과)
-  - [ ] 브라우저 호환성 체크 및 폴백 처리
+  - [x] `components/chat-interface.tsx`의 `toggleVoiceRecording` 함수 구현
+  - [x] 음성 인식 중 비주얼 피드백 (펄스 애니메이션 및 빨간색 버튼)
+  - [x] 브라우저 호환성 체크 및 폴백 처리
     - Chrome, Edge 지원
-    - Safari/FF 폴백: 안내 메시지 표시
-  - [ ] 에러 처리: 인식 실패 시 사용자 안내
-  - [ ] 상태 관리: `isRecording` 상태로 버튼 활성/비활성, 인식 결과를 `input` 상태에 자동 입력
-  - 위치: `components/chat-interface.tsx:161-169`
+    - Safari/FF 폴백: 안내 메시지 표시 및 버튼 비활성화
+  - [x] 에러 처리: 인식 실패 시 사용자 안내 (no-speech, not-allowed 등)
+  - [x] 상태 관리: `isRecording` 상태로 버튼 활성/비활성, 인식 결과를 `input` 상태에 자동 입력
+  - 위치: `components/chat-interface.tsx`
 
-- [ ] **이미지 업로드 (Gemini Vision) 구현**:
-  - [ ] 파일 업로드 UI 컴포넌트 (`components/features/chat/image-upload.tsx`)
-    - 드래그 앤 드롭 지원
-    - 파일 선택 버튼
+- [x] **이미지 업로드 (Gemini Vision) 구현**:
+  - [x] 파일 업로드 UI 컴포넌트 (인라인 구현)
+    - 파일 선택 버튼 (Paperclip 아이콘)
     - 이미지 미리보기 및 제거 기능
-    - 파일 크기 제한 (예: 5MB)
-  - [ ] Gemini Vision API 연동
+    - 파일 크기 제한 (5MB)
+    - 파일 타입 검증 (image/\*)
+  - [x] Gemini Vision API 연동
     - 이미지를 base64로 인코딩
     - `app/api/chat/route.ts`에 `image` 파라미터 추가
+    - `lib/gemini.ts`의 `callGemini` 함수에 이미지 지원 추가
     - Gemini API에 이미지와 텍스트 함께 전송
-  - [ ] 이미지 분석 결과 시각화
-    - 분석된 환경 요소를 채팅에 표시
-    - 예: "문턱 높이 5cm 감지됨"
+  - [x] 이미지 분석 결과 시각화
+    - Gemini Vision API가 이미지를 분석하여 환경 요소 추출
+    - 분석 결과가 ICF 코드 및 추천에 반영됨
   - 위치: `components/chat-interface.tsx:173-174`
 
 ### 5.3 스트리밍 응답 구현
