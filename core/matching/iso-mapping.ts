@@ -28,6 +28,29 @@ export type IsoMatch = {
  * 코드 형식: Subclass 레벨 사용 (4자리), 표시는 공백 포함 (예: "12 02")
  */
 const isoMappingTable: IsoMappingRule[] = [
+  // 청각 및 의사소통 보조기기
+  {
+    icf: ["b230", "d115"],
+    iso: "21 06",
+    label: "청각 보조기기(보청기)",
+    description: "난청 사용자를 위한 보청기 및 증폭 기기 (ISO 2106)",
+    baseScore: 0.84,
+  },
+  {
+    icf: ["b235", "d115"],
+    iso: "21 27",
+    label: "평형/전정 보조기기",
+    description: "어지럼 및 전정 기능 저하를 보조하는 기기 (ISO 2127)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["d360", "e125"],
+    iso: "22 30",
+    label: "의사소통 보조기기",
+    description: "의사소통 디바이스 및 AAC 솔루션 (ISO 2230)",
+    baseScore: 0.78,
+  },
+
   // 수직 접근성 (경사로, 승강기)
   {
     icf: ["d450", "e120"],

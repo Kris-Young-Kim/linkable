@@ -7,6 +7,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
 import { buildPrompt, buildStreamingPrompt } from "@/core/assessment/prompt-engineering"
 import { parseAnalysis } from "@/core/assessment/parser"
+import { enforceIcfConsistency } from "@/core/assessment/icf-validator"
 import { callGemini } from "@/lib/gemini"
 
 type ChatHistoryItem = {
@@ -235,6 +236,23 @@ export async function POST(request: Request) {
               parsedAnalysis = parseAnalysis(json)
               if (!assistantReplyForStorage && parsedAnalysis.assistant_reply) {
                 assistantReplyForStorage = parsedAnalysis.assistant_reply
+              }
+
+              const validationInput = trimmedMessage || body.mediaDescription || ""
+              const { analysis: adjustedAnalysis, updated, appliedRules } = enforceIcfConsistency(
+                validationInput,
+                parsedAnalysis,
+              )
+
+              parsedAnalysis = adjustedAnalysis
+
+              if (updated) {
+                logEvent({
+                  category: "consultation",
+                  action: "icf_codes_adjusted",
+                  payload: { consultationId, appliedRules },
+                  level: "info",
+                })
               }
             } catch (error) {
               logEvent({
