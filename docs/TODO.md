@@ -413,9 +413,9 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 #### 4. FNB (Footer Navigation Bar)
 
-10. [ ] Footer 하단에 “Quick Links” 바 추가
+10. [x] Footer 하단에 “Quick Links” 바 추가
     - CTA: 상담 시작 / 추천 보기 / 전문가 문의
-11. [ ] Footer 모바일 섹션에 언어 선택 드롭다운 추가
+11. [x] Footer 모바일 섹션에 언어 선택 드롭다운 추가
 
 #### 5. Breadcrumbs
 

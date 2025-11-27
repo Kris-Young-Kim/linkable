@@ -3,9 +3,16 @@
 import Link from "next/link"
 import { AlertCircle } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
+import { Button } from "@/components/ui/button"
+
+const languageOptions = [
+  { code: "ko", label: "한국어" },
+  { code: "en", label: "English" },
+  { code: "ja", label: "日本語" },
+]
 
 export function Footer() {
-  const { t } = useLanguage()
+  const { t, language, setLanguage } = useLanguage()
 
   return (
     <footer className="border-t border-border bg-muted/30">
@@ -136,10 +143,31 @@ export function Footer() {
           </div>
         </div>
 
+        {/* Quick Links */}
+        <div className="mt-12 rounded-2xl border border-primary/20 bg-primary/5 px-5 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-primary">{t("footer.quickLinksTitle")}</p>
+            <p className="text-base text-foreground/80 mt-1">{t("footer.quickLinksSubtitle")}</p>
+          </div>
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-end">
+            <Button asChild className="w-full sm:w-auto">
+              <Link href="/chat">{t("footer.quickStartConsult")}</Link>
+            </Button>
+            <Button variant="outline" asChild className="w-full sm:w-auto">
+              <Link href="/recommendations">{t("footer.quickViewRecommendations")}</Link>
+            </Button>
+            <Button variant="ghost" asChild className="w-full sm:w-auto border border-border">
+              <Link href="mailto:expert@linkable.ai">{t("footer.quickContactExpert")}</Link>
+            </Button>
+          </div>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>{t("footer.copyright")}</p>
-          <div className="flex gap-6">
+        <div className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <div className="w-full sm:w-auto">
+            <p>{t("footer.copyright")}</p>
+          </div>
+          <div className="flex gap-6 w-full sm:w-auto justify-center sm:justify-end">
             <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialLinkedIn")}>
               {t("footer.socialLinkedIn")}
             </Link>
@@ -149,6 +177,26 @@ export function Footer() {
             <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialContact")}>
               {t("footer.socialContact")}
             </Link>
+          </div>
+          <div className="w-full sm:hidden">
+            <label htmlFor="footer-language" className="text-xs font-semibold text-muted-foreground">
+              {t("footer.languageLabel")}
+            </label>
+            <div className="mt-1">
+              <select
+                id="footer-language"
+                value={language}
+                onChange={(event) => setLanguage(event.target.value as typeof language)}
+                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                aria-label={t("footer.languageLabel")}
+              >
+                {languageOptions.map((option) => (
+                  <option key={option.code} value={option.code}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </div>
