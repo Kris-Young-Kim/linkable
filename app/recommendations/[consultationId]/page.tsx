@@ -8,6 +8,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { LocalNav } from "@/components/navigation/local-nav"
 import { RecommendationsViewWithFilters, type RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters"
 import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 
@@ -273,8 +274,8 @@ export default async function RecommendationsDetailPage({
         {/* 추천 목록 */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 <CardTitle>추천된 보조기기</CardTitle>
                 <CardDescription>
                   {products.length > 0
@@ -282,6 +283,15 @@ export default async function RecommendationsDetailPage({
                     : "아직 추천이 생성되지 않았습니다"}
                 </CardDescription>
               </div>
+              <LocalNav
+                items={[
+                  { label: "전체 추천", href: `/recommendations/${consultationId}?filter=${filterBy}&sort=${sortBy}` },
+                  { label: "필터", href: `/recommendations/${consultationId}?filter=favorites&sort=${sortBy}`, badge: "Soon" },
+                  { label: "평가 대기", href: `/recommendations/${consultationId}?filter=pending&sort=${sortBy}`, badge: "Soon" },
+                ]}
+                className="overflow-x-auto"
+                label="Recommendation filters"
+              />
             </div>
           </CardHeader>
           <CardContent>

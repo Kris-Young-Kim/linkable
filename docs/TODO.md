@@ -398,8 +398,8 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 #### 2. LNB (Local Navigation)
 
-4. [ ] `components/navigation/local-nav.tsx` 템플릿 작성 (탭/피드백 상태)
-5. [ ] `/recommendations/[id]`에 LNB 적용
+4. [x] `components/navigation/local-nav.tsx` 템플릿 작성 (탭/피드백 상태)
+5. [x] `/recommendations/[id]`에 LNB 적용
    - 탭: 전체 추천 / 필터 / 평가 대기
 6. [ ] `/dashboard`에 LNB 적용
    - 탭: 내 상담 / 평가 요청 / 포인트
