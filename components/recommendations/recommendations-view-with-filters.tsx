@@ -11,6 +11,9 @@ import { Badge } from "@/components/ui/badge"
 import { trackEvent } from "@/lib/analytics"
 import type { RecommendationProduct } from "@/components/recommendations-view"
 
+// Re-export the type for convenience
+export type { RecommendationProduct }
+
 type SortOption = "rank" | "price-asc" | "price-desc" | "name"
 type FilterOption = "all" | "clicked" | "not-clicked"
 

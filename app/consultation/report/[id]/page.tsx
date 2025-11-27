@@ -133,15 +133,17 @@ export default async function ConsultationReportPage({ params }: { params: Promi
       ? (analysisRaw.icf_codes as IcfAnalysisBuckets)
       : null
 
-  const envFactors =
+  const envFactors: string[] =
     analysisRaw?.env_factors
       ?.split(/\r?\n|,/)
-      .map((item) => item.trim())
+      .map((item: string) => item.trim())
       .filter(Boolean) ?? []
 
   const recommendations: RecommendationRow[] =
-    data.recommendations?.map((rec: RecommendationRow) => ({
-      ...rec,
+    data.recommendations?.map((rec: any) => ({
+      id: rec.id,
+      match_reason: rec.match_reason,
+      rank: rec.rank,
       product: Array.isArray(rec.product) ? rec.product[0] ?? null : rec.product,
     })) ?? []
 
@@ -208,7 +210,7 @@ export default async function ConsultationReportPage({ params }: { params: Promi
             <CardContent>
               {envFactors.length > 0 ? (
                 <ul className="space-y-2">
-                  {envFactors.map((factor) => (
+                  {envFactors.map((factor: string) => (
                     <li key={factor} className="flex items-start gap-2 text-foreground">
                       <CheckCircle2 className="size-4 text-primary mt-1 shrink-0" aria-hidden="true" />
                       <span className="text-base">{factor}</span>

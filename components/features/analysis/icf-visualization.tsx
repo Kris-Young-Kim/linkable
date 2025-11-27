@@ -112,7 +112,7 @@ export function IcfVisualization({ data }: { data: IcfAnalysisBuckets | null }) 
                 {category.label}
               </span>
               <span className="text-xs text-muted-foreground">
-                {t("icfVisualization.codesCount", { count: category.codes.length })}
+                {t("icfVisualization.codesCount").replace("{count}", category.codes.length.toString())}
               </span>
             </div>
 

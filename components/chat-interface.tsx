@@ -5,13 +5,6 @@ import type React from "react";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 // Web Speech API 타입 정의
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
-
 interface SpeechRecognition extends EventTarget {
   lang: string;
   continuous: boolean;
@@ -52,6 +45,15 @@ interface SpeechRecognitionAlternative {
   transcript: string;
   confidence: number;
 }
+
+// Web Speech API 전역 타입 정의
+declare global {
+  interface Window {
+    SpeechRecognition: new () => SpeechRecognition;
+    webkitSpeechRecognition: new () => SpeechRecognition;
+  }
+}
+
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
