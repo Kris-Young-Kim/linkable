@@ -6,6 +6,7 @@ import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
   TrendingUp, 
@@ -115,59 +116,71 @@ export function AdminDashboardContent() {
         </div>
       </section>
 
-      {/* 전체 플랫폼 통계 */}
-      <section>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">전체 플랫폼 통계</CardTitle>
-            <CardDescription>모든 사용자의 활동을 종합한 통계입니다.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AnalyticsDashboard apiEndpoint="/api/admin/analytics" />
-          </CardContent>
-        </Card>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+        <SideNav
+          currentRole="admin"
+          className="border border-border/60 rounded-2xl bg-card/80 p-4 shadow-sm"
+          items={[
+            { label: "전체 통계", href: "/admin/dashboard", icon: <BarChart3 className="size-4" /> },
+            { label: "사용자 리스트", href: "/admin/dashboard#users", icon: <Users className="size-4" /> },
+            { label: "로그 모니터링", href: "/admin/dashboard#logs", icon: <ClipboardCheck className="size-4" />, badge: "Soon" },
+          ]}
+        />
 
-      {/* 사용자별 종합 데이터 */}
-      <section>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-2">
-              <Users className="size-5" />
-              사용자별 종합 데이터
-            </CardTitle>
-            <CardDescription>
-              각 사용자의 상담, 추천, K-IPPA 평가 및 점수 변화를 확인할 수 있습니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="py-8 text-center text-muted-foreground">데이터를 불러오는 중...</div>
-            ) : error ? (
-              <div className="py-8 text-center text-destructive">{error}</div>
-            ) : users.length === 0 ? (
-              <div className="py-8 text-center text-muted-foreground">사용자 데이터가 없습니다.</div>
-            ) : (
-              <Tabs defaultValue="all" className="w-full">
-                <TabsList>
-                  <TabsTrigger value="all">전체 사용자</TabsTrigger>
-                  <TabsTrigger value="with-ippa">K-IPPA 평가 완료</TabsTrigger>
-                  <TabsTrigger value="active">활성 사용자</TabsTrigger>
-                </TabsList>
-                <TabsContent value="all" className="mt-6">
-                  <UserTable users={users} />
-                </TabsContent>
-                <TabsContent value="with-ippa" className="mt-6">
-                  <UserTable users={users.filter((u) => u.stats.totalIppaEvaluations > 0)} />
-                </TabsContent>
-                <TabsContent value="active" className="mt-6">
-                  <UserTable users={users.filter((u) => u.stats.totalConsultations > 0)} />
-                </TabsContent>
-              </Tabs>
-            )}
-          </CardContent>
-        </Card>
-      </section>
+        <div className="space-y-8">
+          <section id="overview">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">전체 플랫폼 통계</CardTitle>
+                <CardDescription>모든 사용자의 활동을 종합한 통계입니다.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AnalyticsDashboard apiEndpoint="/api/admin/analytics" />
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="users">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <Users className="size-5" />
+                  사용자별 종합 데이터
+                </CardTitle>
+                <CardDescription>
+                  각 사용자의 상담, 추천, K-IPPA 평가 및 점수 변화를 확인할 수 있습니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="py-8 text-center text-muted-foreground">데이터를 불러오는 중...</div>
+                ) : error ? (
+                  <div className="py-8 text-center text-destructive">{error}</div>
+                ) : users.length === 0 ? (
+                  <div className="py-8 text-center text-muted-foreground">사용자 데이터가 없습니다.</div>
+                ) : (
+                  <Tabs defaultValue="all" className="w-full">
+                    <TabsList>
+                      <TabsTrigger value="all">전체 사용자</TabsTrigger>
+                      <TabsTrigger value="with-ippa">K-IPPA 평가 완료</TabsTrigger>
+                      <TabsTrigger value="active">활성 사용자</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="all" className="mt-6">
+                      <UserTable users={users} />
+                    </TabsContent>
+                    <TabsContent value="with-ippa" className="mt-6">
+                      <UserTable users={users.filter((u) => u.stats.totalIppaEvaluations > 0)} />
+                    </TabsContent>
+                    <TabsContent value="active" className="mt-6">
+                      <UserTable users={users.filter((u) => u.stats.totalConsultations > 0)} />
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </CardContent>
+            </Card>
+          </section>
+        </div>
+      </div>
     </div>
   )
 }

@@ -406,8 +406,8 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 #### 3. SNB (Side Navigation)
 
-7. [ ] `components/navigation/side-nav.tsx` 작성 (role 기반 메뉴, collapse 버튼)
-8. [ ] `/admin/dashboard` 레이아웃에 SNB 적용
+7. [x] `components/navigation/side-nav.tsx` 작성 (role 기반 메뉴, collapse 버튼)
+8. [x] `/admin/dashboard` 레이아웃에 SNB 적용
    - 메뉴: 전체 통계 / 사용자 리스트 / 로그 모니터링
 9. [ ] 사용자 마이페이지 `/dashboard`에 축약형 SNB 적용 검토 (옵션)
 
