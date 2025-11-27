@@ -28,7 +28,8 @@ export function SideNav({
   return (
     <nav className={cn("flex flex-col gap-2", className)} aria-label="Sidebar navigation">
       {visibleItems.map((item) => {
-        const isActive = pathname.startsWith(item.href)
+        const [basePath] = item.href.split("#")
+        const isActive = pathname.startsWith(basePath)
         return (
           <Link
             key={item.href}

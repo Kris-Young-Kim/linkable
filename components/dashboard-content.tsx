@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { LocalNav } from "@/components/navigation/local-nav"
+import { SideNav } from "@/components/navigation/side-nav"
 
 export type RecommendationRow = {
   id: string
@@ -121,90 +122,106 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
         label="Dashboard navigation"
       />
 
-      <EffectivenessDashboard />
+      <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
+        <SideNav
+          className="border border-border/60 rounded-2xl bg-card/80 p-4 shadow-sm"
+          items={[
+            { label: "인사이트", href: "/dashboard#insights" },
+            { label: "상담 이력", href: "/dashboard#consultations" },
+            { label: "평가 요청", href: "/dashboard#evaluations", badge: pendingCount > 0 ? String(pendingCount) : undefined },
+          ]}
+        />
 
-      <section className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("dashboard.timelineTitle")}</CardTitle>
-            <CardDescription>{t("dashboard.timelineDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {timelineItems.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{t("dashboard.timelineEmpty")}</p>
-            ) : (
-              timelineItems.map((consultation) => {
-                const badgeStyle =
-                  consultation.status && statusStyle[consultation.status]
-                    ? statusStyle[consultation.status]
-                    : "bg-slate-200 text-slate-700"
-                const recommendationCount = consultation.recommendations?.length ?? 0
-                const unclickedCount = consultation.recommendations?.filter((rec) => !rec.is_clicked).length ?? 0
+        <div className="space-y-8">
+          <section id="insights" className="scroll-mt-24">
+            <EffectivenessDashboard />
+          </section>
 
-                return (
-                  <Link
-                    key={consultation.id}
-                    href={`/consultation/${consultation.id}`}
-                    className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5 hover:bg-muted/50 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-base font-semibold text-foreground">
-                        {consultation.title || t("dashboard.untitled")}
-                      </h3>
-                      <Badge className={badgeStyle}>{statusLabel(consultation.status)}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{formatUpdatedAt(consultation.updated_at)}</p>
-                    <div className="text-xs text-foreground/80">
-                      {recommendationSummary(recommendationCount, unclickedCount)}
-                    </div>
-                  </Link>
-                )
-              })
-            )}
-          </CardContent>
-        </Card>
+          <section id="consultations" className="grid gap-6 md:grid-cols-2 scroll-mt-24">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("dashboard.timelineTitle")}</CardTitle>
+                <CardDescription>{t("dashboard.timelineDescription")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {timelineItems.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{t("dashboard.timelineEmpty")}</p>
+                ) : (
+                  timelineItems.map((consultation) => {
+                    const badgeStyle =
+                      consultation.status && statusStyle[consultation.status]
+                        ? statusStyle[consultation.status]
+                        : "bg-slate-200 text-slate-700"
+                    const recommendationCount = consultation.recommendations?.length ?? 0
+                    const unclickedCount = consultation.recommendations?.filter((rec) => !rec.is_clicked).length ?? 0
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("dashboard.nextStepsTitle")}</CardTitle>
-            <CardDescription>{t("dashboard.nextStepsDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">{t("dashboard.nextStepActive")}</p>
-                <p className="text-muted-foreground text-sm">
-                  {formatTemplate(t("dashboard.pendingSessions"), { count: activeConsultations.length })}
-                </p>
-              </div>
-              <Badge variant="secondary">{activeConsultations.length}</Badge>
-            </div>
+                    return (
+                      <Link
+                        key={consultation.id}
+                        href={`/consultation/${consultation.id}`}
+                        className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5 hover:bg-muted/50 transition-colors cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-base font-semibold text-foreground">
+                            {consultation.title || t("dashboard.untitled")}
+                          </h3>
+                          <Badge className={badgeStyle}>{statusLabel(consultation.status)}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{formatUpdatedAt(consultation.updated_at)}</p>
+                        <div className="text-xs text-foreground/80">
+                          {recommendationSummary(recommendationCount, unclickedCount)}
+                        </div>
+                      </Link>
+                    )
+                  })
+                )}
+              </CardContent>
+            </Card>
 
-            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">{t("dashboard.nextStepPending")}</p>
-                <p className="text-muted-foreground text-sm">
-                  {formatTemplate(t("dashboard.pendingRecommendationsLabel"), { count: pendingCount })}
-                </p>
-              </div>
-              <Badge variant="outline">{pendingCount}</Badge>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("dashboard.nextStepsTitle")}</CardTitle>
+                <CardDescription>{t("dashboard.nextStepsDescription")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{t("dashboard.nextStepActive")}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {formatTemplate(t("dashboard.pendingSessions"), { count: activeConsultations.length })}
+                    </p>
+                  </div>
+                  <Badge variant="secondary">{activeConsultations.length}</Badge>
+                </div>
 
-            <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">{t("dashboard.nextStepReview")}</p>
-                <p className="text-muted-foreground text-sm">{t("dashboard.nextStepReviewDescription")}</p>
-              </div>
-              <Button variant="ghost" asChild>
-                <Link href="/recommendations">{t("dashboard.actionRecommendations")}</Link>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+                <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{t("dashboard.nextStepPending")}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {formatTemplate(t("dashboard.pendingRecommendationsLabel"), { count: pendingCount })}
+                    </p>
+                  </div>
+                  <Badge variant="outline">{pendingCount}</Badge>
+                </div>
 
-      {/* K-IPPA 평가 대상 추천 섹션 */}
-      <IppaEvaluationSection consultations={consultations} />
+                <div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{t("dashboard.nextStepReview")}</p>
+                    <p className="text-muted-foreground text-sm">{t("dashboard.nextStepReviewDescription")}</p>
+                  </div>
+                  <Button variant="ghost" asChild>
+                    <Link href="/recommendations">{t("dashboard.actionRecommendations")}</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+
+          <section id="evaluations" className="scroll-mt-24">
+            <IppaEvaluationSection consultations={consultations} />
+          </section>
+        </div>
+      </div>
     </div>
   )
 }
