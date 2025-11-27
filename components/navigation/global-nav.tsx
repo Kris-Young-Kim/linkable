@@ -48,6 +48,7 @@ export function GlobalNav() {
         href={link.href}
         onClick={onNavigate}
         className="text-base font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-4 rounded-sm px-2 py-1"
+        aria-current={typeof window !== "undefined" && window.location.pathname === link.href ? "page" : undefined}
       >
         {link.label}
       </Link>
@@ -126,7 +127,7 @@ export function GlobalNav() {
               <SheetTitle>LinkAble</SheetTitle>
             </SheetHeader>
             <div className="mt-6 flex flex-col gap-4">
-              {renderNavLinks()}
+              {renderNavLinks(() => document.activeElement instanceof HTMLElement && document.activeElement.blur())}
               <div className="border-t border-border/60 pt-4 space-y-4">
                 <LanguageSelector />
                 <SignedIn>

@@ -394,7 +394,7 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - 모바일 Sheet Navigation, 언어 스위치 포함
 2. [x] 기존 `components/header.tsx`를 GNB 컴포넌트 사용으로 교체
    - CTA(상담 시작/추천 보기) 상태 분기, SignedIn/Out 정리
-3. [ ] A11y/반응형 QA (키보드 포커스, 스크린리더 레이블)
+3. [x] A11y/반응형 QA (키보드 포커스, 스크린리더 레이블)
 
 #### 2. LNB (Local Navigation)
 
