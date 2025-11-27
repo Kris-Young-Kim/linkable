@@ -10,6 +10,7 @@ import { useLanguage } from "@/components/language-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { LocalNav } from "@/components/navigation/local-nav"
 
 export type RecommendationRow = {
   id: string
@@ -109,6 +110,16 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
           </Button>
         </div>
       </section>
+
+      <LocalNav
+        items={[
+          { label: "내 상담", href: "/dashboard" },
+          { label: "평가 요청", href: "/dashboard?tab=evaluations", badge: String(pendingCount) },
+          { label: "포인트", href: "/dashboard?tab=points", badge: "Soon" },
+        ]}
+        className="overflow-x-auto"
+        label="Dashboard navigation"
+      />
 
       <EffectivenessDashboard />
 
