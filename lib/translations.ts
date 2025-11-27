@@ -5,7 +5,7 @@ export const translations = {
     // Header
     "header.features": "주요 기능",
     "header.howItWorks": "이용 방법",
-    "header.about": "소개",
+    "header.about": "회사 소개",
     "header.startConsultation": "상담 시작하기",
     "header.continueConsultation": "상담 이어가기",
     "header.signIn": "로그인",
@@ -310,7 +310,7 @@ export const translations = {
     // Header
     "header.features": "Features",
     "header.howItWorks": "How It Works",
-    "header.about": "About",
+    "header.about": "Company",
     "header.startConsultation": "Start Consultation",
     "header.continueConsultation": "Continue Consultation",
     "header.signIn": "Sign In",
@@ -592,7 +592,7 @@ export const translations = {
     // Header
     "header.features": "主な機能",
     "header.howItWorks": "利用方法",
-    "header.about": "紹介",
+    "header.about": "会社紹介",
     "header.startConsultation": "相談開始",
     "header.continueConsultation": "相談を続ける",
     "header.signIn": "ログイン",

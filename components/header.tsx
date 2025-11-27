@@ -55,7 +55,7 @@ export function Header() {
             {t("header.howItWorks")}
           </Link>
           <Link
-            href="#about"
+            href="/about"
             className="text-base font-medium text-foreground/80 hover:text-foreground transition-colors focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-4 rounded-sm px-2 py-1"
           >
             {t("header.about")}
