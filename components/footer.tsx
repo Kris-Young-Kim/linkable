@@ -79,10 +79,10 @@ export function Footer() {
               <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("footer.aboutUs")}
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("footer.privacyPolicy")}
               </Link>
-              <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 {t("footer.termsOfService")}
               </Link>
             </nav>
