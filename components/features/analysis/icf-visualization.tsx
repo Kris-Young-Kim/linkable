@@ -50,11 +50,12 @@ const findIcfMeta = (code: string) => icfCoreSet.find((item) => item.code.toLowe
 export function IcfVisualization({ data }: { data: IcfAnalysisBuckets | null }) {
   const { t } = useLanguage()
 
-  const categories = useMemo(() => {
-    if (!data) return []
-    return (["b", "d", "e"] as IcfCategoryKey[])
+  const { categories } = useMemo(() => {
+    if (!data) return { categories: [] as Array<CategoryMeta & { codes: string[] }> }
+
+    const mapped = (["b", "d", "e"] as IcfCategoryKey[])
       .map((key) => {
-        const codes = data[key] ?? []
+        const codes = (data[key] ?? []).filter((code) => Boolean(findIcfMeta(code)))
         return {
           ...CATEGORY_STYLES[key],
           label:
@@ -67,6 +68,8 @@ export function IcfVisualization({ data }: { data: IcfAnalysisBuckets | null }) 
         }
       })
       .filter((category) => category.codes.length > 0)
+
+    return { categories: mapped }
   }, [data, t])
 
   const totalCodes = categories.reduce((acc, category) => acc + category.codes.length, 0)
