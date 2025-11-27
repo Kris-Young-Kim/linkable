@@ -70,6 +70,54 @@ export const translations = {
     "footer.company": "회사",
     "footer.standards": "표준",
     "footer.aboutUs": "회사 소개",
+    "about.badge": "About LinkAble",
+    "about.title": "회사 소개",
+    "about.subtitle": "ICF & ISO 기반 보조공학 코디네이팅 프로젝트",
+    "about.description":
+      "LinkAble은 보조공학 상담에 누구나 쉽게 접근할 수 있어야 한다는 믿음에서 시작되었습니다. 복잡한 ICF·ISO 기준과 단절된 복지 정보를 AI로 연결해, 사용자가 자연어로 어려움을 설명하면 전문가 수준의 분석과 맞춤형 솔루션을 제공하도록 설계했습니다.",
+    "about.back": "홈으로 돌아가기",
+    "privacy.title": "개인정보 처리방침",
+    "privacy.effective": "시행일: 2025년 1월 1일 · 문의: support@linkable.ai",
+    "privacy.paragraph1":
+      "LinkAble은 Clerk 인증을 통해 최소한의 개인정보만 수집하며, 본인 확인과 세션 유지 목적 외에는 사용하지 않습니다. 법적 보존 기간이 경과하면 지체 없이 파기됩니다.",
+    "privacy.paragraph2":
+      "대화 내용, ICF 분석 결과, 추천 기록은 개인 식별 정보를 제거한 뒤 서비스 품질 개선과 통계 분석에 활용되며, Gemini·Supabase 등 파트너에게 전송될 때는 암호화됩니다.",
+    "privacy.paragraph3":
+      "모든 개인정보는 접근 권한이 제한된 인프라에 저장되며, 이용자는 support@linkable.ai로 열람·정정·삭제를 요청할 수 있습니다. 정책 변경 시 이메일과 서비스 공지를 통해 안내합니다.",
+    "privacy.back": "홈으로 돌아가기",
+    "terms.title": "LinkAble 이용약관",
+    "terms.effective": "시행일: 2025년 1월 1일 · 문의: legal@linkable.ai",
+    "terms.section1.title": "제1조 (목적)",
+    "terms.section1.content":
+      "본 약관은 회사가 제공하는 AI 보조공학 서비스의 이용 조건과 절차, 회사와 이용자의 권리·의무 및 책임 사항을 규정합니다.",
+    "terms.section2.title": "제2조 (정의)",
+    "terms.section2.content":
+      "“서비스”란 AI 상담, ICF/ISO 분석, 추천, K-IPPA 평가를 포함한 회사의 온라인 기능을 의미하며, “이용자”란 본 약관에 동의한 회원 및 비회원을 말합니다.",
+    "terms.section3.title": "제3조 (약관의 효력 및 변경)",
+    "terms.section3.content":
+      "회사는 약관을 변경할 수 있으며, 최소 7일 전(중요 변경 시 30일 전) 서비스 공지 및 이메일로 안내합니다. 변경 이후 계속 이용 시 변경된 약관에 동의한 것으로 봅니다.",
+    "terms.section4.title": "제4조 (회원 가입 및 계정 관리)",
+    "terms.section4.content":
+      "이용자는 Clerk 인증 절차를 통해 가입하며 정확한 정보를 유지해야 합니다. 법령 위반, 타인 명의 도용 등 확인 시 회사는 계정 사용을 제한할 수 있습니다.",
+    "terms.section5.title": "제5조 (서비스 이용 및 제한)",
+    "terms.section5.content":
+      "링커 AI의 분석은 참고용 정보이며 의료행위를 대체하지 않습니다. 이용자는 허위 정보 입력, 지재권 침해, 서비스 방해 행위를 금지하며, 회사는 시스템 점검 등으로 서비스를 일시 중단할 수 있습니다.",
+    "terms.section6.title": "제6조 (요금 및 결제)",
+    "terms.section6.content":
+      "현재 서비스는 무료로 제공되며, 유료 기능 도입 시 결제 조건과 환불 정책을 별도로 고지합니다. 유료 결제 시 전자상거래법 등 관련 법령을 준수합니다.",
+    "terms.section7.title": "제7조 (개인정보 보호)",
+    "terms.section7.content":
+      "개인정보 보호에 관한 사항은 개인정보 처리방침을 따르며, 회사는 서비스 제공 및 품질 개선 목적 범위 내에서만 데이터를 이용합니다. 이용자는 열람·정정·삭제를 요청할 수 있습니다.",
+    "terms.section8.title": "제8조 (콘텐츠 및 지식재산권)",
+    "terms.section8.content":
+      "서비스에서 제공되는 콘텐츠와 알고리즘은 회사 또는 정당한 권리자의 자산이며, 이용자는 사전 허가 없이 복제·배포·변형할 수 없습니다.",
+    "terms.section9.title": "제9조 (면책 및 책임 제한)",
+    "terms.section9.content":
+      "AI 분석 결과, 제3자 정보, 외부 API 장애로 발생한 손해에 대해 회사는 고의 또는 중대한 과실이 없는 한 책임을 지지 않습니다. 이용자의 위법 행위로 인한 손해는 본인이 부담합니다.",
+    "terms.section10.title": "제10조 (준거법 및 분쟁 해결)",
+    "terms.section10.content":
+      "본 약관은 대한민국 법률을 준거법으로 하며, 분쟁 발생 시 회사 소재지 관할 법원을 제1심 관할 법원으로 합니다.",
+    "terms.back": "홈으로 돌아가기",
     "footer.privacyPolicy": "개인정보 처리방침",
     "footer.termsOfService": "이용약관",
     "footer.icfFramework": "ICF 프레임워크",
@@ -377,6 +425,54 @@ export const translations = {
     "footer.company": "Company",
     "footer.standards": "Standards",
     "footer.aboutUs": "About Us",
+    "about.badge": "About LinkAble",
+    "about.title": "Company Overview",
+    "about.subtitle": "ICF & ISO based assistive technology coordination",
+    "about.description":
+      "LinkAble started with the belief that everyone should have easy access to assistive technology counseling. By connecting complex ICF/ISO standards and fragmented welfare information with AI, we deliver expert-grade analysis and tailored solutions whenever users describe their situation in natural language.",
+    "about.back": "Back to Home",
+    "privacy.title": "Privacy Policy",
+    "privacy.effective": "Effective: Jan 1, 2025 · Contact: support@linkable.ai",
+    "privacy.paragraph1":
+      "LinkAble collects only the minimum personal information through Clerk authentication and uses it solely for identity verification and session maintenance. Data is deleted without delay after the legally required retention period.",
+    "privacy.paragraph2":
+      "Conversation logs, ICF analysis results, and recommendation records are de-identified and used to improve service quality and for aggregate analytics. When data is shared with partners such as Gemini and Supabase, it is encrypted and limited to what is necessary.",
+    "privacy.paragraph3":
+      "All personal data is stored in restricted, access-controlled infrastructure. Users can request access, correction, or deletion at any time via support@linkable.ai. Policy updates are announced via email and in-product notices.",
+    "privacy.back": "Back to Home",
+    "terms.title": "LinkAble Terms of Service",
+    "terms.effective": "Effective: Jan 1, 2025 · Contact: legal@linkable.ai",
+    "terms.section1.title": "Article 1 (Purpose)",
+    "terms.section1.content":
+      "These Terms define the conditions and procedures for using the AI assistive technology services provided by the Company, along with the rights and responsibilities of both users and the Company.",
+    "terms.section2.title": "Article 2 (Definitions)",
+    "terms.section2.content":
+      "“Service” refers to the Company’s online features, including AI consultation, ICF/ISO analysis, recommendations, and K-IPPA evaluation. “User” includes both members and guests who agree to these Terms.",
+    "terms.section3.title": "Article 3 (Effect and Modification of Terms)",
+    "terms.section3.content":
+      "The Company may amend these Terms when necessary, providing at least 7 days’ notice (30 days for material changes) via service announcements and email. Continued use constitutes acceptance of the revised Terms.",
+    "terms.section4.title": "Article 4 (Membership and Account Management)",
+    "terms.section4.content":
+      "Users register through Clerk authentication and must keep their information accurate. The Company may restrict accounts if legal violations, identity theft, or abusive behaviors are detected.",
+    "terms.section5.title": "Article 5 (Service Use and Restrictions)",
+    "terms.section5.content":
+      "Linker’s AI analysis is reference information and does not replace medical advice. Users must not provide false data, infringe intellectual property rights, or disrupt the service. The Company may suspend service temporarily for maintenance or unavoidable events.",
+    "terms.section6.title": "Article 6 (Fees and Payment)",
+    "terms.section6.content":
+      "The service is currently free. If paid features are introduced, pricing and refund policies will be announced separately. Any paid transactions will follow applicable e-commerce regulations.",
+    "terms.section7.title": "Article 7 (Privacy Protection)",
+    "terms.section7.content":
+      "Personal information is handled according to the Privacy Policy. The Company uses data only within the scope necessary for providing and improving the service, and users may request access, correction, or deletion at any time.",
+    "terms.section8.title": "Article 8 (Content and Intellectual Property)",
+    "terms.section8.content":
+      "All content and algorithms provided through the service belong to the Company or rightful owners. Users may not reproduce, distribute, or modify them without prior consent.",
+    "terms.section9.title": "Article 9 (Disclaimer and Limitation of Liability)",
+    "terms.section9.content":
+      "The Company is not liable for damages arising from AI outputs, third-party product information, or partner API outages unless caused by willful misconduct or gross negligence. Users bear responsibility for any damages resulting from unlawful acts.",
+    "terms.section10.title": "Article 10 (Governing Law and Dispute Resolution)",
+    "terms.section10.content":
+      "These Terms are governed by the laws of the Republic of Korea, and any disputes will be resolved by the court with jurisdiction over the Company’s principal office.",
+    "terms.back": "Back to Home",
     "footer.privacyPolicy": "Privacy Policy",
     "footer.termsOfService": "Terms of Service",
     "footer.icfFramework": "ICF Framework",
@@ -657,6 +753,54 @@ export const translations = {
     "footer.company": "会社",
     "footer.standards": "基準",
     "footer.aboutUs": "会社概要",
+    "about.badge": "About LinkAble",
+    "about.title": "会社紹介",
+    "about.subtitle": "ICF・ISO基準に基づく支援機器コーディネート",
+    "about.description":
+      "LinkAbleは「誰もが気軽に支援機器の相談を受けられる世界」を目指して誕生しました。複雑なICF/ISO基準や分断された福祉情報をAIでつなぎ、利用者が日常の困りごとを自然な言葉で伝えるだけで、専門家レベルの分析と最適なソリューションを提供します。",
+    "about.back": "ホームに戻る",
+    "privacy.title": "プライバシーポリシー",
+    "privacy.effective": "施行日: 2025年1月1日 · お問い合わせ: support@linkable.ai",
+    "privacy.paragraph1":
+      "LinkAbleはClerk認証を通じて最小限の個人情報のみを収集し、本人確認とセッション維持以外の目的では利用しません。法的な保存期間満了後は速やかに削除します。",
+    "privacy.paragraph2":
+      "会話内容やICF分析結果、推薦記録は個人を特定できない形に加工した上でサービス品質向上と統計分析に活用され、GeminiやSupabaseなどのパートナーに送信する際も暗号化されます。",
+    "privacy.paragraph3":
+      "すべての個人情報はアクセス権限が厳しく管理されたインフラに保存され、利用者は support@linkable.ai へ連絡することで閲覧・訂正・削除をいつでも請求できます。ポリシー変更時はメールおよびサービス内告知でお知らせします。",
+    "privacy.back": "ホームに戻る",
+    "terms.title": "LinkAble 利用規約",
+    "terms.effective": "施行日: 2025年1月1日 · お問い合わせ: legal@linkable.ai",
+    "terms.section1.title": "第1条（目的）",
+    "terms.section1.content":
+      "本規約は、当社が提供するAI支援機器サービスの利用条件と手続き、利用者および当社の権利・義務・責任事項を定めるものです。",
+    "terms.section2.title": "第2条（定義）",
+    "terms.section2.content":
+      "「サービス」とは、AI相談、ICF/ISO分析、推薦、K-IPPA評価を含む当社のオンライン機能を指し、「利用者」とは本規約に同意した会員および非会員をいいます。",
+    "terms.section3.title": "第3条（規約の効力および変更）",
+    "terms.section3.content":
+      "当社は必要に応じて本規約を変更でき、少なくとも7日前（重要な変更は30日前）までにサービス内告知およびメールで通知します。変更後もサービスを利用する場合、改定後の規約に同意したものとみなします。",
+    "terms.section4.title": "第4条（会員登録およびアカウント管理）",
+    "terms.section4.content":
+      "利用者はClerk認証を通じて登録し、正確な情報を維持しなければなりません。法令違反やなりすまし等が確認された場合、当社はアカウント利用を制限できます。",
+    "terms.section5.title": "第5条（サービス利用および制限）",
+    "terms.section5.content":
+      "リンク・アブルAIの分析は参考情報であり、医療行為を代替するものではありません。利用者は虚偽情報の提供、知的財産権侵害、サービス妨害行為をしてはならず、当社はシステム保守等によりサービスを一時停止することがあります。",
+    "terms.section6.title": "第6条（料金および決済）",
+    "terms.section6.content":
+      "現在サービスは無料で提供されており、有料機能を導入する場合は料金および返金ポリシーを別途告知します。課金時には関連法令を遵守します。",
+    "terms.section7.title": "第7条（個人情報保護）",
+    "terms.section7.content":
+      "個人情報の取り扱いはプライバシーポリシーに従い、当社はサービス提供と品質向上の範囲内でのみデータを利用します。利用者はいつでも閲覧・訂正・削除を請求できます。",
+    "terms.section8.title": "第8条（コンテンツおよび知的財産権）",
+    "terms.section8.content":
+      "サービスで提供されるコンテンツおよびアルゴリズムは当社または正当な権利者に帰属し、利用者は事前の許可なく複製・配布・改変できません。",
+    "terms.section9.title": "第9条（免責および責任制限）",
+    "terms.section9.content":
+      "AI出力、第三者情報、外部API障害によって生じた損害について、当社は故意または重大な過失がない限り責任を負いません。利用者の違法行為による損害は利用者自身の負担となります。",
+    "terms.section10.title": "第10条（準拠法および紛争解決）",
+    "terms.section10.content":
+      "本規約は大韓民国の法令に準拠し、紛争が生じた場合は当社本店所在地を管轄する裁判所を第一審裁判所とします。",
+    "terms.back": "ホームに戻る",
     "footer.privacyPolicy": "プライバシーポリシー",
     "footer.termsOfService": "利用規約",
     "footer.icfFramework": "ICFフレームワーク",

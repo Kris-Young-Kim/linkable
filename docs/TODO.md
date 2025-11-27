@@ -372,3 +372,112 @@ K-IPPA 평가 제출
 ---
 
 _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하여 다음 Phase 준비에 활용하세요._
+
+## Post-MVP Score Improvement Strategy (2025-Phase+)
+
+| 영역            | 현재 점수 | 목표  | 핵심 지표                          | 실행 전략                                                                                                                                          |
+| --------------- | --------- | ----- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 성능/로딩       | 3.0/5     | 4.2/5 | LCP ≤ 2.5s, TTFB 30%↓              | - Next.js 동적 import + Suspense<br/>- Hero/카드 이미지 `next/image` 전환 + prefetch<br/>- 추천/채팅 로딩 스켈레톤, SSE 에러 토스트                |
+| UX 반응성       | 3.2/5     | 4.3/5 | 상담→추천 플로우 완료율 70%        | - 상담 종료 시 CTA 가시화 (추천 보기, 평가하기)<br/>- 버튼 상태/로딩/토스트 일관화<br/>- 접근성 체크리스트(포커스, SR 텍스트) 적용                 |
+| AI 매칭 품질    | 3.3/5     | 4.2/5 | 내부 QA에서 ICF 정확도 85%         | - Keyword rule 추가(b2xx,d3xx,e1xx 등 도메인 확대)<br/>- QA 스크립트로 batch 테스트 자동화<br/>- 상담 종료 시 “ICF 정확성” 미니 설문 수집          |
+| 구매/전환       | 2.2/5     | 4.0/5 | 추천 CTA 클릭률 25%, 문의 연결 10% | - 상품 카드에 `구매하기/지원제도` 버튼 추가<br/>- 추천 시 쿠폰/포인트 인센티브 및 7·14일 리마인더<br/>- 제휴 링크 클릭 이벤트 로그 → Supabase 집계 |
+| 운영/신뢰성     | 3.4/5     | 4.5/5 | 오류 자동 로깅 100%, SLA 99.5%     | - Vercel/Logflare/Supabase Edge Function 모니터링<br/>- DB snapshot 스케줄링 및 알림<br/>- FAQ/가이드 모달, 예외 공지 템플릿                       |
+| 비즈니스 스케일 | 2.8/5     | 4.0/5 | 파트너 PoC 1건, 유저 인터뷰 10회   | - 복지용구 센터·재활 병원과 파일럿 진행<br/>- 추천/분석 리포트 유료 PoC 설계<br/>- KPI 대시보드(추천 CTR, K-IPPA 참여율) 시각화                    |
+
+> 진행 순서: (1) 성능 최적화 & UX 폴리싱 → (2) AI 품질 룰/검증 확장 → (3) CTA·전환 구조 개선 → (4) 운영/로깅 자동화 → (5) 파트너 PoC.
+
+### GNB/LNB/SNB/FNB/Breadcrumbs 개선 플랜 (작업 티켓)
+
+#### 1. GNB (Global Navigation Bar)
+
+1. [x] `components/navigation/global-nav.tsx` 생성
+   - 모바일 Sheet Navigation, 언어 스위치 포함
+2. [x] 기존 `components/header.tsx`를 GNB 컴포넌트 사용으로 교체
+   - CTA(상담 시작/추천 보기) 상태 분기, SignedIn/Out 정리
+3. [ ] A11y/반응형 QA (키보드 포커스, 스크린리더 레이블)
+
+#### 2. LNB (Local Navigation)
+
+4. [ ] `components/navigation/local-nav.tsx` 템플릿 작성 (탭/피드백 상태)
+5. [ ] `/recommendations/[id]`에 LNB 적용
+   - 탭: 전체 추천 / 필터 / 평가 대기
+6. [ ] `/dashboard`에 LNB 적용
+   - 탭: 내 상담 / 평가 요청 / 포인트
+
+#### 3. SNB (Side Navigation)
+
+7. [ ] `components/navigation/side-nav.tsx` 작성 (role 기반 메뉴, collapse 버튼)
+8. [ ] `/admin/dashboard` 레이아웃에 SNB 적용
+   - 메뉴: 전체 통계 / 사용자 리스트 / 로그 모니터링
+9. [ ] 사용자 마이페이지 `/dashboard`에 축약형 SNB 적용 검토 (옵션)
+
+#### 4. FNB (Footer Navigation Bar)
+
+10. [ ] Footer 하단에 “Quick Links” 바 추가
+    - CTA: 상담 시작 / 추천 보기 / 전문가 문의
+11. [ ] Footer 모바일 섹션에 언어 선택 드롭다운 추가
+
+#### 5. Breadcrumbs
+
+12. [ ] `components/navigation/breadcrumbs.tsx` 구현 (`usePathname`, schema.org)
+13. [ ] `/consultation/[id]`, `/recommendations/[id]`, `/dashboard/ippa/[recommendationId]` 페이지에 적용
+14. [ ] SEO/접근성 테스트 (nav[aria-label="Breadcrumb"], SR 텍스트)
+
+### Phase 3 — 쿠팡/유통업체 상품 연결 강화 (세부 티켓)
+
+1. [ ] 상품 데이터 수집 파이프라인 설계서 (`docs/product-sync-plan.md`) 작성
+2. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 또는 스크래퍼)
+3. [ ] Supabase `products` 테이블 스키마 확장 (제휴사, 재고, 가격 이력)
+4. [ ] `app/api/products/sync/route.ts` 스케줄러 대응 (수동 호출 + cron 메모)
+5. [ ] 데이터 검증 유닛 테스트 (`purchase_link`, `iso_code`, `price`) 작성
+6. [ ] Admin UI에서 상품 수동 등록/수정 화면 추가 (`/admin/products`)
+7. [ ] 제휴 링크 상태 체크 함수 (`lib/integrations/link-validator.ts`) 구현
+8. [ ] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback
+
+### Phase 4 이후 남은 과제 (세부 티켓)
+
+1. [ ] 자동 알림 스케줄러 PoC (`supabase edge functions` or `cron`) 작성
+2. [ ] 추천 생성 → +14일 K-IPPA 알림 트리거 연동 테스트
+3. [ ] Analytics & Metrics 요구사항 명세 (`docs/analytics-dashboard.md`)
+4. [ ] Supabase 뷰/스토어드 프로시저로 KPI 데이터 집계
+5. [ ] 대시보드 UI 초안 (`components/analytics/kpi-board.tsx`) 제작
+6. [ ] 관리자 페이지에 KPI 위젯 삽입 및 필터 기능 구현
+
+### Post-MVP 전략 실행 티켓
+
+#### 성능/로딩 최적화
+
+1. [ ] 추천/대시보드 페이지 주요 컴포넌트 동적 import + Suspense
+2. [ ] Hero, 추천 카드, 대시보드 그래프 `next/image`/`ImageResponse`로 교체
+3. [ ] SSE 스트림 로딩 스켈레톤/토스트 컴포넌트 추가
+4. [ ] Lighthouse/Next-Profiler 측정 & 성능 회귀 테스트 문서화
+
+#### UX 반응성 향상
+
+5. [ ] 채팅/추천/대시보드 CTA 버튼 통일 (컴포넌트화)
+6. [ ] 접근성 체크리스트 (포커스 링, SR 텍스트, 대비) 실행
+7. [ ] 상담→추천 플로우 안내 모달/토스트 설계
+
+#### AI 매칭 품질 강화
+
+8. [ ] ICF Keyword Rule 세트 확장 (시각, 의사소통, 인지, 자세)
+9. [ ] QA 스크립트 (`scripts/tests/icf-matching.test.ts`) 작성
+10. [ ] 상담 종료 설문 UI 추가 (“분석 정확했나요?”)
+
+#### 구매/전환 장치
+
+11. [ ] 추천 카드 CTA: 구매하기/지원제도/전문가 문의 버튼 추가
+12. [ ] 포인트/쿠폰 인센티브 로직 설계 + DB 필드 추가
+13. [ ] 클릭/전환 이벤트 로깅 + Analytics 대시보드와 연동
+
+#### 운영/신뢰성
+
+14. [ ] Observability 스택 구성 (Vercel Log Drains + Supabase Edge logging)
+15. [ ] DB snapshot/백업 스케줄 자동화 문서화
+16. [ ] 에러 대응 가이드/FAQ 모달 작성 및 연결
+
+#### 비즈니스 스케일
+
+17. [ ] 파트너 PoC 후보 리스트 + 제안서 템플릿 작성
+18. [ ] 사용자 인터뷰 가이드 및 일정표 수립
+19. [ ] KPI 대시보드(추천 CTR, K-IPPA 참여율) 시각화 MVP 제작
