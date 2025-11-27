@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { IppaEvaluationPageClient } from "@/components/ippa/ippa-evaluation-page-client"
 import { IppaHistoryComparison } from "@/components/ippa/ippa-history-comparison"
+import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
@@ -169,6 +170,16 @@ export default async function IppaEvaluationPage({
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-8 md:py-12 space-y-8">
+        <Breadcrumbs
+          className="text-xs text-muted-foreground"
+          items={[
+            { translationKey: "breadcrumbs.dashboard", href: "/dashboard" },
+            { translationKey: "breadcrumbs.ippa", href: "/dashboard?tab=evaluations" },
+            recommendation.productName
+              ? { label: recommendation.productName }
+              : { translationKey: "breadcrumbs.ippaEvaluation" },
+          ]}
+        />
         {/* 헤더 */}
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild aria-label="대시보드로 돌아가기">

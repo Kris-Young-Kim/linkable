@@ -419,9 +419,9 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 #### 5. Breadcrumbs
 
-12. [ ] `components/navigation/breadcrumbs.tsx` 구현 (`usePathname`, schema.org)
-13. [ ] `/consultation/[id]`, `/recommendations/[id]`, `/dashboard/ippa/[recommendationId]` 페이지에 적용
-14. [ ] SEO/접근성 테스트 (nav[aria-label="Breadcrumb"], SR 텍스트)
+12. [x] `components/navigation/breadcrumbs.tsx` 구현 (`usePathname`, schema.org)
+13. [x] `/consultation/[id]`, `/recommendations/[id]`, `/dashboard/ippa/[recommendationId]` 페이지에 적용
+14. [x] SEO/접근성 테스트 (nav[aria-label="Breadcrumb"], SR 텍스트)
 
 ### Phase 3 — 쿠팡/유통업체 상품 연결 강화 (세부 티켓)
 

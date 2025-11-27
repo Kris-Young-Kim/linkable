@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LocalNav } from "@/components/navigation/local-nav"
+import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 import { RecommendationsViewWithFilters, type RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters"
 import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 
@@ -158,6 +159,16 @@ export default async function RecommendationsDetailPage({
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 md:px-6 py-4">
+          <Breadcrumbs
+            className="mb-2 text-xs"
+            items={[
+              { translationKey: "breadcrumbs.dashboard", href: "/dashboard" },
+              { translationKey: "breadcrumbs.recommendations", href: "/recommendations" },
+              consultation.title
+                ? { label: consultation.title }
+                : { translationKey: "breadcrumbs.recommendationDetail" },
+            ]}
+          />
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" asChild aria-label="대시보드로 돌아가기">
               <Link href="/dashboard">

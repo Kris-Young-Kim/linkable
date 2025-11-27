@@ -13,6 +13,16 @@ export const translations = {
     "header.homeAria": "LinkAble 홈으로 이동",
     "header.navAria": "주요 메뉴",
 
+    // Breadcrumbs
+    "breadcrumbs.home": "홈",
+    "breadcrumbs.dashboard": "대시보드",
+    "breadcrumbs.consultations": "상담",
+    "breadcrumbs.recommendations": "추천",
+    "breadcrumbs.ippa": "K-IPPA",
+    "breadcrumbs.consultationDetail": "상담 상세",
+    "breadcrumbs.recommendationDetail": "추천 상세",
+    "breadcrumbs.ippaEvaluation": "K-IPPA 평가",
+
     // Hero Section
     "hero.title": "AI로 연결하는",
     "hero.titleHighlight": "가능성",
@@ -372,6 +382,16 @@ export const translations = {
     "header.homeAria": "Go to LinkAble home",
     "header.navAria": "Main navigation",
 
+    // Breadcrumbs
+    "breadcrumbs.home": "Home",
+    "breadcrumbs.dashboard": "Dashboard",
+    "breadcrumbs.consultations": "Consultations",
+    "breadcrumbs.recommendations": "Recommendations",
+    "breadcrumbs.ippa": "K-IPPA",
+    "breadcrumbs.consultationDetail": "Consultation Detail",
+    "breadcrumbs.recommendationDetail": "Recommendation Detail",
+    "breadcrumbs.ippaEvaluation": "K-IPPA Evaluation",
+
     // Hero Section
     "hero.title": "Connecting Possibilities through",
     "hero.titleHighlight": "AI",
@@ -707,6 +727,16 @@ export const translations = {
     "header.signUp": "新規登録",
     "header.homeAria": "LinkAbleホームに移動",
     "header.navAria": "メインメニュー",
+
+    // Breadcrumbs
+    "breadcrumbs.home": "ホーム",
+    "breadcrumbs.dashboard": "ダッシュボード",
+    "breadcrumbs.consultations": "相談",
+    "breadcrumbs.recommendations": "推薦",
+    "breadcrumbs.ippa": "K-IPPA",
+    "breadcrumbs.consultationDetail": "相談詳細",
+    "breadcrumbs.recommendationDetail": "推薦詳細",
+    "breadcrumbs.ippaEvaluation": "K-IPPA評価",
 
     // Hero Section
     "hero.title": "AIでつなぐ",

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
+import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 
 type MessageRow = {
   id: string
@@ -151,6 +152,13 @@ export default async function ConsultationDetailPage({ params }: { params: Promi
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4 py-10 space-y-8">
+        <Breadcrumbs
+          className="text-xs text-muted-foreground"
+          items={[
+            { translationKey: "breadcrumbs.dashboard", href: "/dashboard" },
+            { label: title },
+          ]}
+        />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="icon" asChild aria-label="대시보드로 돌아가기">
