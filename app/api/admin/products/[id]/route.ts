@@ -31,6 +31,8 @@ export async function PATCH(
     price?: number | string | null
     purchase_link?: string | null
     image_url?: string | null
+    manufacturer?: string | null
+    category?: string | null
     is_active?: boolean
   }
 
@@ -52,6 +54,8 @@ export async function PATCH(
   if (parsedPrice !== undefined) updatePayload.price = parsedPrice
   if (body.purchase_link !== undefined) updatePayload.purchase_link = body.purchase_link
   if (body.image_url !== undefined) updatePayload.image_url = body.image_url
+  if (body.manufacturer !== undefined) updatePayload.manufacturer = body.manufacturer
+  if (body.category !== undefined) updatePayload.category = body.category
   if (body.is_active !== undefined) updatePayload.is_active = body.is_active
   updatePayload.updated_at = new Date().toISOString()
 
@@ -68,6 +72,8 @@ export async function PATCH(
       price,
       purchase_link,
       image_url,
+      manufacturer,
+      category,
       is_active,
       updated_at
     `,
@@ -75,9 +81,11 @@ export async function PATCH(
     .single()
 
   if (error) {
+    console.error(`[Admin Products] Update error for ${id}:`, error)
     return NextResponse.json({ error: "상품을 수정하지 못했습니다." }, { status: 500 })
   }
 
+  console.log(`[Admin Products] Product updated: ${id} - ${data.name}`)
   return NextResponse.json({ product: data })
 }
 
@@ -98,9 +106,11 @@ export async function DELETE(
   const { error } = await supabase.from("products").delete().eq("id", id)
 
   if (error) {
+    console.error(`[Admin Products] Delete error for ${id}:`, error)
     return NextResponse.json({ error: "상품을 삭제하지 못했습니다." }, { status: 500 })
   }
 
+  console.log(`[Admin Products] Product deleted: ${id}`)
   return NextResponse.json({ success: true })
 }
 

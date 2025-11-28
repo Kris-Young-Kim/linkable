@@ -19,14 +19,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // 관리자 권한 확인
+    // 관리자 권한 확인 (privateMetadata에서 role 확인)
     const client = await clerkClient()
     const clerkUser = await client.users.getUser(userId)
-    const userRole = clerkUser.publicMetadata?.role as string | undefined
+    const userRole = clerkUser.privateMetadata?.role as string | undefined
+    
+    console.log(`[Admin Analytics] Checking role for user ${userId}: role=${userRole}`)
     
     if (userRole !== "admin" && userRole !== "expert") {
+      console.log(`[Admin Analytics] Access denied for user ${userId}: role=${userRole}`)
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 })
     }
+
+    console.log(`[Admin Analytics] Access granted for user ${userId}: role=${userRole}`)
 
     const supabase = getSupabaseServerClient()
 

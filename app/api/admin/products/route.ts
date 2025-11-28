@@ -31,6 +31,8 @@ export async function GET() {
       price,
       purchase_link,
       image_url,
+      manufacturer,
+      category,
       is_active,
       updated_at
     `,
@@ -38,9 +40,11 @@ export async function GET() {
     .order("updated_at", { ascending: false })
 
   if (error) {
+    console.error("[Admin Products] Fetch error:", error)
     return NextResponse.json({ error: "상품을 불러오지 못했습니다." }, { status: 500 })
   }
 
+  console.log(`[Admin Products] Fetched ${data?.length ?? 0} products`)
   return NextResponse.json({ products: data ?? [] })
 }
 
@@ -61,6 +65,8 @@ export async function POST(request: Request) {
     price?: number | string | null
     purchase_link?: string | null
     image_url?: string | null
+    manufacturer?: string | null
+    category?: string | null
     is_active?: boolean
   }
 
@@ -84,6 +90,8 @@ export async function POST(request: Request) {
       price: parsedPrice,
       purchase_link: body.purchase_link ?? null,
       image_url: body.image_url ?? null,
+      manufacturer: body.manufacturer ?? null,
+      category: body.category ?? null,
       is_active: body.is_active ?? true,
     })
     .select(
@@ -95,6 +103,8 @@ export async function POST(request: Request) {
       price,
       purchase_link,
       image_url,
+      manufacturer,
+      category,
       is_active,
       updated_at
     `,
@@ -102,9 +112,11 @@ export async function POST(request: Request) {
     .single()
 
   if (error) {
+    console.error("[Admin Products] Create error:", error)
     return NextResponse.json({ error: "상품을 추가하지 못했습니다." }, { status: 500 })
   }
 
+  console.log(`[Admin Products] Product created: ${data.id} - ${data.name}`)
   return NextResponse.json({ product: data }, { status: 201 })
 }
 

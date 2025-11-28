@@ -60,6 +60,8 @@ export default async function AdminProductsPage() {
       price,
       purchase_link,
       image_url,
+      manufacturer,
+      category,
       is_active,
       updated_at
     `,

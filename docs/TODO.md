@@ -430,17 +430,39 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - [x] 기존 `products` 테이블 활용 방안 제시
    - [x] ISO 코드별 다중 상품 링크 관리 가이드
 2. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 또는 스크래퍼)
-3. [ ] Supabase `products` 테이블 스키마 확장 (제휴사, 재고, 가격 이력)
+3. [ ] **상품 크롤링 및 자동 등록 시스템 구현**
+   - [ ] 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts` 구현)
+     - API 키 발급 및 환경 변수 설정
+     - 상품 검색 API 구현 (`searchProducts`)
+     - 상품 상세 정보 조회 API 구현 (`getProductDetails`)
+     - 제휴 링크 자동 생성 (`generateAffiliateLink`)
+   - [ ] 웹 스크래핑 크롤러 구현 (대안 방법)
+     - Puppeteer 또는 Playwright 기반 스크래퍼 (`scripts/crawlers/web-scraper.ts`)
+     - 쿠팡/네이버/11번가 등 주요 쇼핑몰 지원
+     - 상품 정보 추출 로직 (이름, 가격, 이미지, 링크)
+   - [ ] 수동 크롤링 스크립트 (`scripts/manual-product-import.ts`)
+     - CSV/Excel 파일 기반 일괄 등록
+     - JSON 파일 기반 일괄 등록
+     - ISO 코드 매핑 자동화
+   - [ ] 크롤링 데이터 → DB 자동 등록 파이프라인
+     - `upsertProduct` 함수 활용
+     - 중복 상품 자동 감지 및 업데이트
+     - 링크 검증 및 이미지 URL 정규화
+   - [ ] 관리자 UI에 크롤링 기능 추가 (`/admin/products`)
+     - 크롤링 실행 버튼 (키워드/ISO 코드 입력)
+     - 크롤링 결과 미리보기 및 선택적 등록
+     - 크롤링 로그 및 에러 처리
+4. [ ] Supabase `products` 테이블 스키마 확장 (제휴사, 재고, 가격 이력)
    - 참고: 현재 구조로도 ISO 코드별 여러 상품 등록 가능 (추가 스키마 변경 불필요)
-4. [ ] `app/api/products/sync/route.ts` 스케줄러 대응 (수동 호출 + cron 메모)
-5. [ ] 데이터 검증 유닛 테스트 (`purchase_link`, `iso_code`, `price`) 작성
-6. [ ] Admin UI에서 상품 수동 등록/수정 화면 추가 (`/admin/products`)
+5. [ ] `app/api/products/sync/route.ts` 스케줄러 대응 (수동 호출 + cron 메모)
+6. [ ] 데이터 검증 유닛 테스트 (`purchase_link`, `iso_code`, `price`) 작성
+7. [ ] Admin UI에서 상품 수동 등록/수정 화면 추가 (`/admin/products`)
    - ISO 코드별 상품 목록 표시
    - 상품 추가/수정/삭제 기능
    - purchase_link 검증 및 업데이트
-7. [ ] 제휴 링크 상태 체크 함수 (`lib/integrations/link-validator.ts`) 구현
-8. [ ] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback
-9. [ ] **Meta Pixel 연동 및 도식화된 구매 전송 플로우 구현**: 상대방 홈페이지 → 영기님 서비스 픽셀 → 구매 정보 전송 → 영기님 DB 흐름을 추적/시각화. 구현 예정 기능으로 @docs/TODO.md 기준으로 관리.
+8. [ ] 제휴 링크 상태 체크 함수 (`lib/integrations/link-validator.ts`) 구현
+9. [ ] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback
+10. [ ] **Meta Pixel 연동 및 도식화된 구매 전송 플로우 구현**: 상대방 홈페이지 → 영기님 서비스 픽셀 → 구매 정보 전송 → 영기님 DB 흐름을 추적/시각화. 구현 예정 기능으로 @docs/TODO.md 기준으로 관리.
 
 **구현 방향:**
 
@@ -448,6 +470,19 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 - 하나의 ISO 코드에 여러 상품을 등록하면 자동으로 추천됨
 - 각 상품은 고유한 `purchase_link`를 가짐
 - 상세 내용은 `docs/product-sync-plan.md` 참고
+
+**상품 크롤링 전략:**
+
+- **단기 (MVP)**: 수동 크롤링 스크립트 + CSV/Excel 일괄 등록
+  - 빠른 구현 가능, 데이터 품질 제어 용이
+  - `scripts/manual-product-import.ts` 구현
+- **장기 (Post-MVP)**: 쿠팡 파트너스 API 자동화
+  - 쿠팡 파트너스 가입 및 API 키 발급
+  - `lib/integrations/coupang.ts` 완전 구현
+  - 제휴 링크 자동 생성 및 관리
+- **대안**: 웹 스크래핑 (Puppeteer/Playwright)
+  - API 키 불필요, 다양한 쇼핑몰 지원
+  - 사이트 구조 변경 시 유지보수 필요
 
 ### Phase 4 이후 남은 과제 (세부 티켓)
 

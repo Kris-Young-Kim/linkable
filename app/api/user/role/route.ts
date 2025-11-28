@@ -22,16 +22,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 1. Clerk 메타데이터에 role 저장
+    // 1. Clerk privateMetadata에 role 저장 (관리자 권한은 privateMetadata에 저장)
     try {
       const clerkClientInstance = await clerkClient()
       await clerkClientInstance.users.updateUserMetadata(userId, {
-        publicMetadata: {
+        privateMetadata: {
           role,
         },
       })
 
-      console.log(`[Role API] Clerk metadata updated for user ${userId}: role=${role}`)
+      console.log(`[Role API] Clerk privateMetadata updated for user ${userId}: role=${role}`)
     } catch (clerkError) {
       console.error("[Role API] Clerk metadata update error:", clerkError)
       // Clerk 업데이트 실패해도 Supabase는 업데이트 시도
