@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { getIsoMatches } from "@/core/matching/iso-mapping"
+import { appendKeywordIsoMatches } from "@/core/matching/keyword-inference"
 import { rankProducts } from "@/core/matching/ranking"
 import { logEvent } from "@/lib/logging"
 import { getMultipleIsoCodeLinksFromEnv } from "@/lib/config/iso-links-env"
@@ -139,12 +140,13 @@ export async function GET(request: Request) {
         ? await fetchAnalysisIcfCodes(consultationId)
         : []
 
-  // K-IPPA 데이터 가져오기 (상담 단계에서 수집한 중요도, 현재 난이도)
+  // K-IPPA 데이터 및 요약 정보
   let ippaData: { importance?: number; currentDifficulty?: number } | null = null
+  let analysisSummary: string | null = null
   if (consultationId) {
     const { data: analysisData } = await supabase
       .from("analysis_results")
-      .select("icf_codes")
+      .select("icf_codes, summary, identified_problems")
       .eq("consultation_id", consultationId)
       .single()
 
@@ -157,9 +159,25 @@ export async function GET(request: Request) {
         }
       }
     }
+
+    if (typeof analysisData?.summary === "string" && analysisData.summary.trim()) {
+      analysisSummary = analysisData.summary
+    } else if (
+      typeof analysisData?.identified_problems === "string" &&
+      analysisData.identified_problems.trim()
+    ) {
+      analysisSummary = analysisData.identified_problems
+    }
   }
 
-  const isoMatches = getIsoMatches(icfCodes)
+  let isoMatches = getIsoMatches(icfCodes)
+
+  isoMatches = appendKeywordIsoMatches({
+    text: analysisSummary,
+    icfCodes,
+    matches: isoMatches,
+  })
+
   const isoCodes = isoMatches.map((match) => match.isoCode)
 
   let query = supabase.from("products").select(

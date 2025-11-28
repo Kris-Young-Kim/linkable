@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useMemo, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Edit2, Trash2, X, Check } from "lucide-react"
 
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 import { IppaForm } from "@/components/ippa-form"
@@ -10,6 +11,24 @@ import { useLanguage } from "@/components/language-provider"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { LocalNav } from "@/components/navigation/local-nav"
 import { SideNav } from "@/components/navigation/side-nav"
 
@@ -147,33 +166,14 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
                 {timelineItems.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{t("dashboard.timelineEmpty")}</p>
                 ) : (
-                  timelineItems.map((consultation) => {
-                    const badgeStyle =
-                      consultation.status && statusStyle[consultation.status]
-                        ? statusStyle[consultation.status]
-                        : "bg-slate-200 text-slate-700"
-                    const recommendationCount = consultation.recommendations?.length ?? 0
-                    const unclickedCount = consultation.recommendations?.filter((rec) => !rec.is_clicked).length ?? 0
-
-                    return (
-                      <Link
-                        key={consultation.id}
-                        href={`/consultation/${consultation.id}`}
-                        className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5 hover:bg-muted/50 transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-base font-semibold text-foreground">
-                            {consultation.title || t("dashboard.untitled")}
-                          </h3>
-                          <Badge className={badgeStyle}>{statusLabel(consultation.status)}</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{formatUpdatedAt(consultation.updated_at)}</p>
-                        <div className="text-xs text-foreground/80">
-                          {recommendationSummary(recommendationCount, unclickedCount)}
-                        </div>
-                      </Link>
-                    )
-                  })
+                  timelineItems.map((consultation) => (
+                    <ConsultationCard
+                      key={consultation.id}
+                      consultation={consultation}
+                      onUpdate={() => window.location.reload()}
+                      onDelete={() => window.location.reload()}
+                    />
+                  ))
                 )}
               </CardContent>
             </Card>
@@ -320,6 +320,218 @@ function IppaEvaluationSection({ consultations }: { consultations: ConsultationR
         </CardContent>
       </Card>
     </section>
+  )
+}
+
+// 상담 카드 컴포넌트 (수정/삭제 기능 포함)
+function ConsultationCard({
+  consultation,
+  onUpdate,
+  onDelete,
+}: {
+  consultation: ConsultationRow
+  onUpdate: () => void
+  onDelete: () => void
+}) {
+  const { t } = useLanguage()
+  const [isEditing, setIsEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState(consultation.title || "")
+  const [editStatus, setEditStatus] = useState<"in_progress" | "completed" | "archived">(
+    (consultation.status as "in_progress" | "completed" | "archived") || "in_progress",
+  )
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const badgeStyle =
+    consultation.status && statusStyle[consultation.status]
+      ? statusStyle[consultation.status]
+      : "bg-slate-200 text-slate-700"
+  const recommendationCount = consultation.recommendations?.length ?? 0
+  const unclickedCount = consultation.recommendations?.filter((rec) => !rec.is_clicked).length ?? 0
+
+  const formatUpdatedAt = (iso?: string | null) => {
+    if (!iso) {
+      return t("dashboard.noUpdates")
+    }
+    const formatter = new Intl.DateTimeFormat("ko-KR", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    })
+    return `${t("dashboard.updatedAt")} ${formatter.format(new Date(iso))}`
+  }
+
+  const statusLabel = (status?: string | null) => {
+    if (!status) {
+      return t("dashboard.status.unknown")
+    }
+    if (status === "completed") return t("dashboard.status.completed")
+    if (status === "in_progress") return t("dashboard.status.inProgress")
+    if (status === "archived") return t("dashboard.status.archived")
+    return status
+  }
+
+  const formatTemplate = (template: string, params: Record<string, string | number>) =>
+    template.replace(/\{(\w+)\}/g, (_, key) => params[key]?.toString() ?? "")
+
+  const recommendationSummary = (recommendationCount: number, unclickedCount: number) =>
+    formatTemplate(t("dashboard.timelineSummary"), {
+      recommendationCount,
+      pendingCount: unclickedCount,
+    })
+
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const response = await fetch(`/api/consultations/${consultation.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle.trim() || null,
+          status: editStatus,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error("[dashboard] Update error:", error)
+        alert("수정에 실패했습니다. 다시 시도해 주세요.")
+        return
+      }
+
+      setIsEditing(false)
+      onUpdate()
+    } catch (error) {
+      console.error("[dashboard] Update error:", error)
+      alert("수정에 실패했습니다. 다시 시도해 주세요.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    setIsSaving(true)
+    try {
+      const response = await fetch(`/api/consultations/${consultation.id}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error("[dashboard] Delete error:", error)
+        alert("삭제에 실패했습니다. 다시 시도해 주세요.")
+        return
+      }
+
+      setIsDeleting(false)
+      onDelete()
+    } catch (error) {
+      console.error("[dashboard] Delete error:", error)
+      alert("삭제에 실패했습니다. 다시 시도해 주세요.")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isEditing) {
+    return (
+      <div className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-2">
+          <Input
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            placeholder="상담 제목"
+            className="flex-1"
+          />
+          <Select value={editStatus} onValueChange={(value) => setEditStatus(value as typeof editStatus)}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="in_progress">진행 중</SelectItem>
+              <SelectItem value="completed">완료</SelectItem>
+              <SelectItem value="archived">보관됨</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => setIsEditing(false)} disabled={isSaving}>
+            <X className="size-4 mr-1" />
+            취소
+          </Button>
+          <Button size="sm" onClick={handleSave} disabled={isSaving}>
+            <Check className="size-4 mr-1" />
+            저장
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="rounded-lg border border-border bg-card px-4 py-3 flex flex-col gap-1.5 hover:bg-muted/50 transition-colors group relative">
+        <div className="flex items-center justify-between gap-2">
+          <Link
+            href={`/consultation/${consultation.id}`}
+            className="flex-1 flex items-center justify-between gap-2"
+          >
+            <h3 className="text-base font-semibold text-foreground">
+              {consultation.title || t("dashboard.untitled")}
+            </h3>
+            <Badge className={badgeStyle}>{statusLabel(consultation.status)}</Badge>
+          </Link>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={(e) => {
+                e.preventDefault()
+                setIsEditing(true)
+              }}
+              aria-label="수정"
+            >
+              <Edit2 className="size-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-destructive hover:text-destructive"
+              onClick={(e) => {
+                e.preventDefault()
+                setIsDeleting(true)
+              }}
+              aria-label="삭제"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </div>
+        </div>
+        <Link href={`/consultation/${consultation.id}`}>
+          <p className="text-sm text-muted-foreground">{formatUpdatedAt(consultation.updated_at)}</p>
+          <div className="text-xs text-foreground/80">
+            {recommendationSummary(recommendationCount, unclickedCount)}
+          </div>
+        </Link>
+      </div>
+
+      <AlertDialog open={isDeleting} onOpenChange={setIsDeleting}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>상담 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              정말로 이 상담을 삭제하시겠습니까? 이 작업은 되돌릴 수 없으며, 관련된 모든 데이터(대화 기록, 분석 결과, 추천 등)가 함께 삭제됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSaving}>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={isSaving} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              삭제
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 

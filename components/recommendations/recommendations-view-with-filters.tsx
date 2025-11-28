@@ -1,8 +1,8 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Filter, ArrowUpDown, X } from "lucide-react"
+import { Filter, ArrowUpDown, X, Trash2 } from "lucide-react"
 
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { useLanguage } from "@/components/language-provider"
@@ -36,6 +36,9 @@ export function RecommendationsViewWithFilters({
   const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [localProducts, setLocalProducts] = useState(products)
+  const [removingId, setRemovingId] = useState<string | null>(null)
+  const [removeError, setRemoveError] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortOption>(
     (initialSort as SortOption) || "rank",
   )
@@ -45,17 +48,21 @@ export function RecommendationsViewWithFilters({
 
   // 추천 목록 조회 이벤트 추적
   useEffect(() => {
-    if (products.length > 0) {
+    if (localProducts.length > 0) {
       trackEvent("recommendations_viewed", {
-        count: products.length,
+        count: localProducts.length,
         consultation_id: consultationId,
       })
     }
-  }, [products.length, consultationId])
+  }, [localProducts.length, consultationId])
+
+  useEffect(() => {
+    setLocalProducts(products)
+  }, [products])
 
   // 필터링 및 정렬
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products]
+    let filtered = [...localProducts]
 
     // 필터링
     if (filterBy === "clicked") {
@@ -90,7 +97,43 @@ export function RecommendationsViewWithFilters({
     })
 
     return filtered
-  }, [products, sortBy, filterBy])
+  }, [localProducts, sortBy, filterBy])
+
+  const handleRemoveProduct = useCallback(
+    async (product: RecommendationProduct) => {
+      if (removingId) {
+        return
+      }
+
+      if (!window.confirm("이 추천을 목록에서 제거할까요?")) {
+        return
+      }
+
+      setRemoveError(null)
+      setRemovingId(product.id)
+
+      try {
+        if (product.recommendation_id) {
+          const response = await fetch(`/api/recommendations/${product.recommendation_id}`, {
+            method: "DELETE",
+          })
+
+          if (!response.ok) {
+            const errorPayload = await response.json().catch(() => ({}))
+            throw new Error(errorPayload?.error ?? "Failed to delete recommendation")
+          }
+        }
+
+        setLocalProducts((prev) => prev.filter((item) => item.id !== product.id))
+      } catch (error) {
+        console.error("[recommendations] remove_error", error)
+        setRemoveError("추천을 삭제하지 못했습니다. 잠시 후 다시 시도해 주세요.")
+      } finally {
+        setRemovingId(null)
+      }
+    },
+    [removingId],
+  )
 
   // URL 업데이트
   const updateUrl = (newSort: SortOption, newFilter: FilterOption) => {
@@ -138,12 +181,12 @@ export function RecommendationsViewWithFilters({
     return (
       <div className="rounded-xl border border-border bg-card px-6 py-12 text-center">
         <p className="text-lg font-medium text-foreground">
-          {products.length === 0
+          {localProducts.length === 0
             ? "아직 추천이 생성되지 않았습니다"
             : "필터 조건에 맞는 추천이 없습니다"}
         </p>
         <p className="text-sm text-muted-foreground mt-2">
-          {products.length === 0
+          {localProducts.length === 0
             ? "상담을 더 진행해 주세요"
             : "다른 필터를 선택해 보세요"}
         </p>
@@ -232,11 +275,17 @@ export function RecommendationsViewWithFilters({
         )}
       </div>
 
+      {removeError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {removeError}
+        </div>
+      )}
+
       {/* 결과 개수 */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {filteredAndSortedProducts.length}개의 추천
-          {products.length !== filteredAndSortedProducts.length && ` (전체 ${products.length}개 중)`}
+          {localProducts.length !== filteredAndSortedProducts.length && ` (전체 ${localProducts.length}개 중)`}
         </p>
       </div>
 
@@ -257,6 +306,19 @@ export function RecommendationsViewWithFilters({
             price={product.price}
             purchaseLink={product.purchase_link}
             recommendationId={product.recommendation_id}
+            adminActions={
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                className="h-8 bg-transparent"
+                onClick={() => handleRemoveProduct(product)}
+                disabled={removingId === product.id}
+              >
+                <Trash2 className="mr-1 size-3.5" />
+                삭제
+              </Button>
+            }
           />
         ))}
       </div>

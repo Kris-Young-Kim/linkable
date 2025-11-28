@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { LocalNav } from "@/components/navigation/local-nav"
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 import { RecommendationsViewWithFilters, type RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters"
-import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
+import type { IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
@@ -186,10 +186,8 @@ export default async function RecommendationsDetailPage({
               </Link>
             </Button>
             <div>
-              <p className="text-sm text-muted-foreground">추천 상세</p>
-              <h1 className="text-2xl font-bold text-foreground">
-                {consultation.title || "제목 없는 상담"}의 추천
-              </h1>
+              <p className="text-sm text-muted-foreground">상담 상세</p>
+              <h1 className="text-2xl font-bold text-foreground">링커의 맞춤 추천</h1>
             </div>
           </div>
         </div>
@@ -201,13 +199,6 @@ export default async function RecommendationsDetailPage({
           <div className="lg:col-span-2 space-y-6">
             {/* 상담 요약 */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="size-5 text-primary" />
-                  상담 요약
-                </CardTitle>
-                <CardDescription>이 상담에서 파악한 핵심 내용입니다.</CardDescription>
-              </CardHeader>
               <CardContent className="space-y-4">
                 {analysis?.summary ? (
                   <div>
@@ -231,19 +222,6 @@ export default async function RecommendationsDetailPage({
                 )}
               </CardContent>
             </Card>
-
-            {/* ICF 분석 결과 */}
-            {analysis?.icfCodes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>ICF 분석 결과</CardTitle>
-                  <CardDescription>AI가 추출한 ICF 코드 요약입니다.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <IcfVisualization data={analysis.icfCodes} />
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* 사이드바: 상담 정보 */}
@@ -294,28 +272,21 @@ export default async function RecommendationsDetailPage({
 
         {/* 추천 목록 */}
         <Card>
-          <CardHeader>
-            <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <CardTitle>추천된 보조기기</CardTitle>
-                <CardDescription>
-                  {products.length > 0
-                    ? `총 ${products.length}개의 추천이 있습니다`
-                    : "아직 추천이 생성되지 않았습니다"}
-                </CardDescription>
-              </div>
-              <LocalNav
-                items={[
-                  { label: "전체 추천", href: `/recommendations/${consultationId}?filter=${filterBy}&sort=${sortBy}` },
-                  { label: "필터", href: `/recommendations/${consultationId}?filter=favorites&sort=${sortBy}`, badge: "Soon" },
-                  { label: "평가 대기", href: `/recommendations/${consultationId}?filter=pending&sort=${sortBy}`, badge: "Soon" },
-                ]}
-                className="overflow-x-auto"
-                label="Recommendation filters"
-              />
-            </div>
+          <CardHeader className="pb-0">
+            <LocalNav
+              items={[
+                { label: "전체 추천", href: `/recommendations/${consultationId}?filter=${filterBy}&sort=${sortBy}` },
+                { label: "필터", href: `/recommendations/${consultationId}?filter=favorites&sort=${sortBy}`, badge: "Soon" },
+                { label: "평가 대기", href: `/recommendations/${consultationId}?filter=pending&sort=${sortBy}`, badge: "Soon" },
+              ]}
+              className="overflow-x-auto"
+              label="Recommendation filters"
+            />
           </CardHeader>
           <CardContent>
+            <div className="mb-4 text-sm text-muted-foreground">
+              {products.length > 0 ? `총 ${products.length}개의 추천이 있습니다.` : "아직 추천이 생성되지 않았습니다."}
+            </div>
             <RecommendationsViewWithFilters
               products={products}
               errorMessage={errorMessage}

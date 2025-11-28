@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, type ReactNode } from "react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +23,7 @@ interface ProductRecommendationCardProps {
   price?: number | string | null
   purchaseLink?: string | null
   recommendationId?: string | null
+  adminActions?: ReactNode
 }
 
 export function ProductRecommendationCard({
@@ -38,6 +39,7 @@ export function ProductRecommendationCard({
   price,
   purchaseLink,
   recommendationId,
+  adminActions,
 }: ProductRecommendationCardProps) {
   const { t } = useLanguage()
   const matchPercentage = matchScore ? `${Math.round(matchScore * 100)}%` : null
@@ -100,16 +102,21 @@ export function ProductRecommendationCard({
     <Card className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
       <CardHeader>
         <div className="flex items-start justify-between gap-4 mb-2">
-          <CardTitle className="text-xl font-bold text-foreground">{productName}</CardTitle>
-          {isoCode && (
-            <Badge variant="secondary" className="shrink-0 bg-primary/10 text-primary border border-primary/20">
-              ISO {isoCode}
-            </Badge>
-          )}
+          <div className="flex-1">
+            <CardTitle className="text-xl font-bold text-foreground">{productName}</CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
+              {isoLabel || functionalSupport}
+            </CardDescription>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            {isoCode && (
+              <Badge variant="secondary" className="shrink-0 bg-primary/10 text-primary border border-primary/20">
+                ISO {isoCode}
+              </Badge>
+            )}
+            {adminActions}
+          </div>
         </div>
-        <CardDescription className="text-base text-muted-foreground">
-          {isoLabel || functionalSupport}
-        </CardDescription>
       </CardHeader>
 
       {imageUrl && (
