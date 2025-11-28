@@ -135,3 +135,53 @@
     @apply outline-2 outline-offset-2 outline-ring;
   }
 }
+
+@layer utilities {
+  @keyframes softGlow {
+    0% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes panelGlow {
+    0% {
+      filter: blur(8px);
+    }
+    50% {
+      filter: blur(2px);
+    }
+    100% {
+      filter: blur(8px);
+    }
+  }
+
+  .animate-softGlow {
+    animation: softGlow 12s ease-in-out infinite;
+  }
+
+  .animate-panelGlow {
+    animation: panelGlow 6s ease-in-out infinite;
+  }
+
+  @keyframes scrollRight {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0%);
+    }
+  }
+
+  .animate-scrollRight {
+    animation: scrollRight 30s linear infinite;
+  }
+}

@@ -32,13 +32,13 @@ export function Breadcrumbs({ items, className, currentLabel }: BreadcrumbsProps
   const pathname = usePathname()
   const { t } = useLanguage()
 
-  const derivedItems = useMemo(() => {
+  const derivedItems = useMemo((): BreadcrumbItem[] => {
     if (items?.length) return items
 
     const pathWithoutQuery = pathname?.split("?")[0] ?? ""
     const segments = pathWithoutQuery.split("/").filter(Boolean)
 
-    return segments.map((segment, index) => {
+    return segments.map((segment, index): BreadcrumbItem => {
       const href = "/" + segments.slice(0, index + 1).join("/")
       const isLast = index === segments.length - 1
       const translationKey = segmentKeyMap[segment]
@@ -47,17 +47,18 @@ export function Breadcrumbs({ items, className, currentLabel }: BreadcrumbsProps
       return {
         href: isLast ? undefined : href,
         label: isLast && currentLabel ? currentLabel : derivedLabel,
+        translationKey: translationKey,
       }
     })
   }, [items, pathname, currentLabel, t])
 
-  const trail = [
+  const trail: BreadcrumbItem[] = [
     { label: t("breadcrumbs.home"), href: "/" },
-    ...derivedItems.map((item) => ({
+    ...derivedItems.map((item): BreadcrumbItem => ({
       ...item,
       label: item.translationKey ? t(item.translationKey) : item.label,
     })),
-  ].filter((item) => item.label)
+  ].filter((item): item is BreadcrumbItem => Boolean(item.label))
 
   return (
     <nav

@@ -165,7 +165,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <div className="w-full sm:w-auto">
-            <p>{t("footer.copyright")}</p>
+          <p>{t("footer.copyright")}</p>
           </div>
           <div className="flex gap-6 w-full sm:w-auto justify-center sm:justify-end">
             <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialLinkedIn")}>

@@ -9,6 +9,7 @@ import { ProductRecommendationCard } from "@/components/product-recommendation-c
 import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
 import { trackEvent } from "@/lib/analytics"
+import { PartnershipNotice } from "@/components/recommendations/partnership-notice"
 
 export type RecommendationProduct = {
   id: string
@@ -83,25 +84,30 @@ export function RecommendationsView({ products, errorMessage }: RecommendationsV
               <p className="text-sm text-muted-foreground mt-2">{t("recommendations.emptyDescription")}</p>
             </div>
           ) : (
-            <div className="space-y-6">
-              {products.map((product) => (
-                <ProductRecommendationCard
-                  key={product.id}
-                  productName={product.name}
-                  functionalSupport={product.category ?? t("recommendations.defaultCategory")}
-                  description={product.description}
-                  imageUrl={product.image_url ?? undefined}
-                  isoCode={product.iso_code}
-                  isoLabel={product.match_label}
-                  matchScore={product.match_score}
-                  matchReason={product.match_reason}
-                  matchedIcf={product.matched_icf}
-                  price={product.price}
-                  purchaseLink={product.purchase_link}
-                  recommendationId={product.recommendation_id}
-                />
-              ))}
-            </div>
+            <>
+              <div className="space-y-6">
+                {products.map((product) => (
+                  <ProductRecommendationCard
+                    key={product.id}
+                    productName={product.name}
+                    functionalSupport={product.category ?? t("recommendations.defaultCategory")}
+                    description={product.description}
+                    imageUrl={product.image_url ?? undefined}
+                    isoCode={product.iso_code}
+                    isoLabel={product.match_label}
+                    matchScore={product.match_score}
+                    matchReason={product.match_reason}
+                    matchedIcf={product.matched_icf}
+                    price={product.price}
+                    purchaseLink={product.purchase_link}
+                    recommendationId={product.recommendation_id}
+                  />
+                ))}
+              </div>
+
+              {/* 쿠팡 파트너스 활동 시 주의사항 */}
+              <PartnershipNotice />
+            </>
           )}
 
           <div className="flex justify-center pt-8 gap-4 flex-wrap">

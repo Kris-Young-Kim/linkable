@@ -194,6 +194,228 @@ const isoMappingTable: IsoMappingRule[] = [
     description: "배변 활동을 돕는 보조기기 (ISO 0912)",
     baseScore: 0.65,
   },
+  {
+    icf: ["d540"],
+    iso: "09 18",
+    label: "옷 입기 보조기기",
+    description: "옷 입기 활동을 돕는 보조기기 (ISO 0918)",
+    baseScore: 0.62,
+  },
+
+  // 시각 보조기기 (b2xx 확대)
+  {
+    icf: ["b210", "d110"],
+    iso: "22 03",
+    label: "시각 보조기기",
+    description: "저시력 사용자를 위한 확대경, 돋보기, 시각 보조기기 (ISO 2203)",
+    baseScore: 0.80,
+  },
+  {
+    icf: ["b210", "d166"],
+    iso: "22 06",
+    label: "읽기 보조기기",
+    description: "시각 장애인을 위한 점자 디스플레이, 스크린 리더, 음성 변환 기기 (ISO 2206)",
+    baseScore: 0.78,
+  },
+  {
+    icf: ["b215", "d110"],
+    iso: "22 03",
+    label: "시각 관련 보조기기",
+    description: "시각 기능 보조를 위한 기기 (ISO 2203)",
+    baseScore: 0.75,
+  },
+  {
+    icf: ["e240", "b210"],
+    iso: "18 06",
+    label: "조명 보조기기",
+    description: "시각 보조를 위한 조명 기기 (ISO 1806)",
+    baseScore: 0.70,
+  },
+
+  // 의사소통 보조기기 (d3xx 확대)
+  {
+    icf: ["b240", "d320"],
+    iso: "21 09",
+    label: "음성 보조기기",
+    description: "음성 생성 및 보조 기기 (ISO 2109)",
+    baseScore: 0.76,
+  },
+  {
+    icf: ["d330", "d350"],
+    iso: "22 30",
+    label: "대화 보조기기",
+    description: "대화 및 의사소통을 돕는 보조기기 (ISO 2230)",
+    baseScore: 0.74,
+  },
+  {
+    icf: ["d335", "d345"],
+    iso: "22 30",
+    label: "메시지 생성 보조기기",
+    description: "비공식 및 공식 메시지 생성을 돕는 보조기기 (ISO 2230)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["b167", "d310"],
+    iso: "22 30",
+    label: "언어 이해 보조기기",
+    description: "언어 정신 기능 및 구어 메시지 이해를 돕는 보조기기 (ISO 2230)",
+    baseScore: 0.70,
+  },
+
+  // 인지 보조기기 (b1xx, d1xx)
+  {
+    icf: ["b144", "d160"],
+    iso: "04 03",
+    label: "인지 훈련 보조기기",
+    description: "기억 및 주의 기능 훈련을 위한 보조기기 (ISO 0403)",
+    baseScore: 0.68,
+  },
+  {
+    icf: ["b140", "d160"],
+    iso: "04 03",
+    label: "주의 집중 보조기기",
+    description: "주의 기능 향상을 위한 보조기기 (ISO 0403)",
+    baseScore: 0.65,
+  },
+  {
+    icf: ["b160", "b164", "d175"],
+    iso: "04 03",
+    label: "사고 및 문제해결 보조기기",
+    description: "사고 기능 및 문제해결 능력 향상을 위한 보조기기 (ISO 0403)",
+    baseScore: 0.70,
+  },
+  {
+    icf: ["b117", "d163"],
+    iso: "04 03",
+    label: "지적 기능 보조기기",
+    description: "지적 기능 및 생각하기 능력 향상을 위한 보조기기 (ISO 0403)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["d140", "d145", "d170"],
+    iso: "22 33",
+    label: "학습 보조기기",
+    description: "읽기, 쓰기, 계산 학습을 돕는 보조기기 (ISO 2233)",
+    baseScore: 0.75,
+  },
+  {
+    icf: ["b144", "d163"],
+    iso: "22 33",
+    label: "기억 보조기기",
+    description: "기억 기능 보조를 위한 디지털 기기 (ISO 2233)",
+    baseScore: 0.73,
+  },
+
+  // 자세 및 체위 변경 보조기기 (b7xx, d4xx 확대)
+  {
+    icf: ["b710", "d410"],
+    iso: "06 03",
+    label: "관절 이동성 보조기기",
+    description: "관절 이동성 기능 향상을 위한 보조기 (ISO 0603)",
+    baseScore: 0.70,
+  },
+  {
+    icf: ["b730", "d420"],
+    iso: "12 31",
+    label: "근력 저하 체위 변경 보조기기",
+    description: "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
+    baseScore: 0.82,
+  },
+  {
+    icf: ["d415", "b760"],
+    iso: "12 31",
+    label: "안정한 자세 유지 보조기기",
+    description: "안정한 자세 유지를 돕는 보조기기 (ISO 1231)",
+    baseScore: 0.75,
+  },
+  {
+    icf: ["b235", "d415"],
+    iso: "12 08",
+    label: "균형 보조기기",
+    description: "전정 기능 저하 시 균형 유지를 돕는 보조기기 (ISO 1208)",
+    baseScore: 0.73,
+  },
+  {
+    icf: ["b760", "d440"],
+    iso: "24 06",
+    label: "손 기능 보조기기",
+    description: "수의적 운동 조절 기능 향상을 위한 손 기능 보조기기 (ISO 2406)",
+    baseScore: 0.76,
+  },
+  {
+    icf: ["b765", "d440"],
+    iso: "24 06",
+    label: "손 떨림 보정 보조기기",
+    description: "불수의적 운동 조절 보정을 위한 보조기기 (ISO 2406)",
+    baseScore: 0.78,
+  },
+  {
+    icf: ["d430", "d435"],
+    iso: "24 03",
+    label: "물건 들기 및 옮기기 보조기기",
+    description: "물건 들기 및 옮기기 활동을 돕는 보조기기 (ISO 2403)",
+    baseScore: 0.68,
+  },
+  {
+    icf: ["d445", "b730"],
+    iso: "24 06",
+    label: "근력 저하 손 기능 보조기기",
+    description: "근력 저하 시 손과 팔 사용을 돕는 보조기기 (ISO 2406)",
+    baseScore: 0.74,
+  },
+
+  // 환경 접근성 보조기기 (e1xx 확대)
+  {
+    icf: ["e110", "d450"],
+    iso: "18 24",
+    label: "집 구조 개선 보조기기",
+    description: "집 안 구조 개선을 위한 보조기기 (ISO 1824)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["e155", "d460"],
+    iso: "18 30",
+    label: "건축물 접근성 보조기기",
+    description: "건축물 설계 및 건물 제품을 통한 접근성 개선 (ISO 1830)",
+    baseScore: 0.80,
+  },
+  {
+    icf: ["d410", "e120"],
+    iso: "18 18",
+    label: "지지 손잡이 및 그랩바",
+    description: "욕실, 계단 등에서 균형 유지와 안전을 돕는 손잡이 및 그랩바 (ISO 1818)",
+    baseScore: 0.68,
+  },
+  {
+    icf: ["e110", "d410"],
+    iso: "18 09",
+    label: "앉기 보조 가구",
+    description: "집 안에서 안정적인 앉기를 돕는 가구 (ISO 1809)",
+    baseScore: 0.70,
+  },
+  {
+    icf: ["e110", "d415"],
+    iso: "18 12",
+    label: "안정 자세 유지 보조 침대",
+    description: "안정적인 자세 유지를 돕는 침대 및 침대 장비 (ISO 1812)",
+    baseScore: 0.68,
+  },
+
+  // 여가 및 레크리에이션 확대
+  {
+    icf: ["d910", "e140"],
+    iso: "30 09",
+    label: "스포츠 보조기기",
+    description: "스포츠 활동을 돕는 보조기기 (ISO 3009)",
+    baseScore: 0.65,
+  },
+  {
+    icf: ["d920", "e140"],
+    iso: "30 03",
+    label: "레크리에이션 보조기기",
+    description: "레크리에이션 활동을 돕는 보조기기 (ISO 3003)",
+    baseScore: 0.60,
+  },
 ]
 
 const buildReason = (icfCodes: string[], label: string) => {

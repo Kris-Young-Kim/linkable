@@ -425,14 +425,28 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 ### Phase 3 — 쿠팡/유통업체 상품 연결 강화 (세부 티켓)
 
-1. [ ] 상품 데이터 수집 파이프라인 설계서 (`docs/product-sync-plan.md`) 작성
+1. [x] 상품 데이터 수집 파이프라인 설계서 (`docs/product-sync-plan.md`) 작성
+   - [x] 데이터베이스 방식 vs .env 방식 비교 분석
+   - [x] 기존 `products` 테이블 활용 방안 제시
+   - [x] ISO 코드별 다중 상품 링크 관리 가이드
 2. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 또는 스크래퍼)
 3. [ ] Supabase `products` 테이블 스키마 확장 (제휴사, 재고, 가격 이력)
+   - 참고: 현재 구조로도 ISO 코드별 여러 상품 등록 가능 (추가 스키마 변경 불필요)
 4. [ ] `app/api/products/sync/route.ts` 스케줄러 대응 (수동 호출 + cron 메모)
 5. [ ] 데이터 검증 유닛 테스트 (`purchase_link`, `iso_code`, `price`) 작성
 6. [ ] Admin UI에서 상품 수동 등록/수정 화면 추가 (`/admin/products`)
+   - ISO 코드별 상품 목록 표시
+   - 상품 추가/수정/삭제 기능
+   - purchase_link 검증 및 업데이트
 7. [ ] 제휴 링크 상태 체크 함수 (`lib/integrations/link-validator.ts`) 구현
 8. [ ] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback
+
+**구현 방향:**
+
+- **권장**: 기존 `products` 테이블 활용 (ISO 코드별 여러 상품 등록)
+- 하나의 ISO 코드에 여러 상품을 등록하면 자동으로 추천됨
+- 각 상품은 고유한 `purchase_link`를 가짐
+- 상세 내용은 `docs/product-sync-plan.md` 참고
 
 ### Phase 4 이후 남은 과제 (세부 티켓)
 

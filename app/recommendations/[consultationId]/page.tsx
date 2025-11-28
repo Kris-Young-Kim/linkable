@@ -148,6 +148,16 @@ export default async function RecommendationsDetailPage({
   try {
     const data = await fetchRecommendations(consultationId)
     products = data.products
+    
+    // 디버깅: 클라이언트에서도 확인 가능하도록
+    if (process.env.NODE_ENV === "development" && (data as any)._debug) {
+      console.log("[recommendations page] API 응답 디버깅 정보:", (data as any)._debug)
+    }
+    
+    console.log("[recommendations page] 제품 개수:", products.length)
+    if (products.length === 0) {
+      console.warn("[recommendations page] 제품이 없습니다. ICF 코드:", consultationData.analysis?.icfCodes)
+    }
   } catch (error) {
     console.error("[recommendations] fetch_error", error)
     errorMessage = "추천 데이터를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."

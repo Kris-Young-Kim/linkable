@@ -9,6 +9,7 @@ import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { trackEvent } from "@/lib/analytics"
+import { PartnershipNotice } from "@/components/recommendations/partnership-notice"
 import type { RecommendationProduct } from "@/components/recommendations-view"
 
 // Re-export the type for convenience
@@ -259,6 +260,9 @@ export function RecommendationsViewWithFilters({
           />
         ))}
       </div>
+
+      {/* 쿠팡 파트너스 활동 시 주의사항 */}
+      <PartnershipNotice />
     </div>
   )
 }
