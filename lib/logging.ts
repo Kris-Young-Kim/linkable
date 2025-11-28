@@ -1,7 +1,7 @@
 type LogLevel = "info" | "warn" | "error"
 
 export type LogEvent = {
-  category: "consultation" | "matching" | "validation" | "system" | "product"
+  category: "consultation" | "matching" | "validation" | "system" | "product" | "recommendation"
   action: string
   payload?: Record<string, unknown>
   level?: LogLevel

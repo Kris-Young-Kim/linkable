@@ -34,7 +34,6 @@ export function GlobalNav() {
       { label: t("header.features"), href: "#features" },
       { label: t("header.howItWorks"), href: "#how-it-works" },
       { label: t("header.about"), href: "/about" },
-      { label: "대시보드", href: "/dashboard", requiresAuth: true },
     ],
     [t],
   )

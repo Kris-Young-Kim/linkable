@@ -30,8 +30,8 @@ export const translations = {
       "ICF & ISO 표준 기반 맞춤형 보조기기 추천입니다.\n검증된 방법론으로 전문가 매칭을 경험하세요.",
     "hero.getStarted": "시작하기",
     "hero.learnMore": "자세히 보기",
-    "hero.icfCertified": "ICF 인증",
-    "hero.isoStandards": "ISO 표준",
+    "hero.icfCertified": "ICF Core Set 활용",
+    "hero.isoStandards": "ISO 9999 데이터 매핑",
     "hero.kippaValidated": "K-IPPA 검증",
     "hero.imageAlt": "편안한 공간에서 태블릿을 사용하는 시니어의 모습",
 
