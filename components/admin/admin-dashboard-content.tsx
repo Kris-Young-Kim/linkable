@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AnalyticsDashboard } from "@/components/analytics-dashboard"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SideNav } from "@/components/navigation/side-nav"
@@ -16,7 +15,6 @@ import {
   ArrowDown,
   Minus,
 } from "lucide-react"
-import Link from "next/link"
 
 interface UserStats {
   totalConsultations: number
@@ -108,11 +106,6 @@ export function AdminDashboardContent() {
           <p className="text-muted-foreground mt-2 text-base">
             전체 플랫폼 통계와 사용자별 종합 데이터를 확인할 수 있습니다.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" asChild>
-            <Link href="/dashboard">사용자 대시보드</Link>
-          </Button>
         </div>
       </section>
 

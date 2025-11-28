@@ -37,7 +37,7 @@ export function SideNav({
             className={cn(
               "flex items-center justify-between rounded-xl border px-3 py-2 text-sm font-medium transition",
               isActive
-                ? "border-primary bg-primary/5 text-primary-foreground"
+                ? "border-primary bg-primary/5 text-primary"
                 : "border-transparent bg-muted/40 text-muted-foreground hover:bg-muted/70",
             )}
             aria-current={isActive ? "page" : undefined}
