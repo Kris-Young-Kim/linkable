@@ -1,10 +1,10 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { auth, clerkClient } from "@clerk/nextjs/server"
 import { AdminDashboardContent } from "@/components/admin/admin-dashboard-content"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { verifyAdminAccess } from "@/lib/auth/verify-admin"
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 const pageUrl = `${baseUrl}/admin/dashboard`
@@ -15,30 +15,10 @@ export const metadata: Metadata = {
   alternates: { canonical: pageUrl },
 }
 
-async function checkAdminAccess() {
-  const { userId } = await auth()
-  if (!userId) {
-    return { hasAccess: false, reason: "not_authenticated" as const }
-  }
-
-  try {
-    const client = await clerkClient()
-    const clerkUser = await client.users.getUser(userId)
-    const userRole = clerkUser.publicMetadata?.role as string | undefined
-    
-    if (userRole !== "admin" && userRole !== "expert") {
-      return { hasAccess: false, reason: "insufficient_permissions" as const }
-    }
-
-    return { hasAccess: true, reason: null }
-  } catch (error) {
-    console.error("[Admin] Error checking access:", error)
-    return { hasAccess: false, reason: "error" as const }
-  }
-}
-
 export default async function AdminDashboardPage() {
-  const { hasAccess, reason } = await checkAdminAccess()
+  const accessResult = await verifyAdminAccess()
+  const hasAccess = accessResult.hasAccess
+  const reason = hasAccess ? null : accessResult.reason
 
   if (!hasAccess) {
     if (reason === "not_authenticated") {

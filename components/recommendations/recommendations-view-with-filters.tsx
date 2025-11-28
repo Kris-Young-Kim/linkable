@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { trackEvent } from "@/lib/analytics"
 import { PartnershipNotice } from "@/components/recommendations/partnership-notice"
 import type { RecommendationProduct } from "@/components/recommendations-view"
+import { CardActionButtons } from "@/components/ui/card-action-buttons"
 
 // Re-export the type for convenience
 export type { RecommendationProduct }
@@ -292,34 +293,28 @@ export function RecommendationsViewWithFilters({
       {/* 추천 카드 목록 */}
       <div className="space-y-6">
         {filteredAndSortedProducts.map((product) => (
-          <ProductRecommendationCard
-            key={product.id}
-            productName={product.name}
-            functionalSupport={product.category ?? t("recommendations.defaultCategory")}
-            description={product.description}
-            imageUrl={product.image_url ?? undefined}
-            isoCode={product.iso_code}
-            isoLabel={product.match_label}
-            matchScore={product.match_score}
-            matchReason={product.match_reason}
-            matchedIcf={product.matched_icf}
-            price={product.price}
-            purchaseLink={product.purchase_link}
-            recommendationId={product.recommendation_id}
-            adminActions={
-              <Button
-                variant="outline"
-                size="sm"
-                type="button"
-                className="h-8 bg-transparent"
-                onClick={() => handleRemoveProduct(product)}
-                disabled={removingId === product.id}
-              >
-                <Trash2 className="mr-1 size-3.5" />
-                삭제
-              </Button>
-            }
-          />
+            <ProductRecommendationCard
+              key={product.id}
+              productName={product.name}
+              functionalSupport={product.category ?? t("recommendations.defaultCategory")}
+              description={product.description}
+              imageUrl={product.image_url ?? undefined}
+              isoCode={product.iso_code}
+              isoLabel={product.match_label}
+              matchScore={product.match_score}
+              matchReason={product.match_reason}
+              matchedIcf={product.matched_icf}
+              price={product.price}
+              purchaseLink={product.purchase_link}
+              recommendationId={product.recommendation_id}
+              adminActions={
+                <CardActionButtons
+                  onDelete={() => handleRemoveProduct(product)}
+                  deleteLabel="추천 삭제"
+                  isDeleteDisabled={removingId === product.id}
+                />
+              }
+            />
         ))}
       </div>
 

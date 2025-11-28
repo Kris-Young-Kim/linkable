@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useMemo, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Edit2, Trash2, X, Check } from "lucide-react"
+import { X, Check } from "lucide-react"
 
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 import { IppaForm } from "@/components/ippa-form"
@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { LocalNav } from "@/components/navigation/local-nav"
 import { SideNav } from "@/components/navigation/side-nav"
+import { CardActionButtons } from "@/components/ui/card-action-buttons"
 
 export type RecommendationRow = {
   id: string
@@ -480,32 +481,12 @@ function ConsultationCard({
             </h3>
             <Badge className={badgeStyle}>{statusLabel(consultation.status)}</Badge>
           </Link>
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={(e) => {
-                e.preventDefault()
-                setIsEditing(true)
-              }}
-              aria-label="수정"
-            >
-              <Edit2 className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-destructive hover:text-destructive"
-              onClick={(e) => {
-                e.preventDefault()
-                setIsDeleting(true)
-              }}
-              aria-label="삭제"
-            >
-              <Trash2 className="size-4" />
-            </Button>
-          </div>
+          <CardActionButtons
+            onEdit={() => setIsEditing(true)}
+            onDelete={() => setIsDeleting(true)}
+            editLabel="상담 수정"
+            deleteLabel="상담 삭제"
+          />
         </div>
         <Link href={`/consultation/${consultation.id}`}>
           <p className="text-sm text-muted-foreground">{formatUpdatedAt(consultation.updated_at)}</p>

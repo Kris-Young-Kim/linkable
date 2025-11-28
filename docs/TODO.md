@@ -440,6 +440,7 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - purchase_link 검증 및 업데이트
 7. [ ] 제휴 링크 상태 체크 함수 (`lib/integrations/link-validator.ts`) 구현
 8. [ ] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback
+9. [ ] **Meta Pixel 연동 및 도식화된 구매 전송 플로우 구현**: 상대방 홈페이지 → 영기님 서비스 픽셀 → 구매 정보 전송 → 영기님 DB 흐름을 추적/시각화. 구현 예정 기능으로 @docs/TODO.md 기준으로 관리.
 
 **구현 방향:**
 
