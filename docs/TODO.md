@@ -528,6 +528,18 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 **n8n 워크플로우 자동화 상세 가이드:**
 
+> 📖 **상세 설정 가이드**: `docs/n8n-setup-guide.md` 참고
+>
+> 이 문서는 n8n 초보자를 위한 단계별 설정 가이드를 포함합니다:
+>
+> - n8n 설치 및 기본 설정
+> - Webhook 기반 수동 등록 워크플로우 설정
+> - Schedule Trigger 기반 자동 크롤링 워크플로우 설정
+> - 쿠팡 파트너스 API 연동
+> - 웹 스크래핑 설정
+> - 테스트 및 검증
+> - 문제 해결
+
 1. **Webhook 기반 수동 등록 워크플로우** (구현 완료)
 
    - Webhook URL: `http://localhost:5678/webhook/products` (Production)
