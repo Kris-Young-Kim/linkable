@@ -9,6 +9,14 @@ import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { CardActionButtons } from "@/components/ui/card-action-buttons"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Search, X } from "lucide-react"
 
 type AdminProduct = {
   id: string
@@ -28,6 +36,8 @@ type AdminProductManagerProps = {
   initialProducts: AdminProduct[]
 }
 
+type SortOption = "updated-desc" | "updated-asc" | "name-asc" | "name-desc" | "price-asc" | "price-desc"
+
 export function AdminProductManager({ initialProducts }: AdminProductManagerProps) {
   const [products, setProducts] = useState(initialProducts)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -43,6 +53,13 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     manufacturer: "",
     category: "",
   })
+
+  // 필터링 및 검색 상태
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedIsoCode, setSelectedIsoCode] = useState<string>("all")
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [selectedStatus, setSelectedStatus] = useState<string>("all")
+  const [sortBy, setSortBy] = useState<SortOption>("updated-desc")
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -136,6 +153,72 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
       return acc
     }, {})
   }, [products])
+
+  // 고유한 ISO 코드 목록
+  const uniqueIsoCodes = useMemo(() => {
+    return Array.from(new Set(products.map((p) => p.iso_code))).sort()
+  }, [products])
+
+  // 고유한 카테고리 목록
+  const uniqueCategories = useMemo(() => {
+    return Array.from(new Set(products.map((p) => p.category).filter(Boolean))).sort()
+  }, [products])
+
+  // 필터링 및 정렬된 상품 목록
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = [...products]
+
+    // 검색 필터
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.iso_code.toLowerCase().includes(query) ||
+          product.manufacturer?.toLowerCase().includes(query) ||
+          product.category?.toLowerCase().includes(query) ||
+          product.description?.toLowerCase().includes(query),
+      )
+    }
+
+    // ISO 코드 필터
+    if (selectedIsoCode !== "all") {
+      filtered = filtered.filter((product) => product.iso_code === selectedIsoCode)
+    }
+
+    // 카테고리 필터
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((product) => product.category === selectedCategory)
+    }
+
+    // 상태 필터
+    if (selectedStatus !== "all") {
+      const isActive = selectedStatus === "active"
+      filtered = filtered.filter((product) => product.is_active === isActive)
+    }
+
+    // 정렬
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "updated-desc":
+          return new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime()
+        case "updated-asc":
+          return new Date(a.updated_at || 0).getTime() - new Date(b.updated_at || 0).getTime()
+        case "name-asc":
+          return a.name.localeCompare(b.name, "ko")
+        case "name-desc":
+          return b.name.localeCompare(a.name, "ko")
+        case "price-asc":
+          return (a.price || 0) - (b.price || 0)
+        case "price-desc":
+          return (b.price || 0) - (a.price || 0)
+        default:
+          return 0
+      }
+    })
+
+    return filtered
+  }, [products, searchQuery, selectedIsoCode, selectedCategory, selectedStatus, sortBy])
 
   return (
     <div className="space-y-8">
@@ -238,15 +321,147 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>상품 목록</CardTitle>
+          <CardDescription>
+            {filteredAndSortedProducts.length === products.length
+              ? `전체 ${products.length}개 상품`
+              : `검색 결과: ${filteredAndSortedProducts.length}개 / 전체 ${products.length}개`}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* 검색 및 필터 컨트롤 */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+            {/* 검색 */}
+            <div className="relative lg:col-span-2">
+              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="상품명, ISO 코드, 제조사 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-9"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              )}
+            </div>
+
+            {/* ISO 코드 필터 */}
+            <Select value={selectedIsoCode} onValueChange={setSelectedIsoCode}>
+              <SelectTrigger>
+                <SelectValue placeholder="ISO 코드" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">전체 ISO 코드</SelectItem>
+                {uniqueIsoCodes.map((iso) => (
+                  <SelectItem key={iso} value={iso}>
+                    ISO {iso} ({productCountByIso[iso]}개)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* 카테고리 필터 */}
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="카테고리" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">전체 카테고리</SelectItem>
+                {uniqueCategories.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* 정렬 */}
+            <Select
+              value={sortBy}
+              onValueChange={(value) => setSortBy(value as SortOption)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="정렬" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="updated-desc">최근 업데이트순</SelectItem>
+                <SelectItem value="updated-asc">오래된 업데이트순</SelectItem>
+                <SelectItem value="name-asc">이름순 (가나다)</SelectItem>
+                <SelectItem value="name-desc">이름순 (역순)</SelectItem>
+                <SelectItem value="price-asc">가격 낮은순</SelectItem>
+                <SelectItem value="price-desc">가격 높은순</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* 상태 필터 */}
+          <div className="flex items-center gap-4">
+            <Label className="text-sm text-muted-foreground">상태:</Label>
+            <div className="flex gap-2">
+              <Button
+                variant={selectedStatus === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus("all")}
+              >
+                전체
+              </Button>
+              <Button
+                variant={selectedStatus === "active" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus("active")}
+              >
+                활성
+              </Button>
+              <Button
+                variant={selectedStatus === "inactive" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedStatus("inactive")}
+              >
+                비활성
+              </Button>
+            </div>
+          </div>
+
+          {/* 필터 초기화 버튼 */}
+          {(searchQuery || selectedIsoCode !== "all" || selectedCategory !== "all" || selectedStatus !== "all") && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery("")
+                  setSelectedIsoCode("all")
+                  setSelectedCategory("all")
+                  setSelectedStatus("all")
+                }}
+              >
+                <X className="mr-2 size-4" />
+                필터 초기화
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6">
-        {products.length === 0 ? (
+        {filteredAndSortedProducts.length === 0 ? (
           <Card>
             <CardContent className="py-10 text-center text-sm text-muted-foreground">
-              아직 등록된 상품이 없습니다.
+              {products.length === 0
+                ? "아직 등록된 상품이 없습니다."
+                : "검색 조건에 맞는 상품이 없습니다."}
             </CardContent>
           </Card>
         ) : (
-          products.map((product) => (
+          filteredAndSortedProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

@@ -26,10 +26,30 @@
  *   ]
  */
 
+// 환경 변수 로드 (import 전에 먼저 실행되어야 함)
+import { config } from "dotenv"
+import { resolve } from "path"
+
+// .env.local 파일 로드
+config({ path: resolve(process.cwd(), ".env.local") })
+// .env 파일도 시도 (없어도 무방)
+config({ path: resolve(process.cwd(), ".env") })
+
+// 환경 변수 확인
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error("❌ 환경 변수가 설정되지 않았습니다.")
+  console.error("필요한 환경 변수:")
+  console.error("  - NEXT_PUBLIC_SUPABASE_URL")
+  console.error("  - SUPABASE_SERVICE_ROLE_KEY")
+  console.error("\n.env.local 파일을 확인하세요.")
+  process.exit(1)
+}
+
 import { readFileSync } from "fs"
 import { join } from "path"
-import { syncProducts, type ProductInput } from "../lib/integrations/product-sync"
-import { getSupabaseServerClient } from "../lib/supabase/server"
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
+import type { ProductInput } from "../lib/integrations/product-sync"
+import type { ProductSyncResult } from "../lib/integrations/types"
 
 /**
  * ISO 코드 검증
@@ -180,10 +200,86 @@ function parseJSON(filePath: string): ProductInput[] {
 
 
 /**
+ * 로컬 상품 동기화 함수 (스크립트 전용)
+ */
+async function syncProductsLocal(
+  supabase: SupabaseClient,
+  products: ProductInput[],
+): Promise<ProductSyncResult> {
+  const result: ProductSyncResult = {
+    success: true,
+    created: 0,
+    updated: 0,
+    failed: 0,
+    errors: [],
+  }
+
+  for (const product of products) {
+    try {
+      // 기존 상품 확인 (이름과 ISO 코드로)
+      const { data: existing } = await supabase
+        .from("products")
+        .select("id")
+        .eq("name", product.name)
+        .eq("iso_code", product.iso_code)
+        .maybeSingle()
+
+      if (existing) {
+        // 업데이트
+        const { data, error } = await supabase
+          .from("products")
+          .update({
+            ...product,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existing.id)
+          .select("id")
+          .single()
+
+        if (error) {
+          throw error
+        }
+
+        result.updated++
+        console.log(`  🔄 업데이트: ${product.name} (ISO: ${product.iso_code})`)
+      } else {
+        // 신규 생성
+        const { data, error } = await supabase
+          .from("products")
+          .insert({
+            ...product,
+            is_active: product.is_active ?? true,
+          })
+          .select("id")
+          .single()
+
+        if (error) {
+          throw error
+        }
+
+        result.created++
+        console.log(`  ✅ 생성: ${product.name} (ISO: ${product.iso_code})`)
+      }
+    } catch (error) {
+      result.failed++
+      result.success = false
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      result.errors?.push({
+        productId: product.name,
+        error: errorMessage,
+      })
+      console.error(`  ❌ 실패: ${product.name} - ${errorMessage}`)
+    }
+  }
+
+  return result
+}
+
+/**
  * 명령줄 인자 파싱
  */
 function parseArgs(): ImportOptions {
-  const args = process.argv.slice(2)
+  const args = process.argv.slice(2).filter((arg) => arg !== "--") // "--" 구분자 제거
   const options: ImportOptions = {
     file: "",
   }
@@ -238,8 +334,17 @@ async function main() {
       return
     }
 
+    // Supabase 클라이언트 생성
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+    const supabase = createClient(supabaseUrl, serviceRoleKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    })
+
     // 데이터베이스 연결 확인
-    const supabase = getSupabaseServerClient()
     const { error: testError } = await supabase.from("products").select("id").limit(1)
     
     if (testError) {
@@ -248,10 +353,8 @@ async function main() {
 
     console.log("\n📤 상품 등록 중...\n")
 
-    // 상품 동기화
-    const result = await syncProducts(products, {
-      validateLinks: options.validateLinks,
-    })
+    // 상품 동기화 (스크립트에서 직접 구현)
+    const result = await syncProductsLocal(supabase, products)
 
     // 결과 출력
     console.log("\n" + "=".repeat(50))

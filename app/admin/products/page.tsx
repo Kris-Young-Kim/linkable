@@ -94,7 +94,7 @@ export default async function AdminProductsPage() {
             items={[
               { label: "전체 통계", href: "/admin/dashboard", icon: <BarChart3 className="size-4" /> },
               { label: "사용자 리스트", href: "/admin/dashboard#users", icon: <Users className="size-4" /> },
-              { label: "로그 모니터링", href: "/admin/dashboard#logs", icon: <ClipboardCheck className="size-4" />, badge: "Soon" },
+              { label: "K-IPPA 통계", href: "/admin/logs", icon: <ClipboardCheck className="size-4" /> },
               { label: "상품 관리", href: "/admin/products", icon: <Package className="size-4" /> },
             ]}
           />
