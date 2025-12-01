@@ -161,7 +161,7 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
 
   // 고유한 카테고리 목록
   const uniqueCategories = useMemo(() => {
-    return Array.from(new Set(products.map((p) => p.category).filter(Boolean))).sort()
+    return Array.from(new Set(products.map((p) => p.category).filter((cat): cat is string => Boolean(cat)))).sort()
   }, [products])
 
   // 필터링 및 정렬된 상품 목록
