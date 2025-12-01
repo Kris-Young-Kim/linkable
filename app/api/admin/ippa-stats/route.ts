@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     // 전체 K-IPPA 평가 데이터
     const { data: allEvaluations, error: evalError } = await supabase
       .from("ippa_evaluations")
-      .select("id, user_id, effectiveness_score, score_difficulty_pre, score_difficulty_post, evaluated_at, recommendation_id")
+      .select("id, user_id, product_id, effectiveness_score, score_difficulty_pre, score_difficulty_post, evaluated_at, recommendation_id")
 
     if (evalError) {
       console.error("[Admin Ippa Stats] Evaluations fetch error:", evalError)

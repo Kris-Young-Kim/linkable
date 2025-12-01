@@ -431,6 +431,46 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - [x] ISO 코드별 다중 상품 링크 관리 가이드
 2. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 또는 스크래퍼)
 3. [ ] **상품 크롤링 및 자동 등록 시스템 구현**
+   - [x] 수동 크롤링 스크립트 (`scripts/manual-product-import.ts`)
+     - [x] CSV/Excel 파일 기반 일괄 등록
+     - [x] JSON 파일 기반 일괄 등록
+     - [x] ISO 코드 매핑 자동화
+   - [ ] **n8n 워크플로우 자동화 시스템** (진행 중)
+     - [x] Webhook 기반 수동 등록 워크플로우 구축
+       - [x] Webhook 노드 설정 (POST /webhook/products)
+       - [x] 데이터 변환 Code 노드 (ISO 코드 자동 매핑)
+       - [x] Supabase 중복 체크 (Get 노드)
+       - [x] 조건 분기 (IF 노드)
+       - [x] Supabase Update/Create 노드
+       - [x] Respond to Webhook 노드
+     - [ ] Schedule Trigger 기반 자동 크롤링 워크플로우
+       - [ ] Schedule Trigger 노드 추가 및 설정
+         - [ ] 실행 주기 설정 (매일 오전 2시 또는 6시간마다)
+         - [ ] Cron Expression 설정 (`0 2 * * *` 또는 `0 */6 * * *`)
+       - [ ] 쿠팡 파트너스 API 연동
+         - [ ] 쿠팡 파트너스 API 키 발급
+         - [ ] n8n HTTP Request 노드 설정
+         - [ ] API Credential 설정 (Header Auth)
+         - [ ] 상품 검색 쿼리 파라미터 설정 (keyword, limit)
+       - [ ] 웹 스크래핑 설정 (대안 방법)
+         - [ ] Playwright 노드 추가 및 설정
+         - [ ] HTML Extract 노드 설정
+         - [ ] 셀렉터 설정 (상품명, 가격, 이미지, 링크)
+       - [ ] 데이터 변환 및 처리
+         - [ ] Code 노드: 쿠팡 API 응답 → Supabase 형식 변환
+         - [ ] ISO 코드 자동 매핑 로직 (키워드 기반)
+         - [ ] 가격 정규화 로직
+         - [ ] Split In Batches 노드 (배치 처리)
+       - [ ] Supabase 자동 등록 파이프라인
+         - [ ] 중복 체크 (Get 노드)
+         - [ ] 조건 분기 (IF 노드)
+         - [ ] Update/Create 노드
+         - [ ] Wait 노드 (Rate Limit 방지)
+       - [ ] 워크플로우 활성화 및 테스트
+         - [ ] 워크플로우 저장
+         - [ ] Active 토글 ON
+         - [ ] Executions에서 실행 내역 확인
+         - [ ] Supabase에서 데이터 확인
    - [ ] 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts` 구현)
      - API 키 발급 및 환경 변수 설정
      - 상품 검색 API 구현 (`searchProducts`)
@@ -440,10 +480,6 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
      - Puppeteer 또는 Playwright 기반 스크래퍼 (`scripts/crawlers/web-scraper.ts`)
      - 쿠팡/네이버/11번가 등 주요 쇼핑몰 지원
      - 상품 정보 추출 로직 (이름, 가격, 이미지, 링크)
-   - [ ] 수동 크롤링 스크립트 (`scripts/manual-product-import.ts`)
-     - CSV/Excel 파일 기반 일괄 등록
-     - JSON 파일 기반 일괄 등록
-     - ISO 코드 매핑 자동화
    - [ ] 크롤링 데이터 → DB 자동 등록 파이프라인
      - `upsertProduct` 함수 활용
      - 중복 상품 자동 감지 및 업데이트
@@ -475,7 +511,13 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 - **단기 (MVP)**: 수동 크롤링 스크립트 + CSV/Excel 일괄 등록
   - 빠른 구현 가능, 데이터 품질 제어 용이
-  - `scripts/manual-product-import.ts` 구현
+  - `scripts/manual-product-import.ts` 구현 ✅
+- **중기 (진행 중)**: n8n 워크플로우 자동화
+  - Webhook 기반 수동 등록: 외부 시스템에서 데이터 전송 가능 ✅
+  - Schedule Trigger 기반 자동 크롤링: 주기적으로 자동 실행
+  - 쿠팡 API 또는 웹 스크래핑으로 상품 수집
+  - Supabase에 자동 등록 (중복 체크 및 Upsert)
+  - 관리자 페이지(`/admin/products`)에서 자동으로 상품 확인 가능
 - **장기 (Post-MVP)**: 쿠팡 파트너스 API 자동화
   - 쿠팡 파트너스 가입 및 API 키 발급
   - `lib/integrations/coupang.ts` 완전 구현
@@ -483,6 +525,44 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 - **대안**: 웹 스크래핑 (Puppeteer/Playwright)
   - API 키 불필요, 다양한 쇼핑몰 지원
   - 사이트 구조 변경 시 유지보수 필요
+
+**n8n 워크플로우 자동화 상세 가이드:**
+
+1. **Webhook 기반 수동 등록 워크플로우** (구현 완료)
+
+   - Webhook URL: `http://localhost:5678/webhook/products` (Production)
+   - 외부에서 POST 요청으로 상품 데이터 전송
+   - 데이터 변환 → 중복 체크 → Update/Create → 응답
+   - 사용 예시:
+     ```powershell
+     Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -ContentType "application/json" -Body '{"name": "무게조절 식기 세트", "purchase_link": "https://coupang.link/test", "price": 25000, "category": "coupang"}'
+     ```
+
+2. **Schedule Trigger 기반 자동 크롤링 워크플로우** (구현 예정)
+
+   - Schedule Trigger: 매일 오전 2시 또는 6시간마다 실행
+   - 쿠팡 API 호출 또는 웹 스크래핑으로 상품 수집
+   - 데이터 변환 (ISO 코드 자동 매핑, 가격 정규화)
+   - 배치 처리 (10개씩 처리)
+   - 중복 체크 → Update/Create
+   - Rate Limit 방지 (1초 대기)
+   - 워크플로우 구조:
+     ```
+     Schedule Trigger → HTTP Request/Playwright → Code 변환 → Split In Batches →
+     중복 체크 → IF → Update/Create → Wait → 다음 배치
+     ```
+
+3. **n8n 설정 요구사항:**
+
+   - Supabase Credential 설정 (Host, Service Role Key)
+   - 쿠팡 API Credential 설정 (선택사항)
+   - 워크플로우 Active 상태 유지
+   - 환경 변수: `N8N_WEBHOOK_URL` (커서 프로젝트에서 사용)
+
+4. **관리자 페이지 연동:**
+   - `https://link-able.vercel.app/admin/products`에서 자동으로 등록된 상품 확인
+   - n8n이 주기적으로 실행되면 관리자 페이지에 상품이 자동으로 누적됨
+   - 필터링, 검색, 정렬 기능으로 상품 관리 가능
 
 ### Phase 4 이후 남은 과제 (세부 티켓)
 
