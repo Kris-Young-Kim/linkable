@@ -7,6 +7,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AdminProductManager } from "@/components/admin/admin-product-manager"
+import { SideNav } from "@/components/navigation/side-nav"
+import { BarChart3, Users, Package, ClipboardCheck } from "lucide-react"
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 const pageUrl = `${baseUrl}/admin/products`
@@ -75,11 +77,32 @@ export default async function AdminProductsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-10">
       <div className="container mx-auto px-4 md:px-6 space-y-8">
-        <div className="flex flex-col gap-2">
-          <p className="text-sm text-muted-foreground">상품 관리</p>
-          <h1 className="text-3xl font-bold text-foreground">쿠팡/유통업체 상품 등록</h1>
+        <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-wide text-muted-foreground">상품 관리</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">쿠팡/유통업체 상품 등록</h1>
+            <p className="text-muted-foreground mt-2 text-base">
+              ISO 9999 코드에 해당하는 보조기기 상품을 등록하고 관리할 수 있습니다.
+            </p>
+          </div>
+        </section>
+
+        <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+          <SideNav
+            currentRole="admin"
+            className="border border-border/60 rounded-2xl bg-card/80 p-4 shadow-sm"
+            items={[
+              { label: "전체 통계", href: "/admin/dashboard", icon: <BarChart3 className="size-4" /> },
+              { label: "사용자 리스트", href: "/admin/dashboard#users", icon: <Users className="size-4" /> },
+              { label: "로그 모니터링", href: "/admin/dashboard#logs", icon: <ClipboardCheck className="size-4" />, badge: "Soon" },
+              { label: "상품 관리", href: "/admin/products", icon: <Package className="size-4" /> },
+            ]}
+          />
+
+          <div className="space-y-8">
+            <AdminProductManager initialProducts={data ?? []} />
+          </div>
         </div>
-        <AdminProductManager initialProducts={data ?? []} />
       </div>
     </div>
   )

@@ -7,7 +7,8 @@
     "dev": "next dev",
     "lint": "eslint .",
     "start": "next start",
-    "gen:types": "npx -y supabase gen types typescript --project-id \"sityptcwbnremuzsvbhx\" --schema public > database.types.ts"
+    "gen:types": "npx -y supabase gen types typescript --project-id \"sityptcwbnremuzsvbhx\" --schema public > database.types.ts",
+    "import:products": "tsx scripts/manual-product-import.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",

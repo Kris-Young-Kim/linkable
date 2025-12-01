@@ -1,0 +1,53 @@
+[
+  {
+    "name": "무게조절 식기 세트",
+    "iso_code": "15 09",
+    "price": 25000,
+    "purchase_link": "https://www.coupang.com/vp/products/example1",
+    "image_url": "https://thumbnail.image.com/weighted-utensils.jpg",
+    "manufacturer": "보조기기코리아",
+    "category": "coupang",
+    "description": "손 떨림이 있는 분들을 위한 무게조절 식기 세트입니다. 무게 중심을 조절하여 식사 시 떨림을 최소화합니다."
+  },
+  {
+    "name": "적응형 숟가락",
+    "iso_code": "15 09",
+    "price": 15000,
+    "purchase_link": "https://shopping.naver.com/catalog/example2",
+    "image_url": "https://thumbnail.image.com/adaptive-spoon.jpg",
+    "manufacturer": "보조기기코리아",
+    "category": "naver",
+    "description": "손 기능이 제한된 분들을 위한 적응형 숟가락입니다."
+  },
+  {
+    "name": "접이식 휠체어 경사로",
+    "iso_code": "18 30",
+    "price": 150000,
+    "purchase_link": "https://shopping.naver.com/catalog/example3",
+    "image_url": "https://cdn.example.com/ramp.jpg",
+    "manufacturer": "접근성솔루션",
+    "category": "naver",
+    "description": "휠체어 사용자가 문턱이나 낮은 계단을 쉽게 넘을 수 있도록 돕는 접이식 경사로입니다."
+  },
+  {
+    "name": "LED 손전등 지팡이",
+    "iso_code": "12 22",
+    "price": 35000,
+    "purchase_link": "https://www.coupang.com/vp/products/example4",
+    "image_url": "https://thumbnail.image.com/led-cane.jpg",
+    "manufacturer": "안전보조기기",
+    "category": "coupang",
+    "description": "야간 보행을 위한 LED 조명이 내장된 지팡이입니다."
+  },
+  {
+    "name": "전동 리프트 체어",
+    "iso_code": "12 31",
+    "price": 2500000,
+    "purchase_link": "https://www.coupang.com/vp/products/example5",
+    "image_url": "https://thumbnail.image.com/lift-chair.jpg",
+    "manufacturer": "전동보조기기",
+    "category": "coupang",
+    "description": "앉기와 서기를 돕는 전동 리프트 체어입니다."
+  }
+]
+
