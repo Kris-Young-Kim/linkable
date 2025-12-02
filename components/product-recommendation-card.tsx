@@ -1,10 +1,11 @@
 "use client"
 
 import { useCallback, useState, type ReactNode } from "react"
+import Image from "next/image"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ExternalLink, ShoppingCart } from "lucide-react"
+import { ExternalLink, ShoppingCart, Package } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { trackEvent } from "@/lib/analytics"
 
@@ -119,9 +120,20 @@ export function ProductRecommendationCard({
         </div>
       </CardHeader>
 
-      {imageUrl && (
-        <div className="px-6">
-          <img src={imageUrl || "/placeholder.svg"} alt={productName} className="w-full h-48 object-cover rounded-lg" />
+      {imageUrl ? (
+        <div className="px-6 relative h-48 w-full">
+          <Image
+            src={imageUrl}
+            alt={productName}
+            fill
+            className="object-cover rounded-lg"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        <div className="px-6 h-48 w-full flex items-center justify-center bg-muted rounded-lg">
+          <Package className="size-12 text-muted-foreground/50" aria-hidden="true" />
         </div>
       )}
 

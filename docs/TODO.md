@@ -578,21 +578,21 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 ### Phase 4 이후 남은 과제 (세부 티켓)
 
-1. [ ] 자동 알림 스케줄러 PoC (`supabase edge functions` or `cron`) 작성
-2. [ ] 추천 생성 → +14일 K-IPPA 알림 트리거 연동 테스트
-3. [ ] Analytics & Metrics 요구사항 명세 (`docs/analytics-dashboard.md`)
-4. [ ] Supabase 뷰/스토어드 프로시저로 KPI 데이터 집계
-5. [ ] 대시보드 UI 초안 (`components/analytics/kpi-board.tsx`) 제작
-6. [ ] 관리자 페이지에 KPI 위젯 삽입 및 필터 기능 구현
+1. [x] 자동 알림 스케줄러 PoC (`supabase edge functions` or `cron`) 작성
+2. [x] 추천 생성 → +14일 K-IPPA 알림 트리거 연동 테스트
+3. [x] Analytics & Metrics 요구사항 명세 (`docs/analytics-dashboard.md`)
+4. [x] Supabase 뷰/스토어드 프로시저로 KPI 데이터 집계
+5. [x] 대시보드 UI 초안 (`components/analytics/kpi-board.tsx`) 제작
+6. [x] 관리자 페이지에 KPI 위젯 삽입 및 필터 기능 구현
 
 ### Post-MVP 전략 실행 티켓
 
 #### 성능/로딩 최적화
 
-1. [ ] 추천/대시보드 페이지 주요 컴포넌트 동적 import + Suspense
-2. [ ] Hero, 추천 카드, 대시보드 그래프 `next/image`/`ImageResponse`로 교체
-3. [ ] SSE 스트림 로딩 스켈레톤/토스트 컴포넌트 추가
-4. [ ] Lighthouse/Next-Profiler 측정 & 성능 회귀 테스트 문서화
+1. [x] 추천/대시보드 페이지 주요 컴포넌트 동적 import + Suspense
+2. [x] Hero, 추천 카드, 대시보드 그래프 `next/image`/`ImageResponse`로 교체
+3. [x] SSE 스트림 로딩 스켈레톤/토스트 컴포넌트 추가
+4. [x] Lighthouse/Next-Profiler 측정 & 성능 회귀 테스트 문서화
 
 #### UX 반응성 향상
 

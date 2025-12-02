@@ -1,11 +1,40 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { auth } from "@clerk/nextjs/server"
+import { Suspense } from "react"
+import dynamic from "next/dynamic"
 
-import { DashboardContent, type ConsultationRow } from "@/components/dashboard-content"
+import type { ConsultationRow } from "@/components/dashboard-content"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
+
+// 동적 import로 무거운 컴포넌트 지연 로딩
+const DashboardContent = dynamic(
+  () => import("@/components/dashboard-content").then((mod) => ({ default: mod.DashboardContent })),
+  {
+    loading: () => (
+      <div className="container mx-auto px-4 py-8 space-y-6">
+        <div className="h-12 bg-muted animate-pulse rounded-lg" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-6 bg-muted rounded w-3/4" />
+                <div className="h-4 bg-muted rounded w-1/2 mt-2" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 bg-muted rounded w-full mb-2" />
+                <div className="h-4 bg-muted rounded w-5/6" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    ),
+    ssr: true,
+  }
+)
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 const pageUrl = `${baseUrl}/dashboard`
@@ -121,7 +150,29 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <DashboardContent consultations={consultations} />
+      <Suspense
+        fallback={
+          <div className="container mx-auto px-4 py-8 space-y-6">
+            <div className="h-12 bg-muted animate-pulse rounded-lg" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader>
+                    <div className="h-6 bg-muted rounded w-3/4" />
+                    <div className="h-4 bg-muted rounded w-1/2 mt-2" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-4 bg-muted rounded w-full mb-2" />
+                    <div className="h-4 bg-muted rounded w-5/6" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        }
+      >
+        <DashboardContent consultations={consultations} />
+      </Suspense>
     </div>
   )
 }

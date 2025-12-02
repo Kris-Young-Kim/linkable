@@ -1,6 +1,7 @@
 "use client"
 
 import { Fragment } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
@@ -130,14 +131,17 @@ export function HeroSection() {
             {[...heroAssistiveImages, ...heroAssistiveImages].map((image, index) => (
               <div
                 key={`${image.src}-${index}`}
-                className="h-32 w-48 flex-shrink-0 overflow-hidden rounded-2xl border border-primary/10 bg-muted"
+                className="relative h-32 w-48 flex-shrink-0 overflow-hidden rounded-2xl border border-primary/10 bg-muted"
                 aria-hidden="true"
               >
-                <img
+                <Image
                   src={image.src}
                   alt={image.alt}
-                  className="h-full w-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="192px"
                   loading="lazy"
+                  unoptimized={image.src.startsWith("https://images.unsplash.com")}
                 />
               </div>
             ))}

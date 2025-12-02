@@ -1,52 +1,71 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  MousePointerClick, 
-  ClipboardCheck, 
-  TrendingUp, 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  MousePointerClick,
+  ClipboardCheck,
+  TrendingUp,
   BarChart3,
   Calendar,
   Users,
-} from "lucide-react"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
-import { useLanguage } from "@/components/language-provider"
+} from "lucide-react";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
+import { useLanguage } from "@/components/language-provider";
 
 interface KPIMetrics {
   recommendationAccuracy: {
-    clickThroughRate: number
-    totalRecommendations: number
-    clickedRecommendations: number
-  }
+    clickThroughRate: number;
+    totalRecommendations: number;
+    clickedRecommendations: number;
+  };
   ippaParticipation: {
-    participationRate: number
-    totalEvaluations: number
-    eligibleRecommendations: number
-  }
+    participationRate: number;
+    totalEvaluations: number;
+    eligibleRecommendations: number;
+  };
   consultationCompletion: {
-    completionRate: number
-    totalConsultations: number
-    completedConsultations: number
-  }
+    completionRate: number;
+    totalConsultations: number;
+    completedConsultations: number;
+  };
   recentActivity: {
-    recommendations: number
-    ippaEvaluations: number
-  }
-  averageEffectiveness: number
+    recommendations: number;
+    ippaEvaluations: number;
+  };
+  averageEffectiveness: number;
 }
 
 interface DailyStats {
-  stat_date: string
-  recommendations_count: number
-  clicked_count: number
+  stat_date: string;
+  recommendations_count: number;
+  clicked_count: number;
 }
 
 interface KPIBoardProps {
-  apiEndpoint?: string
-  showTrendChart?: boolean
-  showFilters?: boolean
+  apiEndpoint?: string;
+  showTrendChart?: boolean;
+  showFilters?: boolean;
 }
 
 const chartConfig = {
@@ -62,55 +81,55 @@ const chartConfig = {
     label: "K-IPPA 평가",
     color: "hsl(var(--chart-3))",
   },
-}
+};
 
-export function KPIBoard({ 
+export function KPIBoard({
   apiEndpoint = "/api/admin/analytics",
   showTrendChart = true,
   showFilters = false,
 }: KPIBoardProps) {
-  const { t } = useLanguage()
-  const [metrics, setMetrics] = useState<KPIMetrics | null>(null)
-  const [dailyStats, setDailyStats] = useState<DailyStats[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { t } = useLanguage();
+  const [metrics, setMetrics] = useState<KPIMetrics | null>(null);
+  const [dailyStats, setDailyStats] = useState<DailyStats[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
       try {
         // 메트릭 데이터 조회
-        const metricsResponse = await fetch(apiEndpoint)
+        const metricsResponse = await fetch(apiEndpoint);
         if (!metricsResponse.ok) {
-          throw new Error("Failed to fetch metrics")
+          throw new Error("Failed to fetch metrics");
         }
-        const metricsData = await metricsResponse.json()
-        setMetrics(metricsData.metrics)
+        const metricsData = await metricsResponse.json();
+        setMetrics(metricsData.metrics);
 
         // 일별 통계 조회 (View 사용)
         try {
-          const dailyResponse = await fetch(`${apiEndpoint}?daily=true`)
+          const dailyResponse = await fetch(`${apiEndpoint}?daily=true`);
           if (dailyResponse.ok) {
-            const dailyData = await dailyResponse.json()
+            const dailyData = await dailyResponse.json();
             if (dailyData.dailyStats) {
-              setDailyStats(dailyData.dailyStats)
+              setDailyStats(dailyData.dailyStats);
             }
           }
         } catch (dailyError) {
-          console.warn("[KPI Board] Daily stats not available:", dailyError)
+          console.warn("[KPI Board] Daily stats not available:", dailyError);
           // 일별 통계는 선택적이므로 에러를 무시
         }
       } catch (err) {
-        console.error("[KPI Board] Fetch error:", err)
-        setError(err instanceof Error ? err.message : "알 수 없는 오류")
+        console.error("[KPI Board] Fetch error:", err);
+        setError(err instanceof Error ? err.message : "알 수 없는 오류");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [apiEndpoint])
+    fetchData();
+  }, [apiEndpoint]);
 
   if (isLoading) {
     return (
@@ -128,7 +147,7 @@ export function KPIBoard({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (error || !metrics) {
@@ -138,7 +157,7 @@ export function KPIBoard({
           {error || "데이터를 불러올 수 없습니다"}
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // 일별 통계 차트 데이터 준비
@@ -146,13 +165,13 @@ export function KPIBoard({
     .slice(0, 30) // 최근 30일
     .reverse() // 오래된 순서로 정렬
     .map((stat) => ({
-      date: new Date(stat.stat_date).toLocaleDateString("ko-KR", { 
-        month: "short", 
-        day: "numeric" 
+      date: new Date(stat.stat_date).toLocaleDateString("ko-KR", {
+        month: "short",
+        day: "numeric",
       }),
       recommendations: stat.recommendations_count,
       clicked: stat.clicked_count,
-    }))
+    }));
 
   return (
     <div className="space-y-6">
@@ -165,9 +184,12 @@ export function KPIBoard({
             <MousePointerClick className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.recommendationAccuracy.clickThroughRate}%</div>
+            <div className="text-2xl font-bold">
+              {metrics.recommendationAccuracy.clickThroughRate}%
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics.recommendationAccuracy.clickedRecommendations} / {metrics.recommendationAccuracy.totalRecommendations} 클릭
+              {metrics.recommendationAccuracy.clickedRecommendations} /{" "}
+              {metrics.recommendationAccuracy.totalRecommendations} 클릭
             </p>
           </CardContent>
         </Card>
@@ -179,7 +201,9 @@ export function KPIBoard({
             <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.ippaParticipation.participationRate}%</div>
+            <div className="text-2xl font-bold">
+              {metrics.ippaParticipation.participationRate}%
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               {metrics.ippaParticipation.totalEvaluations}개 평가 완료
             </p>
@@ -193,9 +217,12 @@ export function KPIBoard({
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.consultationCompletion.completionRate}%</div>
+            <div className="text-2xl font-bold">
+              {metrics.consultationCompletion.completionRate}%
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {metrics.consultationCompletion.completedConsultations} / {metrics.consultationCompletion.totalConsultations} 완료
+              {metrics.consultationCompletion.completedConsultations} /{" "}
+              {metrics.consultationCompletion.totalConsultations} 완료
             </p>
           </CardContent>
         </Card>
@@ -207,7 +234,9 @@ export function KPIBoard({
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metrics.averageEffectiveness}</div>
+            <div className="text-2xl font-bold">
+              {metrics.averageEffectiveness}
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
               K-IPPA 평균 점수
             </p>
@@ -225,11 +254,15 @@ export function KPIBoard({
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <p className="text-sm text-muted-foreground">추천 생성</p>
-              <p className="text-2xl font-bold">{metrics.recentActivity.recommendations}개</p>
+              <p className="text-2xl font-bold">
+                {metrics.recentActivity.recommendations}개
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">K-IPPA 평가</p>
-              <p className="text-2xl font-bold">{metrics.recentActivity.ippaEvaluations}개</p>
+              <p className="text-2xl font-bold">
+                {metrics.recentActivity.ippaEvaluations}개
+              </p>
             </div>
           </div>
         </CardContent>
@@ -246,27 +279,27 @@ export function KPIBoard({
             <ChartContainer config={chartConfig}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   className="text-xs"
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
-                <YAxis 
+                <YAxis
                   className="text-xs"
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="recommendations" 
-                  stroke="hsl(var(--chart-1))" 
+                <Line
+                  type="monotone"
+                  dataKey="recommendations"
+                  stroke="hsl(var(--chart-1))"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="clicked" 
-                  stroke="hsl(var(--chart-2))" 
+                <Line
+                  type="monotone"
+                  dataKey="clicked"
+                  stroke="hsl(var(--chart-2))"
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
@@ -287,24 +320,24 @@ export function KPIBoard({
             <ChartContainer config={chartConfig}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   className="text-xs"
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
-                <YAxis 
+                <YAxis
                   className="text-xs"
                   tick={{ fill: "hsl(var(--muted-foreground))" }}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar 
-                  dataKey="recommendations" 
-                  fill="hsl(var(--chart-1))" 
+                <Bar
+                  dataKey="recommendations"
+                  fill="hsl(var(--chart-1))"
                   radius={[4, 4, 0, 0]}
                 />
-                <Bar 
-                  dataKey="clicked" 
-                  fill="hsl(var(--chart-2))" 
+                <Bar
+                  dataKey="clicked"
+                  fill="hsl(var(--chart-2))"
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>
@@ -313,6 +346,5 @@ export function KPIBoard({
         </Card>
       )}
     </div>
-  )
+  );
 }
-

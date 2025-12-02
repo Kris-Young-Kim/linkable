@@ -3,6 +3,8 @@ import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
 import { ArrowLeft, Filter, ArrowUpDown, Sparkles } from "lucide-react"
+import { Suspense } from "react"
+import dynamic from "next/dynamic"
 
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,8 +12,36 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { LocalNav } from "@/components/navigation/local-nav"
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
-import { RecommendationsViewWithFilters, type RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters"
+import type { RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters"
 import type { IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
+
+// 동적 import로 무거운 컴포넌트 지연 로딩
+const RecommendationsViewWithFilters = dynamic(
+  () => import("@/components/recommendations/recommendations-view-with-filters").then((mod) => ({ default: mod.RecommendationsViewWithFilters })),
+  {
+    loading: () => (
+      <div className="space-y-6">
+        <div className="h-12 bg-muted animate-pulse rounded-lg" />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="h-48 bg-muted rounded-t-lg" />
+              <CardHeader>
+                <div className="h-6 bg-muted rounded w-3/4" />
+                <div className="h-4 bg-muted rounded w-1/2 mt-2" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-4 bg-muted rounded w-full mb-2" />
+                <div className="h-4 bg-muted rounded w-5/6" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    ),
+    ssr: true,
+  }
+)
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
@@ -287,13 +317,36 @@ export default async function RecommendationsDetailPage({
             <div className="mb-4 text-sm text-muted-foreground">
               {products.length > 0 ? `총 ${products.length}개의 추천이 있습니다.` : "아직 추천이 생성되지 않았습니다."}
             </div>
-            <RecommendationsViewWithFilters
-              products={products}
-              errorMessage={errorMessage}
-              consultationId={consultationId}
-              initialSort={sortBy}
-              initialFilter={filterBy}
-            />
+            <Suspense
+              fallback={
+                <div className="space-y-6">
+                  <div className="h-12 bg-muted animate-pulse rounded-lg" />
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {[1, 2, 3].map((i) => (
+                      <Card key={i} className="animate-pulse">
+                        <div className="h-48 bg-muted rounded-t-lg" />
+                        <CardHeader>
+                          <div className="h-6 bg-muted rounded w-3/4" />
+                          <div className="h-4 bg-muted rounded w-1/2 mt-2" />
+                        </CardHeader>
+                        <CardContent>
+                          <div className="h-4 bg-muted rounded w-full mb-2" />
+                          <div className="h-4 bg-muted rounded w-5/6" />
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              }
+            >
+              <RecommendationsViewWithFilters
+                products={products}
+                errorMessage={errorMessage}
+                consultationId={consultationId}
+                initialSort={sortBy}
+                initialFilter={filterBy}
+              />
+            </Suspense>
           </CardContent>
         </Card>
       </main>
