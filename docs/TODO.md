@@ -614,9 +614,9 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 #### 운영/신뢰성
 
-14. [ ] Observability 스택 구성 (Vercel Log Drains + Supabase Edge logging)
-15. [ ] DB snapshot/백업 스케줄 자동화 문서화
-16. [ ] 에러 대응 가이드/FAQ 모달 작성 및 연결
+14. [x] Observability 스택 구성 (Vercel Log Drains + Supabase Edge logging)
+15. [x] DB snapshot/백업 스케줄 자동화 문서화
+16. [x] 에러 대응 가이드/FAQ 모달 작성 및 연결
 
 #### 비즈니스 스케일
 

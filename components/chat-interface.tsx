@@ -67,6 +67,8 @@ import {
 } from "@/components/features/analysis/icf-visualization";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { ConsultationFlowGuide } from "@/components/consultation-flow-guide";
+import { ErrorFaqModal } from "@/components/error-faq-modal";
+import { ErrorFaqModal } from "@/components/error-faq-modal";
 import {
   Sparkles,
   Send,
@@ -367,27 +369,32 @@ export function ChatInterface() {
           case "error": {
             try {
               const payload = JSON.parse(data) as { message?: string };
+              const errorMessage = payload.message || t("chat.errorResponse");
               setMessages((prev) =>
                 prev.map((message) =>
                   message.id === assistantMessageId
                     ? {
                         ...message,
-                        content: payload.message || t("chat.errorResponse"),
+                        content: errorMessage,
                       }
                     : message
                 )
               );
+              // 에러 발생 시 에러 상태 저장 (ErrorFaqModal에서 사용)
+              setErrorState(errorMessage);
             } catch {
+              const errorMessage = t("chat.errorResponse");
               setMessages((prev) =>
                 prev.map((message) =>
                   message.id === assistantMessageId
                     ? {
                         ...message,
-                        content: t("chat.errorResponse"),
+                        content: errorMessage,
                       }
                     : message
                 )
               );
+              setErrorState(errorMessage);
             }
             break;
           }
@@ -601,6 +608,22 @@ export function ChatInterface() {
         aria-live="polite"
         aria-atomic="true"
       />
+
+      {/* 에러 FAQ 모달 */}
+      {errorState && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <ErrorFaqModal
+            error={errorState}
+            onRetry={() => {
+              setErrorState(null);
+              // 에러가 발생한 경우 마지막 메시지를 다시 전송
+              if (input.trim()) {
+                handleSend();
+              }
+            }}
+          />
+        </div>
+      )}
 
       {requiresLogin && (
         <div className="flex h-screen flex-col items-center justify-center gap-4 p-8">
