@@ -74,6 +74,12 @@ const persistRecommendations = async (
     payload: { consultationId, count: data?.length ?? 0 },
   })
 
+  // 추천 생성 로그 추가 (리마인더 연동 테스트용)
+  console.log(`[Products API] 추천 생성 완료: consultationId=${consultationId}, count=${data?.length ?? 0}`)
+  if (data && data.length > 0) {
+    console.log(`[Products API] 생성된 추천 ID: ${data.map((r) => r.id).join(", ")}`)
+  }
+
   return mapping
 }
 

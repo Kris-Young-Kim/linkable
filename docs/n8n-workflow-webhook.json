@@ -1,0 +1,312 @@
+{
+  "name": "LinkAble 상품 등록 (Webhook)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "products",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300],
+      "webhookId": "linkable-products"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Webhook에서 받은 데이터를 Supabase 형식으로 변환\nconst items = $input.all();\n\nreturn items.map(item => {\n  // Webhook body에서 데이터 추출\n  const data = item.json.body || item.json;\n  \n  // ISO 코드 자동 매핑\n  function getIsoCode(keyword) {\n    if (!keyword) return \"15 09\";\n    const k = String(keyword).toLowerCase();\n    if (k.includes(\"식기\") || k.includes(\"식사\")) return \"15 09\";\n    if (k.includes(\"휠체어\") && !k.includes(\"전동\")) return \"12 22\";\n    if (k.includes(\"전동\") && k.includes(\"휠체어\")) return \"12 23\";\n    if (k.includes(\"경사로\") || k.includes(\"승강기\")) return \"18 30\";\n    if (k.includes(\"체위\") || k.includes(\"리프트\")) return \"12 31\";\n    if (k.includes(\"청각\") || k.includes(\"보청기\")) return \"21 06\";\n    if (k.includes(\"의사소통\")) return \"22 30\";\n    if (k.includes(\"지팡이\") || k.includes(\"보행기\")) return \"12 06\";\n    return \"15 09\";\n  }\n  \n  // 가격 정규화\n  function getPrice(price) {\n    if (!price) return null;\n    if (typeof price === 'number') return price;\n    const num = String(price).replace(/[^0-9]/g, '');\n    return num ? parseInt(num) : null;\n  }\n  \n  return {\n    json: {\n      name: data.name || \"상품명 없음\",\n      iso_code: data.iso_code || data.isoCode || getIsoCode(data.name || data.keyword),\n      purchase_link: data.purchase_link || data.purchaseLink || data.url || null,\n      image_url: data.image_url || data.imageUrl || data.image || null,\n      price: getPrice(data.price || data.productPrice),\n      manufacturer: data.manufacturer || data.brand || null,\n      category: data.category || data.platform || \"coupang\",\n      description: data.description || null,\n      is_active: data.is_active !== undefined ? data.is_active : true\n    }\n  };\n});"
+      },
+      "id": "code-transform",
+      "name": "데이터 변환",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "products",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "name",
+              "condition": "equals",
+              "keyValue": "={{ $json.name }}"
+            },
+            {
+              "keyName": "iso_code",
+              "condition": "equals",
+              "keyValue": "={{ $json.iso_code }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "supabase-get",
+      "name": "중복 체크",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credential",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-node",
+      "name": "기존 상품 있음?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "products",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "equals",
+              "keyValue": "={{ $('중복 체크').first().json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $('데이터 변환').first().json.name }}"
+            },
+            {
+              "fieldId": "iso_code",
+              "fieldValue": "={{ $('데이터 변환').first().json.iso_code }}"
+            },
+            {
+              "fieldId": "purchase_link",
+              "fieldValue": "={{ $('데이터 변환').first().json.purchase_link }}"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "={{ $('데이터 변환').first().json.image_url }}"
+            },
+            {
+              "fieldId": "price",
+              "fieldValue": "={{ $('데이터 변환').first().json.price }}"
+            },
+            {
+              "fieldId": "manufacturer",
+              "fieldValue": "={{ $('데이터 변환').first().json.manufacturer }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "={{ $('데이터 변환').first().json.category }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $('데이터 변환').first().json.description }}"
+            },
+            {
+              "fieldId": "is_active",
+              "fieldValue": "={{ $('데이터 변환').first().json.is_active }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "supabase-update",
+      "name": "Supabase Update",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1050, 200],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credential",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "tableId": "products",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.name }}"
+            },
+            {
+              "fieldId": "iso_code",
+              "fieldValue": "={{ $json.iso_code }}"
+            },
+            {
+              "fieldId": "purchase_link",
+              "fieldValue": "={{ $json.purchase_link }}"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "={{ $json.image_url }}"
+            },
+            {
+              "fieldId": "price",
+              "fieldValue": "={{ $json.price }}"
+            },
+            {
+              "fieldId": "manufacturer",
+              "fieldValue": "={{ $json.manufacturer }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "={{ $json.category }}"
+            },
+            {
+              "fieldId": "description",
+              "fieldValue": "={{ $json.description }}"
+            },
+            {
+              "fieldId": "is_active",
+              "fieldValue": "={{ $json.is_active }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "supabase-create",
+      "name": "Supabase Create",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1050, 400],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-credential",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": $json.id ? \"상품이 업데이트되었습니다.\" : \"상품이 등록되었습니다.\", \"product_id\": $json.id || $json[0].id } }}",
+        "options": {}
+      },
+      "id": "respond-webhook",
+      "name": "응답",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "데이터 변환",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "데이터 변환": {
+      "main": [
+        [
+          {
+            "node": "중복 체크",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "중복 체크": {
+      "main": [
+        [
+          {
+            "node": "기존 상품 있음?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "기존 상품 있음?": {
+      "main": [
+        [
+          {
+            "node": "Supabase Update",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Update": {
+      "main": [
+        [
+          {
+            "node": "응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Create": {
+      "main": [
+        [
+          {
+            "node": "응답",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-12-01T00:00:00.000Z",
+  "versionId": "1"
+}
+
