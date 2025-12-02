@@ -173,6 +173,11 @@ export function ProductRecommendationCard({
           onClick={() => handleClick("primary")}
           disabled={isButtonDisabled || isPrimaryPending}
           aria-disabled={isButtonDisabled}
+          aria-label={
+            purchaseLink
+              ? `${productName} 상품 정보 보기 (외부 링크)`
+              : `${productName} 상품 정보 (링크 없음)`
+          }
         >
           <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
           {purchaseLink ? t("recommendations.learnMore") : t("recommendations.noLink")}
@@ -185,6 +190,11 @@ export function ProductRecommendationCard({
           onClick={() => handleClick("secondary")}
           disabled={isButtonDisabled || isSecondaryPending}
           aria-disabled={isButtonDisabled}
+          aria-label={
+            purchaseLink
+              ? `${productName} 구매하기 (외부 링크)`
+              : `${productName} 구매하기 (링크 없음)`
+          }
         >
           <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
           {purchaseLink ? t("recommendations.buyNow") : t("recommendations.noLink")}

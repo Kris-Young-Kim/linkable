@@ -66,6 +66,7 @@ import {
   type IcfAnalysisBuckets,
 } from "@/components/features/analysis/icf-visualization";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
+import { ConsultationFlowGuide } from "@/components/consultation-flow-guide";
 import {
   Sparkles,
   Send,
@@ -121,6 +122,7 @@ export function ChatInterface() {
     useState(false);
   const [hasRecommendations, setHasRecommendations] = useState(false);
   const [showRecommendationCTA, setShowRecommendationCTA] = useState(false);
+  const [showFlowGuide, setShowFlowGuide] = useState(false);
   const [previewRecommendations, setPreviewRecommendations] = useState<any[]>(
     []
   );
@@ -151,6 +153,10 @@ export function ChatInterface() {
           ) {
             setHasRecommendations(true);
             setPreviewRecommendations(recommendationsData.products.slice(0, 3));
+            // 추천이 준비되면 플로우 가이드 표시 (모달 또는 토스트)
+            if (recommendationsData.products && recommendationsData.products.length > 0) {
+              setShowFlowGuide(true);
+            }
           }
         }
       } catch (error) {
@@ -263,6 +269,20 @@ export function ChatInterface() {
       const decoder = new TextDecoder("utf-8");
       let buffer = "";
 
+      // 접근성: 동적 콘텐츠 변경 알림을 위한 aria-live 영역
+      const announceToScreenReader = (message: string) => {
+        const liveRegion = document.getElementById("aria-live-region");
+        if (liveRegion) {
+          liveRegion.textContent = message;
+          // 메시지가 업데이트되도록 잠시 후 초기화
+          setTimeout(() => {
+            if (liveRegion) {
+              liveRegion.textContent = "";
+            }
+          }, 1000);
+        }
+      };
+
       const processEvent = async (eventType: string, data?: string) => {
         if (!data) return;
         switch (eventType) {
@@ -306,6 +326,8 @@ export function ChatInterface() {
               }
 
               if (payload.icfAnalysis) {
+                // 접근성: 분석 완료 알림
+                announceToScreenReader("ICF 분석이 완료되었습니다. 추천을 확인할 수 있습니다.");
                 console.log(
                   "[chat] Received ICF analysis:",
                   payload.icfAnalysis
@@ -556,6 +578,23 @@ export function ChatInterface() {
       <DisclaimerModal
         open={shouldShowDisclaimer}
         onAccept={handleAcceptDisclaimer}
+      />
+
+      {/* 상담→추천 플로우 안내 */}
+      <ConsultationFlowGuide
+        isOpen={showFlowGuide}
+        onClose={() => setShowFlowGuide(false)}
+        consultationId={consultationId}
+        recommendationCount={previewRecommendations.length}
+        variant="modal"
+      />
+
+      {/* 접근성: 동적 콘텐츠 변경 알림 영역 */}
+      <div
+        id="aria-live-region"
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
       />
 
       {requiresLogin && (

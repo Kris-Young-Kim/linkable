@@ -84,6 +84,10 @@ export function StreamLoadingToast({
     <Alert
       className={`fixed bottom-4 right-4 z-50 max-w-md shadow-lg ${config.className}`}
       variant={config.variant}
+      role="status"
+      aria-live={status === "loading" ? "polite" : "off"}
+      aria-busy={status === "loading"}
+      aria-label={config.title}
     >
       <div className="flex items-start gap-3">
         <Icon
