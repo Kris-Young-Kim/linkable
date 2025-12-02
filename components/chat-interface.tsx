@@ -56,6 +56,7 @@ declare global {
 
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { CTAButton } from "@/components/ui/cta-button";
 import { Textarea } from "@/components/ui/textarea";
 import { DisclaimerModal } from "@/components/disclaimer-modal";
 import { IppaConsultationForm } from "@/components/ippa-consultation-form";
@@ -791,21 +792,13 @@ export function ChatInterface() {
                             <p className="text-base font-medium text-foreground">
                               {t("chat.recommendationsReady")}
                             </p>
-                            <Button
+                            <CTAButton
+                              variant="recommendations"
+                              href={`/recommendations/${consultationId}`}
                               size="lg"
-                              className="min-h-[44px] px-8"
-                              onClick={() => {
-                                router.push(
-                                  `/recommendations/${consultationId}`
-                                );
-                              }}
                             >
-                              <ShoppingBag
-                                className="mr-2 size-5"
-                                aria-hidden="true"
-                              />
                               {t("chat.viewRecommendations")}
-                            </Button>
+                            </CTAButton>
                           </div>
                         )}
                       </div>

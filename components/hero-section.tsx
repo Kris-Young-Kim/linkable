@@ -3,6 +3,7 @@
 import { Fragment } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { CTAButton, CTAButtonSecondary } from "@/components/ui/cta-button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-provider"
@@ -80,24 +81,23 @@ export function HeroSection() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Button
+            <CTAButton
+              variant="chat"
+              href="/chat"
               size="lg"
-              className="min-h-[48px] px-8 text-base font-semibold shadow-xl shadow-primary/30 transition-transform hover:-translate-y-0.5"
-              asChild
+              className="shadow-xl shadow-primary/30 transition-transform hover:-translate-y-0.5"
             >
-              <Link href="/chat">
-                {t("hero.getStarted")}
-                <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button
+              {t("hero.getStarted")}
+            </CTAButton>
+            <CTAButtonSecondary
+              variant="custom"
+              href="#how-it-works"
               size="lg"
-              variant="outline"
-              className="min-h-[48px] border-2 border-primary/20 bg-white/70 px-8 text-base font-semibold backdrop-blur hover:border-primary hover:bg-primary/10"
-              asChild
+              showArrow={false}
+              className="border-2 border-primary/20 bg-white/70 backdrop-blur hover:border-primary hover:bg-primary/10"
             >
-              <Link href="#how-it-works">{t("hero.learnMore")}</Link>
-            </Button>
+              {t("hero.learnMore")}
+            </CTAButtonSecondary>
           </div>
 
           {/* Trust Indicators */}

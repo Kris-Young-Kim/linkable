@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { CTAButton, CTAButtonSecondary } from "@/components/ui/cta-button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-provider"
@@ -24,23 +25,12 @@ export function CTASection() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-              <Button
-                size="lg"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] px-8 text-base font-semibold shadow-lg"
-                asChild
-              >
-                <Link href="/chat">
-                  {t("cta.button")}
-                  <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="min-h-[44px] px-8 text-base font-semibold border-2 bg-transparent"
-              >
+              <CTAButton variant="chat" href="/chat" size="lg">
+                {t("cta.button")}
+              </CTAButton>
+              <CTAButtonSecondary variant="custom" href="#" size="lg" showArrow={false}>
                 {t("cta.scheduleCall")}
-              </Button>
+              </CTAButtonSecondary>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 text-sm text-muted-foreground">

@@ -32,6 +32,7 @@ import {
 import { LocalNav } from "@/components/navigation/local-nav"
 import { SideNav } from "@/components/navigation/side-nav"
 import { CardActionButtons } from "@/components/ui/card-action-buttons"
+import { CTAButton, CTAButtonSecondary } from "@/components/ui/cta-button"
 
 export type RecommendationRow = {
   id: string
@@ -123,12 +124,12 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
           <p className="text-muted-foreground mt-2 text-base">나의 상담 이력을 확인하고 이어서 진행할 수 있습니다.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button asChild>
-            <Link href="/chat">{t("dashboard.actionChat")}</Link>
-          </Button>
-          <Button variant="outline" className="bg-transparent" asChild>
-            <Link href="/recommendations">{t("dashboard.actionRecommendations")}</Link>
-          </Button>
+          <CTAButton variant="chat" href="/chat" size="default">
+            {t("dashboard.actionChat")}
+          </CTAButton>
+          <CTAButtonSecondary variant="recommendations" href="/recommendations" size="default">
+            {t("dashboard.actionRecommendations")}
+          </CTAButtonSecondary>
         </div>
       </section>
 

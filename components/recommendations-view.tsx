@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react"
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { useLanguage } from "@/components/language-provider"
 import { Button } from "@/components/ui/button"
+import { CTAButton, CTAButtonSecondary } from "@/components/ui/cta-button"
 import { trackEvent } from "@/lib/analytics"
 import { PartnershipNotice } from "@/components/recommendations/partnership-notice"
 
@@ -111,12 +112,12 @@ export function RecommendationsView({ products, errorMessage }: RecommendationsV
           )}
 
           <div className="flex justify-center pt-8 gap-4 flex-wrap">
-            <Button size="lg" variant="outline" className="min-h-[44px] px-8 bg-transparent" asChild>
-              <Link href="/chat">{t("recommendations.backToChat")}</Link>
-            </Button>
-            <Button size="lg" className="min-h-[44px] px-8" asChild>
-              <Link href="/dashboard">{t("recommendations.viewDashboard")}</Link>
-            </Button>
+            <CTAButtonSecondary variant="chat" href="/chat" size="lg">
+              {t("recommendations.backToChat")}
+            </CTAButtonSecondary>
+            <CTAButton variant="dashboard" href="/dashboard" size="lg">
+              {t("recommendations.viewDashboard")}
+            </CTAButton>
           </div>
         </div>
       </main>
