@@ -8,7 +8,15 @@
     "lint": "eslint .",
     "start": "next start",
     "gen:types": "npx -y supabase gen types typescript --project-id \"sityptcwbnremuzsvbhx\" --schema public > database.types.ts",
-    "import:products": "tsx scripts/manual-product-import.ts"
+    "import:products": "tsx scripts/manual-product-import.ts",
+    "crawl:products": "tsx scripts/crawlers/web-scraper.ts",
+    "test:crawl": "tsx scripts/crawlers/test-steps.ts",
+    "test:selectors": "tsx scripts/crawlers/test-site-selectors.ts",
+    "test:selector": "tsx scripts/crawlers/quick-test-selector.ts",
+    "debug:html": "tsx scripts/crawlers/debug-html-structure.ts",
+    "test:products": "tsx scripts/test-crawled-products.ts",
+    "test:api": "tsx scripts/test-product-api.ts",
+    "test:recommendation": "tsx scripts/test-recommendation-system.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",
@@ -54,6 +62,7 @@
     "lucide-react": "^0.454.0",
     "next": "15.5.6",
     "next-themes": "^0.4.6",
+    "playwright": "^1.57.0",
     "react": "19.2.0",
     "react-day-picker": "9.8.0",
     "react-dom": "19.2.0",

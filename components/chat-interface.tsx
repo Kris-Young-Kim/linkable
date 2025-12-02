@@ -68,7 +68,6 @@ import {
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { ConsultationFlowGuide } from "@/components/consultation-flow-guide";
 import { ErrorFaqModal } from "@/components/error-faq-modal";
-import { ErrorFaqModal } from "@/components/error-faq-modal";
 import {
   Sparkles,
   Send,
@@ -139,12 +138,19 @@ export function ChatInterface() {
   const [icfAnalysis, setIcfAnalysis] = useState<IcfAnalysisBuckets | null>(
     null
   );
+  const [errorState, setErrorState] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const preloadRecommendations = useCallback(
     async (currentConsultationId: string) => {
+      // ICF 분석이 완료되지 않았으면 추천을 로드하지 않음
+      if (!icfAnalysis) {
+        console.log("[chat] ICF analysis not completed, skipping recommendation preload");
+        return;
+      }
+      
       setShowRecommendationCTA(true);
       setIsLoadingRecommendations(true);
 
@@ -172,7 +178,7 @@ export function ChatInterface() {
         setIsLoadingRecommendations(false);
       }
     },
-    []
+    [icfAnalysis] // icfAnalysis가 변경될 때마다 함수 재생성
   );
 
   const isAuthResolved = isLoaded;
@@ -760,6 +766,7 @@ export function ChatInterface() {
               {/* Recommendation Preview Cards */}
               {showRecommendationCTA &&
                 consultationId &&
+                icfAnalysis && // ICF 분석이 완료된 경우에만 표시
                 previewRecommendations.length > 0 &&
                 !isLoadingRecommendations && (
                   <div className="flex justify-center px-4 py-6">
@@ -806,17 +813,6 @@ export function ChatInterface() {
                                   {product.match_reason}
                                 </p>
                               )}
-                              {product.price && (
-                                <p className="text-sm font-medium text-foreground">
-                                  {typeof product.price === "number"
-                                    ? new Intl.NumberFormat("ko-KR", {
-                                        style: "currency",
-                                        currency: "KRW",
-                                        maximumFractionDigits: 0,
-                                      }).format(product.price)
-                                    : product.price}
-                                </p>
-                              )}
                             </div>
                           </div>
                         ))}
@@ -843,6 +839,7 @@ export function ChatInterface() {
               {/* Recommendation CTA (Fallback when no preview) */}
               {showRecommendationCTA &&
                 consultationId &&
+                icfAnalysis && // ICF 분석이 완료된 경우에만 표시
                 previewRecommendations.length === 0 && (
                   <div className="flex justify-center px-4 py-6">
                     <div className="w-full max-w-2xl">

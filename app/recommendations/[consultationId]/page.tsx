@@ -44,10 +44,23 @@ const RecommendationsViewWithFilters = dynamic(
 )
 
 // 상담 종료 설문 컴포넌트 (클라이언트 컴포넌트)
+// 이미 "use client"로 선언된 컴포넌트이므로 ssr: false 불필요
 const ConsultationFeedbackForm = dynamic(
   () => import("@/components/consultation-feedback-form").then((mod) => ({ default: mod.ConsultationFeedbackForm })),
   {
-    ssr: false,
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="h-20 bg-muted animate-pulse rounded" />
+            <div className="h-10 bg-muted animate-pulse rounded" />
+          </div>
+        </CardContent>
+      </Card>
+    ),
   }
 )
 

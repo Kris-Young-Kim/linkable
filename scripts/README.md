@@ -144,9 +144,102 @@ ISO 9999:2022 표준에 따라 다음 형식을 사용하세요:
 - CSV 파일의 헤더와 데이터 행의 컬럼 수가 일치하는지 확인
 - 쉼표가 포함된 필드는 따옴표로 감싸야 합니다
 
+## 웹 스크래핑 크롤러
+
+### 개요
+
+Playwright 기반 웹 스크래핑 크롤러로 쿠팡, 네이버 쇼핑 등에서 상품 정보를 자동으로 수집하고 데이터베이스에 등록할 수 있습니다.
+
+### 사전 준비
+
+1. **Playwright 브라우저 설치** (최초 1회)
+   ```bash
+   npx playwright install chromium
+   ```
+
+2. **환경 변수 설정** (수동 크롤링과 동일)
+   - `.env.local` 파일에 Supabase 환경 변수 설정
+
+### 사용법
+
+#### 기본 사용법
+
+```bash
+# 쿠팡만 크롤링 (5개 상품)
+pnpm crawl:products --keyword "무게조절 식기" --iso-code "15 09" --platform coupang --max 5
+
+# 네이버 쇼핑만 크롤링 (10개 상품)
+pnpm crawl:products --keyword "보행기" --iso-code "12 03" --platform naver --max 10
+
+# 모든 플랫폼 크롤링 (10개 상품)
+pnpm crawl:products --keyword "식기" --iso-code "15 09" --max 10
+
+# Dry-run 모드 (실제 등록 안 함)
+pnpm crawl:products --keyword "식기" --iso-code "15 09" --dry-run
+```
+
+#### 옵션
+
+- `--keyword <검색어>`: 검색할 키워드 (필수)
+- `--iso-code <코드>`: ISO 9999 코드 (예: "15 09") (선택, 추천)
+- `--platform <플랫폼>`: 크롤링할 플랫폼 (`coupang`, `naver`, `all`) (기본값: `all`)
+- `--max <숫자>`: 최대 수집 개수 (기본값: 10)
+- `--dry-run`: 실제 등록 없이 결과만 확인
+
+### 예시
+
+```bash
+# 쿠팡에서 "보행기" 검색하여 ISO "12 03"으로 등록 (5개)
+pnpm crawl:products --keyword "보행기" --iso-code "12 03" --platform coupang --max 5
+
+# 네이버 쇼핑에서 "청각 보조기기" 검색 (10개)
+pnpm crawl:products --keyword "청각 보조기기" --iso-code "21 06" --platform naver --max 10
+
+# 모든 플랫폼에서 "식기" 검색 (ISO 코드 없이)
+pnpm crawl:products --keyword "식기" --max 10
+```
+
+### 동작 방식
+
+1. **브라우저 실행**: Playwright로 헤드리스 브라우저 실행
+2. **검색 페이지 접속**: 쿠팡/네이버 쇼핑 검색 페이지로 이동
+3. **상품 정보 추출**: 상품명, 가격, 이미지, 링크 추출
+4. **Rate Limit 방지**: 요청 간 1초 대기
+5. **데이터베이스 등록**: 수집한 상품을 Supabase에 자동 등록
+
+### 주의사항
+
+1. **셀렉터 변경**: 쇼핑몰 사이트 구조 변경 시 셀렉터 수정 필요
+2. **Rate Limit**: 요청 간격을 1초 이상 유지하여 차단 방지
+3. **에러 처리**: 일부 상품 추출 실패해도 계속 진행
+4. **ISO 코드**: ISO 코드 없이 등록하면 추천에 사용되지 않을 수 있음
+
+### 문제 해결
+
+#### "상품이 수집되지 않습니다"
+
+- 셀렉터가 사이트 구조 변경으로 인해 작동하지 않을 수 있음
+- `scripts/crawlers/coupang-scraper.ts` 또는 `naver-scraper.ts`의 셀렉터 확인
+- 브라우저 개발자 도구로 실제 HTML 구조 확인 후 셀렉터 수정
+
+#### "크롤링이 너무 느립니다"
+
+- `--max` 옵션으로 수집 개수 제한
+- Rate Limit 방지를 위해 요청 간격이 1초로 설정되어 있음
+
+#### "브라우저 실행 오류"
+
+- Playwright 브라우저가 설치되어 있는지 확인: `npx playwright install chromium`
+
 ## 다음 단계
 
-1. **자동 크롤링**: 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts`)
-2. **웹 스크래핑**: Puppeteer/Playwright 기반 크롤러
-3. **관리자 UI**: `/admin/products`에서 크롤링 기능 추가
+1. **셀렉터 테스트 및 조정**: 각 사이트별 실제 HTML 구조 확인 및 셀렉터 최적화 (`docs/selector-testing-guide.md`)
+2. **관리자 UI 연동**: `/admin/products`에서 크롤링 기능 추가
+3. **자동 크롤링**: 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts`) (API 확보 후)
+4. **n8n 워크플로우**: Schedule Trigger 기반 자동 크롤링 (API 확보 후)
+
+## 참고 문서
+
+- **웹 스크래핑 전체 가이드**: `docs/web-scraping-guide.md`
+- **셀렉터 테스트 가이드**: `docs/selector-testing-guide.md`
 

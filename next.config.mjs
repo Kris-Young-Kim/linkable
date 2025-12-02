@@ -18,7 +18,57 @@ const SYSTEM_FILES_TO_IGNORE = [
 
 const nextConfig = {
   images: {
-    unoptimized: true,
+    // 이미지 최적화 활성화 (성능 개선)
+    unoptimized: false,
+    // 외부 이미지 도메인 허용
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.supabase.co",
+      },
+      {
+        protocol: "https",
+        hostname: "**.supabase.in",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      // 크롤링된 상품 이미지 도메인들
+      {
+        protocol: "https",
+        hostname: "**.ablelife.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.carelifemall.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.willbe.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.11st.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.wheelopia.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.sk-easymove.co.kr",
+      },
+    ],
+    // 이미지 최적화 품질 설정
+    formats: ["image/avif", "image/webp"],
+    // 디바이스별 이미지 크기 최적화
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   webpack: (config, { dev }) => {
     if (dev) {

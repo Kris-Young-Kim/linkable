@@ -398,6 +398,22 @@ export const translations = {
     "dashboard.ratingThanksMessage":
       "{rating}점 평가가 서비스 개선에 큰 도움이 됩니다.",
 
+    // Consultation Flow Guide
+    "flowGuide.modalTitle": "맞춤 추천이 준비되었습니다",
+    "flowGuide.modalSubtitle": "ICF 분석을 완료했습니다",
+    "flowGuide.recommendationCount": "{count}개의 맞춤형 보조기기",
+    "flowGuide.recommendationsReady": "맞춤형 보조기기 추천",
+    "flowGuide.recommendationDescription":
+      "링커가 분석한 ICF 코드와 ISO 9999 표준을 기반으로 최적의 보조기기를 추천해드립니다.",
+    "flowGuide.step1": "추천 페이지에서 상세 정보를 확인하세요",
+    "flowGuide.step2": "원하는 보조기기를 선택하고 구매 링크로 이동하세요",
+    "flowGuide.step3": "사용 후 K-IPPA 평가로 효과성을 기록하세요",
+    "flowGuide.continueChat": "나중에 보기",
+    "flowGuide.viewRecommendations": "추천 보기",
+    "flowGuide.toastTitle": "맞춤 추천이 준비되었습니다",
+    "flowGuide.toastDescription": "ICF 분석을 바탕으로 맞춤형 보조기기를 추천해드립니다.",
+    "flowGuide.toastDescriptionWithCount": "{count}개의 맞춤형 보조기기 추천을 확인하세요.",
+
     // Footer socials
     "footer.socialLinkedIn": "링크드인",
     "footer.socialTwitter": "트위터",
@@ -745,6 +761,22 @@ export const translations = {
     "dashboard.ratingThanksTitle": "Thank you for your feedback!",
     "dashboard.ratingThanksMessage":
       "Your {rating}-star rating helps us improve our services.",
+
+    // Consultation Flow Guide
+    "flowGuide.modalTitle": "Personalized Recommendations Ready",
+    "flowGuide.modalSubtitle": "ICF analysis completed",
+    "flowGuide.recommendationCount": "{count} personalized assistive devices",
+    "flowGuide.recommendationsReady": "Personalized assistive device recommendations",
+    "flowGuide.recommendationDescription":
+      "We recommend optimal assistive devices based on ICF codes and ISO 9999 standards analyzed by LinkAble.",
+    "flowGuide.step1": "Check detailed information on the recommendations page",
+    "flowGuide.step2": "Select your desired assistive device and go to the purchase link",
+    "flowGuide.step3": "Record effectiveness with K-IPPA evaluation after use",
+    "flowGuide.continueChat": "View later",
+    "flowGuide.viewRecommendations": "View Recommendations",
+    "flowGuide.toastTitle": "Personalized Recommendations Ready",
+    "flowGuide.toastDescription": "We recommend personalized assistive devices based on ICF analysis.",
+    "flowGuide.toastDescriptionWithCount": "Check {count} personalized assistive device recommendations.",
 
     // Footer socials
     "footer.socialLinkedIn": "LinkedIn",
@@ -1112,6 +1144,22 @@ export const translations = {
     "dashboard.ratingThanksTitle": "ご意見ありがとうございます！",
     "dashboard.ratingThanksMessage":
       "いただいた{rating}点の評価はサービス改善に活用されます。",
+
+    // Consultation Flow Guide
+    "flowGuide.modalTitle": "パーソナライズされた推奨が準備できました",
+    "flowGuide.modalSubtitle": "ICF分析が完了しました",
+    "flowGuide.recommendationCount": "{count}個のパーソナライズされた補助機器",
+    "flowGuide.recommendationsReady": "パーソナライズされた補助機器の推奨",
+    "flowGuide.recommendationDescription":
+      "LinkAbleが分析したICFコードとISO 9999標準に基づいて、最適な補助機器を推奨します。",
+    "flowGuide.step1": "推奨ページで詳細情報を確認してください",
+    "flowGuide.step2": "希望する補助機器を選択し、購入リンクに移動してください",
+    "flowGuide.step3": "使用後、K-IPPA評価で効果を記録してください",
+    "flowGuide.continueChat": "後で見る",
+    "flowGuide.viewRecommendations": "推奨を見る",
+    "flowGuide.toastTitle": "パーソナライズされた推奨が準備できました",
+    "flowGuide.toastDescription": "ICF分析に基づいてパーソナライズされた補助機器を推奨します。",
+    "flowGuide.toastDescriptionWithCount": "{count}個のパーソナライズされた補助機器の推奨を確認してください。",
 
     // Footer socials
     "footer.socialLinkedIn": "LinkedIn",

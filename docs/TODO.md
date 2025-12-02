@@ -429,33 +429,62 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - [x] 데이터베이스 방식 vs .env 방식 비교 분석
    - [x] 기존 `products` 테이블 활용 방안 제시
    - [x] ISO 코드별 다중 상품 링크 관리 가이드
-2. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 또는 스크래퍼)
-3. [ ] **상품 크롤링 및 자동 등록 시스템 구현**
-   - [x] 수동 크롤링 스크립트 (`scripts/manual-product-import.ts`)
+2. [ ] **상품 크롤링 및 자동 등록 시스템 구현**
+   - [x] 수동 크롤링 스크립트 (`scripts/manual-product-import.ts`) ✅ 유지
      - [x] CSV/Excel 파일 기반 일괄 등록
      - [x] JSON 파일 기반 일괄 등록
      - [x] ISO 코드 매핑 자동화
-   - [ ] **n8n 워크플로우 자동화 시스템** (진행 중)
-     - [x] Webhook 기반 수동 등록 워크플로우 구축
+   - [x] **웹 스크래핑 크롤러 구현** (기본 구조 완료) ✅
+     - [x] Puppeteer 또는 Playwright 기반 스크래퍼 (`scripts/crawlers/web-scraper.ts`) ✅
+       - [x] 기본 구조 및 타입 정의 (`types.ts`, `utils.ts`) ✅
+       - [x] 범용 크롤러 클래스 (`generic-scraper.ts`) ✅
+       - [x] 사이트별 설정 관리 (`site-config.ts`) ✅
+       - [x] 통합 웹 스크래퍼 (`web-scraper.ts`) ✅
+       - [x] 단계별 테스트 스크립트 (`test-steps.ts`) ✅
+       - [x] 쿠팡 크롤러 (`coupang-scraper.ts`) - 기본 구현 완료, 셀렉터 조정 필요 ⚠️
+       - [x] 네이버 쇼핑 크롤러 (`naver-scraper.ts`) - 기본 구현 완료, 셀렉터 조정 필요 ⚠️
+       - [x] 보조기기 전문 쇼핑몰 지원 (7개 사이트 추가) ✅
+         - [x] 에이블라이프 (ablelife) ✅
+         - [x] 케어라이프몰 (carelifemall) ✅
+         - [x] 윌비 (willbe) ✅
+         - [x] 11번가 (11st) ✅
+         - [x] 퍼모빌 (permobil) ✅
+         - [x] 휠로피아 (wheelopia) ✅
+         - [x] SK 이지무브 (sk-easymove) ✅
+       - [x] 에러 처리 및 재시도 로직 ✅
+       - [x] Rate Limit 방지 (요청 간격 조절) ✅
+     - [x] 크롤링 데이터 → DB 자동 등록 파이프라인 ✅
+       - [x] `upsertProduct` 함수 활용 ✅
+       - [x] 중복 상품 자동 감지 및 업데이트 ✅
+       - [x] 링크 검증 및 이미지 URL 정규화 ✅
+       - [x] ISO 코드 자동 매핑 (키워드 기반) ✅
+     - [x] 셀렉터 테스트 및 조정 ✅
+       - [x] 각 사이트별 실제 HTML 구조 확인 ✅
+       - [x] 셀렉터 정확도 검증 ✅
+       - [x] 사이트별 셀렉터 최적화 ✅
+       - [x] 테스트 결과 문서화 (`docs/selector-test-results.md`) ✅
+       - 참고: 퍼모빌은 메인 페이지에 상품 목록이 없어 추가 조사 필요
+     - [ ] 관리자 UI에 크롤링 기능 추가 (`/admin/products`)
+       - [ ] 크롤링 실행 버튼 (키워드/ISO 코드 입력)
+       - [ ] 크롤링 결과 미리보기 및 선택적 등록
+       - [ ] 크롤링 로그 및 에러 처리
+   - [ ] **n8n 워크플로우 자동화 시스템** (쿠팡파트너스 API 확보 후 진행)
+     - [x] Webhook 기반 수동 등록 워크플로우 구축 ✅
        - [x] Webhook 노드 설정 (POST /webhook/products)
        - [x] 데이터 변환 Code 노드 (ISO 코드 자동 매핑)
        - [x] Supabase 중복 체크 (Get 노드)
        - [x] 조건 분기 (IF 노드)
        - [x] Supabase Update/Create 노드
        - [x] Respond to Webhook 노드
-     - [ ] Schedule Trigger 기반 자동 크롤링 워크플로우
-       - [ ] Schedule Trigger 노드 추가 및 설정
-         - [ ] 실행 주기 설정 (매일 오전 2시 또는 6시간마다)
-         - [ ] Cron Expression 설정 (`0 2 * * *` 또는 `0 */6 * * *`)
+     - [ ] Schedule Trigger 기반 자동 크롤링 워크플로우 (쿠팡파트너스 API 확보 후)
        - [ ] 쿠팡 파트너스 API 연동
          - [ ] 쿠팡 파트너스 API 키 발급
          - [ ] n8n HTTP Request 노드 설정
          - [ ] API Credential 설정 (Header Auth)
          - [ ] 상품 검색 쿼리 파라미터 설정 (keyword, limit)
-       - [ ] 웹 스크래핑 설정 (대안 방법)
-         - [ ] Playwright 노드 추가 및 설정
-         - [ ] HTML Extract 노드 설정
-         - [ ] 셀렉터 설정 (상품명, 가격, 이미지, 링크)
+       - [ ] Schedule Trigger 노드 추가 및 설정
+         - [ ] 실행 주기 설정 (매일 오전 2시 또는 6시간마다)
+         - [ ] Cron Expression 설정 (`0 2 * * *` 또는 `0 */6 * * *`)
        - [ ] 데이터 변환 및 처리
          - [ ] Code 노드: 쿠팡 API 응답 → Supabase 형식 변환
          - [ ] ISO 코드 자동 매핑 로직 (키워드 기반)
@@ -471,23 +500,12 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
          - [ ] Active 토글 ON
          - [ ] Executions에서 실행 내역 확인
          - [ ] Supabase에서 데이터 확인
-   - [ ] 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts` 구현)
-     - API 키 발급 및 환경 변수 설정
-     - 상품 검색 API 구현 (`searchProducts`)
-     - 상품 상세 정보 조회 API 구현 (`getProductDetails`)
-     - 제휴 링크 자동 생성 (`generateAffiliateLink`)
-   - [ ] 웹 스크래핑 크롤러 구현 (대안 방법)
-     - Puppeteer 또는 Playwright 기반 스크래퍼 (`scripts/crawlers/web-scraper.ts`)
-     - 쿠팡/네이버/11번가 등 주요 쇼핑몰 지원
-     - 상품 정보 추출 로직 (이름, 가격, 이미지, 링크)
-   - [ ] 크롤링 데이터 → DB 자동 등록 파이프라인
-     - `upsertProduct` 함수 활용
-     - 중복 상품 자동 감지 및 업데이트
-     - 링크 검증 및 이미지 URL 정규화
-   - [ ] 관리자 UI에 크롤링 기능 추가 (`/admin/products`)
-     - 크롤링 실행 버튼 (키워드/ISO 코드 입력)
-     - 크롤링 결과 미리보기 및 선택적 등록
-     - 크롤링 로그 및 에러 처리
+   - [ ] 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts` 구현) (API 확보 후)
+     - [ ] API 키 발급 및 환경 변수 설정
+     - [ ] 상품 검색 API 구현 (`searchProducts`)
+     - [ ] 상품 상세 정보 조회 API 구현 (`getProductDetails`)
+     - [ ] 제휴 링크 자동 생성 (`generateAffiliateLink`)
+3. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 확보 후)
 4. [ ] Supabase `products` 테이블 스키마 확장 (제휴사, 재고, 가격 이력)
    - 참고: 현재 구조로도 ISO 코드별 여러 상품 등록 가능 (추가 스키마 변경 불필요)
 5. [ ] `app/api/products/sync/route.ts` 스케줄러 대응 (수동 호출 + cron 메모)
@@ -509,22 +527,26 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 
 **상품 크롤링 전략:**
 
-- **단기 (MVP)**: 수동 크롤링 스크립트 + CSV/Excel 일괄 등록
+- **단기 (MVP)**: 수동 크롤링 스크립트 + CSV/Excel 일괄 등록 ✅
   - 빠른 구현 가능, 데이터 품질 제어 용이
-  - `scripts/manual-product-import.ts` 구현 ✅
-- **중기 (진행 중)**: n8n 워크플로우 자동화
+  - `scripts/manual-product-import.ts` 구현 완료
+- **중기 (우선 진행)**: 웹 스크래핑 크롤러 구현
+  - Puppeteer 또는 Playwright 기반 스크래퍼
+  - 쿠팡/네이버/11번가 등 주요 쇼핑몰 지원
+  - API 키 불필요, 다양한 쇼핑몰 지원 가능
+  - 관리자 UI에서 수동 실행 또는 스케줄 실행
+  - 사이트 구조 변경 시 유지보수 필요 (대안 방법)
+- **중장기 (쿠팡파트너스 API 확보 후)**: n8n 워크플로우 자동화
   - Webhook 기반 수동 등록: 외부 시스템에서 데이터 전송 가능 ✅
   - Schedule Trigger 기반 자동 크롤링: 주기적으로 자동 실행
-  - 쿠팡 API 또는 웹 스크래핑으로 상품 수집
+  - 쿠팡 파트너스 API 연동 (API 키 발급 후)
   - Supabase에 자동 등록 (중복 체크 및 Upsert)
   - 관리자 페이지(`/admin/products`)에서 자동으로 상품 확인 가능
-- **장기 (Post-MVP)**: 쿠팡 파트너스 API 자동화
-  - 쿠팡 파트너스 가입 및 API 키 발급
+- **장기 (Post-MVP)**: 쿠팡 파트너스 API 완전 자동화
+  - 쿠팡 파트너스 가입 및 API 키 발급 완료 후
   - `lib/integrations/coupang.ts` 완전 구현
   - 제휴 링크 자동 생성 및 관리
-- **대안**: 웹 스크래핑 (Puppeteer/Playwright)
-  - API 키 불필요, 다양한 쇼핑몰 지원
-  - 사이트 구조 변경 시 유지보수 필요
+  - n8n 워크플로우와 통합
 
 **n8n 워크플로우 자동화 상세 가이드:**
 
@@ -550,17 +572,18 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
      Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -ContentType "application/json" -Body '{"name": "무게조절 식기 세트", "purchase_link": "https://coupang.link/test", "price": 25000, "category": "coupang"}'
      ```
 
-2. **Schedule Trigger 기반 자동 크롤링 워크플로우** (구현 예정)
+2. **Schedule Trigger 기반 자동 크롤링 워크플로우** (쿠팡파트너스 API 확보 후 진행)
 
+   - **전제 조건**: 쿠팡 파트너스 API 키 발급 완료
    - Schedule Trigger: 매일 오전 2시 또는 6시간마다 실행
-   - 쿠팡 API 호출 또는 웹 스크래핑으로 상품 수집
+   - 쿠팡 파트너스 API 호출로 상품 수집
    - 데이터 변환 (ISO 코드 자동 매핑, 가격 정규화)
    - 배치 처리 (10개씩 처리)
    - 중복 체크 → Update/Create
    - Rate Limit 방지 (1초 대기)
    - 워크플로우 구조:
      ```
-     Schedule Trigger → HTTP Request/Playwright → Code 변환 → Split In Batches →
+     Schedule Trigger → HTTP Request (쿠팡 API) → Code 변환 → Split In Batches →
      중복 체크 → IF → Update/Create → Wait → 다음 배치
      ```
 
@@ -575,6 +598,31 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - `https://link-able.vercel.app/admin/products`에서 자동으로 등록된 상품 확인
    - n8n이 주기적으로 실행되면 관리자 페이지에 상품이 자동으로 누적됨
    - 필터링, 검색, 정렬 기능으로 상품 관리 가능
+
+**개발 순서:**
+
+1. ✅ **수동 크롤링 스크립트** (완료)
+
+   - CSV/Excel/JSON 파일 기반 일괄 등록
+   - ISO 코드 매핑 자동화
+
+2. 🔄 **웹 스크래핑 크롤러 구현** (우선 진행)
+
+   - Puppeteer/Playwright 기반 스크래퍼 개발
+   - 쿠팡/네이버/11번가 등 주요 쇼핑몰 지원
+   - 관리자 UI에서 수동 실행 기능
+   - 크롤링 데이터 → DB 자동 등록 파이프라인
+
+3. ⏸️ **n8n 워크플로우 자동화** (쿠팡파트너스 API 확보 후)
+
+   - ✅ Webhook 기반 수동 등록 (완료)
+   - ⏸️ Schedule Trigger 기반 자동 크롤링 (API 확보 후)
+   - ⏸️ 쿠팡 파트너스 API 연동 (API 확보 후)
+
+4. ⏸️ **쿠팡 파트너스 API 완전 자동화** (Post-MVP)
+   - API 키 발급 완료 후
+   - `lib/integrations/coupang.ts` 완전 구현
+   - 제휴 링크 자동 생성 및 관리
 
 ### Phase 4 이후 남은 과제 (세부 티켓)
 

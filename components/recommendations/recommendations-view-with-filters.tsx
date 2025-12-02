@@ -16,7 +16,7 @@ import { CardActionButtons } from "@/components/ui/card-action-buttons"
 // Re-export the type for convenience
 export type { RecommendationProduct }
 
-type SortOption = "rank" | "price-asc" | "price-desc" | "name"
+type SortOption = "rank" | "name"
 type FilterOption = "all" | "clicked" | "not-clicked"
 
 interface RecommendationsViewWithFiltersProps {
@@ -82,14 +82,6 @@ export function RecommendationsViewWithFilters({
           const scoreA = a.match_score ?? 0
           const scoreB = b.match_score ?? 0
           return scoreB - scoreA
-        case "price-asc":
-          const priceA = typeof a.price === "number" ? a.price : typeof a.price === "string" ? parseFloat(a.price) : Infinity
-          const priceB = typeof b.price === "number" ? b.price : typeof b.price === "string" ? parseFloat(b.price) : Infinity
-          return priceA - priceB
-        case "price-desc":
-          const priceA2 = typeof a.price === "number" ? a.price : typeof a.price === "string" ? parseFloat(a.price) : -Infinity
-          const priceB2 = typeof b.price === "number" ? b.price : typeof b.price === "string" ? parseFloat(b.price) : -Infinity
-          return priceB2 - priceA2
         case "name":
           return a.name.localeCompare(b.name, "ko")
         default:
@@ -243,20 +235,6 @@ export function RecommendationsViewWithFilters({
               onClick={() => handleSortChange("rank")}
             >
               추천순
-            </Button>
-            <Button
-              variant={sortBy === "price-asc" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleSortChange("price-asc")}
-            >
-              가격 낮은순
-            </Button>
-            <Button
-              variant={sortBy === "price-desc" ? "default" : "outline"}
-              size="sm"
-              onClick={() => handleSortChange("price-desc")}
-            >
-              가격 높은순
             </Button>
             <Button
               variant={sortBy === "name" ? "default" : "outline"}

@@ -44,14 +44,6 @@ export function ProductRecommendationCard({
 }: ProductRecommendationCardProps) {
   const { t } = useLanguage()
   const matchPercentage = matchScore ? `${Math.round(matchScore * 100)}%` : null
-  const priceDisplay =
-    price === null || price === undefined
-      ? t("recommendations.noPrice")
-      : typeof price === "number"
-        ? new Intl.NumberFormat("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 }).format(
-            price,
-          )
-        : price
 
   const [pendingSource, setPendingSource] = useState<ClickSource | null>(null)
 
@@ -243,10 +235,6 @@ export function ProductRecommendationCard({
         ) : null}
 
         {matchReason && <p className="text-sm text-foreground/80 leading-relaxed">{matchReason}</p>}
-
-        <p className="text-sm font-medium text-foreground">
-          {t("recommendations.priceLabel")}: {priceDisplay}
-        </p>
       </CardContent>
 
       <CardFooter className="flex flex-col gap-3">

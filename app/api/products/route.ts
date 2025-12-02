@@ -132,12 +132,26 @@ const computeFreshnessScore = (updatedAt?: string | null) => {
   return 0.5
 }
 
+// 캐싱 설정: 정적 데이터는 5분, 동적 데이터는 30초
+export const revalidate = 30 // ISR: 30초마다 재검증
+export const dynamic = "force-dynamic" // 동적 데이터이므로 force-dynamic
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const icfParam = parseIcfCodes(searchParams.get("icf"))
   const consultationId = searchParams.get("consultationId") ?? undefined
   const limitParam = Number(searchParams.get("limit")) || 12
   const limit = Math.min(Math.max(limitParam, 1), MAX_LIMIT)
+  
+  // 응답 헤더에 캐싱 설정
+  const headers = new Headers()
+  if (consultationId) {
+    // 상담별 추천은 짧은 캐시 (30초)
+    headers.set("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60")
+  } else {
+    // 일반 제품 목록은 더 긴 캐시 (5분)
+    headers.set("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600")
+  }
 
   const icfCodes =
     icfParam.length > 0
@@ -201,6 +215,12 @@ export async function GET(request: Request) {
       updated_at
     `
   )
+
+  // ICF 코드가 없으면 추천을 반환하지 않음 (consultationId만 있고 ICF 분석이 없는 경우)
+  if (isoCodes.length === 0 && consultationId) {
+    console.log("[products API] ICF codes not found for consultation, returning empty array");
+    return NextResponse.json({ products: [] })
+  }
 
   if (isoCodes.length) {
     query = query.in("iso_code", isoCodes)
@@ -368,13 +388,16 @@ export async function GET(request: Request) {
 
   console.log("[products API] 최종 응답:", debugInfo)
 
-  return NextResponse.json({
-    products: ranked.map((product) => ({
-      ...product,
-      recommendation_id: recommendationMap?.get(product.id as string) ?? null,
-    })),
-    icfCodes,
-    // 개발 환경에서만 디버깅 정보 포함
-    ...(process.env.NODE_ENV === "development" && { _debug: debugInfo }),
-  })
+  return NextResponse.json(
+    {
+      products: ranked.map((product) => ({
+        ...product,
+        recommendation_id: recommendationMap?.get(product.id as string) ?? null,
+      })),
+      icfCodes,
+      // 개발 환경에서만 디버깅 정보 포함
+      ...(process.env.NODE_ENV === "development" && { _debug: debugInfo }),
+    },
+    { headers }
+  )
 }
