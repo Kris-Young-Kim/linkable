@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
-import { getSupabaseServerClient } from "@/lib/supabase-server"
+import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
 
 /**
@@ -135,9 +135,31 @@ export async function POST(request: Request) {
       level: "info",
     })
 
+    // 전환 이벤트 로깅 (Analytics 대시보드 연동)
+    await supabase.from("conversion_events").insert({
+      user_id: userRow.id,
+      event_type: "consultation_feedback_submit",
+      consultation_id,
+      metadata: {
+        accuracy_rating: rating,
+        has_comment: !!feedback_comment,
+      },
+    })
+
+    // 피드백 제출 시 포인트 지급 (5포인트)
+    await supabase.from("point_transactions").insert({
+      user_id: userRow.id,
+      points: 5,
+      transaction_type: "earned_feedback_submit",
+      description: "상담 피드백 제출 보상",
+      reference_id: consultation_id,
+      reference_type: "consultation",
+    })
+
     return NextResponse.json({
       success: true,
       message: "Feedback submitted successfully",
+      pointsEarned: 5,
     })
   } catch (error) {
     console.error("[consultations/feedback] 오류:", error)

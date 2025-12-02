@@ -300,6 +300,8 @@ export const translations = {
     "recommendations.backToChat": "코디네이터 채팅으로 돌아가기",
     "recommendations.viewDashboard": "효과성 대시보드 보기",
     "recommendations.defaultCategory": "보조기기 솔루션",
+    "recommendations.supportProgram": "지원제도",
+    "recommendations.expertInquiry": "전문가 문의",
 
     // Language Selector
     "language.select": "언어 선택",
@@ -644,6 +646,8 @@ export const translations = {
     "recommendations.backToChat": "Return to Coordinator Chat",
     "recommendations.viewDashboard": "View Effectiveness Dashboard",
     "recommendations.defaultCategory": "Assistive Solution",
+    "recommendations.supportProgram": "Support Program",
+    "recommendations.expertInquiry": "Expert Inquiry",
 
     // Language Selector
     "language.select": "Select Language",

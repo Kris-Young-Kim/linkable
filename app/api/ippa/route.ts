@@ -116,20 +116,17 @@ export async function POST(request: Request) {
     // 포인트 적립
     const pointsEarned = calculatePoints(result.effectivenessScore)
     if (pointsEarned > 0) {
-      // 현재 포인트 조회
-      const { data: userData } = await supabase
-        .from("users")
-        .select("points")
-        .eq("id", supabaseUserId)
-        .single()
-
-      const currentPoints = (userData?.points as number) ?? 0
-      const newPoints = currentPoints + pointsEarned
-
+      // 포인트 트랜잭션 기록 (트리거가 자동으로 users.points 업데이트)
       const { error: pointsError } = await supabase
-        .from("users")
-        .update({ points: newPoints })
-        .eq("id", supabaseUserId)
+        .from("point_transactions")
+        .insert({
+          user_id: supabaseUserId,
+          points: pointsEarned,
+          transaction_type: "earned_ippa_evaluation",
+          description: `K-IPPA 평가 제출 보상 (효과성 점수: ${result.effectivenessScore.toFixed(2)})`,
+          reference_id: evaluation.id,
+          reference_type: "ippa_evaluation",
+        })
 
       if (pointsError) {
         // 포인트 적립 실패는 로그만 남기고 평가는 성공 처리
@@ -143,10 +140,23 @@ export async function POST(request: Request) {
         logEvent({
           category: "validation",
           action: "ippa_points_awarded",
-          payload: { userId: supabaseUserId, pointsEarned, newPoints },
+          payload: { userId: supabaseUserId, pointsEarned },
         })
       }
     }
+
+    // 전환 이벤트 로깅 (Analytics 대시보드 연동)
+    await supabase.from("conversion_events").insert({
+      user_id: supabaseUserId,
+      event_type: "ippa_evaluation_submit",
+      recommendation_id: body.recommendationId ?? null,
+      product_id: body.productId,
+      metadata: {
+        effectiveness_score: result.effectivenessScore,
+        improvement_percentage: result.improvementPercentage,
+        points_earned: pointsEarned,
+      },
+    })
 
     logEvent({
       category: "validation",

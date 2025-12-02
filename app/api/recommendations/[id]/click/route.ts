@@ -116,6 +116,35 @@ export async function POST(
         action: "recommendation_clicked",
         payload: { recommendationId, source: source ?? "unknown" },
       })
+
+      // 전환 이벤트 로깅 (Analytics 대시보드 연동)
+      const { data: productData } = await supabase
+        .from("recommendations")
+        .select("product_id, consultation_id")
+        .eq("id", recommendationId)
+        .single()
+
+      if (productData) {
+        await supabase.from("conversion_events").insert({
+          user_id: supabaseUserId,
+          event_type: "recommendation_click",
+          source: source ?? "unknown",
+          recommendation_id: recommendationId,
+          product_id: productData.product_id,
+          consultation_id: productData.consultation_id,
+          metadata: { source: source ?? "unknown" },
+        })
+
+        // 포인트 지급 (추천 클릭 시 10포인트)
+        await supabase.from("point_transactions").insert({
+          user_id: supabaseUserId,
+          points: 10,
+          transaction_type: "earned_recommendation_click",
+          description: "추천 상품 클릭 보상",
+          reference_id: recommendationId,
+          reference_type: "recommendation",
+        })
+      }
     }
 
     return NextResponse.json({ success: true })
