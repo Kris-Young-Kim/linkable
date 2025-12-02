@@ -1,0 +1,35 @@
+# 줄바꿈 문자 설정
+# 모든 텍스트 파일은 LF를 사용하고, Git이 자동으로 변환하지 않도록 설정
+* text=auto eol=lf
+
+# 소스 코드 파일들
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sql text eol=lf
+*.txt text eol=lf
+
+# 바이너리 파일
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# 설정 파일
+.env* text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+

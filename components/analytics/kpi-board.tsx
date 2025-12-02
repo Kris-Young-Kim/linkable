@@ -268,6 +268,138 @@ export function KPIBoard({
         </CardContent>
       </Card>
 
+      {/* 추천 CTR 시각화 */}
+      {metrics && (
+        <Card>
+          <CardHeader>
+            <CardTitle>추천 클릭률 (CTR) 분석</CardTitle>
+            <CardDescription>
+              추천 생성 대비 클릭률 및 트렌드 분석
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* CTR 게이지 */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">전체 CTR</span>
+                    <span className="text-2xl font-bold">
+                      {metrics.recommendationAccuracy.clickThroughRate}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-3">
+                    <div
+                      className="bg-primary h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          metrics.recommendationAccuracy.clickThroughRate,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                    <span>
+                      클릭: {metrics.recommendationAccuracy.clickedRecommendations}개
+                    </span>
+                    <span>
+                      전체: {metrics.recommendationAccuracy.totalRecommendations}개
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTR 목표 대비 */}
+              <div className="rounded-lg border border-border p-4 bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">목표 CTR (40%)</span>
+                  <span
+                    className={`text-sm font-semibold ${
+                      metrics.recommendationAccuracy.clickThroughRate >= 40
+                        ? "text-green-600"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    {metrics.recommendationAccuracy.clickThroughRate >= 40
+                      ? "목표 달성"
+                      : `${(
+                          40 - metrics.recommendationAccuracy.clickThroughRate
+                        ).toFixed(1)}% 부족`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* K-IPPA 참여율 시각화 */}
+      {metrics && (
+        <Card>
+          <CardHeader>
+            <CardTitle>K-IPPA 참여율 분석</CardTitle>
+            <CardDescription>
+              클릭된 추천 대비 K-IPPA 평가 제출률
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* 참여율 게이지 */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">전체 참여율</span>
+                    <span className="text-2xl font-bold">
+                      {metrics.ippaParticipation.participationRate}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-3">
+                    <div
+                      className="bg-chart-3 h-3 rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(
+                          metrics.ippaParticipation.participationRate,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                    <span>
+                      평가 완료: {metrics.ippaParticipation.totalEvaluations}개
+                    </span>
+                    <span>
+                      대상: {metrics.ippaParticipation.eligibleRecommendations}개
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 참여율 목표 대비 */}
+              <div className="rounded-lg border border-border p-4 bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">목표 참여율 (40%)</span>
+                  <span
+                    className={`text-sm font-semibold ${
+                      metrics.ippaParticipation.participationRate >= 40
+                        ? "text-green-600"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    {metrics.ippaParticipation.participationRate >= 40
+                      ? "목표 달성"
+                      : `${(
+                          40 - metrics.ippaParticipation.participationRate
+                        ).toFixed(1)}% 부족`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 트렌드 차트 */}
       {showTrendChart && chartData.length > 0 && (
         <Card>
@@ -304,6 +436,101 @@ export function KPIBoard({
                   dot={{ r: 4 }}
                 />
               </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* CTR vs K-IPPA 참여율 비교 차트 */}
+      {showTrendChart && metrics && (
+        <Card>
+          <CardHeader>
+            <CardTitle>주요 KPI 비교</CardTitle>
+            <CardDescription>추천 CTR과 K-IPPA 참여율 비교</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={chartConfig}>
+              <BarChart
+                data={[
+                  {
+                    name: "추천 CTR",
+                    value: metrics.recommendationAccuracy.clickThroughRate,
+                    target: 40,
+                  },
+                  {
+                    name: "K-IPPA 참여율",
+                    value: metrics.ippaParticipation.participationRate,
+                    target: 40,
+                  },
+                ]}
+              >
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="name"
+                  className="text-xs"
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                />
+                <YAxis
+                  className="text-xs"
+                  tick={{ fill: "hsl(var(--muted-foreground))" }}
+                  domain={[0, 100]}
+                />
+                <ChartTooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                          <div className="grid gap-2">
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-sm text-muted-foreground">
+                                현재 값
+                              </span>
+                              <span className="font-bold">
+                                {data.value.toFixed(1)}%
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-sm text-muted-foreground">
+                                목표
+                              </span>
+                              <span className="font-semibold">
+                                {data.target}%
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-sm text-muted-foreground">
+                                달성률
+                              </span>
+                              <span
+                                className={`font-semibold ${
+                                  data.value >= data.target
+                                    ? "text-green-600"
+                                    : "text-orange-600"
+                                }`}
+                              >
+                                {((data.value / data.target) * 100).toFixed(1)}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  fill="hsl(var(--chart-1))"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="target"
+                  fill="hsl(var(--muted))"
+                  radius={[4, 4, 0, 0]}
+                  opacity={0.3}
+                />
+              </BarChart>
             </ChartContainer>
           </CardContent>
         </Card>
