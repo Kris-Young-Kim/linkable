@@ -140,7 +140,8 @@ export function HeroSection() {
                   fill
                   className="object-cover"
                   sizes="192px"
-                  loading="lazy"
+                  loading={index < 3 ? "eager" : "lazy"}
+                  priority={index < 3}
                   unoptimized={image.src.startsWith("https://images.unsplash.com")}
                 />
               </div>

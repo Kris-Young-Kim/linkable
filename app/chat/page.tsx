@@ -1,6 +1,19 @@
 import type { Metadata } from "next"
+import dynamic from "next/dynamic"
+import { Suspense } from "react"
 
-import { ChatInterface } from "@/components/chat-interface"
+// 동적 import로 ChatInterface 지연 로딩 (초기 번들 크기 감소)
+const ChatInterface = dynamic(() => import("@/components/chat-interface").then((mod) => ({ default: mod.ChatInterface })), {
+  loading: () => (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-background">
+      <div className="space-y-4 text-center">
+        <div className="h-12 w-12 mx-auto border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-muted-foreground">채팅 인터페이스를 불러오는 중...</p>
+      </div>
+    </div>
+  ),
+  ssr: false, // 클라이언트 전용 컴포넌트
+})
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 const pageUrl = `${baseUrl}/chat`

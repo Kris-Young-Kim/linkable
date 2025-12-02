@@ -72,8 +72,9 @@ export function ConsultationFlowGuide({
     return (
       <div
         className={cn(
-          "fixed bottom-4 right-4 z-50 max-w-md rounded-lg border-2 border-primary/20 bg-card p-4 shadow-lg",
-          "animate-in slide-in-from-bottom-5 fade-in-0",
+          "fixed bottom-4 right-4 z-50 max-w-md rounded-lg border-2 border-primary/30 bg-card p-4 shadow-xl shadow-primary/10",
+          "animate-in slide-in-from-bottom-5 fade-in-0 zoom-in-95",
+          "ring-2 ring-primary/20",
           !isOpen && "hidden"
         )}
         role="alert"
@@ -99,10 +100,18 @@ export function ConsultationFlowGuide({
                 variant="recommendations"
                 href={consultationId ? `/recommendations/${consultationId}` : "#"}
                 size="sm"
-                className="text-xs"
+                className={cn(
+                  "text-xs font-semibold",
+                  "shadow-md shadow-primary/20",
+                  "ring-1 ring-primary/30",
+                  "animate-pulse hover:animate-none",
+                  "transition-all duration-200 hover:scale-105"
+                )}
                 onClick={handleViewRecommendations}
               >
+                <Sparkles className="mr-1 h-3 w-3" aria-hidden="true" />
                 {t("flowGuide.viewRecommendations") || "추천 보기"}
+                <ArrowRight className="ml-1 h-3 w-3" aria-hidden="true" />
               </CTAButton>
               <Button
                 variant="ghost"
@@ -201,9 +210,18 @@ export function ConsultationFlowGuide({
             variant="recommendations"
             href={consultationId ? `/recommendations/${consultationId}` : "#"}
             onClick={handleViewRecommendations}
-            className="w-full sm:w-auto"
+            className={cn(
+              "w-full sm:w-auto",
+              "shadow-lg shadow-primary/30",
+              "animate-pulse hover:animate-none",
+              "ring-2 ring-primary ring-offset-2",
+              "font-bold text-base",
+              "transition-all duration-300 hover:scale-105"
+            )}
           >
+            <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
             {t("flowGuide.viewRecommendations") || "추천 보기"}
+            <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
           </CTAButton>
         </DialogFooter>
       </DialogContent>

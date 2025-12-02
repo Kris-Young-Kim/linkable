@@ -1,14 +1,36 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
+import dynamic from "next/dynamic"
+import { Suspense } from "react"
 
 import { verifyAdminAccess } from "@/lib/auth/verify-admin"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { AdminProductManager } from "@/components/admin/admin-product-manager"
 import { SideNav } from "@/components/navigation/side-nav"
 import { BarChart3, Users, Package, ClipboardCheck } from "lucide-react"
+
+// 동적 import로 관리자 상품 관리 컴포넌트 지연 로딩
+const AdminProductManager = dynamic(
+  () => import("@/components/admin/admin-product-manager").then((mod) => ({ default: mod.AdminProductManager })),
+  {
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="h-20 bg-muted animate-pulse rounded" />
+            <div className="h-10 bg-muted animate-pulse rounded" />
+          </div>
+        </CardContent>
+      </Card>
+    ),
+    ssr: false, // 클라이언트 전용 컴포넌트
+  }
+)
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 const pageUrl = `${baseUrl}/admin/products`
@@ -100,7 +122,21 @@ export default async function AdminProductsPage() {
           />
 
           <div className="space-y-8">
-            <AdminProductManager initialProducts={data ?? []} />
+            <Suspense fallback={
+              <Card>
+                <CardHeader>
+                  <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="h-20 bg-muted animate-pulse rounded" />
+                    <div className="h-10 bg-muted animate-pulse rounded" />
+                  </div>
+                </CardContent>
+              </Card>
+            }>
+              <AdminProductManager initialProducts={data ?? []} />
+            </Suspense>
           </div>
         </div>
       </div>
