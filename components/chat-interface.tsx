@@ -126,6 +126,11 @@ export function ChatInterface() {
   const [previewRecommendations, setPreviewRecommendations] = useState<any[]>(
     []
   );
+
+  // useCallback으로 onClose 함수 메모이제이션하여 무한 루프 방지
+  const handleCloseFlowGuide = useCallback(() => {
+    setShowFlowGuide(false);
+  }, []);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -583,7 +588,7 @@ export function ChatInterface() {
       {/* 상담→추천 플로우 안내 */}
       <ConsultationFlowGuide
         isOpen={showFlowGuide}
-        onClose={() => setShowFlowGuide(false)}
+        onClose={handleCloseFlowGuide}
         consultationId={consultationId}
         recommendationCount={previewRecommendations.length}
         variant="modal"
