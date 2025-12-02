@@ -603,8 +603,8 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 #### AI 매칭 품질 강화
 
 8. [x] ICF Keyword Rule 세트 확장 (시각, 의사소통, 인지, 자세)
-9. [ ] QA 스크립트 (`scripts/tests/icf-matching.test.ts`) 작성
-10. [ ] 상담 종료 설문 UI 추가 (“분석 정확했나요?”)
+9. [x] QA 스크립트 (`scripts/tests/icf-matching.test.ts`) 작성
+10. [x] 상담 종료 설문 UI 추가 ("분석 정확했나요?")
 
 #### 구매/전환 장치
 

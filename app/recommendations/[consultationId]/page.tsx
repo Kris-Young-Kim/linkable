@@ -43,6 +43,14 @@ const RecommendationsViewWithFilters = dynamic(
   }
 )
 
+// 상담 종료 설문 컴포넌트 (클라이언트 컴포넌트)
+const ConsultationFeedbackForm = dynamic(
+  () => import("@/components/consultation-feedback-form").then((mod) => ({ default: mod.ConsultationFeedbackForm })),
+  {
+    ssr: false,
+  }
+)
+
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
 export const metadata: Metadata = {
@@ -297,6 +305,16 @@ export default async function RecommendationsDetailPage({
                 </Button>
               </CardContent>
             </Card>
+
+            {/* 상담 종료 설문 (완료된 상담만 표시) */}
+            {consultation.status === "completed" && (
+              <ConsultationFeedbackForm
+                consultationId={consultation.id}
+                onSuccess={() => {
+                  // 피드백 제출 성공 시 처리 (선택적)
+                }}
+              />
+            )}
           </div>
         </div>
 
