@@ -5,13 +5,24 @@ import { logEvent } from "@/lib/logging"
 import { calculateEffectiveness, calculatePoints } from "@/core/validation/ippa-calculator"
 import { analyseFeedback } from "@/core/validation/feedback-analyser"
 
+type ActivityScore = {
+  icfCode: string
+  importance: number
+  preDifficulty: number
+  postDifficulty: number
+}
+
 type IppaSubmissionRequest = {
   recommendationId?: string
   productId: string
   problemDescription?: string
-  scoreImportance: number // 1-5
-  scoreDifficultyPre: number // 1-5
-  scoreDifficultyPost: number // 1-5
+  consultationId?: string
+  // 기존 방식 (단일 활동)
+  scoreImportance?: number // 1-5
+  scoreDifficultyPre?: number // 1-5
+  scoreDifficultyPost?: number // 1-5
+  // 새로운 방식 (활동별 점수)
+  activityScores?: ActivityScore[]
   feedbackComment?: string
 }
 
@@ -55,31 +66,112 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "productId is required" }, { status: 400 })
     }
 
-    if (
-      !body.scoreImportance ||
-      !body.scoreDifficultyPre ||
-      !body.scoreDifficultyPost ||
-      body.scoreImportance < 1 ||
-      body.scoreImportance > 5 ||
-      body.scoreDifficultyPre < 1 ||
-      body.scoreDifficultyPre > 5 ||
-      body.scoreDifficultyPost < 1 ||
-      body.scoreDifficultyPost > 5
-    ) {
-      return NextResponse.json(
-        { error: "All scores must be between 1 and 5" },
-        { status: 400 },
-      )
-    }
-
     const supabaseUserId = await ensureUserRecord(userId)
 
-    // 효과성 점수 계산
-    const result = calculateEffectiveness({
-      importance: body.scoreImportance,
-      preDifficulty: body.scoreDifficultyPre,
-      postDifficulty: body.scoreDifficultyPost,
-    })
+    // 활동별 점수 처리 (새로운 방식)
+    let activityScoresData: any = null
+    let result: any
+    let avgScoreImportance = 0
+    let avgScoreDifficultyPre = 0
+    let avgScoreDifficultyPost = 0
+
+    if (body.activityScores && Array.isArray(body.activityScores) && body.activityScores.length > 0) {
+      // 활동별 점수 유효성 검사
+      for (const activity of body.activityScores) {
+        if (
+          !activity.icfCode ||
+          !activity.importance ||
+          !activity.preDifficulty ||
+          !activity.postDifficulty ||
+          activity.importance < 1 ||
+          activity.importance > 5 ||
+          activity.preDifficulty < 1 ||
+          activity.preDifficulty > 5 ||
+          activity.postDifficulty < 1 ||
+          activity.postDifficulty > 5
+        ) {
+          return NextResponse.json(
+            { error: "All activity scores must be between 1 and 5" },
+            { status: 400 },
+          )
+        }
+      }
+
+      // 활동별 점수 계산
+      const activities = body.activityScores.map(a => {
+        const improvement = a.preDifficulty - a.postDifficulty
+        const effectivenessScore = improvement * a.importance
+        return {
+          icfCode: a.icfCode,
+          importance: a.importance,
+          preDifficulty: a.preDifficulty,
+          postDifficulty: a.postDifficulty,
+          improvement,
+          effectivenessScore,
+        }
+      })
+
+      const totalPreScore = activities.reduce((sum, a) => sum + (a.importance * a.preDifficulty), 0)
+      const totalPostScore = activities.reduce((sum, a) => sum + (a.importance * a.postDifficulty), 0)
+      const totalImprovement = totalPreScore - totalPostScore
+      const avgPreScore = totalPreScore / activities.length
+      const avgPostScore = totalPostScore / activities.length
+      const avgImprovement = avgPreScore - avgPostScore
+
+      activityScoresData = {
+        activities,
+        totalPreScore,
+        totalPostScore,
+        totalImprovement,
+        avgPreScore,
+        avgPostScore,
+        avgImprovement,
+      }
+
+      // 평균 점수 계산 (기존 필드 호환성)
+      avgScoreImportance = activities.reduce((sum, a) => sum + a.importance, 0) / activities.length
+      avgScoreDifficultyPre = activities.reduce((sum, a) => sum + a.preDifficulty, 0) / activities.length
+      avgScoreDifficultyPost = activities.reduce((sum, a) => sum + a.postDifficulty, 0) / activities.length
+
+      // 전체 효과성 점수는 총 개선 점수 사용
+      result = {
+        effectivenessScore: totalImprovement,
+        improvement: avgScoreDifficultyPre - avgScoreDifficultyPost,
+        improvementPercentage: avgScoreDifficultyPre > 0 
+          ? ((avgScoreDifficultyPre - avgScoreDifficultyPost) / avgScoreDifficultyPre) * 100 
+          : 0,
+        interpretation: totalImprovement > 0 ? "excellent" : totalImprovement === 0 ? "none" : "worse",
+      }
+    } else {
+      // 기존 방식 (단일 활동)
+      if (
+        !body.scoreImportance ||
+        !body.scoreDifficultyPre ||
+        !body.scoreDifficultyPost ||
+        body.scoreImportance < 1 ||
+        body.scoreImportance > 5 ||
+        body.scoreDifficultyPre < 1 ||
+        body.scoreDifficultyPre > 5 ||
+        body.scoreDifficultyPost < 1 ||
+        body.scoreDifficultyPost > 5
+      ) {
+        return NextResponse.json(
+          { error: "All scores must be between 1 and 5" },
+          { status: 400 },
+        )
+      }
+
+      avgScoreImportance = body.scoreImportance
+      avgScoreDifficultyPre = body.scoreDifficultyPre
+      avgScoreDifficultyPost = body.scoreDifficultyPost
+
+      // 효과성 점수 계산
+      result = calculateEffectiveness({
+        importance: body.scoreImportance,
+        preDifficulty: body.scoreDifficultyPre,
+        postDifficulty: body.scoreDifficultyPost,
+      })
+    }
 
     // 피드백 감성 분석
     const feedbackAnalysis = body.feedbackComment
@@ -87,19 +179,26 @@ export async function POST(request: Request) {
       : null
 
     // DB에 저장
+    const insertData: any = {
+      user_id: supabaseUserId,
+      product_id: body.productId,
+      recommendation_id: body.recommendationId ?? null,
+      problem_description: body.problemDescription ?? null,
+      score_importance: avgScoreImportance,
+      score_difficulty_pre: avgScoreDifficultyPre,
+      score_difficulty_post: avgScoreDifficultyPost,
+      effectiveness_score: result.effectivenessScore,
+      feedback_comment: body.feedbackComment ?? null,
+    }
+
+    // 활동별 점수 데이터 추가
+    if (activityScoresData) {
+      insertData.activity_scores = activityScoresData
+    }
+
     const { data: evaluation, error: insertError } = await supabase
       .from("ippa_evaluations")
-      .insert({
-        user_id: supabaseUserId,
-        product_id: body.productId,
-        recommendation_id: body.recommendationId ?? null,
-        problem_description: body.problemDescription ?? null,
-        score_importance: body.scoreImportance,
-        score_difficulty_pre: body.scoreDifficultyPre,
-        score_difficulty_post: body.scoreDifficultyPost,
-        effectiveness_score: result.effectivenessScore,
-        feedback_comment: body.feedbackComment ?? null,
-      })
+      .insert(insertData)
       .select("id")
       .single()
 

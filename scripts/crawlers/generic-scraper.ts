@@ -71,16 +71,57 @@ export class GenericScraper {
       });
 
       // 페이지 로딩 대기 (필요한 경우에만)
-      await page.waitForTimeout(3000); // 페이지가 완전히 로드될 때까지 대기
+      await page.waitForTimeout(8000); // 페이지가 완전히 로드될 때까지 대기 (5초 -> 8초)
 
       // 상품 목록 찾기 (타임아웃 증가)
       let productElements: any[] = [];
       let workingSelector = "";
+      
+      // 먼저 테이블이 있는지 확인
+      const hasTable = await page.evaluate(() => {
+        return document.querySelector("table") !== null;
+      });
+      
+      if (hasTable) {
+        console.log(`   📋 테이블 구조 감지됨`);
+        // 테이블이 있으면 더 긴 대기 시간
+        await page.waitForTimeout(3000);
+      }
+
       for (const selector of this.siteConfig.selectors.productList) {
         try {
           console.log(`   🔍 셀렉터 시도 중: ${selector}`);
-          await page.waitForSelector(selector, { timeout: 15000 }); // 5초 -> 15초로 증가
+          
+          // waitForSelector 대신 직접 요소 찾기 시도
           productElements = await page.$$(selector);
+          
+          // 링크 요소를 찾은 경우, 부모 요소(tr 또는 td)로 변환
+          if (productElements.length > 0 && selector.includes("a[href")) {
+            const parentElements: any[] = [];
+            for (const linkEl of productElements) {
+              try {
+                // 부모 요소 찾기 (evaluateHandle 사용)
+                const parentHandle = await linkEl.evaluateHandle((el: any) => {
+                  let current = el.parentElement;
+                  while (current) {
+                    if (current.tagName === "TR" || current.tagName === "TD") {
+                      return current;
+                    }
+                    current = current.parentElement;
+                  }
+                  return el.parentElement || el;
+                });
+                parentElements.push(parentHandle);
+              } catch {
+                // 부모 찾기 실패 시 원본 사용
+                parentElements.push(linkEl);
+              }
+            }
+            if (parentElements.length > 0) {
+              productElements = parentElements;
+            }
+          }
+          
           if (productElements.length > 0) {
             workingSelector = selector;
             console.log(
@@ -89,9 +130,10 @@ export class GenericScraper {
             break;
           } else {
             console.log(`   ⚠️  ${selector}: 요소 0개`);
+            // 요소가 없어도 다음 셀렉터 시도
           }
         } catch (error) {
-          console.log(`   ❌ ${selector}: 타임아웃 또는 오류`);
+          console.log(`   ❌ ${selector}: 오류 - ${error instanceof Error ? error.message : String(error)}`);
         }
       }
 
@@ -122,6 +164,32 @@ export class GenericScraper {
             }
             if (el.tagName) {
               tagSet.add(el.tagName.toLowerCase());
+            }
+          });
+
+          // 테이블 행 찾기
+          const tableRows: any[] = [];
+          document.querySelectorAll("table tr, tbody tr, tr").forEach((el, idx) => {
+            if (idx < 20) {
+              const text = el.textContent?.trim() || "";
+              const hasLink = el.querySelector("a[href*='goods_view']") !== null;
+              const hasImage = el.querySelector("img") !== null;
+              const linkHref = el.querySelector("a[href*='goods_view']")?.getAttribute("href") || null;
+              
+              if (text.length > 10 && (hasLink || hasImage)) {
+                tableRows.push({
+                  tag: el.tagName.toLowerCase(),
+                  text: text.substring(0, 100),
+                  hasLink,
+                  hasImage,
+                  linkHref,
+                  children: Array.from(el.children).slice(0, 5).map((child) => ({
+                    tag: child.tagName.toLowerCase(),
+                    classes: Array.from(child.classList).join(" "),
+                    text: child.textContent?.trim().substring(0, 50) || "",
+                  })),
+                });
+              }
             }
           });
 
@@ -160,6 +228,7 @@ export class GenericScraper {
             title: document.title,
             classes: Array.from(classSet).sort(),
             tags: Array.from(tagSet).sort(),
+            tableRows,
             candidates: candidateElements,
           };
         });
@@ -170,6 +239,26 @@ export class GenericScraper {
         pageInfo.classes
           .slice(0, 20)
           .forEach((cls: string) => console.log(`      - ${cls}`));
+
+        if (pageInfo.tableRows && pageInfo.tableRows.length > 0) {
+          console.log(`   📋 테이블 행 발견 (${pageInfo.tableRows.length}개):`);
+          pageInfo.tableRows.slice(0, 5).forEach((row: any, idx: number) => {
+            console.log(`      ${idx + 1}. <${row.tag}>`);
+            console.log(`         텍스트: ${row.text}`);
+            if (row.hasLink) {
+              console.log(`         링크: ${row.linkHref}`);
+            }
+            if (row.hasImage) {
+              console.log(`         이미지: 있음`);
+            }
+            if (row.children.length > 0) {
+              console.log(`         자식 요소:`);
+              row.children.forEach((child: any) => {
+                console.log(`           - <${child.tag}> class="${child.classes}" - ${child.text}`);
+              });
+            }
+          });
+        }
 
         console.log(`   🔍 상품 후보 요소 (${pageInfo.candidates.length}개):`);
         pageInfo.candidates
@@ -499,6 +588,166 @@ export class GenericScraper {
           error instanceof Error ? error.message : String(error)
         }`
       );
+    }
+  }
+
+  /**
+   * 개별 제품 상세 페이지에서 정보 추출
+   */
+  async scrapeProductDetail(productUrl: string): Promise<ScrapedProduct | null> {
+    if (!this.browser) {
+      await this.initialize();
+    }
+
+    try {
+      const context = await this.browser!.newContext({
+        userAgent:
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        viewport: { width: 1280, height: 720 },
+      });
+      const page = await context.newPage();
+
+      // 불필요한 리소스 로딩 차단
+      await page.route("**/*", (route) => {
+        const resourceType = route.request().resourceType();
+        if (["font", "media"].includes(resourceType)) {
+          route.abort();
+        } else {
+          route.continue();
+        }
+      });
+
+      console.log(`🔍 제품 상세 페이지 크롤링: ${productUrl}`);
+
+      await page.goto(productUrl, {
+        waitUntil: "domcontentloaded",
+        timeout: 60000,
+      });
+
+      await page.waitForTimeout(5000);
+
+      // 제품명 추출
+      let name = "";
+      for (const selector of this.siteConfig.selectors.productName) {
+        try {
+          const nameElement = await page.$(selector);
+          if (nameElement) {
+            name = (await nameElement.textContent())?.trim() || "";
+            if (name && name.length > 2) {
+              break;
+            }
+          }
+        } catch {
+          // 다음 셀렉터 시도
+        }
+      }
+
+      // 제품명이 없으면 페이지 제목 사용
+      if (!name) {
+        name = await page.title();
+        // 제목에서 불필요한 부분 제거
+        name = name.replace(/\s*[-|]\s*.*$/, "").trim();
+      }
+
+      // 가격 추출
+      let price: number | null = null;
+      for (const selector of this.siteConfig.selectors.productPrice) {
+        try {
+          const priceElement = await page.$(selector);
+          if (priceElement) {
+            const priceText = (await priceElement.textContent())?.trim() || "";
+            price = parsePrice(priceText);
+            if (price) break;
+          }
+        } catch {
+          // 다음 셀렉터 시도
+        }
+      }
+
+      // wheelopia 특화 가격 추출 (테이블 형식)
+      if (!price) {
+        try {
+          const priceText = await page.evaluate(() => {
+            // "판매가격" 또는 "가격" 텍스트가 있는 행 찾기
+            const rows = Array.from(document.querySelectorAll("table tr, tr"));
+            for (const row of rows) {
+              const text = row.textContent || "";
+              if (text.includes("판매가격") || text.includes("가격") || text.includes("원")) {
+                const strong = row.querySelector("strong, b");
+                if (strong) {
+                  return strong.textContent || "";
+                }
+                // strong이 없으면 전체 텍스트에서 숫자 추출
+                const match = text.match(/([0-9,]+)\s*원/);
+                if (match) {
+                  return match[1];
+                }
+              }
+            }
+            return null;
+          });
+          if (priceText) {
+            price = parsePrice(priceText);
+          }
+        } catch {
+          // 무시
+        }
+      }
+
+      // 이미지 URL 추출
+      let imageUrl: string | null = null;
+      for (const selector of this.siteConfig.selectors.productImage) {
+        try {
+          const imageElement = await page.$(selector);
+          if (imageElement) {
+            imageUrl =
+              (await imageElement.getAttribute("src")) ||
+              (await imageElement.getAttribute("data-src")) ||
+              null;
+            if (imageUrl) {
+              imageUrl = normalizeUrl(imageUrl, this.siteConfig.baseUrl);
+              break;
+            }
+          }
+        } catch {
+          // 다음 셀렉터 시도
+        }
+      }
+
+      // wheelopia 특화 이미지 추출
+      if (!imageUrl) {
+        try {
+          const imgSrc = await page.evaluate(() => {
+            // 제품 상세 이미지 찾기
+            const img = document.querySelector("img[src*='data'], img[src*='goods'], img[src*='product']");
+            return img ? (img.getAttribute("src") || img.getAttribute("data-src")) : null;
+          });
+          if (imgSrc) {
+            imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
+          }
+        } catch {
+          // 무시
+        }
+      }
+
+      await page.close();
+      await context.close();
+
+      if (!name) {
+        console.warn(`⚠️  제품명을 찾을 수 없습니다: ${productUrl}`);
+        return null;
+      }
+
+      return {
+        name,
+        price,
+        image_url: imageUrl,
+        purchase_link: productUrl,
+        category: this.siteConfig.name.toLowerCase(),
+      };
+    } catch (error) {
+      console.error(`❌ 제품 상세 페이지 크롤링 오류: ${error}`);
+      throw error;
     }
   }
 

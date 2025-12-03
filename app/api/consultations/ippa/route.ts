@@ -5,10 +5,15 @@ import { logEvent } from "@/lib/logging"
 
 const supabase = getSupabaseServerClient()
 
-type IppaConsultationRequest = {
-  consultationId: string
+type ActivityScore = {
+  icfCode: string
   importance: number
   currentDifficulty: number
+}
+
+type IppaConsultationRequest = {
+  consultationId: string
+  activities: ActivityScore[]
 }
 
 export async function POST(request: NextRequest) {
@@ -24,71 +29,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "consultationId is required" }, { status: 400 })
     }
 
-    if (
-      !body.importance ||
-      !body.currentDifficulty ||
-      body.importance < 1 ||
-      body.importance > 5 ||
-      body.currentDifficulty < 1 ||
-      body.currentDifficulty > 5
-    ) {
+    if (!body.activities || !Array.isArray(body.activities) || body.activities.length === 0) {
       return NextResponse.json(
-        { error: "importance and currentDifficulty must be between 1 and 5" },
+        { error: "activities array is required and must not be empty" },
         { status: 400 }
       )
     }
 
-    // consultations 테이블에 K-IPPA 데이터 저장
-    // JSONB 필드로 저장하거나 별도 컬럼으로 저장
-    // 일단 JSONB로 저장 (향후 스키마 확장 가능)
+    // 활동 점수 유효성 검사
+    for (const activity of body.activities) {
+      if (
+        !activity.icfCode ||
+        !activity.importance ||
+        !activity.currentDifficulty ||
+        activity.importance < 1 ||
+        activity.importance > 5 ||
+        activity.currentDifficulty < 1 ||
+        activity.currentDifficulty > 5
+      ) {
+        return NextResponse.json(
+          { error: "Each activity must have valid icfCode, importance (1-5), and currentDifficulty (1-5)" },
+          { status: 400 }
+        )
+      }
+    }
+
+    // consultations 테이블의 ippa_activities JSONB 필드에 저장
+    const ippaActivitiesData = {
+      activities: body.activities.map(a => ({
+        icfCode: a.icfCode,
+        importance: a.importance,
+        preDifficulty: a.currentDifficulty,
+        collectedAt: new Date().toISOString(),
+      })),
+      collectedAt: new Date().toISOString(),
+    }
+
     const { error: updateError } = await supabase
       .from("consultations")
       .update({
-        // JSONB 필드에 저장 (향후 스키마 확장 시 별도 컬럼으로 변경 가능)
-        // 현재는 metadata JSONB 필드가 없으므로, 일단 analysis_results에 저장하거나
-        // 별도 테이블에 저장하는 방법도 있음
-        // 임시로 title에 힌트를 남기거나, 별도 처리 필요
+        ippa_activities: ippaActivitiesData,
       })
       .eq("id", body.consultationId)
 
-    // consultations 테이블에 직접 저장할 수 없으므로,
-    // analysis_results 테이블에 저장하거나 별도 처리
-    // 일단 analysis_results의 icf_codes JSONB에 추가
-    const { data: analysisData, error: analysisError } = await supabase
-      .from("analysis_results")
-      .select("icf_codes")
-      .eq("consultation_id", body.consultationId)
-      .single()
-
-    if (analysisError && analysisError.code !== "PGRST116") {
-      console.error("[K-IPPA] Analysis fetch error:", analysisError)
-    }
-
-    // analysis_results에 K-IPPA 데이터 추가
-    const updatedIcfCodes = {
-      ...(analysisData?.icf_codes as Record<string, unknown> | null),
-      ippa_consultation: {
-        importance: body.importance,
-        current_difficulty: body.currentDifficulty,
-        collected_at: new Date().toISOString(),
-      },
-    }
-
-    const { error: upsertError } = await supabase
-      .from("analysis_results")
-      .upsert(
-        {
-          consultation_id: body.consultationId,
-          icf_codes: updatedIcfCodes,
-        },
-        {
-          onConflict: "consultation_id",
-        }
-      )
-
-    if (upsertError) {
-      console.error("[K-IPPA] Upsert error:", upsertError)
-      return NextResponse.json({ error: "Failed to save K-IPPA data" }, { status: 500 })
+    if (updateError) {
+      console.error("[K-IPPA] Update error:", updateError)
+      return NextResponse.json({ error: "Failed to save K-IPPA activities" }, { status: 500 })
     }
 
     logEvent({
@@ -96,8 +82,8 @@ export async function POST(request: NextRequest) {
       action: "ippa_consultation_saved",
       payload: {
         consultationId: body.consultationId,
-        importance: body.importance,
-        currentDifficulty: body.currentDifficulty,
+        activityCount: body.activities.length,
+        activities: body.activities.map(a => a.icfCode),
       },
     })
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
@@ -16,7 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Search, X } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Search, X, Upload, Download, Sparkles, Loader2, FileText, Globe } from "lucide-react"
+import { IsoCodeSelector } from "./iso-code-selector"
 
 type AdminProduct = {
   id: string
@@ -43,6 +45,19 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  // 제품 목록 새로고침 함수
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/products")
+      if (response.ok) {
+        const data = await response.json()
+        setProducts(data.products || [])
+      }
+    } catch (error) {
+      console.error("[Admin Products] 제품 목록 새로고침 실패:", error)
+    }
+  }, [])
   const [formValues, setFormValues] = useState({
     name: "",
     iso_code: "",
@@ -54,12 +69,224 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     category: "",
   })
 
+  // ISO 코드 자동 추천
+  const [isoSuggestions, setIsoSuggestions] = useState<Array<{ iso: string; label: string; description: string }>>([])
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false)
+
+  // 일괄 업로드
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadResult, setUploadResult] = useState<{
+    success: boolean
+    created: number
+    updated: number
+    failed: number
+    total: number
+  } | null>(null)
+
+  // 크롤링
+  const [crawlValues, setCrawlValues] = useState({
+    keyword: "",
+    category: "",
+    categories: "",
+    isoCode: "",
+    platform: "all",
+    max: "10",
+    productUrl: "", // 개별 제품 URL
+  })
+  const [isCrawling, setIsCrawling] = useState(false)
+  const [crawlResult, setCrawlResult] = useState<string | null>(null)
+
   // 필터링 및 검색 상태
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedIsoCode, setSelectedIsoCode] = useState<string>("all")
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [sortBy, setSortBy] = useState<SortOption>("updated-desc")
+
+  // ISO 코드 자동 추천 (상품명 입력 시)
+  const fetchIsoSuggestions = useCallback(async (productName: string) => {
+    if (!productName || productName.length < 2) {
+      setIsoSuggestions([])
+      return
+    }
+
+    setIsLoadingSuggestions(true)
+    try {
+      const response = await fetch("/api/admin/iso-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setIsoSuggestions(data.suggestions || [])
+        
+        // 첫 번째 추천이 있으면 자동으로 선택 (선택적)
+        if (data.suggestions && data.suggestions.length > 0 && !formValues.iso_code) {
+          // 자동 선택은 하지 않고, 사용자가 선택하도록 함
+        }
+      }
+    } catch (error) {
+      console.error("[Admin Products] ISO suggestion error:", error)
+    } finally {
+      setIsLoadingSuggestions(false)
+    }
+  }, [formValues.iso_code])
+
+  // 상품명 변경 시 ISO 코드 추천
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formValues.name) {
+        fetchIsoSuggestions(formValues.name)
+      } else {
+        setIsoSuggestions([])
+      }
+    }, 500) // 500ms 디바운스
+
+    return () => clearTimeout(timer)
+  }, [formValues.name, fetchIsoSuggestions])
+
+  // 일괄 업로드 핸들러
+  const handleFileUpload = async () => {
+    if (!uploadFile) {
+      setErrorMessage("파일을 선택해주세요.")
+      return
+    }
+
+    setIsUploading(true)
+    setErrorMessage(null)
+    setUploadResult(null)
+
+    try {
+      const formData = new FormData()
+      formData.append("file", uploadFile)
+
+      const response = await fetch("/api/admin/products/import", {
+        method: "POST",
+        body: formData,
+      }).catch((error) => {
+        console.error("[Admin Products] Fetch error:", error)
+        throw new Error(`네트워크 오류: ${error.message}`)
+      })
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}))
+        throw new Error(errorPayload?.error ?? `파일 업로드 실패 (${response.status})`)
+      }
+
+      const result = await response.json()
+      setUploadResult(result)
+      setUploadFile(null)
+
+      // 상품 목록 새로고침
+      const productsResponse = await fetch("/api/admin/products")
+      if (productsResponse.ok) {
+        const data = await productsResponse.json()
+        setProducts(data.products || [])
+      }
+
+      setSuccessMessage(
+        `일괄 등록 완료: 생성 ${result.created}개, 업데이트 ${result.updated}개, 실패 ${result.failed}개`
+      )
+      setTimeout(() => setSuccessMessage(null), 5000)
+    } catch (error) {
+      console.error("[Admin Products] Upload error:", error)
+      setErrorMessage(error instanceof Error ? error.message : "파일 업로드 실패")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  // 크롤링 실행 핸들러
+  const handleCrawl = async () => {
+    // 개별 제품 URL이 있으면 URL 크롤링 우선
+    if (crawlValues.productUrl) {
+      setIsCrawling(true)
+      setErrorMessage(null)
+      setCrawlResult(null)
+
+      try {
+        const response = await fetch("/api/admin/products/crawl", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            productUrl: crawlValues.productUrl,
+            isoCode: crawlValues.isoCode || undefined,
+            platform: crawlValues.platform,
+          }),
+        })
+
+        if (!response.ok) {
+          const errorPayload = await response.json().catch(() => ({}))
+          throw new Error(errorPayload?.error ?? "제품 크롤링 실패")
+        }
+
+        const result = await response.json()
+        setCrawlResult(
+          result.message || `제품 크롤링 완료: ${result.created > 0 ? "생성" : "업데이트"} (${result.product?.name || "알 수 없음"})`
+        )
+        setSuccessMessage(null)
+        // 제품 목록 새로고침
+        await fetchProducts()
+      } catch (error) {
+        console.error("제품 크롤링 오류:", error)
+        setErrorMessage(error instanceof Error ? error.message : "제품 크롤링 실패")
+      } finally {
+        setIsCrawling(false)
+      }
+      return
+    }
+
+    if (!crawlValues.keyword && !crawlValues.category && !crawlValues.categories) {
+      setErrorMessage("키워드, 카테고리 또는 제품 URL을 입력해주세요.")
+      return
+    }
+
+    setIsCrawling(true)
+    setErrorMessage(null)
+    setCrawlResult(null)
+
+    try {
+      const response = await fetch("/api/admin/products/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keyword: crawlValues.keyword || undefined,
+          category: crawlValues.category || undefined,
+          categories: crawlValues.categories || undefined,
+          isoCode: crawlValues.isoCode || undefined,
+          platform: crawlValues.platform,
+          max: crawlValues.max ? parseInt(crawlValues.max) : undefined,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}))
+        throw new Error(errorPayload?.error ?? "크롤링 실행 실패")
+      }
+
+      const result = await response.json()
+      setCrawlResult(result.message || "크롤링이 시작되었습니다.")
+      setSuccessMessage("크롤링이 시작되었습니다. 잠시 후 상품 목록을 확인해주세요.")
+      setTimeout(() => setSuccessMessage(null), 5000)
+
+      // 상품 목록 새로고침 (크롤링이 완료될 때까지 기다려야 하지만, 일단 시도)
+      setTimeout(async () => {
+        const productsResponse = await fetch("/api/admin/products")
+        if (productsResponse.ok) {
+          const data = await productsResponse.json()
+          setProducts(data.products || [])
+        }
+      }, 3000)
+    } catch (error) {
+      console.error("[Admin Products] Crawl error:", error)
+      setErrorMessage(error instanceof Error ? error.message : "크롤링 실행 실패")
+    } finally {
+      setIsCrawling(false)
+    }
+  }
 
   const handleCreate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -222,43 +449,80 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>새 상품 등록</CardTitle>
-          <CardDescription>ISO 9999 코드에 해당하는 상품을 빠르게 추가하세요.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {errorMessage && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-              {errorMessage}
-            </div>
-          )}
-          {successMessage && (
-            <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
-              {successMessage}
-            </div>
-          )}
-          <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
-            <Input
-              required
-              placeholder="상품 이름"
-              value={formValues.name}
-              onChange={(event) => setFormValues((prev) => ({ ...prev, name: event.target.value }))}
-            />
-            <Input
-              required
-              placeholder="ISO 코드 (예: 12 22)"
-              value={formValues.iso_code}
-              onChange={(event) => setFormValues((prev) => ({ ...prev, iso_code: event.target.value }))}
-            />
-            <Input
-              placeholder="가격 (원)"
-              value={formValues.price}
-              onChange={(event) => setFormValues((prev) => ({ ...prev, price: event.target.value }))}
-              type="number"
-              min="0"
-              step="1000"
-            />
+      <Tabs defaultValue="single" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="single">단일 등록</TabsTrigger>
+          <TabsTrigger value="bulk">일괄 업로드</TabsTrigger>
+          <TabsTrigger value="crawl">크롤링</TabsTrigger>
+          <TabsTrigger value="list">상품 목록</TabsTrigger>
+        </TabsList>
+
+        {/* 단일 상품 등록 */}
+        <TabsContent value="single">
+          <Card>
+            <CardHeader>
+              <CardTitle>새 상품 등록</CardTitle>
+              <CardDescription>ISO 9999 코드에 해당하는 상품을 빠르게 추가하세요.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {errorMessage && (
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+              {successMessage && (
+                <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+                  {successMessage}
+                </div>
+              )}
+              <form className="grid gap-4 md:grid-cols-2" onSubmit={handleCreate}>
+                <div className="md:col-span-2">
+                  <Label htmlFor="product-name" className="mb-2 block">
+                    상품 이름
+                    {isLoadingSuggestions && (
+                      <Loader2 className="ml-2 inline h-4 w-4 animate-spin" />
+                    )}
+                  </Label>
+                  <Input
+                    id="product-name"
+                    required
+                    placeholder="상품 이름을 입력하세요 (ISO 코드 자동 추천)"
+                    value={formValues.name}
+                    onChange={(event) => setFormValues((prev) => ({ ...prev, name: event.target.value }))}
+                  />
+                  {isoSuggestions.length > 0 && (
+                    <div className="mt-2 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                      <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-900">
+                        <Sparkles className="h-4 w-4" />
+                        추천 ISO 코드
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {isoSuggestions.map((suggestion) => (
+                          <Badge
+                            key={suggestion.iso}
+                            variant="secondary"
+                            className="cursor-pointer hover:bg-blue-100"
+                            onClick={() => {
+                              setFormValues((prev) => ({ ...prev, iso_code: suggestion.iso }))
+                            }}
+                          >
+                            ISO {suggestion.iso} - {suggestion.label}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="iso-code" className="mb-2 block">
+                    ISO 코드 <span className="text-red-500">*</span>
+                  </Label>
+                  <IsoCodeSelector
+                    value={formValues.iso_code}
+                    onValueChange={(value) => setFormValues((prev) => ({ ...prev, iso_code: value }))}
+                    suggestions={isoSuggestions}
+                  />
+                </div>
             <Input
               placeholder="구매 링크"
               value={formValues.purchase_link}
@@ -312,16 +576,280 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
                 rows={3}
               />
             </div>
-            <div className="md:col-span-2 flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "등록 중..." : "상품 등록"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                <div className="md:col-span-2 flex justify-end">
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "등록 중..." : "상품 등록"}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      <Card>
+        {/* 일괄 업로드 */}
+        <TabsContent value="bulk">
+          <Card>
+            <CardHeader>
+              <CardTitle>일괄 업로드</CardTitle>
+              <CardDescription>CSV, JSON 또는 PDF 카탈로그 파일로 여러 상품을 한 번에 등록하세요.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {errorMessage && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+              {successMessage && (
+                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+                  {successMessage}
+                </div>
+              )}
+              {uploadResult && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2">
+                  <div className="text-sm font-medium text-blue-900">업로드 결과</div>
+                  <div className="mt-2 text-sm text-blue-700">
+                    <div>✅ 생성: {uploadResult.created}개</div>
+                    <div>🔄 업데이트: {uploadResult.updated}개</div>
+                    {uploadResult.failed > 0 && (
+                      <div className="text-red-600">❌ 실패: {uploadResult.failed}개</div>
+                    )}
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      총 {uploadResult.total}개 중 {uploadResult.created + uploadResult.updated}개 처리 완료
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="file-upload" className="mb-2 block">
+                    파일 선택 (CSV, JSON 또는 PDF)
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      accept=".csv,.json,.pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) {
+                          setUploadFile(file)
+                          setUploadResult(null)
+                        }
+                      }}
+                      className="cursor-pointer"
+                    />
+                    {uploadFile && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <FileText className="h-4 w-4" />
+                        {uploadFile.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-muted bg-muted/50 p-4">
+                  <div className="mb-2 text-sm font-medium">파일 형식 예시</div>
+                  <div className="space-y-2 text-xs text-muted-foreground">
+                    <div>
+                      <strong>CSV:</strong> name,iso_code,purchase_link,image_url,manufacturer,category,description
+                    </div>
+                    <div>
+                      <strong>JSON:</strong> [{"{"}"name": "상품명", "iso_code": "15 09", "purchase_link": "https://..."{"}"}]
+                    </div>
+                    <div>
+                      <strong>PDF:</strong> 제품 카탈로그 PDF 파일. 보조기기 관련 제품명과 가격 정보를 자동으로 추출합니다. (개선된 필터링 적용)
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground/70">
+                      * 가격(price) 필드는 선택 사항입니다. 생략 가능합니다.
+                      * PDF는 보조기기 관련 키워드가 포함된 제품만 추출됩니다.
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  onClick={handleFileUpload}
+                  disabled={!uploadFile || isUploading}
+                  className="w-full"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      업로드 중...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      파일 업로드 및 등록
+                    </>
+                  )}
+                </Button>
+                <div className="text-center">
+                  <a
+                    href="/scripts/example-products.csv"
+                    download
+                    className="text-sm text-primary hover:underline"
+                  >
+                    <Download className="mr-1 inline h-4 w-4" />
+                    CSV 예제 파일 다운로드
+                  </a>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 크롤링 */}
+        <TabsContent value="crawl">
+          <Card>
+            <CardHeader>
+              <CardTitle>웹 크롤링</CardTitle>
+              <CardDescription>웹사이트에서 상품 정보를 자동으로 수집하여 등록합니다.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {errorMessage && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+                  {errorMessage}
+                </div>
+              )}
+              {successMessage && (
+                <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-2 text-sm text-green-700">
+                  {successMessage}
+                </div>
+              )}
+              {crawlResult && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm text-blue-700">
+                  {crawlResult}
+                </div>
+              )}
+              <div className="space-y-4">
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <Label htmlFor="crawl-product-url" className="mb-2 block font-medium">
+                    개별 제품 URL (우선 사용)
+                  </Label>
+                  <Input
+                    id="crawl-product-url"
+                    placeholder="예: https://www.wheelopia.co.kr/shop/goods/goods_view.php?goodsno=50"
+                    value={crawlValues.productUrl}
+                    onChange={(e) => setCrawlValues((prev) => ({ ...prev, productUrl: e.target.value }))}
+                    className="font-mono text-sm"
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    특정 제품 상세 페이지 URL을 입력하면 해당 제품만 크롤링합니다.
+                  </p>
+                </div>
+                <div className="text-center text-sm text-muted-foreground">또는</div>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="crawl-keyword" className="mb-2 block">
+                    검색 키워드
+                  </Label>
+                  <Input
+                    id="crawl-keyword"
+                    placeholder="예: 무게조절 식기"
+                    value={crawlValues.keyword}
+                    onChange={(e) => setCrawlValues((prev) => ({ ...prev, keyword: e.target.value, productUrl: "" }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="crawl-category" className="mb-2 block">
+                    카테고리 (또는 여러 카테고리: 쉼표로 구분)
+                  </Label>
+                  <Input
+                    id="crawl-category"
+                    placeholder="예: 휠체어 또는 휠체어,워커"
+                    value={crawlValues.categories || crawlValues.category}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      if (value.includes(",")) {
+                        setCrawlValues((prev) => ({ ...prev, categories: value, category: "" }))
+                      } else {
+                        setCrawlValues((prev) => ({ ...prev, category: value, categories: "" }))
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="crawl-iso" className="mb-2 block">
+                    ISO 코드
+                  </Label>
+                  <IsoCodeSelector
+                    value={crawlValues.isoCode}
+                    onValueChange={(value) => setCrawlValues((prev) => ({ ...prev, isoCode: value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="crawl-platform" className="mb-2 block">
+                    플랫폼
+                  </Label>
+                  <Select
+                    value={crawlValues.platform}
+                    onValueChange={(value) => setCrawlValues((prev) => ({ ...prev, platform: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">전체</SelectItem>
+                      <SelectItem value="coupang">쿠팡</SelectItem>
+                      <SelectItem value="naver">네이버 쇼핑</SelectItem>
+                      <SelectItem value="ablelife">에이블라이프</SelectItem>
+                      <SelectItem value="carelifemall">케어라이프몰</SelectItem>
+                      <SelectItem value="willbe">윌비</SelectItem>
+                      <SelectItem value="11st">11번가</SelectItem>
+                      <SelectItem value="wheelopia">휠로피아</SelectItem>
+                      <SelectItem value="sk-easymove">SK 이지무브</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="crawl-max" className="mb-2 block">
+                    최대 수집 개수
+                  </Label>
+                  <Input
+                    id="crawl-max"
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={crawlValues.max}
+                    onChange={(e) => setCrawlValues((prev) => ({ ...prev, max: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <Button
+                onClick={handleCrawl}
+                disabled={
+                  isCrawling ||
+                  (!crawlValues.productUrl && !crawlValues.keyword && !crawlValues.category && !crawlValues.categories)
+                }
+                className="w-full"
+              >
+                {isCrawling ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    크롤링 중...
+                  </>
+                ) : (
+                  <>
+                    <Globe className="mr-2 h-4 w-4" />
+                    크롤링 시작
+                  </>
+                )}
+              </Button>
+              <div className="rounded-lg border border-muted bg-muted/50 p-4">
+                <div className="mb-2 text-sm font-medium">사용 예시</div>
+                <div className="space-y-1 text-xs text-muted-foreground">
+                  <div>• 개별 제품 URL: "https://www.wheelopia.co.kr/shop/goods/goods_view.php?goodsno=50", ISO: "12 23"</div>
+                  <div>• 키워드: "무게조절 식기", ISO: "15 09", 플랫폼: "쿠팡"</div>
+                  <div>• 카테고리: "워커", ISO: "12 03", 플랫폼: "에이블라이프"</div>
+                  <div>• 여러 카테고리: "휠체어,워커", ISO: "12 03", 플랫폼: "전체"</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* 상품 목록 */}
+        <TabsContent value="list">
+          <Card>
         <CardHeader>
           <CardTitle>상품 목록</CardTitle>
           <CardDescription>
@@ -472,6 +1000,8 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           ))
         )}
       </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
@@ -590,19 +1120,6 @@ function ProductCard({ product, count, onUpdate, onDelete }: ProductCardProps) {
                   id="edit-iso"
                   value={localValues.iso_code}
                   onChange={(event) => setLocalValues((prev) => ({ ...prev, iso_code: event.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-price" className="text-xs text-muted-foreground mb-1 block">
-                  가격 (원)
-                </Label>
-                <Input
-                  id="edit-price"
-                  value={localValues.price}
-                  onChange={(event) => setLocalValues((prev) => ({ ...prev, price: event.target.value }))}
-                  type="number"
-                  min="0"
-                  step="1000"
                 />
               </div>
               <div>

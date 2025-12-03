@@ -3,6 +3,7 @@ import dynamic from "next/dynamic"
 import { Suspense } from "react"
 
 // 동적 import로 ChatInterface 지연 로딩 (초기 번들 크기 감소)
+// ChatInterface는 이미 "use client"로 선언된 클라이언트 컴포넌트이므로 ssr: false 불필요
 const ChatInterface = dynamic(() => import("@/components/chat-interface").then((mod) => ({ default: mod.ChatInterface })), {
   loading: () => (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background">
@@ -12,7 +13,6 @@ const ChatInterface = dynamic(() => import("@/components/chat-interface").then((
       </div>
     </div>
   ),
-  ssr: false, // 클라이언트 전용 컴포넌트
 })
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"

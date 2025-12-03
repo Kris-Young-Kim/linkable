@@ -2,6 +2,27 @@
 
 문서 참고: `docs/DIR.md`, `docs/Mermaid.md`, `docs/Read.md`, `docs/MRD.md`, `docs/PRD.md`, `docs/TRD.md`
 
+## 최근 완료된 작업 (2025-01-22)
+
+### K-IPPA 사용자 여정 개선
+
+- ✅ 채팅 인터페이스에서 K-IPPA 폼 제거 (채팅 흐름 개선)
+- ✅ 추천 페이지에 기초선 평가 제안 섹션 추가
+- ✅ 기초선 평가 전용 페이지 생성 (`/dashboard/ippa/baseline/[consultationId]`)
+- ✅ 기초선 평가 완료 여부 확인 및 상태 표시
+- ✅ 사용자가 선택적으로 평가 진행 가능
+
+### K-IPPA ICF 활동 항목 통합 (기존 시스템 기반)
+
+- ✅ ICF 활동 항목 정의 파일 생성 (`core/assessment/icf-activities.ts`) - 참조용
+- ✅ 상담 폼 수정: AI가 추출한 ICF D-Level 코드 기반으로 점수 입력
+- ✅ 사후 평가 폼에 활동별 사후 점수 입력 기능 추가
+- ✅ 데이터베이스 스키마 확장 (활동별 점수 저장)
+- ✅ API 수정: 추출된 ICF 코드 기반 처리 (`analysis_results.icf_codes` 활용)
+- ✅ 통계 페이지에 활동별 평가 결과 시각화 추가
+- ✅ 개별 평가 상세 보기 컴포넌트 구현
+- 📄 상세 문서: `docs/ippa-icf-integration.md`
+
 ## 핵심 기능 흐름 (Core Flow)
 
 ```
@@ -33,13 +54,15 @@ AI 상담 (텍스트/음성/이미지 입력)
     ↓
 ICF 분석 완료 → 추천 자동 생성
     ↓
-추천 페이지 (/recommendations?consultationId={id})
+추천 페이지 (/recommendations/[consultationId])
+    ↓
+[선택적] 기초선 평가 (/dashboard/ippa/baseline/[consultationId])
     ↓
 상품 선택 및 구매 (아웃링크)
     ↓
-[14일 후] K-IPPA 평가 알림
+[14일 후] K-IPPA 사후 평가 알림
     ↓
-K-IPPA 평가 제출
+K-IPPA 사후 평가 제출 (/dashboard/ippa/[recommendationId])
 ```
 
 ### 사용자 대시보드 ("내 상담")

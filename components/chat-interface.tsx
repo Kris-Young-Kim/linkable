@@ -59,7 +59,6 @@ import { Button } from "@/components/ui/button";
 import { CTAButton } from "@/components/ui/cta-button";
 import { Textarea } from "@/components/ui/textarea";
 import { DisclaimerModal } from "@/components/disclaimer-modal";
-import { IppaConsultationForm } from "@/components/ippa-consultation-form";
 import { ProductRecommendationCard } from "@/components/product-recommendation-card";
 import {
   IcfVisualization,
@@ -113,12 +112,6 @@ export function ChatInterface() {
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [consultationId, setConsultationId] = useState<string | null>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
-  const [showIppaForm, setShowIppaForm] = useState(false);
-  const [ippaData, setIppaData] = useState<{
-    importance: number;
-    currentDifficulty: number;
-  } | null>(null);
-  const [problemDescription, setProblemDescription] = useState<string>("");
   const [isLoadingRecommendations, setIsLoadingRecommendations] =
     useState(false);
   const [hasRecommendations, setHasRecommendations] = useState(false);
@@ -141,7 +134,9 @@ export function ChatInterface() {
   const [errorState, setErrorState] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const isUserScrollingRef = useRef(false);
 
   const preloadRecommendations = useCallback(
     async (currentConsultationId: string) => {
@@ -185,13 +180,51 @@ export function ChatInterface() {
   const requiresLogin = isAuthResolved && !isSignedIn;
   const shouldShowDisclaimer = Boolean(isSignedIn && !hasAcceptedDisclaimer);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = useCallback((force = false) => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
 
+    // 사용자가 수동으로 스크롤을 올렸는지 확인
+    const isNearBottom = 
+      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+
+    // 사용자가 맨 아래에 있거나 강제 스크롤인 경우에만 스크롤
+    if (force || isNearBottom) {
+      // requestAnimationFrame을 사용하여 DOM 업데이트 후 스크롤
+      requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+      });
+    }
+  }, []);
+
+  // 메시지가 추가될 때 자동 스크롤 (사용자가 맨 아래에 있을 때만)
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    scrollToBottom(false);
+  }, [messages, scrollToBottom]);
+
+  // 스크롤 이벤트 핸들러: 사용자가 수동으로 스크롤하는지 감지
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      // 스크롤 중에는 자동 스크롤 방지
+      isUserScrollingRef.current = true;
+      clearTimeout(scrollTimeout);
+      
+      // 스크롤이 멈춘 후 일정 시간이 지나면 다시 자동 스크롤 허용
+      scrollTimeout = setTimeout(() => {
+        isUserScrollingRef.current = false;
+      }, 150);
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
 
   const handleSend = async () => {
     if (!isSignedIn) {
@@ -221,6 +254,8 @@ export function ChatInterface() {
       },
     ]);
     setInput("");
+    // 사용자가 메시지를 보낼 때는 강제로 스크롤
+    setTimeout(() => scrollToBottom(true), 100);
     setIsTyping(true);
     setSuggestedQuestions([]);
     setIcfAnalysis(null);
@@ -353,15 +388,6 @@ export function ChatInterface() {
                   consultation_id: payload.consultationId,
                   has_recommendations: true,
                 });
-
-                if (!ippaData && !showIppaForm) {
-                  setShowIppaForm(true);
-                  setProblemDescription(
-                    payload.problemDescription ||
-                      trimmed.slice(0, 100) ||
-                      "상담 내용을 요약해 주세요."
-                  );
-                }
 
                 if (payload.consultationId) {
                   await preloadRecommendations(payload.consultationId);
@@ -561,35 +587,6 @@ export function ChatInterface() {
     textareaRef.current?.focus();
   };
 
-  const handleIppaComplete = async (data: {
-    importance: number;
-    currentDifficulty: number;
-  }) => {
-    setIppaData(data);
-    setShowIppaForm(false);
-
-    // K-IPPA 데이터를 서버에 저장
-    if (consultationId) {
-      try {
-        await fetch("/api/consultations/ippa", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            consultationId,
-            importance: data.importance,
-            currentDifficulty: data.currentDifficulty,
-          }),
-        });
-        console.log("[Chat] K-IPPA data saved");
-      } catch (error) {
-        console.error("[Chat] Failed to save K-IPPA data:", error);
-      }
-    }
-  };
-
-  const handleIppaSkip = () => {
-    setShowIppaForm(false);
-  };
 
   return (
     <>
@@ -684,7 +681,10 @@ export function ChatInterface() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto px-4 py-6 min-h-0">
+          <div 
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto px-4 py-6 min-h-0"
+          >
             <div className="mx-auto max-w-3xl space-y-6">
               {messages.map((message) => (
                 <div
@@ -738,19 +738,6 @@ export function ChatInterface() {
                       {question}
                     </Button>
                   ))}
-                </div>
-              )}
-
-              {/* K-IPPA Consultation Form */}
-              {showIppaForm && (
-                <div className="flex justify-center">
-                  <div className="w-full max-w-2xl">
-                    <IppaConsultationForm
-                      onComplete={handleIppaComplete}
-                      onSkip={handleIppaSkip}
-                      problemDescription={problemDescription}
-                    />
-                  </div>
                 </div>
               )}
 

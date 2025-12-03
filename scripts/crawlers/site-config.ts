@@ -27,14 +27,33 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
     baseUrl: "https://www.ablelife.co.kr",
     // 카테고리별 URL 매핑
     categoryUrls: {
-      "휠체어": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X",
+      // 휠체어 카테고리 (xcode=003)
+      "유모차형-틸팅/리클형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X",
+      "유모차형-기본형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=009&type=X",
+      "기본형,보호자형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=001&type=X",
+      "활동형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=004&type=X",
+      "착탈,분리형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=002&type=X",
+      "아동,청소년용": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=003&type=X",
+      "특수,틸트형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=005&type=X",
+      "거상,침대형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=008&type=X",
+      "전동휠체어": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=007&type=X",
+      "휠체어방석": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=010&type=X",
+      "휠체어소품": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=006&type=X",
+      // 기타 카테고리
       "워커": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=012&type=X",
       "목발": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=013&type=X",
       "보행보조": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=014&type=X",
       "보행기": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=015&type=X",
+      // 전체 휠체어 카테고리 (모든 휠체어 관련 카테고리)
+      "휠체어": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X", // 기본값
     },
     selectors: {
       productList: [
+        "table tbody tr", // 테이블 행
+        "table tr", // 테이블 행
+        "tr", // 모든 행
+        "td:has(a[href*='shopdetail'])", // 테이블 셀 (상품 링크가 있는 셀)
+        "td a[href*='shopdetail']", // 상품 링크 (부모 요소로 찾기)
         "ul.product_list > li", // 문서에서 확인된 우선 셀렉터
         ".product_list > li",
         ".prd-list > li", // 추가 시도
@@ -44,8 +63,9 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "[class*='product']",
       ],
       productName: [
+        "a[href*='shopdetail']", // 링크에서 텍스트 추출 (우선)
+        "td a[href*='shopdetail']", // 테이블 셀 안의 링크
         ".product_name", // 문서에서 확인된 우선 셀렉터
-        "a[href*='shopdetail']", // 링크에서 텍스트 추출
         ".prd-name",
         ".prd_list_name",
         ".name",
@@ -54,18 +74,23 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "a",
       ],
       productPrice: [
+        "td:has(strong)", // 테이블 셀 안의 strong 태그
+        "td strong", // strong 태그
         ".price", // 문서에서 확인된 우선 셀렉터
         ".product_price",
         "[class*='price']",
         ".cost",
       ],
       productImage: [
+        "a[href*='shopdetail'] img", // 상품 링크 안의 이미지
+        "td img[src*='shopimages']", // 테이블 셀 안의 이미지
         "img[src*='shopimages']", // 문서에서 확인된 우선 셀렉터
         ".product_img img",
         "img",
       ],
       productLink: [
         "a[href*='shopdetail']", // 문서에서 확인된 우선 셀렉터
+        "td a[href*='shopdetail']", // 테이블 셀 안의 링크
         "a",
       ],
     },
@@ -224,35 +249,60 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
   wheelopia: {
     name: "휠로피아",
     baseUrl: "https://www.wheelopia.co.kr",
+    // 카테고리별 URL 매핑
+    categoryUrls: {
+      "전동휠체어": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001",
+      "스탠딩": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001001",
+      "수동휠체어": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011002",
+      "워커": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011012",
+    },
     selectors: {
       productList: [
-        ".top_product > li",
-        ".list > li",
-        ".board_list > li",
-        "ul[class*='list'] > li",
-        "[class*='product']",
+        "table tbody tr", // 테이블 행
+        "tr:has(a[href*='goods_view'])", // 상품 링크가 있는 행
+        "tr:has(a[href*='goods_view.php'])", // 상품 상세 페이지 링크가 있는 행
+        "tbody tr:not(:first-child)", // 첫 번째 행(헤더) 제외
+        "table tr:has(td)", // td가 있는 행
+        "tr[onclick]", // 클릭 가능한 행
+        "tbody tr",
+        "table tr",
+        "tr",
       ],
       productName: [
-        ".product_name",
-        ".name",
-        "h3",
-        "h4",
+        "a[href*='goods_view']", // 상품 링크 텍스트
+        "td a[href*='goods_view']", // 상품 링크
+        "td:first-child a", // 첫 번째 셀의 링크
+        "td a",
+        "a",
       ],
       productPrice: [
-        ".price",
+        "td strong", // <td><strong>가격</strong></td>
+        "td b", // <td><b>가격</b></td>
+        "strong",
+        "b",
+        "td:has(strong)",
         "[class*='price']",
+        ".price",
       ],
       productImage: [
+        "a[href*='goods_view'] img", // 상품 링크 안의 이미지
+        "td:first-child img", // 첫 번째 셀의 이미지
+        "td img", // 테이블 셀 안의 이미지
+        "img[src*='data']", // data 폴더의 이미지
+        "img[src*='goods']", // goods 관련 이미지
         "img",
-        ".product_img img",
       ],
       productLink: [
+        "a[href*='goods_view.php']", // 상품 상세 페이지 링크
+        "a[href*='goods_view']",
+        "td a[href*='goods_view']",
+        "td a[href*='goods']",
+        "td a",
         "a",
-        "a[href*='product']",
       ],
     },
     enabled: true,
-    notes: "휠체어 전문 쇼핑몰",
+    notes: "휠체어 전문 쇼핑몰 - 테이블 형식 상품 목록",
   },
   "sk-easymove": {
     name: "SK 이지무브",

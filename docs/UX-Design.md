@@ -55,8 +55,11 @@ flowchart TD
     Recommend --> |상품 클릭| ClickLog[클릭 로그 기록]
     ClickLog --> External[외부 구매 링크<br/>쿠팡/네이버]
 
-    Recommend --> |14일 후 알림| IPPANotif[K-IPPA 평가 알림]
-    IPPANotif --> IPPA[K-IPPA 평가<br/>/dashboard/ippa/[id]]
+    Recommend --> |선택적| Baseline[기초선 평가<br/>/dashboard/ippa/baseline/[id]]
+    Baseline --> |평가 완료| Recommend
+    
+    Recommend --> |14일 후 알림| IPPANotif[K-IPPA 사후 평가 알림]
+    IPPANotif --> IPPA[K-IPPA 사후 평가<br/>/dashboard/ippa/[id]]
 
     IPPA --> |점수 입력| Calculate[효과성 점수 계산<br/>pre-post*importance]
     Calculate --> |제출 완료| Points[포인트 적립]

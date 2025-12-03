@@ -235,7 +235,7 @@ async function main() {
     const sitesToTest =
       targetSite === "all"
         ? Object.entries(SITE_CONFIGS)
-        : [[targetSite, SITE_CONFIGS[targetSite]]].filter(([_, config]) => config)
+        : [[targetSite, SITE_CONFIGS[targetSite]]].filter(([_, config]) => config) as Array<[string, SiteConfig]>
 
     if (sitesToTest.length === 0) {
       console.error(`❌ 사이트를 찾을 수 없습니다: ${targetSite}`)

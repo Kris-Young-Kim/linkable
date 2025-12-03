@@ -8,6 +8,7 @@ interface IppaEvaluationPageClientProps {
   productId: string
   productName?: string
   problemDescription?: string
+  consultationId?: string
 }
 
 export function IppaEvaluationPageClient({
@@ -15,6 +16,7 @@ export function IppaEvaluationPageClient({
   productId,
   productName,
   problemDescription,
+  consultationId,
 }: IppaEvaluationPageClientProps) {
   const router = useRouter()
 
@@ -24,6 +26,7 @@ export function IppaEvaluationPageClient({
       productId={productId}
       productName={productName}
       problemDescription={problemDescription}
+      consultationId={consultationId}
       onSuccess={() => {
         // 성공 시 페이지 새로고침하여 히스토리 업데이트
         router.refresh()

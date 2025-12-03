@@ -2,13 +2,16 @@
 
 import { forwardRef, type ReactNode } from "react"
 import Link from "next/link"
-import { Button, type ButtonProps } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { type VariantProps } from "class-variance-authority"
 import { ArrowRight, ShoppingBag, MessageSquare, LayoutDashboard, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export type CTAVariant = "chat" | "recommendations" | "dashboard" | "custom"
 
-interface CTAButtonProps extends Omit<ButtonProps, "asChild" | "children"> {
+interface CTAButtonProps
+  extends Omit<React.ComponentProps<typeof Button>, "asChild" | "children" | "variant">,
+    Omit<VariantProps<typeof buttonVariants>, "variant"> {
   variant?: CTAVariant
   href: string
   children?: ReactNode

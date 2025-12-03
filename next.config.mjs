@@ -63,6 +63,86 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.sk-easymove.co.kr",
       },
+      // 쿠팡 이미지 도메인
+      {
+        protocol: "https",
+        hostname: "thumbnail.coupang.com",
+      },
+      {
+        protocol: "https",
+        hostname: "thumbnail.coupangcdn.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.coupang.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.coupangcdn.com",
+      },
+      // 네이버 쇼핑 이미지 도메인
+      {
+        protocol: "https",
+        hostname: "shopping-phinf.pstatic.net",
+      },
+      {
+        protocol: "https",
+        hostname: "**.pstatic.net",
+      },
+      {
+        protocol: "https",
+        hostname: "**.naver.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.navercorp.com",
+      },
+      // 일반 CDN 및 예제 도메인
+      {
+        protocol: "https",
+        hostname: "cdn.example.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.example.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.cloudfront.net",
+      },
+      {
+        protocol: "https",
+        hostname: "**.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.imgur.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.githubusercontent.com",
+      },
+      // 기타 쇼핑몰 이미지 도메인
+      {
+        protocol: "https",
+        hostname: "**.gmarket.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.auction.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.interpark.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.lotteon.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.ssg.com",
+      },
     ],
     // 이미지 최적화 품질 설정
     formats: ["image/avif", "image/webp"],

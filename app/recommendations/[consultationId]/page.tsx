@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
-import { ArrowLeft, Filter, ArrowUpDown, Sparkles } from "lucide-react"
+import { ArrowLeft, Filter, ArrowUpDown, Sparkles, ClipboardCheck } from "lucide-react"
 import { Suspense } from "react"
 import dynamic from "next/dynamic"
 
@@ -95,6 +95,7 @@ async function fetchConsultationData(consultationId: string, clerkUserId: string
       status,
       created_at,
       updated_at,
+      ippa_activities,
       analysis_results(
         id,
         summary,
@@ -116,6 +117,12 @@ async function fetchConsultationData(consultationId: string, clerkUserId: string
     ? consultation.analysis_results[0]
     : consultation.analysis_results
 
+  // 기초선 평가 완료 여부 확인
+  const hasBaselineEvaluation = consultation.ippa_activities && 
+    typeof consultation.ippa_activities === 'object' &&
+    Array.isArray((consultation.ippa_activities as any).activities) &&
+    (consultation.ippa_activities as any).activities.length > 0
+
   return {
     consultation: {
       id: consultation.id,
@@ -123,6 +130,7 @@ async function fetchConsultationData(consultationId: string, clerkUserId: string
       status: consultation.status,
       createdAt: consultation.created_at,
       updatedAt: consultation.updated_at,
+      hasBaselineEvaluation,
     },
     analysis: analysisResult
       ? {
@@ -318,6 +326,46 @@ export default async function RecommendationsDetailPage({
                 </Button>
               </CardContent>
             </Card>
+
+            {/* 기초선 평가 제안 (아직 평가하지 않은 경우만 표시) */}
+            {!consultation.hasBaselineEvaluation && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5 text-primary" />
+                    <CardTitle className="text-lg">기초선 평가</CardTitle>
+                  </div>
+                  <CardDescription>
+                    현재 상태를 평가해주시면, 보조기기 사용 후 개선도를 정확히 측정할 수 있습니다.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full" asChild>
+                    <Link href={`/dashboard/ippa/baseline/${consultation.id}`}>
+                      기초선 평가 시작하기
+                    </Link>
+                  </Button>
+                  <p className="mt-2 text-xs text-muted-foreground text-center">
+                    평가는 선택사항이며, 나중에 대시보드에서도 진행할 수 있습니다.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* 기초선 평가 완료 표시 */}
+            {consultation.hasBaselineEvaluation && (
+              <Card className="border-emerald-200 bg-emerald-50/50">
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <ClipboardCheck className="h-5 w-5 text-emerald-600" />
+                    <CardTitle className="text-lg text-emerald-900">기초선 평가 완료</CardTitle>
+                  </div>
+                  <CardDescription className="text-emerald-700">
+                    기초선 평가가 완료되었습니다. 보조기기 사용 후 효과를 측정할 준비가 되었습니다.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
 
             {/* 상담 종료 설문 (완료된 상담만 표시) */}
             {consultation.status === "completed" && (

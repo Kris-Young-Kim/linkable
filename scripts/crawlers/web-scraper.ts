@@ -240,7 +240,11 @@ async function main() {
         if (options.platform === "all" || (options.platform !== "coupang" && options.platform !== "naver")) {
           const sites = options.platform === "all" 
             ? getEnabledSites() 
-            : [getSiteConfig(options.platform)].filter(Boolean) as SiteConfig[]
+            : (() => {
+                if (!options.platform) return []
+                const config = getSiteConfig(options.platform)
+                return config ? [config] : []
+              })()
 
           for (const site of sites) {
             console.log(`\n🛒 ${site.name} (${category}) 크롤링 시작...`)
@@ -346,7 +350,11 @@ async function main() {
 
       const sites = options.platform === "all" 
         ? getEnabledSites() 
-        : [getSiteConfig(options.platform)].filter(Boolean) as SiteConfig[]
+        : (() => {
+            if (!options.platform) return []
+            const config = getSiteConfig(options.platform)
+            return config ? [config] : []
+          })()
 
       for (const site of sites) {
         console.log(`\n🛒 ${site.name} 크롤링 시작...`)

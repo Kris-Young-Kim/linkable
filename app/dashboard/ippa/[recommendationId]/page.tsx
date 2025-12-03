@@ -232,6 +232,7 @@ export default async function IppaEvaluationPage({
               productId={recommendation.productId}
               productName={recommendation.productName}
               problemDescription={consultation.problemDescription}
+              consultationId={consultation.id}
             />
           </div>
 

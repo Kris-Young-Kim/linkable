@@ -12,6 +12,7 @@ import { SideNav } from "@/components/navigation/side-nav"
 import { BarChart3, Users, Package, ClipboardCheck } from "lucide-react"
 
 // 동적 import로 관리자 상품 관리 컴포넌트 지연 로딩
+// AdminProductManager는 이미 "use client"로 선언된 클라이언트 컴포넌트이므로 ssr: false 불필요
 const AdminProductManager = dynamic(
   () => import("@/components/admin/admin-product-manager").then((mod) => ({ default: mod.AdminProductManager })),
   {
@@ -28,7 +29,6 @@ const AdminProductManager = dynamic(
         </CardContent>
       </Card>
     ),
-    ssr: false, // 클라이언트 전용 컴포넌트
   }
 )
 

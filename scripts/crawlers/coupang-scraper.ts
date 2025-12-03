@@ -24,6 +24,15 @@ export class CoupangScraper {
     const products: ScrapedProduct[] = []
     const errors: string[] = []
 
+    // keyword가 없으면 빈 결과 반환
+    if (!options.keyword) {
+      return {
+        success: false,
+        products: [],
+        errors: ["검색 키워드가 필요합니다."],
+      }
+    }
+
     try {
       // User-Agent 설정 (봇 차단 방지)
       const context = await this.browser!.newContext({
