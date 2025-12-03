@@ -78,6 +78,31 @@ const persistRecommendations = async (
   console.log(`[Products API] 추천 생성 완료: consultationId=${consultationId}, count=${data?.length ?? 0}`)
   if (data && data.length > 0) {
     console.log(`[Products API] 생성된 추천 ID: ${data.map((r) => r.id).join(", ")}`)
+    
+    // 추천이 생성되면 상담 상태를 자동으로 'completed'로 변경
+    const { error: statusUpdateError } = await supabase
+      .from("consultations")
+      .update({ 
+        status: "completed",
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", consultationId)
+      .neq("status", "archived") // 보관된 상담은 자동 변경하지 않음
+
+    if (statusUpdateError) {
+      logEvent({
+        category: "consultation",
+        action: "auto_status_update_error",
+        payload: { error: statusUpdateError, consultationId },
+        level: "warn",
+      })
+    } else {
+      logEvent({
+        category: "consultation",
+        action: "auto_status_completed",
+        payload: { consultationId },
+      })
+    }
   }
 
   return mapping

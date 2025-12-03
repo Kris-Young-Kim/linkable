@@ -36,6 +36,8 @@ export async function POST(request: Request) {
     platform?: string
     max?: number
     productUrl?: string // 개별 제품 상세 페이지 URL
+    preview?: boolean // 미리보기 모드 (DB 저장 안 함)
+    selectedProducts?: string[] // 선택한 상품 ID 목록 (등록용)
   }
 
   // 개별 제품 URL 크롤링
@@ -338,11 +340,44 @@ export async function POST(request: Request) {
         failed: 0,
         total: 0,
         errors: errors.length > 0 ? errors : undefined,
+        products: [],
       })
     }
 
+    // 미리보기 모드: DB 저장하지 않고 결과만 반환
+    if (body.preview) {
+      return NextResponse.json({
+        success: true,
+        message: `${allProducts.length}개 상품 수집 완료 (미리보기)`,
+        created: 0,
+        updated: 0,
+        failed: 0,
+        total: allProducts.length,
+        products: allProducts.map((p, idx) => ({
+          id: `preview-${idx}`,
+          ...p,
+        })),
+        errors: errors.length > 0 ? errors : undefined,
+        preview: true,
+      })
+    }
+
+    // 선택한 상품만 필터링 (미리보기 모드에서 선택한 상품만 등록)
+    let productsToSync = allProducts
+    if (body.selectedProducts && body.selectedProducts.length > 0) {
+      // selectedProducts는 preview-{index} 형식의 ID 배열
+      const selectedIndices = body.selectedProducts
+        .map((id) => {
+          const match = id.match(/^preview-(\d+)$/)
+          return match ? parseInt(match[1], 10) : -1
+        })
+        .filter((idx) => idx >= 0 && idx < allProducts.length)
+      
+      productsToSync = allProducts.filter((_, idx) => selectedIndices.includes(idx))
+    }
+
     // 데이터베이스에 저장
-    const result = await syncProducts(allProducts, { validateLinks: false })
+    const result = await syncProducts(productsToSync, { validateLinks: false })
 
     return NextResponse.json({
       success: true,
@@ -350,7 +385,7 @@ export async function POST(request: Request) {
       created: result.created,
       updated: result.updated,
       failed: result.failed,
-      total: allProducts.length,
+      total: productsToSync.length,
       errors: result.errors?.length ? result.errors.map((e) => `${e.productId}: ${e.error}`) : undefined,
     })
   } catch (error) {

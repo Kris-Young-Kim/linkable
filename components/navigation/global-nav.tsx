@@ -61,6 +61,11 @@ export function GlobalNav() {
           <AdminLink />
           <NotificationsBell />
           <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
+            <Link href="/dashboard">
+              상담 내역
+            </Link>
+          </Button>
+          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
             <Link href="/chat">
               <Sparkles className="mr-2 size-4" aria-hidden="true" />
               {t("header.continueConsultation")}
@@ -130,6 +135,9 @@ export function GlobalNav() {
               <div className="border-t border-border/60 pt-4 space-y-4">
                 <LanguageSelector />
                 <SignedIn>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/dashboard">상담 내역</Link>
+                  </Button>
                   <Button className="w-full" asChild>
                     <Link href="/chat">{t("header.continueConsultation")}</Link>
                   </Button>

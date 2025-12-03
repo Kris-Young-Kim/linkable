@@ -17,7 +17,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, X, Upload, Download, Sparkles, Loader2, FileText, Globe } from "lucide-react"
+import { Search, X, Upload, Download, Sparkles, Loader2, FileText, Globe, CheckSquare, Square } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { IsoCodeSelector } from "./iso-code-selector"
 
 type AdminProduct = {
@@ -96,6 +99,20 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
   })
   const [isCrawling, setIsCrawling] = useState(false)
   const [crawlResult, setCrawlResult] = useState<string | null>(null)
+  const [crawlPreview, setCrawlPreview] = useState<Array<{
+    id: string
+    name: string
+    price: number | null
+    purchase_link: string | null
+    image_url: string | null
+    iso_code: string
+    description?: string | null
+    manufacturer?: string | null
+    category?: string | null
+  }>>([])
+  const [selectedPreviewProducts, setSelectedPreviewProducts] = useState<Set<string>>(new Set())
+  const [crawlLogs, setCrawlLogs] = useState<string[]>([])
+  const [isRegistering, setIsRegistering] = useState(false)
 
   // 필터링 및 검색 상태
   const [searchQuery, setSearchQuery] = useState("")
@@ -199,13 +216,16 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     }
   }
 
-  // 크롤링 실행 핸들러
+  // 크롤링 실행 핸들러 (미리보기 모드)
   const handleCrawl = async () => {
-    // 개별 제품 URL이 있으면 URL 크롤링 우선
+    // 개별 제품 URL이 있으면 URL 크롤링 우선 (즉시 등록)
     if (crawlValues.productUrl) {
       setIsCrawling(true)
       setErrorMessage(null)
       setCrawlResult(null)
+      setCrawlPreview([])
+      setCrawlLogs([])
+      addCrawlLog("개별 제품 URL 크롤링 시작...")
 
       try {
         const response = await fetch("/api/admin/products/crawl", {
@@ -224,6 +244,7 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
         }
 
         const result = await response.json()
+        addCrawlLog(`제품 크롤링 완료: ${result.product?.name || "알 수 없음"}`)
         setCrawlResult(
           result.message || `제품 크롤링 완료: ${result.created > 0 ? "생성" : "업데이트"} (${result.product?.name || "알 수 없음"})`
         )
@@ -232,7 +253,9 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
         await fetchProducts()
       } catch (error) {
         console.error("제품 크롤링 오류:", error)
-        setErrorMessage(error instanceof Error ? error.message : "제품 크롤링 실패")
+        const errorMsg = error instanceof Error ? error.message : "제품 크롤링 실패"
+        addCrawlLog(`오류: ${errorMsg}`, true)
+        setErrorMessage(errorMsg)
       } finally {
         setIsCrawling(false)
       }
@@ -247,6 +270,10 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     setIsCrawling(true)
     setErrorMessage(null)
     setCrawlResult(null)
+    setCrawlPreview([])
+    setSelectedPreviewProducts(new Set())
+    setCrawlLogs([])
+    addCrawlLog("크롤링 시작...")
 
     try {
       const response = await fetch("/api/admin/products/crawl", {
@@ -259,6 +286,7 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           isoCode: crawlValues.isoCode || undefined,
           platform: crawlValues.platform,
           max: crawlValues.max ? parseInt(crawlValues.max) : undefined,
+          preview: true, // 미리보기 모드
         }),
       })
 
@@ -268,23 +296,98 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
       }
 
       const result = await response.json()
-      setCrawlResult(result.message || "크롤링이 시작되었습니다.")
-      setSuccessMessage("크롤링이 시작되었습니다. 잠시 후 상품 목록을 확인해주세요.")
-      setTimeout(() => setSuccessMessage(null), 5000)
-
-      // 상품 목록 새로고침 (크롤링이 완료될 때까지 기다려야 하지만, 일단 시도)
-      setTimeout(async () => {
-        const productsResponse = await fetch("/api/admin/products")
-        if (productsResponse.ok) {
-          const data = await productsResponse.json()
-          setProducts(data.products || [])
+      
+      if (result.preview && result.products) {
+        addCrawlLog(`${result.products.length}개 상품 수집 완료`)
+        if (result.errors && result.errors.length > 0) {
+          addCrawlLog(`경고: ${result.errors.length}개 오류 발생`, true)
+          result.errors.forEach((err: string) => addCrawlLog(`  - ${err}`, true))
         }
-      }, 3000)
+        setCrawlPreview(result.products)
+        setCrawlResult(`${result.products.length}개 상품을 수집했습니다. 아래에서 선택하여 등록하세요.`)
+        // 모든 상품 자동 선택
+        setSelectedPreviewProducts(new Set(result.products.map((p: { id: string }) => p.id)))
+      } else {
+        // 미리보기 모드가 아닌 경우 (레거시)
+        setCrawlResult(result.message || "크롤링이 시작되었습니다.")
+        setSuccessMessage("크롤링이 시작되었습니다. 잠시 후 상품 목록을 확인해주세요.")
+        setTimeout(() => setSuccessMessage(null), 5000)
+        setTimeout(async () => {
+          await fetchProducts()
+        }, 3000)
+      }
     } catch (error) {
       console.error("[Admin Products] Crawl error:", error)
-      setErrorMessage(error instanceof Error ? error.message : "크롤링 실행 실패")
+      const errorMsg = error instanceof Error ? error.message : "크롤링 실행 실패"
+      addCrawlLog(`오류: ${errorMsg}`, true)
+      setErrorMessage(errorMsg)
     } finally {
       setIsCrawling(false)
+    }
+  }
+
+  // 크롤링 로그 추가
+  const addCrawlLog = (message: string, isError = false) => {
+    const timestamp = new Date().toLocaleTimeString("ko-KR")
+    setCrawlLogs((prev) => [...prev, `[${timestamp}] ${isError ? "❌" : "✓"} ${message}`])
+  }
+
+  // 선택한 상품 등록
+  const handleRegisterSelected = async () => {
+    if (selectedPreviewProducts.size === 0) {
+      setErrorMessage("등록할 상품을 선택해주세요.")
+      return
+    }
+
+    setIsRegistering(true)
+    setErrorMessage(null)
+    addCrawlLog(`${selectedPreviewProducts.size}개 상품 등록 시작...`)
+
+    try {
+      const response = await fetch("/api/admin/products/crawl", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          keyword: crawlValues.keyword || undefined,
+          category: crawlValues.category || undefined,
+          categories: crawlValues.categories || undefined,
+          isoCode: crawlValues.isoCode || undefined,
+          platform: crawlValues.platform,
+          max: crawlValues.max ? parseInt(crawlValues.max) : undefined,
+          selectedProducts: Array.from(selectedPreviewProducts),
+        }),
+      })
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}))
+        throw new Error(errorPayload?.error ?? "상품 등록 실패")
+      }
+
+      const result = await response.json()
+      addCrawlLog(`등록 완료: ${result.created}개 생성, ${result.updated}개 업데이트`)
+      if (result.errors && result.errors.length > 0) {
+        addCrawlLog(`실패: ${result.failed}개`, true)
+      }
+      
+      setSuccessMessage(
+        `등록 완료: ${result.created}개 생성, ${result.updated}개 업데이트${result.failed > 0 ? `, ${result.failed}개 실패` : ""}`
+      )
+      setTimeout(() => setSuccessMessage(null), 5000)
+
+      // 상품 목록 새로고침
+      await fetchProducts()
+      
+      // 미리보기 초기화
+      setCrawlPreview([])
+      setSelectedPreviewProducts(new Set())
+      setCrawlResult(null)
+    } catch (error) {
+      console.error("[Admin Products] Register error:", error)
+      const errorMsg = error instanceof Error ? error.message : "상품 등록 실패"
+      addCrawlLog(`오류: ${errorMsg}`, true)
+      setErrorMessage(errorMsg)
+    } finally {
+      setIsRegistering(false)
     }
   }
 
@@ -843,6 +946,160 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
                   <div>• 여러 카테고리: "휠체어,워커", ISO: "12 03", 플랫폼: "전체"</div>
                 </div>
               </div>
+
+              {/* 크롤링 로그 */}
+              {crawlLogs.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">크롤링 로그</CardTitle>
+                    <CardDescription>크롤링 진행 상황 및 오류 메시지</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-32 w-full rounded-md border p-4">
+                      <div className="space-y-1 text-xs font-mono">
+                        {crawlLogs.map((log, idx) => (
+                          <div
+                            key={idx}
+                            className={log.includes("❌") || log.includes("오류") ? "text-red-600" : "text-muted-foreground"}
+                          >
+                            {log}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* 크롤링 결과 미리보기 */}
+              {crawlPreview.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-lg">크롤링 결과 미리보기</CardTitle>
+                        <CardDescription>
+                          {selectedPreviewProducts.size}개 선택됨 / 전체 {crawlPreview.length}개
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (selectedPreviewProducts.size === crawlPreview.length) {
+                              setSelectedPreviewProducts(new Set())
+                            } else {
+                              setSelectedPreviewProducts(new Set(crawlPreview.map((p) => p.id)))
+                            }
+                          }}
+                        >
+                          {selectedPreviewProducts.size === crawlPreview.length ? "전체 해제" : "전체 선택"}
+                        </Button>
+                        <Button
+                          onClick={handleRegisterSelected}
+                          disabled={selectedPreviewProducts.size === 0 || isRegistering}
+                          size="sm"
+                        >
+                          {isRegistering ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              등록 중...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="mr-2 h-4 w-4" />
+                              선택한 상품 등록 ({selectedPreviewProducts.size}개)
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px] w-full">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12">
+                              <Checkbox
+                                checked={selectedPreviewProducts.size === crawlPreview.length && crawlPreview.length > 0}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedPreviewProducts(new Set(crawlPreview.map((p) => p.id)))
+                                  } else {
+                                    setSelectedPreviewProducts(new Set())
+                                  }
+                                }}
+                              />
+                            </TableHead>
+                            <TableHead>상품명</TableHead>
+                            <TableHead>ISO 코드</TableHead>
+                            <TableHead>가격</TableHead>
+                            <TableHead>구매 링크</TableHead>
+                            <TableHead>이미지</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {crawlPreview.map((product) => (
+                            <TableRow key={product.id}>
+                              <TableCell>
+                                <Checkbox
+                                  checked={selectedPreviewProducts.has(product.id)}
+                                  onCheckedChange={(checked) => {
+                                    const newSelected = new Set(selectedPreviewProducts)
+                                    if (checked) {
+                                      newSelected.add(product.id)
+                                    } else {
+                                      newSelected.delete(product.id)
+                                    }
+                                    setSelectedPreviewProducts(newSelected)
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell className="font-medium">{product.name}</TableCell>
+                              <TableCell>
+                                <Badge variant="secondary">{product.iso_code}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                {product.price ? `${product.price.toLocaleString()}원` : "-"}
+                              </TableCell>
+                              <TableCell>
+                                {product.purchase_link ? (
+                                  <a
+                                    href={product.purchase_link}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-primary hover:underline text-xs truncate max-w-[200px] block"
+                                  >
+                                    {product.purchase_link}
+                                  </a>
+                                ) : (
+                                  "-"
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {product.image_url ? (
+                                  <img
+                                    src={product.image_url}
+                                    alt={product.name}
+                                    className="h-12 w-12 object-cover rounded"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = "none"
+                                    }}
+                                  />
+                                ) : (
+                                  "-"
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

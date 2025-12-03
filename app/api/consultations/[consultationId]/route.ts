@@ -63,10 +63,11 @@ export async function PATCH(
   const body = (await request.json().catch(() => ({}))) as {
     title?: string
     status?: "in_progress" | "completed" | "archived"
+    is_favorite?: boolean
   }
 
   // 업데이트할 필드만 포함
-  const updateData: { title?: string; status?: string; updated_at?: string } = {}
+  const updateData: { title?: string; status?: string; is_favorite?: boolean; updated_at?: string } = {}
   if (body.title !== undefined) {
     updateData.title = body.title
   }
@@ -75,6 +76,9 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid status" }, { status: 400 })
     }
     updateData.status = body.status
+  }
+  if (body.is_favorite !== undefined) {
+    updateData.is_favorite = body.is_favorite
   }
 
   if (Object.keys(updateData).length === 0) {

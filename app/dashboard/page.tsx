@@ -80,7 +80,8 @@ const fetchDashboardData = async (clerkUserId: string) => {
     return { consultations: [] as ConsultationRow[] }
   }
 
-  const { data, error } = await supabase
+  // is_favorite 컬럼이 없을 수 있으므로 먼저 시도하고, 실패하면 해당 필드 없이 재시도
+  let query = supabase
     .from("consultations")
     .select(
       `
@@ -89,13 +90,15 @@ const fetchDashboardData = async (clerkUserId: string) => {
         status,
         created_at,
         updated_at,
+        is_favorite,
         recommendations:recommendations(
           id,
           product_id,
           match_reason,
           is_clicked,
           created_at,
-          product:product_id(id, name, image_url)
+          rank,
+          product:product_id(id, name, image_url, purchase_link, price, iso_code, description)
         )
       `,
     )
@@ -103,14 +106,57 @@ const fetchDashboardData = async (clerkUserId: string) => {
     .order("updated_at", { ascending: false })
     .limit(10)
 
+  let { data, error } = await query
+
+  // is_favorite 컬럼이 없는 경우 (마이그레이션 미적용) 재시도
+  if (error && (error.code === "42703" || error.message?.includes("is_favorite"))) {
+    console.warn(
+      "[dashboard] is_favorite column not found. Please run migration: supabase/migrations/20250123000000_add_favorite_to_consultations.sql",
+    )
+    // is_favorite 없이 재시도
+    const retryQuery = supabase
+      .from("consultations")
+      .select(
+        `
+          id,
+          title,
+          status,
+          created_at,
+          updated_at,
+          recommendations:recommendations(
+            id,
+            product_id,
+            match_reason,
+            is_clicked,
+            created_at,
+            rank,
+            product:product_id(id, name, image_url, purchase_link, price, iso_code, description)
+          )
+        `,
+      )
+      .eq("user_id", userRow.id)
+      .order("updated_at", { ascending: false })
+      .limit(10)
+
+    const retryResult = await retryQuery
+    data = retryResult.data
+    error = retryResult.error
+  }
+
   if (error) {
-    console.error("[dashboard] consultations_fetch_error", error)
+    console.error("[dashboard] consultations_fetch_error", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    })
     return { consultations: [] as ConsultationRow[] }
   }
 
   const normalized =
     data?.map((consultation) => ({
       ...consultation,
+      is_favorite: consultation.is_favorite ?? false, // 기본값 설정
       recommendations: consultation.recommendations?.map((rec) => ({
         ...rec,
         product: Array.isArray(rec.product) ? rec.product[0] ?? null : rec.product ?? null,
