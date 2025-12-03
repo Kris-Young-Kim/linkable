@@ -18,6 +18,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
+import { ConsultationRating } from "@/components/consultation-rating"
 
 type MessageRow = {
   id: string
@@ -120,6 +121,10 @@ export default async function ConsultationDetailPage({ params }: { params: Promi
           sender,
           message_text,
           created_at
+        ),
+        feedback:consultation_feedback(
+          accuracy_rating,
+          feedback_comment
         )
       `,
     )
@@ -301,6 +306,20 @@ export default async function ConsultationDetailPage({ params }: { params: Promi
                 )}
               </CardContent>
             </Card>
+
+            <ConsultationRating
+              consultationId={data.id}
+              existingRating={
+                Array.isArray(data.feedback) 
+                  ? data.feedback[0]?.accuracy_rating 
+                  : data.feedback?.accuracy_rating
+              }
+              existingComment={
+                Array.isArray(data.feedback)
+                  ? data.feedback[0]?.feedback_comment
+                  : data.feedback?.feedback_comment
+              }
+            />
 
             <Card>
               <CardHeader>

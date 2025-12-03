@@ -184,6 +184,11 @@ export function ChatInterface() {
     const container = messagesContainerRef.current;
     if (!container) return;
 
+    // 사용자가 수동으로 스크롤 중인지 확인
+    if (!force && isUserScrollingRef.current) {
+      return;
+    }
+
     // 사용자가 수동으로 스크롤을 올렸는지 확인
     const isNearBottom = 
       container.scrollHeight - container.scrollTop - container.clientHeight < 100;
@@ -192,7 +197,9 @@ export function ChatInterface() {
     if (force || isNearBottom) {
       // requestAnimationFrame을 사용하여 DOM 업데이트 후 스크롤
       requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
+        if (container) {
+          container.scrollTop = container.scrollHeight;
+        }
       });
     }
   }, []);

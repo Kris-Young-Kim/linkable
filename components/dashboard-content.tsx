@@ -5,7 +5,6 @@ import { useMemo, useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { X, Check } from "lucide-react"
 
-import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 import { IppaForm } from "@/components/ippa-form"
 import { useLanguage } from "@/components/language-provider"
 import { Badge } from "@/components/ui/badge"
@@ -154,10 +153,6 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
         />
 
         <div className="space-y-8">
-          <section id="insights" className="scroll-mt-24">
-            <EffectivenessDashboard />
-          </section>
-
           <section id="consultations" className="grid gap-6 md:grid-cols-2 scroll-mt-24">
             <Card>
               <CardHeader>

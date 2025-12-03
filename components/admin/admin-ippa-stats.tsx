@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ClipboardCheck, TrendingUp, Users, BarChart3, Eye, X } from "lucide-react"
 import { IppaEvaluationDetail } from "./ippa-evaluation-detail"
+import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
 
 interface IppaStats {
   totalEvaluations: number
@@ -99,6 +100,9 @@ export function AdminIppaStats() {
 
   return (
     <div className="space-y-6">
+      {/* 진행 리포트 및 사용 전후 비교 */}
+      <EffectivenessDashboard />
+
       {/* 주요 지표 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>

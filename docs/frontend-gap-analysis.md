@@ -149,7 +149,8 @@ interface ICFAnalysis {
 - PDF 다운로드 기능 (선택적)
 
 **API 엔드포인트**:
-- `GET /api/consultations/[id]` (상담 상세 조회)
+- `PATCH /api/consultations/[consultationId]` (상담 수정)
+- `DELETE /api/consultations/[consultationId]` (상담 삭제)
 - `GET /api/analysis/[consultationId]` (분석 결과 조회)
 
 #### 4.2 상담 상세 페이지

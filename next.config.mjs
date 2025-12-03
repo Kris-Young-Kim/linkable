@@ -143,6 +143,15 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.ssg.com",
       },
+      // 예제 이미지 도메인
+      {
+        protocol: "https",
+        hostname: "thumbnail.image.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.image.com",
+      },
     ],
     // 이미지 최적화 품질 설정
     formats: ["image/avif", "image/webp"],

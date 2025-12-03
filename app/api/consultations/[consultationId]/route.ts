@@ -40,14 +40,14 @@ async function verifyOwnership(consultationId: string, userRowId: string) {
 // PATCH: 상담 수정 (제목, 상태)
 export async function PATCH(
   request: Request,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ consultationId: string }> },
 ) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { id } = await context.params
+  const { consultationId } = await context.params
   const userRowId = await ensureUserRecord(userId)
 
   if (!userRowId) {
@@ -55,7 +55,7 @@ export async function PATCH(
   }
 
   // 소유권 확인
-  const isOwner = await verifyOwnership(id, userRowId)
+  const isOwner = await verifyOwnership(consultationId, userRowId)
   if (!isOwner) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
@@ -86,7 +86,7 @@ export async function PATCH(
   const { data, error } = await supabase
     .from("consultations")
     .update(updateData)
-    .eq("id", id)
+    .eq("id", consultationId)
     .eq("user_id", userRowId)
     .select("*")
     .single()
@@ -95,7 +95,7 @@ export async function PATCH(
     logEvent({
       category: "consultation",
       action: "update_error",
-      payload: { error, consultationId: id },
+      payload: { error, consultationId },
       level: "error",
     })
     return NextResponse.json({ error: "Failed to update consultation" }, { status: 500 })
@@ -104,7 +104,7 @@ export async function PATCH(
   logEvent({
     category: "consultation",
     action: "updated",
-    payload: { userId, consultationId: id, updatedFields: Object.keys(updateData) },
+    payload: { userId, consultationId, updatedFields: Object.keys(updateData) },
   })
 
   return NextResponse.json({ consultation: data })
@@ -113,14 +113,14 @@ export async function PATCH(
 // DELETE: 상담 삭제
 export async function DELETE(
   request: Request,
-  context: { params: Promise<{ id: string }> },
+  context: { params: Promise<{ consultationId: string }> },
 ) {
   const { userId } = await auth()
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { id } = await context.params
+  const { consultationId } = await context.params
   const userRowId = await ensureUserRecord(userId)
 
   if (!userRowId) {
@@ -128,7 +128,7 @@ export async function DELETE(
   }
 
   // 소유권 확인
-  const isOwner = await verifyOwnership(id, userRowId)
+  const isOwner = await verifyOwnership(consultationId, userRowId)
   if (!isOwner) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
@@ -137,14 +137,14 @@ export async function DELETE(
   const { error } = await supabase
     .from("consultations")
     .delete()
-    .eq("id", id)
+    .eq("id", consultationId)
     .eq("user_id", userRowId)
 
   if (error) {
     logEvent({
       category: "consultation",
       action: "delete_error",
-      payload: { error, consultationId: id },
+      payload: { error, consultationId },
       level: "error",
     })
     return NextResponse.json({ error: "Failed to delete consultation" }, { status: 500 })
@@ -153,7 +153,7 @@ export async function DELETE(
   logEvent({
     category: "consultation",
     action: "deleted",
-    payload: { userId, consultationId: id },
+    payload: { userId, consultationId },
   })
 
   return NextResponse.json({ success: true }, { status: 200 })
