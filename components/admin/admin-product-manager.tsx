@@ -61,6 +61,10 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
       console.error("[Admin Products] 제품 목록 새로고침 실패:", error)
     }
   }, [])
+
+  // 일괄 선택/삭제
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const [formValues, setFormValues] = useState({
     name: "",
     iso_code: "",
@@ -94,9 +98,11 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     categories: "",
     isoCode: "",
     platform: "all",
+    customPlatform: "", // 사용자 정의 플랫폼
     max: "10",
     productUrl: "", // 개별 제품 URL
   })
+  const [showCustomPlatform, setShowCustomPlatform] = useState(false)
   const [isCrawling, setIsCrawling] = useState(false)
   const [crawlResult, setCrawlResult] = useState<string | null>(null)
   const [crawlPreview, setCrawlPreview] = useState<Array<{
@@ -234,7 +240,7 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           body: JSON.stringify({
             productUrl: crawlValues.productUrl,
             isoCode: crawlValues.isoCode || undefined,
-            platform: crawlValues.platform,
+            platform: crawlValues.platform === "custom" ? crawlValues.customPlatform : crawlValues.platform,
           }),
         })
 
@@ -284,7 +290,7 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           category: crawlValues.category || undefined,
           categories: crawlValues.categories || undefined,
           isoCode: crawlValues.isoCode || undefined,
-          platform: crawlValues.platform,
+          platform: crawlValues.platform === "custom" ? crawlValues.customPlatform : crawlValues.platform,
           max: crawlValues.max ? parseInt(crawlValues.max) : undefined,
           preview: true, // 미리보기 모드
         }),
@@ -352,7 +358,7 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           category: crawlValues.category || undefined,
           categories: crawlValues.categories || undefined,
           isoCode: crawlValues.isoCode || undefined,
-          platform: crawlValues.platform,
+          platform: crawlValues.platform === "custom" ? crawlValues.customPlatform : crawlValues.platform,
           max: crawlValues.max ? parseInt(crawlValues.max) : undefined,
           selectedProducts: Array.from(selectedPreviewProducts),
         }),
@@ -883,25 +889,41 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
                   <Label htmlFor="crawl-platform" className="mb-2 block">
                     플랫폼
                   </Label>
-                  <Select
-                    value={crawlValues.platform}
-                    onValueChange={(value) => setCrawlValues((prev) => ({ ...prev, platform: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">전체</SelectItem>
-                      <SelectItem value="coupang">쿠팡</SelectItem>
-                      <SelectItem value="naver">네이버 쇼핑</SelectItem>
-                      <SelectItem value="ablelife">에이블라이프</SelectItem>
-                      <SelectItem value="carelifemall">케어라이프몰</SelectItem>
-                      <SelectItem value="willbe">윌비</SelectItem>
-                      <SelectItem value="11st">11번가</SelectItem>
-                      <SelectItem value="wheelopia">휠로피아</SelectItem>
-                      <SelectItem value="sk-easymove">SK 이지무브</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-2">
+                    <Select
+                      value={crawlValues.platform}
+                      onValueChange={(value) => {
+                        setCrawlValues((prev) => ({ ...prev, platform: value, customPlatform: "" }))
+                        setShowCustomPlatform(value === "custom")
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">전체</SelectItem>
+                        <SelectItem value="coupang">쿠팡</SelectItem>
+                        <SelectItem value="naver">네이버 쇼핑</SelectItem>
+                        <SelectItem value="ablelife">에이블라이프</SelectItem>
+                        <SelectItem value="carelifemall">케어라이프몰</SelectItem>
+                        <SelectItem value="willbe">윌비</SelectItem>
+                        <SelectItem value="11st">11번가</SelectItem>
+                        <SelectItem value="wheelopia">휠로피아</SelectItem>
+                        <SelectItem value="sk-easymove">SK 이지무브</SelectItem>
+                        <SelectItem value="mktop">엠케이톱</SelectItem>
+                        <SelectItem value="plusagel">플러스에젤</SelectItem>
+                        <SelectItem value="custom">직접 입력</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {showCustomPlatform && (
+                      <Input
+                        placeholder="플랫폼 이름 입력 (예: mktop, newshop 등)"
+                        value={crawlValues.customPlatform}
+                        onChange={(e) => setCrawlValues((prev) => ({ ...prev, customPlatform: e.target.value }))}
+                        className="mt-2"
+                      />
+                    )}
+                  </div>
                 </div>
                 <div>
                   <Label htmlFor="crawl-max" className="mb-2 block">
@@ -1236,6 +1258,46 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
         </CardContent>
       </Card>
 
+      {/* 일괄 작업 바 */}
+      {selectedProducts.size > 0 && (
+        <Card className="border-primary/50 bg-primary/5">
+          <CardContent className="pt-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-foreground">
+                {selectedProducts.size}개 선택됨
+              </span>
+              <div className="flex gap-2 ml-auto">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={isBulkDeleting}
+                >
+                  {isBulkDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      삭제 중...
+                    </>
+                  ) : (
+                    <>
+                      <X className="mr-2 h-4 w-4" />
+                      선택 삭제
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedProducts(new Set())}
+                >
+                  선택 해제
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-6">
         {filteredAndSortedProducts.length === 0 ? (
           <Card>
@@ -1246,15 +1308,33 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
             </CardContent>
           </Card>
         ) : (
-          filteredAndSortedProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              count={productCountByIso[product.iso_code]}
-              onUpdate={handleUpdate}
-              onDelete={handleDelete}
-            />
-          ))
+          <>
+            {/* 전체 선택 체크박스 */}
+            <div className="flex items-center gap-2 px-2">
+              <Checkbox
+                checked={
+                  filteredAndSortedProducts.length > 0 &&
+                  filteredAndSortedProducts.every((p) => selectedProducts.has(p.id))
+                }
+                onCheckedChange={(checked) => handleSelectAll(checked === true)}
+                aria-label="전체 선택"
+              />
+              <Label className="text-sm font-medium cursor-pointer" onClick={() => handleSelectAll(!filteredAndSortedProducts.every((p) => selectedProducts.has(p.id)))}>
+                전체 선택 ({selectedProducts.size}/{filteredAndSortedProducts.length})
+              </Label>
+            </div>
+            {filteredAndSortedProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                count={productCountByIso[product.iso_code]}
+                onUpdate={handleUpdate}
+                onDelete={handleDelete}
+                isSelected={selectedProducts.has(product.id)}
+                onSelect={(checked) => handleSelectProduct(product.id, checked)}
+              />
+            ))}
+          </>
         )}
       </div>
         </TabsContent>
@@ -1268,9 +1348,11 @@ type ProductCardProps = {
   count: number
   onUpdate: (id: string, updates: Partial<AdminProduct>) => Promise<void>
   onDelete: (id: string) => Promise<void>
+  isSelected?: boolean
+  onSelect?: (checked: boolean) => void
 }
 
-function ProductCard({ product, count, onUpdate, onDelete }: ProductCardProps) {
+function ProductCard({ product, count, onUpdate, onDelete, isSelected = false, onSelect }: ProductCardProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [pending, setPending] = useState(false)
   const [localValues, setLocalValues] = useState({
@@ -1327,17 +1409,27 @@ function ProductCard({ product, count, onUpdate, onDelete }: ProductCardProps) {
   }
 
   return (
-    <Card className="border-border/70">
+    <Card className={`border-border/70 ${isSelected ? "border-primary ring-2 ring-primary/20" : ""}`}>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div className="space-y-1">
-          <CardTitle className="text-xl">{product.name}</CardTitle>
-          <CardDescription className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">ISO {product.iso_code}</Badge>
-            <Badge variant={product.is_active ? "outline" : "destructive"}>{product.is_active ? "활성" : "비활성"}</Badge>
-            <span className="text-xs text-muted-foreground">
-              {count}개 상품 / 업데이트 {product.updated_at ? new Date(product.updated_at).toLocaleDateString("ko-KR") : "-"}
-            </span>
-          </CardDescription>
+        <div className="flex items-start gap-3 flex-1">
+          {onSelect && (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => onSelect(checked === true)}
+              aria-label="상품 선택"
+              className="mt-1"
+            />
+          )}
+          <div className="space-y-1 flex-1">
+            <CardTitle className="text-xl">{product.name}</CardTitle>
+            <CardDescription className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">ISO {product.iso_code}</Badge>
+              <Badge variant={product.is_active ? "outline" : "destructive"}>{product.is_active ? "활성" : "비활성"}</Badge>
+              <span className="text-xs text-muted-foreground">
+                {count}개 상품 / 업데이트 {product.updated_at ? new Date(product.updated_at).toLocaleDateString("ko-KR") : "-"}
+              </span>
+            </CardDescription>
+          </div>
         </div>
         {!isEditing && (
           <CardActionButtons
@@ -1465,9 +1557,11 @@ function ProductCard({ product, count, onUpdate, onDelete }: ProductCardProps) {
                 />
               </div>
             )}
-            <p className="text-sm text-muted-foreground">
-              {product.description || "설명이 등록되지 않았습니다."}
-            </p>
+            {product.description && (
+              <p className="text-sm text-muted-foreground">
+                {product.description}
+              </p>
+            )}
             <div className="grid gap-2 text-sm">
               {product.price && (
                 <div>

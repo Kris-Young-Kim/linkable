@@ -139,7 +139,11 @@ const fetchDashboardData = async (clerkUserId: string) => {
       .limit(10)
 
     const retryResult = await retryQuery
-    data = retryResult.data
+    // is_favorite가 없는 경우 기본값 추가
+    data = retryResult.data?.map((consultation) => ({
+      ...consultation,
+      is_favorite: false, // 마이그레이션 미적용 시 기본값
+    })) ?? null
     error = retryResult.error
   }
 
@@ -156,7 +160,7 @@ const fetchDashboardData = async (clerkUserId: string) => {
   const normalized =
     data?.map((consultation) => ({
       ...consultation,
-      is_favorite: consultation.is_favorite ?? false, // 기본값 설정
+      is_favorite: (consultation as any).is_favorite ?? false, // 기본값 설정
       recommendations: consultation.recommendations?.map((rec) => ({
         ...rec,
         product: Array.isArray(rec.product) ? rec.product[0] ?? null : rec.product ?? null,

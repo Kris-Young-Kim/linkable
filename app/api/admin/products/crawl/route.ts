@@ -53,9 +53,13 @@ export async function POST(request: Request) {
         platform = "coupang"
       } else if (body.productUrl.includes("shopping.naver.com")) {
         platform = "naver"
+      } else if (body.productUrl.includes("mktop.kr")) {
+        platform = "mktop"
+      } else if (body.productUrl.includes("plusagel.co.kr") || body.productUrl.includes("plusagel")) {
+        platform = "plusagel"
       }
 
-      const siteConfig = getSiteConfig(platform)
+      const siteConfig = getSiteConfig(platform, body.productUrl)
       if (!siteConfig) {
         return NextResponse.json({ error: `지원하지 않는 플랫폼: ${platform}` }, { status: 400 })
       }
@@ -99,6 +103,14 @@ export async function POST(request: Request) {
           iso_code: isoCode,
         }
 
+        // 이미지 URL 로깅
+        console.log(`[Admin Products Crawl] 크롤링된 제품 정보:`, {
+          name: product.name,
+          price: product.price,
+          image_url: product.image_url,
+          purchase_link: product.purchase_link,
+        })
+
         const result = await syncProducts([productInput], { validateLinks: false })
 
         return NextResponse.json({
@@ -111,6 +123,7 @@ export async function POST(request: Request) {
           product: {
             name: product.name,
             price: product.price,
+            image_url: product.image_url,
             purchase_link: product.purchase_link,
           },
         })
@@ -238,7 +251,9 @@ export async function POST(request: Request) {
               await scraper.close()
             }
           } else {
-            errors.push(`지원하지 않는 플랫폼: ${body.platform}`)
+            // site-config에 없으면 기본 설정 생성 시도 (baseUrl이 필요하므로 경고만)
+            console.warn(`[Admin Products Crawl] 알 수 없는 플랫폼: ${body.platform}. 카테고리/키워드 크롤링은 개별 제품 URL 크롤링만 지원됩니다.`)
+            errors.push(`지원하지 않는 플랫폼: ${body.platform} (개별 제품 URL 크롤링만 지원)`)
           }
         }
       }

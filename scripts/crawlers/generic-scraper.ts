@@ -694,40 +694,263 @@ export class GenericScraper {
         }
       }
 
-      // 이미지 URL 추출
+      // 이미지 URL 추출 (정확한 제품 이미지 찾기)
       let imageUrl: string | null = null;
-      for (const selector of this.siteConfig.selectors.productImage) {
-        try {
-          const imageElement = await page.$(selector);
-          if (imageElement) {
-            imageUrl =
-              (await imageElement.getAttribute("src")) ||
-              (await imageElement.getAttribute("data-src")) ||
-              null;
-            if (imageUrl) {
-              imageUrl = normalizeUrl(imageUrl, this.siteConfig.baseUrl);
-              break;
-            }
-          }
-        } catch {
-          // 다음 셀렉터 시도
-        }
-      }
 
-      // wheelopia 특화 이미지 추출
+      // 1. 메타 태그에서 이미지 찾기 (og:image, twitter:image) - 가장 신뢰도 높음
       if (!imageUrl) {
         try {
-          const imgSrc = await page.evaluate(() => {
-            // 제품 상세 이미지 찾기
-            const img = document.querySelector("img[src*='data'], img[src*='goods'], img[src*='product']");
-            return img ? (img.getAttribute("src") || img.getAttribute("data-src")) : null;
+          const metaImage = await page.evaluate(() => {
+            const ogImage = document.querySelector('meta[property="og:image"]');
+            const twitterImage = document.querySelector('meta[name="twitter:image"]');
+            const image = ogImage?.getAttribute("content") || twitterImage?.getAttribute("content");
+            return image || null;
           });
-          if (imgSrc) {
-            imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
+          if (metaImage && !metaImage.includes("logo") && !metaImage.includes("banner")) {
+            imageUrl = normalizeUrl(metaImage, this.siteConfig.baseUrl);
+            console.log(`✅ 메타 태그에서 이미지 발견: ${imageUrl.substring(0, 60)}...`);
           }
         } catch {
           // 무시
         }
+      }
+
+      // 2. 제품명/가격과 가까운 이미지 찾기 (가장 정확한 방법)
+      if (!imageUrl) {
+        try {
+          const imgSrc = await page.evaluate(() => {
+            // 제품명이나 가격 요소 찾기
+            const nameSelectors = ["h1", "h2", ".product-name", ".product-title", "[class*='product-name']"];
+            const priceSelectors = [".price", "[class*='price']", "strong:has-text('원')"];
+            
+            let productArea: HTMLElement | null = null;
+            
+            // 제품명 요소 찾기
+            for (const selector of nameSelectors) {
+              const element = document.querySelector(selector);
+              if (element && element.textContent && element.textContent.trim().length > 2) {
+                productArea = element.closest(".product, .product-detail, .detail, main, article, [class*='product']") as HTMLElement;
+                if (!productArea) productArea = element as HTMLElement;
+                break;
+              }
+            }
+            
+            // 제품 영역 내의 이미지 찾기
+            const searchArea = productArea || document.body;
+            const images = Array.from(searchArea.querySelectorAll("img"));
+            
+            const validImages = images
+              .map((img) => {
+                const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+                if (!src) return null;
+                
+                const lowerSrc = src.toLowerCase();
+                const lowerAlt = (img.getAttribute("alt") || "").toLowerCase();
+                const lowerClass = (img.className || "").toLowerCase();
+                const lowerParentClass = (img.parentElement?.className || "").toLowerCase();
+                
+                // 배너, 로고, 아이콘, 버튼 등 제외
+                const excludeKeywords = [
+                  "logo", "banner", "icon", "button", "spacer", "1x1", "placeholder",
+                  "ad", "advertisement", "promo", "header", "footer", "nav", "menu",
+                  "decoration", "bg", "background", "pattern", "line", "arrow"
+                ];
+                
+                if (
+                  excludeKeywords.some(keyword => 
+                    lowerSrc.includes(keyword) || 
+                    lowerAlt.includes(keyword) || 
+                    lowerClass.includes(keyword) ||
+                    lowerParentClass.includes(keyword)
+                  )
+                ) {
+                  return null;
+                }
+                
+                // 너무 작은 이미지 제외
+                const width = img.naturalWidth || img.width || 0;
+                const height = img.naturalHeight || img.height || 0;
+                if (width < 150 || height < 150) {
+                  return null;
+                }
+                
+                // 제품 이미지 관련 키워드가 있으면 가산점
+                const productKeywords = ["product", "goods", "item", "detail", "main", "thumb", "image"];
+                const hasProductKeyword = productKeywords.some(keyword => 
+                  lowerSrc.includes(keyword) || 
+                  lowerAlt.includes(keyword) || 
+                  lowerClass.includes(keyword)
+                );
+                
+                // 제품명/가격과의 거리 계산
+                let distanceScore = 1000;
+                if (productArea) {
+                  const imgRect = img.getBoundingClientRect();
+                  const areaRect = productArea.getBoundingClientRect();
+                  const distance = Math.abs(imgRect.top - areaRect.top) + Math.abs(imgRect.left - areaRect.left);
+                  distanceScore = Math.min(distance, 1000);
+                }
+                
+                return {
+                  src,
+                  width,
+                  height,
+                  area: width * height,
+                  hasProductKeyword,
+                  distanceScore,
+                  score: (width * height) + (hasProductKeyword ? 50000 : 0) - distanceScore,
+                };
+              })
+              .filter((img) => img !== null && img.area > 10000);
+            
+            if (validImages.length > 0) {
+              // 스코어가 높은 순으로 정렬
+              validImages.sort((a, b) => b.score - a.score);
+              return validImages[0].src;
+            }
+            return null;
+          });
+          if (imgSrc) {
+            imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
+            console.log(`✅ 제품 영역에서 이미지 발견: ${imageUrl.substring(0, 60)}...`);
+          }
+        } catch {
+          // 무시
+        }
+      }
+
+      // 3. 사이트 설정의 셀렉터로 이미지 찾기
+      if (!imageUrl) {
+        for (const selector of this.siteConfig.selectors.productImage) {
+          try {
+            const imageElement = await page.$(selector);
+            if (imageElement) {
+              const src = 
+                (await imageElement.getAttribute("src")) ||
+                (await imageElement.getAttribute("data-src")) ||
+                (await imageElement.getAttribute("data-lazy-src")) ||
+                (await imageElement.getAttribute("data-original")) ||
+                null;
+              
+              if (src) {
+                const lowerSrc = src.toLowerCase();
+                // 배너, 로고 제외
+                if (!lowerSrc.includes("logo") && !lowerSrc.includes("banner") && !lowerSrc.includes("icon")) {
+                  imageUrl = normalizeUrl(src, this.siteConfig.baseUrl);
+                  console.log(`✅ 셀렉터로 이미지 발견: ${imageUrl.substring(0, 60)}... (셀렉터: ${selector})`);
+                  break;
+                }
+              }
+            }
+          } catch {
+            // 다음 셀렉터 시도
+          }
+        }
+      }
+
+      // 4. 제품 상세 이미지 갤러리에서 첫 번째 이미지 찾기
+      if (!imageUrl) {
+        try {
+          const imgSrc = await page.evaluate(() => {
+            const selectors = [
+              ".product-image img:first-of-type",
+              ".product-img img:first-of-type",
+              ".product-detail img:first-of-type",
+              ".detail-image img:first-of-type",
+              ".main-image img",
+              ".gallery img:first-of-type",
+              ".product-gallery img:first-of-type",
+              "[class*='product-image'] img:first-of-type",
+              "[class*='product-img'] img:first-of-type",
+            ];
+            
+            for (const selector of selectors) {
+              const img = document.querySelector(selector);
+              if (img) {
+                const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+                if (src) {
+                  const lowerSrc = src.toLowerCase();
+                  if (!lowerSrc.includes("logo") && !lowerSrc.includes("banner") && !lowerSrc.includes("icon")) {
+                    return src;
+                  }
+                }
+              }
+            }
+            return null;
+          });
+          if (imgSrc) {
+            imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
+            console.log(`✅ 갤러리에서 이미지 발견: ${imageUrl.substring(0, 60)}...`);
+          }
+        } catch {
+          // 무시
+        }
+      }
+
+      // 5. 모든 이미지 중에서 가장 적합한 이미지 선택 (최후의 수단)
+      if (!imageUrl) {
+        try {
+          const imgSrc = await page.evaluate(() => {
+            const images = Array.from(document.querySelectorAll("img"));
+            const validImages = images
+              .map((img) => {
+                const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+                if (!src) return null;
+                
+                const lowerSrc = src.toLowerCase();
+                const lowerAlt = (img.getAttribute("alt") || "").toLowerCase();
+                
+                // 배너, 로고, 아이콘 제외
+                if (
+                  lowerSrc.includes("logo") ||
+                  lowerSrc.includes("banner") ||
+                  lowerSrc.includes("icon") ||
+                  lowerSrc.includes("button") ||
+                  lowerSrc.includes("spacer") ||
+                  lowerSrc.includes("1x1") ||
+                  lowerSrc.includes("placeholder") ||
+                  lowerSrc.includes("ad") ||
+                  lowerAlt.includes("logo") ||
+                  lowerAlt.includes("banner")
+                ) {
+                  return null;
+                }
+                
+                const width = img.naturalWidth || img.width || 0;
+                const height = img.naturalHeight || img.height || 0;
+                
+                // 최소 크기 필터 (더 큰 이미지 선호)
+                if (width < 200 || height < 200) {
+                  return null;
+                }
+                
+                return {
+                  src,
+                  width,
+                  height,
+                  area: width * height,
+                };
+              })
+              .filter((img) => img !== null && img.area > 40000); // 최소 크기 필터 증가 (200x200 이상)
+            
+            if (validImages.length > 0) {
+              // 가장 큰 이미지 선택
+              validImages.sort((a, b) => b.area - a.area);
+              return validImages[0].src;
+            }
+            return null;
+          });
+          if (imgSrc) {
+            imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
+            console.log(`✅ 큰 이미지 선택: ${imageUrl.substring(0, 60)}...`);
+          }
+        } catch {
+          // 무시
+        }
+      }
+
+      if (!imageUrl) {
+        console.warn(`⚠️  이미지를 찾을 수 없습니다: ${productUrl}`);
       }
 
       await page.close();

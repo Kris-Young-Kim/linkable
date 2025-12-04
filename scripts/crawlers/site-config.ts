@@ -342,6 +342,110 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
     enabled: true,
     notes: "보조기기 전문 쇼핑몰",
   },
+  mktop: {
+    name: "엠케이톱",
+    baseUrl: "https://mktop.kr",
+    selectors: {
+      productList: [
+        ".product-list > li",
+        "ul.product-list > li",
+        ".item-list > li",
+        "li[class*='product']",
+        "[class*='product']",
+      ],
+      productName: [
+        "h2",
+        "h1",
+        ".product-name",
+        ".product_title",
+        ".product-title",
+        "h3",
+        "h4",
+        "table td:has-text('상품명')",
+        "a[href*='product/detail']",
+        "td:has(a[href*='product/detail'])",
+      ],
+      productPrice: [
+        "table td:has-text('판매가') strong",
+        "table td:has-text('판매가')",
+        "table strong:has-text('원')",
+        ".price",
+        ".product-price",
+        "strong:has-text('원')",
+        "td strong",
+        "[class*='price']",
+      ],
+      productImage: [
+        ".product-image img",
+        ".product-img img",
+        ".detail-image img",
+        "img[src*='product']",
+        "img[src*='goods']",
+        "img[src*='data']",
+        "td img",
+        "img",
+      ],
+      productLink: [
+        "a[href*='product/detail']",
+        "a[href*='product']",
+        "a",
+      ],
+    },
+    enabled: true,
+    notes: "보조기기 전문 쇼핑몰",
+  },
+  plusagel: {
+    name: "플러스에젤",
+    baseUrl: "https://plusagel.co.kr",
+    selectors: {
+      productList: [
+        ".product-list > li",
+        "ul.product-list > li",
+        ".item-list > li",
+        "li[class*='product']",
+        "[class*='product']",
+        "table tbody tr",
+        "table tr",
+      ],
+      productName: [
+        "h1",
+        "h2",
+        ".product-name",
+        ".product_title",
+        ".product-title",
+        "h3",
+        "h4",
+        "a[href*='product']",
+        "a[href*='detail']",
+        "td a",
+      ],
+      productPrice: [
+        ".price",
+        ".product-price",
+        "strong:has-text('원')",
+        "td strong",
+        "[class*='price']",
+        "table td:has-text('가격')",
+        "table td:has-text('판매가')",
+      ],
+      productImage: [
+        ".product-image img",
+        ".product-img img",
+        "img[src*='product']",
+        "img[src*='goods']",
+        "img[src*='data']",
+        "td img",
+        "img",
+      ],
+      productLink: [
+        "a[href*='product']",
+        "a[href*='detail']",
+        "a",
+      ],
+    },
+    enabled: true,
+    notes: "보조기기 전문 쇼핑몰",
+  },
 }
 
 /**
@@ -352,9 +456,92 @@ export function getEnabledSites(): SiteConfig[] {
 }
 
 /**
- * 사이트 이름으로 설정 가져오기
+ * 기본 셀렉터 설정 (알 수 없는 사이트용)
  */
-export function getSiteConfig(siteName: string): SiteConfig | undefined {
-  return SITE_CONFIGS[siteName]
+function getDefaultSiteConfig(baseUrl: string, siteName: string): SiteConfig {
+  return {
+    name: siteName,
+    baseUrl,
+    selectors: {
+      productList: [
+        ".product-list > li",
+        "ul.product-list > li",
+        ".item-list > li",
+        "li[class*='product']",
+        "[class*='product']",
+        "table tbody tr",
+        "table tr",
+      ],
+      productName: [
+        "h1",
+        "h2",
+        ".product-name",
+        ".product_title",
+        ".product-title",
+        "h3",
+        "h4",
+        "a[href*='product']",
+        "td a",
+      ],
+      productPrice: [
+        ".price",
+        ".product-price",
+        "strong:has-text('원')",
+        "td strong",
+        "[class*='price']",
+        "table td:has-text('가격')",
+        "table td:has-text('판매가')",
+      ],
+      productImage: [
+        ".product-image img",
+        ".product-img img",
+        "img[src*='product']",
+        "img[src*='goods']",
+        "img[src*='data']",
+        "td img",
+        "img",
+      ],
+      productLink: [
+        "a[href*='product']",
+        "a[href*='detail']",
+        "a",
+      ],
+    },
+    enabled: true,
+    notes: "기본 설정 (자동 생성)",
+  }
+}
+
+/**
+ * URL에서 baseUrl 추출
+ */
+function extractBaseUrl(url: string): string {
+  try {
+    const urlObj = new URL(url)
+    return `${urlObj.protocol}//${urlObj.host}`
+  } catch {
+    // URL 파싱 실패 시 기본값
+    return "https://example.com"
+  }
+}
+
+/**
+ * 사이트 이름으로 설정 가져오기
+ * 없으면 URL에서 기본 설정 생성
+ */
+export function getSiteConfig(siteName: string, productUrl?: string): SiteConfig | undefined {
+  const config = SITE_CONFIGS[siteName]
+  if (config) {
+    return config
+  }
+
+  // site-config에 없으면 기본 설정 생성
+  if (productUrl) {
+    const baseUrl = extractBaseUrl(productUrl)
+    console.log(`[Site Config] 알 수 없는 플랫폼 "${siteName}", 기본 설정 사용 (baseUrl: ${baseUrl})`)
+    return getDefaultSiteConfig(baseUrl, siteName)
+  }
+
+  return undefined
 }
 
