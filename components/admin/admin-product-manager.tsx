@@ -468,6 +468,28 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     console.log(`[Admin Products] Product updated successfully: ${id}`)
   }
 
+  // 체크박스 선택 함수들
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(filteredAndSortedProducts.map((p) => p.id))
+      setSelectedProducts(allIds)
+    } else {
+      setSelectedProducts(new Set())
+    }
+  }
+
+  const handleSelectProduct = (id: string, checked: boolean) => {
+    setSelectedProducts((prev) => {
+      const next = new Set(prev)
+      if (checked) {
+        next.add(id)
+      } else {
+        next.delete(id)
+      }
+      return next
+    })
+  }
+
   // 일괄 삭제 함수
   const handleBulkDelete = async () => {
     if (selectedProducts.size === 0) {

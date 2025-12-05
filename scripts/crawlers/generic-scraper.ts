@@ -801,7 +801,7 @@ export class GenericScraper {
                   score: (width * height) + (hasProductKeyword ? 50000 : 0) - distanceScore,
                 };
               })
-              .filter((img) => img !== null && img.area > 10000);
+              .filter((img): img is NonNullable<typeof img> => img !== null && img.area > 10000);
             
             if (validImages.length > 0) {
               // 스코어가 높은 순으로 정렬
@@ -931,7 +931,7 @@ export class GenericScraper {
                   area: width * height,
                 };
               })
-              .filter((img) => img !== null && img.area > 40000); // 최소 크기 필터 증가 (200x200 이상)
+              .filter((img): img is NonNullable<typeof img> => img !== null && img.area > 40000); // 최소 크기 필터 증가 (200x200 이상)
             
             if (validImages.length > 0) {
               // 가장 큰 이미지 선택

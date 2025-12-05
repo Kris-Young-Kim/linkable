@@ -17,6 +17,8 @@ const SYSTEM_FILES_TO_IGNORE = [
 ]
 
 const nextConfig = {
+  // Next.js 16에서 Turbopack이 기본 활성화되어 있으므로 설정 추가
+  turbopack: {},
   images: {
     // 이미지 최적화 활성화 (성능 개선)
     unoptimized: false,
