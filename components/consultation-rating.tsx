@@ -110,8 +110,8 @@ export function ConsultationRating({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">상담 만족도 평가</CardTitle>
-        <CardDescription>이 상담이 얼마나 도움이 되었는지 평가해주세요.</CardDescription>
+        <CardTitle className="text-lg">추천 보조기기 만족도 평가</CardTitle>
+        <CardDescription>링커가 추천한 보조기기가 얼마나 마음에 드시나요? 소중한 피드백이 서비스 개선에 도움이 됩니다.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Star Rating */}

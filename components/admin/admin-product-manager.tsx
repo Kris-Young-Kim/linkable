@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Search, X, Upload, Download, Sparkles, Loader2, FileText, Globe, CheckSquare, Square } from "lucide-react"
+import { Search, X, Upload, Download, Sparkles, Loader2, FileText, Globe, CheckSquare, Square, ChevronLeft, ChevronRight } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -126,6 +126,8 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [selectedStatus, setSelectedStatus] = useState<string>("all")
   const [sortBy, setSortBy] = useState<SortOption>("updated-desc")
+  const [pageSize, setPageSize] = useState<number>(20)
+  const [currentPage, setCurrentPage] = useState<number>(1)
 
   // ISO 코드 자동 추천 (상품명 입력 시)
   const fetchIsoSuggestions = useCallback(async (productName: string) => {
@@ -469,9 +471,9 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
   }
 
   // 체크박스 선택 함수들
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (checked: boolean, targetList: AdminProduct[]) => {
     if (checked) {
-      const allIds = new Set(filteredAndSortedProducts.map((p) => p.id))
+      const allIds = new Set(targetList.map((p) => p.id))
       setSelectedProducts(allIds)
     } else {
       setSelectedProducts(new Set())
@@ -614,6 +616,23 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
 
     return filtered
   }, [products, searchQuery, selectedIsoCode, selectedCategory, selectedStatus, sortBy])
+
+  // 필터/검색 변경 시 첫 페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedIsoCode, selectedCategory, selectedStatus, sortBy])
+
+  // 전체 페이지 수 계산
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredAndSortedProducts.length / pageSize)
+  }, [filteredAndSortedProducts.length, pageSize])
+
+  // 현재 페이지에 표시할 상품 목록
+  const visibleProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize
+    const endIndex = startIndex + pageSize
+    return filteredAndSortedProducts.slice(startIndex, endIndex)
+  }, [filteredAndSortedProducts, currentPage, pageSize])
 
   return (
     <div className="space-y-8">
@@ -1192,13 +1211,13 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           <CardTitle>상품 목록</CardTitle>
           <CardDescription>
             {filteredAndSortedProducts.length === products.length
-              ? `전체 ${products.length}개 상품`
-              : `검색 결과: ${filteredAndSortedProducts.length}개 / 전체 ${products.length}개`}
+              ? `전체 ${products.length}개 중 ${Math.min(visibleProducts.length, products.length)}개 표시`
+              : `검색 결과: ${filteredAndSortedProducts.length}개 중 ${visibleProducts.length}개 표시 / 전체 ${products.length}개`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 검색 및 필터 컨트롤 */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
             {/* 검색 */}
             <div className="relative lg:col-span-2">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -1264,6 +1283,23 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
                 <SelectItem value="name-desc">이름순 (역순)</SelectItem>
                 <SelectItem value="price-asc">가격 낮은순</SelectItem>
                 <SelectItem value="price-desc">가격 높은순</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* 표시 개수 */}
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(value) => setPageSize(parseInt(value, 10))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="표시 개수" />
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 20, 30, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}개씩 보기
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -1368,21 +1404,26 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
           </Card>
         ) : (
           <>
-            {/* 전체 선택 체크박스 */}
-            <div className="flex items-center gap-2 px-2">
-              <Checkbox
-                checked={
-                  filteredAndSortedProducts.length > 0 &&
-                  filteredAndSortedProducts.every((p) => selectedProducts.has(p.id))
-                }
-                onCheckedChange={(checked) => handleSelectAll(checked === true)}
-                aria-label="전체 선택"
-              />
-              <Label className="text-sm font-medium cursor-pointer" onClick={() => handleSelectAll(!filteredAndSortedProducts.every((p) => selectedProducts.has(p.id)))}>
-                전체 선택 ({selectedProducts.size}/{filteredAndSortedProducts.length})
-              </Label>
-            </div>
-            {filteredAndSortedProducts.map((product) => (
+          {/* 전체 선택 체크박스 */}
+          <div className="flex items-center gap-2 px-2">
+            <Checkbox
+              checked={visibleProducts.length > 0 && visibleProducts.every((p) => selectedProducts.has(p.id))}
+              onCheckedChange={(checked) => handleSelectAll(checked === true, visibleProducts)}
+              aria-label="전체 선택"
+            />
+            <Label
+              className="text-sm font-medium cursor-pointer"
+              onClick={() =>
+                handleSelectAll(
+                  !(visibleProducts.length > 0 && visibleProducts.every((p) => selectedProducts.has(p.id))),
+                  visibleProducts,
+                )
+              }
+            >
+              전체 선택 ({selectedProducts.size}/{visibleProducts.length})
+            </Label>
+          </div>
+            {visibleProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
@@ -1394,6 +1435,64 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
               />
             ))}
           </>
+        )}
+
+        {/* 페이지네이션 */}
+        {filteredAndSortedProducts.length > 0 && totalPages > 1 && (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {((currentPage - 1) * pageSize + 1).toLocaleString()} - {Math.min(currentPage * pageSize, filteredAndSortedProducts.length).toLocaleString()}개 / 전체 {filteredAndSortedProducts.length.toLocaleString()}개
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    이전
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                      let pageNum: number
+                      if (totalPages <= 5) {
+                        pageNum = i + 1
+                      } else if (currentPage <= 3) {
+                        pageNum = i + 1
+                      } else if (currentPage >= totalPages - 2) {
+                        pageNum = totalPages - 4 + i
+                      } else {
+                        pageNum = currentPage - 2 + i
+                      }
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNum)}
+                          className="min-w-[40px]"
+                        >
+                          {pageNum}
+                        </Button>
+                      )
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    다음
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
         </TabsContent>

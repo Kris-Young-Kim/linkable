@@ -44,9 +44,9 @@ export const translations = {
     "features.personalSupport.title": "개인 맞춤 지원",
     "features.personalSupport.description":
       "고객님의 요구사항을 이해하고 독립적인 생활을 위한 최적의 솔루션을 안내하는 전담 코디네이터와 연결됩니다.",
-    "features.provenResults.title": "K-IPPA 검증된 만족도",
+    "features.provenResults.title": "검증된 제품 추천",
     "features.provenResults.description":
-      "K-IPPA 방법론으로 검증된 추천 시스템으로 일상 활동과 삶의 질 향상을 측정 가능하게 보장합니다.",
+      "신뢰할 수 있는 보조기기만 엄선하여 추천합니다. 실제 사용자 후기와 전문가 검토를 통해 검증된 제품 정보를 제공합니다.",
 
     // How It Works
     "howItWorks.title": "이용 방법",
@@ -59,7 +59,7 @@ export const translations = {
       "AI가 ICF 기준으로 상황을 분석하고 가장 적합한 보조기기 옵션을 찾아냅니다.",
     "howItWorks.step3.title": "맞춤 추천",
     "howItWorks.step3.description":
-      "검증된 제품과 전문가 매칭을 받아 일상에 적합한 솔루션을 선택하세요.",
+      "내 상황에 맞춰 추린 보조기기를 한눈에 비교하고, 필요하면 전문가와 바로 상담하세요.",
 
     // CTA Section
     "cta.title": "더 나은 일상을 위한 첫 걸음",
@@ -300,6 +300,24 @@ export const translations = {
     "ippa.consultation.difficultyHelp": "현재 이 활동을 수행하는 것이 얼마나 어려운지 선택해주세요 (1=쉬움, 5=매우 어려움)",
     "ippa.consultation.submit": "확인",
     "ippa.consultation.skip": "건너뛰기",
+
+    // Consultation Feedback (상담 피드백)
+    "consultationFeedback.title": "추천 보조기기 만족도 평가",
+    "consultationFeedback.description": "링커가 추천한 보조기기가 얼마나 마음에 드시나요? 소중한 피드백이 서비스 개선에 도움이 됩니다.",
+    "consultationFeedback.accuracyQuestion": "추천된 보조기기가 얼마나 마음에 드시나요?",
+    "consultationFeedback.veryAccurate": "매우 정확함 (5점)",
+    "consultationFeedback.accurate": "정확함 (4점)",
+    "consultationFeedback.moderate": "보통 (3점)",
+    "consultationFeedback.inaccurate": "부정확함 (2점)",
+    "consultationFeedback.veryInaccurate": "매우 부정확함 (1점)",
+    "consultationFeedback.commentLabel": "추가 의견 (선택사항)",
+    "consultationFeedback.commentPlaceholder": "ICF 분석에서 개선되었으면 하는 점이나 추가 의견을 자유롭게 작성해주세요.",
+    "consultationFeedback.commentHelp": "피드백은 익명으로 처리되며, 서비스 개선에만 사용됩니다.",
+    "consultationFeedback.submit": "피드백 제출",
+    "consultationFeedback.submitting": "제출 중...",
+    "consultationFeedback.skip": "건너뛰기",
+    "consultationFeedback.thankYou": "피드백을 주셔서 감사합니다!",
+    "consultationFeedback.thankYouDescription": "소중한 의견이 서비스 개선에 큰 도움이 됩니다.",
 
     // Onboarding / Role Selection
     "onboarding.title": "역할을 선택해주세요",

@@ -65,6 +65,23 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.sk-easymove.co.kr",
       },
+      // 플러스에젤 이미지 도메인
+      {
+        protocol: "https",
+        hostname: "plusagel.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "**.plusagel.co.kr",
+      },
+      {
+        protocol: "https",
+        hostname: "plusezer.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.plusezer.com",
+      },
       // 쿠팡 이미지 도메인
       {
         protocol: "https",

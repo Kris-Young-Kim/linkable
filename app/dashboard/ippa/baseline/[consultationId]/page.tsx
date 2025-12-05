@@ -57,7 +57,6 @@ async function fetchConsultationData(consultationId: string, clerkUserId: string
       id,
       title,
       status,
-      ippa_activities,
       analysis_results(
         id,
         summary,
@@ -77,11 +76,24 @@ async function fetchConsultationData(consultationId: string, clerkUserId: string
     ? consultation.analysis_results[0]
     : consultation.analysis_results
 
-  // 기초선 평가 완료 여부 확인
-  const hasBaselineEvaluation = consultation.ippa_activities && 
-    typeof consultation.ippa_activities === 'object' &&
-    Array.isArray((consultation.ippa_activities as any).activities) &&
-    (consultation.ippa_activities as any).activities.length > 0
+  // 기초선 평가 완료 여부 확인 (ippa_activities는 존재하지 않을 수 있으므로 별도 조회)
+  let hasBaselineEvaluation = false
+  try {
+    const { data: ippaData } = await supabase
+      .from("consultations")
+      .select("ippa_activities")
+      .eq("id", consultationId)
+      .maybeSingle()
+    if (ippaData?.ippa_activities) {
+      const activities = ippaData.ippa_activities as any
+      hasBaselineEvaluation =
+        typeof activities === "object" &&
+        Array.isArray(activities.activities) &&
+        activities.activities.length > 0
+    }
+  } catch (e) {
+    console.warn("[baseline] ippa_activities 조회 실패(무시)", e)
+  }
 
   return {
     consultation: {

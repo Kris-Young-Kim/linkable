@@ -113,11 +113,11 @@ export function ConsultationFeedbackForm({
           <div>
             <CardTitle className="text-lg md:text-xl flex items-center gap-2">
               <Star className="h-5 w-5 text-primary" aria-hidden="true" />
-              {t("consultationFeedback.title") || "ICF 분석 정확도 평가"}
+              {t("consultationFeedback.title") || "추천 보조기기 만족도 평가"}
             </CardTitle>
             <CardDescription className="mt-2">
               {t("consultationFeedback.description") ||
-                "링커의 ICF 분석이 얼마나 정확했는지 평가해주세요. 소중한 피드백이 서비스 개선에 도움이 됩니다."}
+                "링커가 추천한 보조기기가 얼마나 마음에 드시나요? 소중한 피드백이 서비스 개선에 도움이 됩니다."}
             </CardDescription>
           </div>
           {onSkip && (
@@ -135,7 +135,7 @@ export function ConsultationFeedbackForm({
         {/* 정확도 평가 */}
         <div className="space-y-3">
           <Label htmlFor="accuracy-rating" className="text-base font-semibold">
-            {t("consultationFeedback.accuracyQuestion") || "ICF 분석이 얼마나 정확했나요?"}
+            {t("consultationFeedback.accuracyQuestion") || "추천된 보조기기가 얼마나 마음에 드시나요?"}
           </Label>
           <RadioGroup
             value={accuracyRating}

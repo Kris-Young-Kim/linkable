@@ -15,6 +15,11 @@ import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 import type { RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters"
 import type { IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
 
+// 플로팅 액션 메뉴 (클라이언트 컴포넌트)
+const FloatingActionMenu = dynamic(
+  () => import("@/components/floating-action-menu").then((mod) => ({ default: mod.FloatingActionMenu }))
+)
+
 // 동적 import로 무거운 컴포넌트 지연 로딩
 const RecommendationsViewWithFilters = dynamic(
   () => import("@/components/recommendations/recommendations-view-with-filters").then((mod) => ({ default: mod.RecommendationsViewWithFilters })),
@@ -81,47 +86,96 @@ async function fetchConsultationData(consultationId: string, clerkUserId: string
     .eq("clerk_id", clerkUserId)
     .maybeSingle()
 
-  if (userError || !userRow?.id) {
+  if (userError) {
+    console.error("[recommendations page] 사용자 조회 오류:", {
+      error: userError,
+      code: userError.code,
+      message: userError.message,
+      clerkUserId,
+    })
     return null
   }
 
-  // 2. 상담 정보 조회
+  if (!userRow?.id) {
+    console.error("[recommendations page] 사용자 정보 없음:", { clerkUserId })
+    return null
+  }
+
+  // 2. 상담 정보 조회 (먼저 기본 정보만 조회)
   const { data: consultation, error: consultError } = await supabase
     .from("consultations")
-    .select(
-      `
-      id,
-      title,
-      status,
-      created_at,
-      updated_at,
-      ippa_activities,
-      analysis_results(
-        id,
-        summary,
-        icf_codes,
-        identified_problems,
-        env_factors
-      )
-    `,
-    )
+    .select("id, title, status, created_at, updated_at, user_id")
     .eq("id", consultationId)
-    .eq("user_id", userRow.id)
     .maybeSingle()
 
-  if (consultError || !consultation) {
+  if (consultError) {
+    console.error("[recommendations page] 상담 조회 오류:", {
+      error: consultError,
+      code: consultError.code,
+      message: consultError.message,
+      details: consultError.details,
+      hint: consultError.hint,
+      consultationId,
+      userRowId: userRow.id,
+    })
     return null
   }
 
-  const analysisResult = Array.isArray(consultation.analysis_results)
-    ? consultation.analysis_results[0]
-    : consultation.analysis_results
+  if (!consultation) {
+    console.error("[recommendations page] 상담 데이터 없음:", {
+      consultationId,
+      userRowId: userRow.id,
+    })
+    return null
+  }
 
-  // 기초선 평가 완료 여부 확인
-  const hasBaselineEvaluation = consultation.ippa_activities && 
-    typeof consultation.ippa_activities === 'object' &&
-    Array.isArray((consultation.ippa_activities as any).activities) &&
-    (consultation.ippa_activities as any).activities.length > 0
+  // 사용자 소유 확인
+  if (consultation.user_id !== userRow.id) {
+    console.error("[recommendations page] 권한 없음:", {
+      consultationId,
+      consultationUserId: consultation.user_id,
+      currentUserId: userRow.id,
+    })
+    return null
+  }
+
+  // 3. 분석 결과 별도 조회
+  const { data: analysisData, error: analysisError } = await supabase
+    .from("analysis_results")
+    .select("id, summary, icf_codes, identified_problems, env_factors")
+    .eq("consultation_id", consultationId)
+    .maybeSingle()
+
+  if (analysisError && analysisError.code !== "PGRST116") {
+    console.warn("[recommendations page] 분석 결과 조회 오류:", {
+      error: analysisError,
+      code: analysisError.code,
+      message: analysisError.message,
+    })
+  }
+
+  const analysisResult = analysisData || null
+
+  // 기초선 평가 완료 여부 확인 (ippa_activities 컬럼이 없을 수 있으므로 별도 조회)
+  let hasBaselineEvaluation = false
+  try {
+    const { data: ippaData } = await supabase
+      .from("consultations")
+      .select("ippa_activities")
+      .eq("id", consultationId)
+      .maybeSingle()
+    
+    if (ippaData?.ippa_activities) {
+      const activities = ippaData.ippa_activities as any
+      hasBaselineEvaluation = 
+        typeof activities === 'object' &&
+        Array.isArray(activities.activities) &&
+        activities.activities.length > 0
+    }
+  } catch (error) {
+    // ippa_activities 컬럼이 없으면 무시
+    console.warn("[recommendations page] ippa_activities 조회 실패 (무시됨):", error)
+  }
 
   return {
     consultation: {
@@ -326,56 +380,6 @@ export default async function RecommendationsDetailPage({
                 </Button>
               </CardContent>
             </Card>
-
-            {/* 기초선 평가 제안 (아직 평가하지 않은 경우만 표시) */}
-            {!consultation.hasBaselineEvaluation && (
-              <Card className="border-primary/20 bg-primary/5">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <ClipboardCheck className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-lg">기초선 평가</CardTitle>
-                  </div>
-                  <CardDescription>
-                    현재 상태를 평가해주시면, 보조기기 사용 후 개선도를 정확히 측정할 수 있습니다.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button className="w-full" asChild>
-                    <Link href={`/dashboard/ippa/baseline/${consultation.id}`}>
-                      기초선 평가 시작하기
-                    </Link>
-                  </Button>
-                  <p className="mt-2 text-xs text-muted-foreground text-center">
-                    평가는 선택사항이며, 나중에 대시보드에서도 진행할 수 있습니다.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* 기초선 평가 완료 표시 */}
-            {consultation.hasBaselineEvaluation && (
-              <Card className="border-emerald-200 bg-emerald-50/50">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <ClipboardCheck className="h-5 w-5 text-emerald-600" />
-                    <CardTitle className="text-lg text-emerald-900">기초선 평가 완료</CardTitle>
-                  </div>
-                  <CardDescription className="text-emerald-700">
-                    기초선 평가가 완료되었습니다. 보조기기 사용 후 효과를 측정할 준비가 되었습니다.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-
-            {/* 상담 종료 설문 (완료된 상담만 표시) */}
-            {consultation.status === "completed" && (
-              <ConsultationFeedbackForm
-                consultationId={consultation.id}
-                onSuccess={() => {
-                  // 피드백 제출 성공 시 처리 (선택적)
-                }}
-              />
-            )}
           </div>
         </div>
 
@@ -428,7 +432,52 @@ export default async function RecommendationsDetailPage({
             </Suspense>
           </CardContent>
         </Card>
+
+        {/* 상담 종료 설문 (추천 보조기기 만족도) */}
+        {consultation.status === "completed" && (
+          <ConsultationFeedbackForm consultationId={consultation.id} />
+        )}
+
+        {/* 기초선 평가 안내 */}
+        {!consultation.hasBaselineEvaluation ? (
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">기초선 평가</CardTitle>
+              </div>
+              <CardDescription>
+                현재 상태를 평가해주시면, 보조기기 사용 후 개선도를 정확히 측정할 수 있습니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full" asChild>
+                <Link href={`/dashboard/ippa/baseline/${consultation.id}`}>
+                  기초선 평가 시작하기
+                </Link>
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground text-center">
+                평가는 선택사항이며, 나중에 대시보드에서도 진행할 수 있습니다.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="border-emerald-200 bg-emerald-50/50">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="h-5 w-5 text-emerald-600" />
+                <CardTitle className="text-lg text-emerald-900">기초선 평가 완료</CardTitle>
+              </div>
+              <CardDescription className="text-emerald-700">
+                기초선 평가가 완료되었습니다. 보조기기 사용 후 효과를 측정할 준비가 되었습니다.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
       </main>
+
+      {/* 플로팅 액션 메뉴 */}
+      <FloatingActionMenu />
     </div>
   )
 }

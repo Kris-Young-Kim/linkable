@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
+import dynamic from "next/dynamic"
 import {
   ArrowLeft,
   CalendarClock,
@@ -16,6 +17,32 @@ import { ProductRecommendationCard } from "@/components/product-recommendation-c
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 import { ConsultationRating } from "@/components/consultation-rating"
 import { ChatHistoryCollapsible } from "@/components/consultation/chat-history-collapsible"
+
+// 플로팅 액션 메뉴 (클라이언트 컴포넌트)
+const FloatingActionMenu = dynamic(
+  () => import("@/components/floating-action-menu").then((mod) => ({ default: mod.FloatingActionMenu }))
+)
+
+// K-IPPA 설문 컴포넌트 (클라이언트 컴포넌트)
+const IppaConsultationFormWrapper = dynamic(
+  () => import("@/components/consultation/ippa-consultation-form-wrapper").then((mod) => ({ default: mod.IppaConsultationFormWrapper })),
+  {
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="h-20 bg-muted animate-pulse rounded" />
+            <div className="h-10 bg-muted animate-pulse rounded" />
+          </div>
+        </CardContent>
+      </Card>
+    ),
+  }
+)
+import { IppaConsultationForm } from "@/components/ippa-consultation-form"
 
 type MessageRow = {
   id: string
@@ -315,21 +342,6 @@ export default async function ConsultationDetailPage({ params }: { params: Promi
             </CardContent>
           </Card>
 
-          {/* ICF 분석 결과 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>ICF 분석 결과</CardTitle>
-              <CardDescription>채팅 중 추출된 ICF 코드를 시각화하여 표시합니다.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {icfBuckets ? (
-                <IcfVisualization data={icfBuckets} />
-              ) : (
-                <p className="text-sm text-muted-foreground py-4">ICF 분석 데이터가 없습니다.</p>
-              )}
-            </CardContent>
-          </Card>
-
           {/* 추천 보조기기 목록 */}
           <Card>
             <CardHeader>
@@ -369,10 +381,7 @@ export default async function ConsultationDetailPage({ params }: { params: Promi
             </CardContent>
           </Card>
 
-          {/* 채팅 기록 (접을 수 있게) */}
-          <ChatHistoryCollapsible messages={messages} />
-
-          {/* 상담 평가 */}
+          {/* 상담 평가 (추천 보조기기 만족도) */}
           <ConsultationRating
             consultationId={data.id}
             existingRating={
@@ -386,8 +395,45 @@ export default async function ConsultationDetailPage({ params }: { params: Promi
                 : data.feedback?.feedback_comment
             }
           />
+
+          {/* ICF 분석 결과 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>ICF 분석 결과</CardTitle>
+              <CardDescription>채팅 중 추출된 ICF 코드를 시각화하여 표시합니다.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {icfBuckets ? (
+                <IcfVisualization data={icfBuckets} />
+              ) : (
+                <p className="text-sm text-muted-foreground py-4">ICF 분석 데이터가 없습니다.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* 채팅 기록 (접을 수 있게) */}
+          <ChatHistoryCollapsible messages={messages} />
+
+          {/* K-IPPA 중요도, 어려움 정도 설문 */}
+          <Card>
+            <CardHeader>
+              <CardTitle>K-IPPA 중요도 및 어려움 정도 설문</CardTitle>
+              <CardDescription>
+                ICF 코드별 활동의 중요도와 현재 어려움 정도를 평가해주세요.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <IppaConsultationFormWrapper
+                consultationId={data.id}
+                problemDescription={analysisData?.identified_problems || analysisData?.summary || undefined}
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* 플로팅 액션 메뉴 */}
+      <FloatingActionMenu />
     </div>
   )
 }
