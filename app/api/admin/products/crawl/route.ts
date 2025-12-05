@@ -7,6 +7,7 @@ import { NaverScraper } from "@/scripts/crawlers/naver-scraper"
 import type { ScraperOptions } from "@/scripts/crawlers/types"
 import { syncProducts } from "@/lib/integrations/product-sync"
 import type { ProductInput } from "@/lib/integrations/product-sync"
+import { createCoupangClient } from "@/lib/integrations/coupang"
 
 const mapReasonToStatus = (reason: "not_authenticated" | "insufficient_permissions" | "error") => {
   if (reason === "not_authenticated") return 401
@@ -270,22 +271,63 @@ export async function POST(request: Request) {
 
       // 쿠팡, 네이버는 키워드 검색 지원
       if (body.platform === "coupang" || body.platform === "all") {
-        const scraper = new CoupangScraper()
-        try {
-          const result = await scraper.scrape(scraperOptions)
-          if (result.success && result.products.length > 0) {
-            allProducts.push(
-              ...result.products.map((p) => ({
-                ...p,
-                iso_code: body.isoCode || "00 00",
-              }))
-            )
+        // 먼저 쿠팡 파트너스 API 시도
+        const apiClient = createCoupangClient()
+        let apiSuccess = false
+
+        if (apiClient) {
+          try {
+            console.log(`[Admin Products Crawl] 쿠팡 파트너스 API 사용: ${body.keyword}`)
+            const apiProducts = await apiClient.searchProducts(body.keyword, body.max || 10)
+            
+            if (apiProducts.length > 0) {
+              // 쿠팡 API 응답을 ScrapedProduct 형식으로 변환
+              const convertedProducts: ProductInput[] = apiProducts.map((p) => {
+                // 제휴 링크 생성
+                const affiliateLink = apiClient.generateAffiliateLink(p.productUrl)
+                
+                return {
+                  name: p.productName,
+                  purchase_link: affiliateLink,
+                  price: p.productPrice,
+                  image_url: p.productImage,
+                  description: p.categoryName || null,
+                  manufacturer: null,
+                  category: "coupang",
+                  iso_code: body.isoCode || "00 00",
+                }
+              })
+              
+              allProducts.push(...convertedProducts)
+              apiSuccess = true
+              console.log(`[Admin Products Crawl] 쿠팡 API 성공: ${apiProducts.length}개 상품 수집`)
+            }
+          } catch (apiError) {
+            console.warn(`[Admin Products Crawl] 쿠팡 API 실패, 웹 스크래핑으로 폴백:`, apiError)
+            errors.push(`쿠팡 API 실패: ${apiError instanceof Error ? apiError.message : String(apiError)}`)
           }
-          if (result.errors) {
-            errors.push(...result.errors)
+        }
+
+        // API 실패 시 웹 스크래핑으로 폴백
+        if (!apiSuccess) {
+          console.log(`[Admin Products Crawl] 쿠팡 웹 스크래핑 사용: ${body.keyword}`)
+          const scraper = new CoupangScraper()
+          try {
+            const result = await scraper.scrape(scraperOptions)
+            if (result.success && result.products.length > 0) {
+              allProducts.push(
+                ...result.products.map((p) => ({
+                  ...p,
+                  iso_code: body.isoCode || "00 00",
+                }))
+              )
+            }
+            if (result.errors) {
+              errors.push(...result.errors)
+            }
+          } finally {
+            await scraper.close()
           }
-        } finally {
-          await scraper.close()
         }
       }
 

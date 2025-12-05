@@ -468,6 +468,43 @@ export function AdminProductManager({ initialProducts }: AdminProductManagerProp
     console.log(`[Admin Products] Product updated successfully: ${id}`)
   }
 
+  // 일괄 삭제 함수
+  const handleBulkDelete = async () => {
+    if (selectedProducts.size === 0) {
+      return
+    }
+
+    if (!window.confirm(`선택한 ${selectedProducts.size}개 상품을 삭제할까요?`)) {
+      return
+    }
+
+    setIsBulkDeleting(true)
+    setErrorMessage(null)
+    setSuccessMessage(null)
+
+    try {
+      const deletePromises = Array.from(selectedProducts).map(async (id) => {
+        const response = await fetch(`/api/admin/products/${id}`, {
+          method: "DELETE",
+        })
+        if (!response.ok) {
+          throw new Error(`상품 ${id} 삭제 실패`)
+        }
+        return id
+      })
+
+      await Promise.all(deletePromises)
+      setSuccessMessage(`${selectedProducts.size}개 상품이 삭제되었습니다.`)
+      setSelectedProducts(new Set())
+      await fetchProducts()
+    } catch (error) {
+      console.error("[Admin Products] 일괄 삭제 오류:", error)
+      setErrorMessage(error instanceof Error ? error.message : "일괄 삭제에 실패했습니다.")
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
+
   const handleDelete = async (id: string) => {
     console.log(`[Admin Products] Deleting product ${id}`)
     const response = await fetch(`/api/admin/products/${id}`, {
