@@ -360,6 +360,9 @@ export class PlaywrightScraper {
             ".product-img img",
             '[class*="image"] img',
             'img[src*="product"]',
+            'img[src*="goods"]',
+            'img[src*="shopimages"]', // willbe.kr 등 쇼핑몰 이미지
+            'img[src*="willbe2018"]', // willbe.kr 특정 폴더
             "img",
           ];
 

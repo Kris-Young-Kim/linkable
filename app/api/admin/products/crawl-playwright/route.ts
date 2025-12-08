@@ -72,6 +72,8 @@ export async function POST(request: Request) {
 
       // 제품 크롤링 (타임아웃 설정)
       const maxResults = Math.min(body.max || 10, 50); // 최대 50개로 제한
+
+      // 타임아웃을 10분으로 증가 (5분 -> 10분)
       const products = await Promise.race([
         scraper.scrapeProducts({
           url: body.url,
@@ -82,8 +84,8 @@ export async function POST(request: Request) {
         }),
         new Promise<never>((_, reject) =>
           setTimeout(
-            () => reject(new Error("크롤링 타임아웃 (5분 초과)")),
-            300000
+            () => reject(new Error("크롤링 타임아웃 (10분 초과)")),
+            600000 // 10분
           )
         ),
       ]);

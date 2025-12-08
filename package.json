@@ -16,12 +16,7 @@
     "debug:html": "tsx scripts/crawlers/debug-html-structure.ts",
     "test:products": "tsx scripts/test-crawled-products.ts",
     "test:api": "tsx scripts/test-product-api.ts",
-    "test:recommendation": "tsx scripts/test-recommendation-system.ts",
-    "crawl:playwright": "tsx scripts/crawl-with-playwright.ts",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug",
-    "test:e2e:headed": "playwright test --headed"
+    "test:recommendation": "tsx scripts/test-recommendation-system.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",
@@ -70,7 +65,6 @@
     "next": "^16.0.7",
     "next-themes": "^0.4.6",
     "pdf-parse": "1.1.1",
-    "playwright": "^1.57.0",
     "puppeteer": "^24.32.0",
     "react": "19.2.1",
     "react-day-picker": "9.8.0",
@@ -86,7 +80,6 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",

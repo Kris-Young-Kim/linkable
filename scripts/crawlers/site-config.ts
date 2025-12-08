@@ -133,23 +133,54 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
   },
   willbe: {
     name: "윌비",
-    baseUrl: "https://willbe.kr",
+    baseUrl: "https://www.willbe.kr",
     selectors: {
       productList: [
+        "[class*='item']",
+        "[class*='product']",
         ".item-list > li",
         ".item-wrap > li",
         "ul.item-list > li",
         "ul.item-wrap > li",
-        "[class*='item']",
-        "[class*='product']",
       ],
-      productName: [".item-cont", ".product_name", ".name", "h3", "h4"],
-      productPrice: [".price", "[class*='price']", ".item-price"],
-      productImage: ["img", ".product_img img"],
-      productLink: ["a", "a[href*='product']"],
+      productName: [
+        ".item-cont",
+        ".product_name",
+        ".name",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "strong",
+        "b",
+      ],
+      productPrice: [
+        ".price",
+        "[class*='price']",
+        ".item-price",
+        "strong:has-text('원')",
+        "b:has-text('원')",
+        "span:has-text('원')",
+        "strong",
+        "b",
+      ],
+      productImage: [
+        "img[src*='shopimages']", // 실제 제품 이미지 우선
+        ".product_img img",
+        ".item-img img",
+        "img[src*='willbe2018']", // willbe2018 폴더 이미지
+        "img:not([src*='btn_srch']):not([src*='delight'])", // 검색 버튼 등 제외
+        "img",
+      ],
+      productLink: [
+        "a[href*='shopdetail']", // 실제 상품 상세 페이지 링크
+        "a[href*='detail']",
+        "a[href*='product']",
+        "a",
+      ],
     },
     enabled: true,
-    notes: "보조기기 전문 쇼핑몰",
+    notes: "보조기기 전문 쇼핑몰 - shopimages 폴더의 PNG 이미지 우선 사용",
   },
   "11st": {
     name: "11번가",

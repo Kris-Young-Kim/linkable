@@ -14,11 +14,48 @@ const SYSTEM_FILES_TO_IGNORE = [
   "c:/hiberfil.sys",
   "c:/pagefile.sys",
   "c:/swapfile.sys",
-]
+];
 
 const nextConfig = {
   // Next.js 16에서 Turbopack이 기본 활성화되어 있으므로 설정 추가
   turbopack: {},
+  // React2Shell 취약점 방지를 위한 보안 설정
+  experimental: {
+    // Server Components 직렬화 보안 강화
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
+  },
+  // 보안 헤더 추가
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     // 이미지 최적화 활성화 (성능 개선)
     unoptimized: false,
@@ -187,15 +224,17 @@ const nextConfig = {
   },
   webpack: (config, { dev }) => {
     if (dev) {
-      const currentWatchOptions = config.watchOptions || {}
-      const ignored = currentWatchOptions.ignored
+      const currentWatchOptions = config.watchOptions || {};
+      const ignored = currentWatchOptions.ignored;
 
       // 기존 ignored가 RegExp인 경우 문자열로 변환 불가하므로 새 배열 생성
       const ignoredList = Array.isArray(ignored)
-        ? ignored.filter((pattern) => typeof pattern === "string" && pattern.length > 0)
+        ? ignored.filter(
+            (pattern) => typeof pattern === "string" && pattern.length > 0
+          )
         : typeof ignored === "string" && ignored.length > 0
-          ? [ignored]
-          : []
+        ? [ignored]
+        : [];
 
       config.watchOptions = {
         ...currentWatchOptions,
@@ -210,11 +249,11 @@ const nextConfig = {
         followSymlinks: false,
         // 폴링 대신 네이티브 파일 시스템 이벤트 사용
         poll: false,
-      }
+      };
     }
 
-    return config
+    return config;
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;
