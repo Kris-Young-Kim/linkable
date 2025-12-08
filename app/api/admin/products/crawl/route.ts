@@ -2,9 +2,11 @@ import { NextResponse } from "next/server"
 import { verifyAdminAccess } from "@/lib/auth/verify-admin"
 import { getSiteConfig } from "@/scripts/crawlers/site-config"
 import { GenericScraper } from "@/scripts/crawlers/generic-scraper"
+import { SimpleScraper } from "@/scripts/crawlers/simple-scraper"
 import { CoupangScraper } from "@/scripts/crawlers/coupang-scraper"
 import { NaverScraper } from "@/scripts/crawlers/naver-scraper"
 import type { ScraperOptions } from "@/scripts/crawlers/types"
+import type { ScrapedProduct } from "@/scripts/crawlers/types"
 import { syncProducts } from "@/lib/integrations/product-sync"
 import type { ProductInput } from "@/lib/integrations/product-sync"
 import { createCoupangClient } from "@/lib/integrations/coupang"
@@ -41,7 +43,7 @@ export async function POST(request: Request) {
     selectedProducts?: string[] // 선택한 상품 ID 목록 (등록용)
   }
 
-  // 개별 제품 URL 크롤링
+  // 웹사이트 URL에서 전체 제품 목록 크롤링
   if (body.productUrl) {
     try {
       // URL에서 플랫폼 추출
@@ -65,23 +67,51 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `지원하지 않는 플랫폼: ${platform}` }, { status: 400 })
       }
 
-      const scraper = new GenericScraper(siteConfig)
+      // 간단한 스크래퍼로 제품 목록 크롤링 시도
+      let products: ScrapedProduct[] = []
+      const simpleScraper = new SimpleScraper(siteConfig)
+      
       try {
-        console.log(`[Admin Products Crawl] 개별 제품 크롤링: ${body.productUrl}`)
-        const product = await scraper.scrapeProductDetail(body.productUrl)
-        
-        if (!product) {
-          return NextResponse.json({
-            success: false,
-            message: "제품 정보를 추출할 수 없습니다.",
-            created: 0,
-            updated: 0,
-            failed: 1,
-            total: 0,
-          })
-        }
+        console.log(`[Admin Products Crawl] 웹사이트 전체 제품 크롤링: ${body.productUrl}`)
+        products = await simpleScraper.scrapeProductList({
+          url: body.productUrl,
+          max: body.max || 50,
+        })
+      } catch (simpleError) {
+        console.warn(`[Admin Products Crawl] 간단한 스크래퍼 실패, Playwright로 폴백:`, simpleError)
+      }
 
-        // ISO 코드 자동 매칭
+      // 간단한 스크래퍼가 실패하거나 제품을 찾지 못하면 Playwright 사용
+      if (products.length === 0) {
+        const scraper = new GenericScraper(siteConfig)
+        try {
+          await scraper.initialize()
+          console.log(`[Admin Products Crawl] Playwright로 제품 목록 크롤링: ${body.productUrl}`)
+          const result = await scraper.scrape({
+            productUrl: body.productUrl,
+            max: body.max || 50,
+          })
+          products = result.products || []
+        } catch (playwrightError) {
+          console.error(`[Admin Products Crawl] Playwright 크롤링 실패:`, playwrightError)
+        } finally {
+          await scraper.close()
+        }
+      }
+
+      if (products.length === 0) {
+        return NextResponse.json({
+          success: false,
+          message: "제품을 찾을 수 없습니다. URL이 제품 목록 페이지인지 확인해주세요.",
+          created: 0,
+          updated: 0,
+          failed: 0,
+          total: 0,
+        })
+      }
+
+      // ISO 코드 자동 매칭 및 제품 변환
+      const productInputs: ProductInput[] = products.map((product) => {
         const productName = product.name.toLowerCase()
         let isoCode = body.isoCode || "00 00"
         
@@ -91,7 +121,7 @@ export async function POST(request: Request) {
           } else if (productName.includes("휠체어")) {
             isoCode = "12 22"
           } else if (productName.includes("스탠딩")) {
-            isoCode = "12 23" // 스탠딩 휠체어는 전동휠체어
+            isoCode = "12 23"
           } else if (productName.includes("워커") || productName.includes("보행기")) {
             isoCode = "12 06"
           } else if (productName.includes("식기")) {
@@ -99,47 +129,52 @@ export async function POST(request: Request) {
           }
         }
 
-        const productInput: ProductInput = {
+        return {
           ...product,
           iso_code: isoCode,
         }
+      })
 
-        // 이미지 URL 로깅
-        console.log(`[Admin Products Crawl] 크롤링된 제품 정보:`, {
-          name: product.name,
-          price: product.price,
-          image_url: product.image_url,
-          purchase_link: product.purchase_link,
-        })
-
-        const result = await syncProducts([productInput], { validateLinks: false })
-
+      // 미리보기 모드인 경우
+      if (body.preview) {
         return NextResponse.json({
           success: true,
-          message: `제품 크롤링 완료: ${result.created > 0 ? "생성" : "업데이트"}`,
-          created: result.created,
-          updated: result.updated,
-          failed: result.failed,
-          total: 1,
-          product: {
-            name: product.name,
-            price: product.price,
-            image_url: product.image_url,
-            purchase_link: product.purchase_link,
-          },
+          message: `${products.length}개 제품을 찾았습니다.`,
+          products: productInputs.map((p) => ({
+            id: p.purchase_link || p.name,
+            name: p.name,
+            price: p.price,
+            purchase_link: p.purchase_link,
+            image_url: p.image_url,
+            iso_code: p.iso_code,
+            description: p.description,
+            manufacturer: p.manufacturer,
+            category: p.category,
+          })),
+          total: products.length,
         })
-      } finally {
-        await scraper.close()
       }
+
+      // 실제 등록
+      const result = await syncProducts(productInputs, { validateLinks: false })
+
+      return NextResponse.json({
+        success: true,
+        message: `${products.length}개 제품 크롤링 완료: ${result.created}개 생성, ${result.updated}개 업데이트`,
+        created: result.created,
+        updated: result.updated,
+        failed: result.failed,
+        total: products.length,
+      })
     } catch (error) {
-      console.error("[Admin Products Crawl] 개별 제품 크롤링 오류:", error)
+      console.error("[Admin Products Crawl] 웹사이트 크롤링 오류:", error)
       return NextResponse.json(
         {
           success: false,
-          error: error instanceof Error ? error.message : "제품 크롤링 실패",
+          error: error instanceof Error ? error.message : "웹사이트 크롤링 실패",
           created: 0,
           updated: 0,
-          failed: 1,
+          failed: 0,
           total: 0,
         },
         { status: 500 }

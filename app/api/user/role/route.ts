@@ -127,7 +127,11 @@ export async function GET() {
 
     const role = data?.role || "user" // 기본값: user
 
-    return NextResponse.json({ role })
+    // 캐싱 헤더 추가 (role은 자주 변경되지 않으므로 조금 더 긴 캐시)
+    const headers = new Headers()
+    headers.set("Cache-Control", "private, s-maxage=60, stale-while-revalidate=120")
+
+    return NextResponse.json({ role }, { headers })
   } catch (error) {
     console.error("[Role API] GET error:", error)
     return NextResponse.json({ error: "Failed to fetch role" }, { status: 500 })

@@ -57,9 +57,29 @@ export function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#fff3e0] via-[#fff8f0] to-[#eef7f4] py-20 md:py-32">
       <div className="absolute inset-0" aria-hidden="true">
+        {/* 배경 이미지 */}
+        <div className="absolute inset-0 opacity-30">
+          <Image
+            src="https://images.unsplash.com/photo-1762264643661-d889726815cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MTYyMzB8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwY2l0eSUyMGFic3RyYWN0JTIwYnJpZ2h0fGVufDB8MHx8fDE3NjUxNTkwMzN8MA&ixlib=rb-4.1.0&q=80&w=1920"
+            alt="Futuristic abstract cityscape background"
+            fill
+            className="object-cover brightness-150 contrast-110 saturate-110 animate-fadeIn animate-float"
+            priority
+            quality={85}
+            sizes="100vw"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
+          />
+        </div>
+        {/* 이미지 오버레이 - 텍스트 가독성 향상 */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-white/50" />
+        {/* 기존 그라데이션 효과 */}
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/80 to-transparent" />
         <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-[radial-gradient(circle,_rgba(255,188,153,0.4),_transparent_55%)] blur-3xl animate-softGlow" />
         <div className="absolute -bottom-24 -right-12 h-72 w-72 rounded-full bg-[radial-gradient(circle,_rgba(144,224,239,0.35),_transparent_55%)] blur-2xl animate-softGlow delay-500" />
+        {/* 추가 애니메이션 효과 - 미래적 느낌 */}
+        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[radial-gradient(circle,_rgba(99,102,241,0.2),_transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-[radial-gradient(circle,_rgba(168,85,247,0.15),_transparent_70%)] blur-3xl animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
       </div>
       <div className="container relative mx-auto px-4 md:px-6">
         <div className="mx-auto max-w-4xl text-center space-y-8">
@@ -139,10 +159,12 @@ export function HeroSection() {
                   alt={image.alt}
                   fill
                   className="object-cover"
-                  sizes="192px"
+                  sizes="(max-width: 768px) 192px, 192px"
                   loading={index < 3 ? "eager" : "lazy"}
                   priority={index < 3}
-                  unoptimized={image.src.startsWith("https://images.unsplash.com")}
+                  quality={80}
+                  placeholder="blur"
+                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                 />
               </div>
             ))}

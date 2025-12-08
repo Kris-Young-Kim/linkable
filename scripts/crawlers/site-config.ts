@@ -3,19 +3,19 @@
  */
 
 export interface SiteConfig {
-  name: string
-  baseUrl: string
-  searchUrl?: string // 검색 URL 패턴 (있으면 사용)
-  categoryUrls?: Record<string, string> // 카테고리별 URL 매핑
+  name: string;
+  baseUrl: string;
+  searchUrl?: string; // 검색 URL 패턴 (있으면 사용)
+  categoryUrls?: Record<string, string>; // 카테고리별 URL 매핑
   selectors: {
-    productList: string[] // 상품 목록 셀렉터 (우선순위 순)
-    productName: string[] // 상품명 셀렉터
-    productPrice: string[] // 가격 셀렉터
-    productImage: string[] // 이미지 셀렉터
-    productLink: string[] // 링크 셀렉터
-  }
-  enabled: boolean // 활성화 여부
-  notes?: string // 메모
+    productList: string[]; // 상품 목록 셀렉터 (우선순위 순)
+    productName: string[]; // 상품명 셀렉터
+    productPrice: string[]; // 가격 셀렉터
+    productImage: string[]; // 이미지 셀렉터
+    productLink: string[]; // 링크 셀렉터
+  };
+  enabled: boolean; // 활성화 여부
+  notes?: string; // 메모
 }
 
 /**
@@ -28,24 +28,38 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
     // 카테고리별 URL 매핑
     categoryUrls: {
       // 휠체어 카테고리 (xcode=003)
-      "유모차형-틸팅/리클형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X",
-      "유모차형-기본형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=009&type=X",
-      "기본형,보호자형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=001&type=X",
-      "활동형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=004&type=X",
-      "착탈,분리형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=002&type=X",
-      "아동,청소년용": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=003&type=X",
-      "특수,틸트형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=005&type=X",
-      "거상,침대형": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=008&type=X",
-      "전동휠체어": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=007&type=X",
-      "휠체어방석": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=010&type=X",
-      "휠체어소품": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=006&type=X",
+      "유모차형-틸팅/리클형":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X",
+      "유모차형-기본형":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=009&type=X",
+      "기본형,보호자형":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=001&type=X",
+      활동형:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=004&type=X",
+      "착탈,분리형":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=002&type=X",
+      "아동,청소년용":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=003&type=X",
+      "특수,틸트형":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=005&type=X",
+      "거상,침대형":
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=008&type=X",
+      전동휠체어:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=007&type=X",
+      휠체어방석:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=010&type=X",
+      휠체어소품:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=006&type=X",
       // 기타 카테고리
-      "워커": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=012&type=X",
-      "목발": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=013&type=X",
-      "보행보조": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=014&type=X",
-      "보행기": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=015&type=X",
+      워커: "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=012&type=X",
+      목발: "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=013&type=X",
+      보행보조:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=014&type=X",
+      보행기:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=015&type=X",
       // 전체 휠체어 카테고리 (모든 휠체어 관련 카테고리)
-      "휠체어": "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X", // 기본값
+      휠체어:
+        "https://www.ablelife.co.kr/shop/shopbrand.html?xcode=003&mcode=011&type=X", // 기본값
     },
     selectors: {
       productList: [
@@ -109,26 +123,10 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "ul[class*='prd-list'] > li",
         "[class*='product']",
       ],
-      productName: [
-        ".f2s-item-name",
-        ".product_name",
-        ".name",
-        "h3",
-        "h4",
-      ],
-      productPrice: [
-        ".f2s-item-price",
-        ".price",
-        "[class*='price']",
-      ],
-      productImage: [
-        "img",
-        ".product_img img",
-      ],
-      productLink: [
-        "a",
-        "a[href*='product']",
-      ],
+      productName: [".f2s-item-name", ".product_name", ".name", "h3", "h4"],
+      productPrice: [".f2s-item-price", ".price", "[class*='price']"],
+      productImage: ["img", ".product_img img"],
+      productLink: ["a", "a[href*='product']"],
     },
     enabled: true,
     notes: "보조기기 전문 쇼핑몰",
@@ -145,26 +143,10 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "[class*='item']",
         "[class*='product']",
       ],
-      productName: [
-        ".item-cont",
-        ".product_name",
-        ".name",
-        "h3",
-        "h4",
-      ],
-      productPrice: [
-        ".price",
-        "[class*='price']",
-        ".item-price",
-      ],
-      productImage: [
-        "img",
-        ".product_img img",
-      ],
-      productLink: [
-        "a",
-        "a[href*='product']",
-      ],
+      productName: [".item-cont", ".product_name", ".name", "h3", "h4"],
+      productPrice: [".price", "[class*='price']", ".item-price"],
+      productImage: ["img", ".product_img img"],
+      productLink: ["a", "a[href*='product']"],
     },
     enabled: true,
     notes: "보조기기 전문 쇼핑몰",
@@ -180,27 +162,10 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "li[class*='product']",
         "[class*='product']",
       ],
-      productName: [
-        ".c_product_item_title",
-        ".product_name",
-        "h3",
-        "h4",
-        "a",
-      ],
-      productPrice: [
-        ".c_product_item_price",
-        ".price",
-        "[class*='price']",
-      ],
-      productImage: [
-        ".c_product_item_thumb img",
-        "img[src*='product']",
-        "img",
-      ],
-      productLink: [
-        "a",
-        "a[href*='product']",
-      ],
+      productName: [".c_product_item_title", ".product_name", "h3", "h4", "a"],
+      productPrice: [".c_product_item_price", ".price", "[class*='price']"],
+      productImage: [".c_product_item_thumb img", "img[src*='product']", "img"],
+      productLink: ["a", "a[href*='product']"],
     },
     enabled: true,
     notes: "종합 쇼핑몰",
@@ -210,51 +175,40 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
     baseUrl: "http://permobil.co.kr",
     // 카테고리별 URL 매핑 (제품 정보 페이지)
     categoryUrls: {
-      "소아용": "http://permobil.co.kr/Products/Pediatric/",
-      "실외용": "http://permobil.co.kr/Products/Outdoor/",
+      소아용: "http://permobil.co.kr/Products/Pediatric/",
+      실외용: "http://permobil.co.kr/Products/Outdoor/",
       "실내/실외": "http://permobil.co.kr/Products/Indoor-Outdoor/",
       "Corpus Seating": "http://permobil.co.kr/Products/Corpus-Seating/",
     },
     selectors: {
       // 주의: 퍼모빌은 제품 정보 페이지만 있고 상품 목록 페이지가 없음
       // 일반적인 쇼핑몰 크롤링에는 적합하지 않음
-      productList: [
-        "article",
-        "[class*='product']",
-        "[class*='item']",
-      ],
-      productName: [
-        "h1",
-        "h2",
-        ".title",
-        ".name",
-      ],
+      productList: ["article", "[class*='product']", "[class*='item']"],
+      productName: ["h1", "h2", ".title", ".name"],
       productPrice: [
         // 가격 정보 없음 (제품 정보 페이지)
         ".price",
         "[class*='price']",
       ],
-      productImage: [
-        "img",
-        "article img",
-      ],
-      productLink: [
-        "a",
-        "article a",
-      ],
+      productImage: ["img", "article img"],
+      productLink: ["a", "article a"],
     },
     enabled: false, // 제품 목록 페이지가 없어 크롤링 비활성화
-    notes: "휠체어 전문 브랜드 - 제품 정보 페이지만 있고 상품 목록 페이지 없음 (크롤링 비활성화)",
+    notes:
+      "휠체어 전문 브랜드 - 제품 정보 페이지만 있고 상품 목록 페이지 없음 (크롤링 비활성화)",
   },
   wheelopia: {
     name: "휠로피아",
     baseUrl: "https://www.wheelopia.co.kr",
     // 카테고리별 URL 매핑
     categoryUrls: {
-      "전동휠체어": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001",
-      "스탠딩": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001001",
-      "수동휠체어": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011002",
-      "워커": "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011012",
+      전동휠체어:
+        "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001",
+      스탠딩:
+        "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001001",
+      수동휠체어:
+        "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011002",
+      워커: "https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011012",
     },
     selectors: {
       productList: [
@@ -316,28 +270,10 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "[class*='item']",
         "[class*='product']",
       ],
-      productName: [
-        ".item-name",
-        ".product_name",
-        ".name",
-        "h3",
-        "h4",
-      ],
-      productPrice: [
-        ".item-price",
-        ".price",
-        "[class*='price']",
-      ],
-      productImage: [
-        ".item-img-wrap img",
-        ".item-img-overlay img",
-        "img",
-      ],
-      productLink: [
-        ".item a",
-        "a",
-        "a[href*='product']",
-      ],
+      productName: [".item-name", ".product_name", ".name", "h3", "h4"],
+      productPrice: [".item-price", ".price", "[class*='price']"],
+      productImage: [".item-img-wrap img", ".item-img-overlay img", "img"],
+      productLink: [".item a", "a", "a[href*='product']"],
     },
     enabled: true,
     notes: "보조기기 전문 쇼핑몰",
@@ -385,11 +321,7 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "td img",
         "img",
       ],
-      productLink: [
-        "a[href*='product/detail']",
-        "a[href*='product']",
-        "a",
-      ],
+      productLink: ["a[href*='product/detail']", "a[href*='product']", "a"],
     },
     enabled: true,
     notes: "보조기기 전문 쇼핑몰",
@@ -437,22 +369,82 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         "td img",
         "img",
       ],
-      productLink: [
-        "a[href*='product']",
-        "a[href*='detail']",
-        "a",
-      ],
+      productLink: ["a[href*='product']", "a[href*='detail']", "a"],
     },
     enabled: true,
     notes: "보조기기 전문 쇼핑몰",
   },
-}
+  plusezer: {
+    name: "플러스에젤(카페24)",
+    baseUrl: "https://plusezer.com",
+    selectors: {
+      // Cafe24 기본 구조 + plusezer.com 실제 구조
+      productList: [
+        "ul.prdList > li",
+        ".prdList > li",
+        ".prdList li",
+        "li[class*='prd']",
+        "li[class*='item']",
+        "[class*='product']",
+        "table tbody tr",
+        "table tr",
+      ],
+      productName: [
+        "#prdDetail .infoArea h3",
+        "#prdDetail .infoArea h2",
+        "#prdDetail .infoArea .prd-name",
+        ".infoArea .prd-name",
+        ".infoArea h3",
+        ".infoArea h2",
+        ".description .name a",
+        ".description .name",
+        ".name > a",
+        ".name",
+        ".title > a",
+        ".product_name a",
+        ".product_name",
+        "a[href*='product']",
+        "a",
+      ],
+      productPrice: [
+        ".description .price .sell",
+        ".description .price .price",
+        ".price .sell",
+        ".price .price",
+        ".price",
+        "[class*='price']",
+        "strong:has-text('원')",
+        "td:has-text('판매가')",
+        ".infoArea .price",
+        ".infoArea [class*='price']",
+      ],
+      productImage: [
+        ".thumbnail img",
+        ".prdImg img",
+        "img[src*='product']",
+        "img[src*='goods']",
+        "img[src*='data']",
+        "img",
+      ],
+      productLink: [
+        ".thumbnail a",
+        ".description .name a",
+        "a[href*='product']",
+        "a[href*='detail']",
+        "a[href*='view']",
+        "a",
+      ],
+    },
+    enabled: true,
+    notes: "플러스에젤 카페24 스토어 (plusezer.com)",
+  },
+};
 
 /**
  * 활성화된 사이트만 반환
  */
 export function getEnabledSites(): SiteConfig[] {
-  return Object.values(SITE_CONFIGS).filter((site) => site.enabled)
+  return Object.values(SITE_CONFIGS).filter((site) => site.enabled);
 }
 
 /**
@@ -501,15 +493,11 @@ function getDefaultSiteConfig(baseUrl: string, siteName: string): SiteConfig {
         "td img",
         "img",
       ],
-      productLink: [
-        "a[href*='product']",
-        "a[href*='detail']",
-        "a",
-      ],
+      productLink: ["a[href*='product']", "a[href*='detail']", "a"],
     },
     enabled: true,
     notes: "기본 설정 (자동 생성)",
-  }
+  };
 }
 
 /**
@@ -517,11 +505,11 @@ function getDefaultSiteConfig(baseUrl: string, siteName: string): SiteConfig {
  */
 function extractBaseUrl(url: string): string {
   try {
-    const urlObj = new URL(url)
-    return `${urlObj.protocol}//${urlObj.host}`
+    const urlObj = new URL(url);
+    return `${urlObj.protocol}//${urlObj.host}`;
   } catch {
     // URL 파싱 실패 시 기본값
-    return "https://example.com"
+    return "https://example.com";
   }
 }
 
@@ -529,19 +517,23 @@ function extractBaseUrl(url: string): string {
  * 사이트 이름으로 설정 가져오기
  * 없으면 URL에서 기본 설정 생성
  */
-export function getSiteConfig(siteName: string, productUrl?: string): SiteConfig | undefined {
-  const config = SITE_CONFIGS[siteName]
+export function getSiteConfig(
+  siteName: string,
+  productUrl?: string
+): SiteConfig | undefined {
+  const config = SITE_CONFIGS[siteName];
   if (config) {
-    return config
+    return config;
   }
 
   // site-config에 없으면 기본 설정 생성
   if (productUrl) {
-    const baseUrl = extractBaseUrl(productUrl)
-    console.log(`[Site Config] 알 수 없는 플랫폼 "${siteName}", 기본 설정 사용 (baseUrl: ${baseUrl})`)
-    return getDefaultSiteConfig(baseUrl, siteName)
+    const baseUrl = extractBaseUrl(productUrl);
+    console.log(
+      `[Site Config] 알 수 없는 플랫폼 "${siteName}", 기본 설정 사용 (baseUrl: ${baseUrl})`
+    );
+    return getDefaultSiteConfig(baseUrl, siteName);
   }
 
-  return undefined
+  return undefined;
 }
-

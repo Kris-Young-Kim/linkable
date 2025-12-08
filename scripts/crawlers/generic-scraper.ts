@@ -76,12 +76,12 @@ export class GenericScraper {
       // 상품 목록 찾기 (타임아웃 증가)
       let productElements: any[] = [];
       let workingSelector = "";
-      
+
       // 먼저 테이블이 있는지 확인
       const hasTable = await page.evaluate(() => {
         return document.querySelector("table") !== null;
       });
-      
+
       if (hasTable) {
         console.log(`   📋 테이블 구조 감지됨`);
         // 테이블이 있으면 더 긴 대기 시간
@@ -91,10 +91,10 @@ export class GenericScraper {
       for (const selector of this.siteConfig.selectors.productList) {
         try {
           console.log(`   🔍 셀렉터 시도 중: ${selector}`);
-          
+
           // waitForSelector 대신 직접 요소 찾기 시도
           productElements = await page.$$(selector);
-          
+
           // 링크 요소를 찾은 경우, 부모 요소(tr 또는 td)로 변환
           if (productElements.length > 0 && selector.includes("a[href")) {
             const parentElements: any[] = [];
@@ -121,7 +121,7 @@ export class GenericScraper {
               productElements = parentElements;
             }
           }
-          
+
           if (productElements.length > 0) {
             workingSelector = selector;
             console.log(
@@ -133,7 +133,11 @@ export class GenericScraper {
             // 요소가 없어도 다음 셀렉터 시도
           }
         } catch (error) {
-          console.log(`   ❌ ${selector}: 오류 - ${error instanceof Error ? error.message : String(error)}`);
+          console.log(
+            `   ❌ ${selector}: 오류 - ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
         }
       }
 
@@ -169,29 +173,37 @@ export class GenericScraper {
 
           // 테이블 행 찾기
           const tableRows: any[] = [];
-          document.querySelectorAll("table tr, tbody tr, tr").forEach((el, idx) => {
-            if (idx < 20) {
-              const text = el.textContent?.trim() || "";
-              const hasLink = el.querySelector("a[href*='goods_view']") !== null;
-              const hasImage = el.querySelector("img") !== null;
-              const linkHref = el.querySelector("a[href*='goods_view']")?.getAttribute("href") || null;
-              
-              if (text.length > 10 && (hasLink || hasImage)) {
-                tableRows.push({
-                  tag: el.tagName.toLowerCase(),
-                  text: text.substring(0, 100),
-                  hasLink,
-                  hasImage,
-                  linkHref,
-                  children: Array.from(el.children).slice(0, 5).map((child) => ({
-                    tag: child.tagName.toLowerCase(),
-                    classes: Array.from(child.classList).join(" "),
-                    text: child.textContent?.trim().substring(0, 50) || "",
-                  })),
-                });
+          document
+            .querySelectorAll("table tr, tbody tr, tr")
+            .forEach((el, idx) => {
+              if (idx < 20) {
+                const text = el.textContent?.trim() || "";
+                const hasLink =
+                  el.querySelector("a[href*='goods_view']") !== null;
+                const hasImage = el.querySelector("img") !== null;
+                const linkHref =
+                  el
+                    .querySelector("a[href*='goods_view']")
+                    ?.getAttribute("href") || null;
+
+                if (text.length > 10 && (hasLink || hasImage)) {
+                  tableRows.push({
+                    tag: el.tagName.toLowerCase(),
+                    text: text.substring(0, 100),
+                    hasLink,
+                    hasImage,
+                    linkHref,
+                    children: Array.from(el.children)
+                      .slice(0, 5)
+                      .map((child) => ({
+                        tag: child.tagName.toLowerCase(),
+                        classes: Array.from(child.classList).join(" "),
+                        text: child.textContent?.trim().substring(0, 50) || "",
+                      })),
+                  });
+                }
               }
-            }
-          });
+            });
 
           // li, ul, div 요소 중 상품 관련으로 보이는 것 찾기
           const candidateElements: any[] = [];
@@ -254,7 +266,9 @@ export class GenericScraper {
             if (row.children.length > 0) {
               console.log(`         자식 요소:`);
               row.children.forEach((child: any) => {
-                console.log(`           - <${child.tag}> class="${child.classes}" - ${child.text}`);
+                console.log(
+                  `           - <${child.tag}> class="${child.classes}" - ${child.text}`
+                );
               });
             }
           });
@@ -370,6 +384,11 @@ export class GenericScraper {
    * 검색 URL 생성
    */
   private buildSearchUrl(options: ScraperOptions): string {
+    // 직접 URL이 주어지면 최우선 사용
+    if (options.productUrl) {
+      return options.productUrl;
+    }
+
     // 카테고리 URL 우선 사용
     if (options.category && this.siteConfig.categoryUrls) {
       const categoryUrl = this.siteConfig.categoryUrls[options.category];
@@ -415,14 +434,17 @@ export class GenericScraper {
           const nameElement = await element.$(selector);
           if (nameElement) {
             // 링크 요소인 경우 직접 텍스트 추출
-            const tagName = await nameElement.evaluate((el: any) => el.tagName?.toLowerCase() || "");
+            const tagName = await nameElement.evaluate(
+              (el: any) => el.tagName?.toLowerCase() || ""
+            );
             if (tagName === "a") {
               // 링크의 직접 텍스트 또는 내부 요소의 텍스트
               name = (await nameElement.textContent())?.trim() || "";
               // 링크 내부에 다른 요소가 있으면 그것의 텍스트도 시도
               if (!name || name.length < 3) {
                 const innerText = await nameElement.evaluate((el: any) => {
-                  const text = el.innerText?.trim() || el.textContent?.trim() || "";
+                  const text =
+                    el.innerText?.trim() || el.textContent?.trim() || "";
                   return text;
                 });
                 name = innerText || name;
@@ -430,7 +452,7 @@ export class GenericScraper {
             } else {
               name = (await nameElement.textContent())?.trim() || "";
             }
-            
+
             if (name && name.length > 2) {
               console.log(
                 `      ✅ 상품명 발견: ${name.substring(
@@ -594,7 +616,9 @@ export class GenericScraper {
   /**
    * 개별 제품 상세 페이지에서 정보 추출
    */
-  async scrapeProductDetail(productUrl: string): Promise<ScrapedProduct | null> {
+  async scrapeProductDetail(
+    productUrl: string
+  ): Promise<ScrapedProduct | null> {
     if (!this.browser) {
       await this.initialize();
     }
@@ -672,7 +696,11 @@ export class GenericScraper {
             const rows = Array.from(document.querySelectorAll("table tr, tr"));
             for (const row of rows) {
               const text = row.textContent || "";
-              if (text.includes("판매가격") || text.includes("가격") || text.includes("원")) {
+              if (
+                text.includes("판매가격") ||
+                text.includes("가격") ||
+                text.includes("원")
+              ) {
                 const strong = row.querySelector("strong, b");
                 if (strong) {
                   return strong.textContent || "";
@@ -702,13 +730,23 @@ export class GenericScraper {
         try {
           const metaImage = await page.evaluate(() => {
             const ogImage = document.querySelector('meta[property="og:image"]');
-            const twitterImage = document.querySelector('meta[name="twitter:image"]');
-            const image = ogImage?.getAttribute("content") || twitterImage?.getAttribute("content");
+            const twitterImage = document.querySelector(
+              'meta[name="twitter:image"]'
+            );
+            const image =
+              ogImage?.getAttribute("content") ||
+              twitterImage?.getAttribute("content");
             return image || null;
           });
-          if (metaImage && !metaImage.includes("logo") && !metaImage.includes("banner")) {
+          if (
+            metaImage &&
+            !metaImage.includes("logo") &&
+            !metaImage.includes("banner")
+          ) {
             imageUrl = normalizeUrl(metaImage, this.siteConfig.baseUrl);
-            console.log(`✅ 메타 태그에서 이미지 발견: ${imageUrl.substring(0, 60)}...`);
+            console.log(
+              `✅ 메타 태그에서 이미지 발견: ${imageUrl.substring(0, 60)}...`
+            );
           }
         } catch {
           // 무시
@@ -720,77 +758,128 @@ export class GenericScraper {
         try {
           const imgSrc = await page.evaluate(() => {
             // 제품명이나 가격 요소 찾기
-            const nameSelectors = ["h1", "h2", ".product-name", ".product-title", "[class*='product-name']"];
-            const priceSelectors = [".price", "[class*='price']", "strong:has-text('원')"];
-            
+            const nameSelectors = [
+              "h1",
+              "h2",
+              ".product-name",
+              ".product-title",
+              "[class*='product-name']",
+            ];
+            const priceSelectors = [
+              ".price",
+              "[class*='price']",
+              "strong:has-text('원')",
+            ];
+
             let productArea: HTMLElement | null = null;
-            
+
             // 제품명 요소 찾기
             for (const selector of nameSelectors) {
               const element = document.querySelector(selector);
-              if (element && element.textContent && element.textContent.trim().length > 2) {
-                productArea = element.closest(".product, .product-detail, .detail, main, article, [class*='product']") as HTMLElement;
+              if (
+                element &&
+                element.textContent &&
+                element.textContent.trim().length > 2
+              ) {
+                productArea = element.closest(
+                  ".product, .product-detail, .detail, main, article, [class*='product']"
+                ) as HTMLElement;
                 if (!productArea) productArea = element as HTMLElement;
                 break;
               }
             }
-            
+
             // 제품 영역 내의 이미지 찾기
             const searchArea = productArea || document.body;
             const images = Array.from(searchArea.querySelectorAll("img"));
-            
+
             const validImages = images
               .map((img) => {
-                const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+                const src =
+                  img.getAttribute("src") ||
+                  img.getAttribute("data-src") ||
+                  img.getAttribute("data-lazy-src") ||
+                  img.getAttribute("data-original");
                 if (!src) return null;
-                
+
                 const lowerSrc = src.toLowerCase();
                 const lowerAlt = (img.getAttribute("alt") || "").toLowerCase();
                 const lowerClass = (img.className || "").toLowerCase();
-                const lowerParentClass = (img.parentElement?.className || "").toLowerCase();
-                
+                const lowerParentClass = (
+                  img.parentElement?.className || ""
+                ).toLowerCase();
+
                 // 배너, 로고, 아이콘, 버튼 등 제외
                 const excludeKeywords = [
-                  "logo", "banner", "icon", "button", "spacer", "1x1", "placeholder",
-                  "ad", "advertisement", "promo", "header", "footer", "nav", "menu",
-                  "decoration", "bg", "background", "pattern", "line", "arrow"
+                  "logo",
+                  "banner",
+                  "icon",
+                  "button",
+                  "spacer",
+                  "1x1",
+                  "placeholder",
+                  "ad",
+                  "advertisement",
+                  "promo",
+                  "header",
+                  "footer",
+                  "nav",
+                  "menu",
+                  "decoration",
+                  "bg",
+                  "background",
+                  "pattern",
+                  "line",
+                  "arrow",
                 ];
-                
+
                 if (
-                  excludeKeywords.some(keyword => 
-                    lowerSrc.includes(keyword) || 
-                    lowerAlt.includes(keyword) || 
-                    lowerClass.includes(keyword) ||
-                    lowerParentClass.includes(keyword)
+                  excludeKeywords.some(
+                    (keyword) =>
+                      lowerSrc.includes(keyword) ||
+                      lowerAlt.includes(keyword) ||
+                      lowerClass.includes(keyword) ||
+                      lowerParentClass.includes(keyword)
                   )
                 ) {
                   return null;
                 }
-                
+
                 // 너무 작은 이미지 제외
                 const width = img.naturalWidth || img.width || 0;
                 const height = img.naturalHeight || img.height || 0;
                 if (width < 150 || height < 150) {
                   return null;
                 }
-                
+
                 // 제품 이미지 관련 키워드가 있으면 가산점
-                const productKeywords = ["product", "goods", "item", "detail", "main", "thumb", "image"];
-                const hasProductKeyword = productKeywords.some(keyword => 
-                  lowerSrc.includes(keyword) || 
-                  lowerAlt.includes(keyword) || 
-                  lowerClass.includes(keyword)
+                const productKeywords = [
+                  "product",
+                  "goods",
+                  "item",
+                  "detail",
+                  "main",
+                  "thumb",
+                  "image",
+                ];
+                const hasProductKeyword = productKeywords.some(
+                  (keyword) =>
+                    lowerSrc.includes(keyword) ||
+                    lowerAlt.includes(keyword) ||
+                    lowerClass.includes(keyword)
                 );
-                
+
                 // 제품명/가격과의 거리 계산
                 let distanceScore = 1000;
                 if (productArea) {
                   const imgRect = img.getBoundingClientRect();
                   const areaRect = productArea.getBoundingClientRect();
-                  const distance = Math.abs(imgRect.top - areaRect.top) + Math.abs(imgRect.left - areaRect.left);
+                  const distance =
+                    Math.abs(imgRect.top - areaRect.top) +
+                    Math.abs(imgRect.left - areaRect.left);
                   distanceScore = Math.min(distance, 1000);
                 }
-                
+
                 return {
                   src,
                   width,
@@ -798,11 +887,17 @@ export class GenericScraper {
                   area: width * height,
                   hasProductKeyword,
                   distanceScore,
-                  score: (width * height) + (hasProductKeyword ? 50000 : 0) - distanceScore,
+                  score:
+                    width * height +
+                    (hasProductKeyword ? 50000 : 0) -
+                    distanceScore,
                 };
               })
-              .filter((img): img is NonNullable<typeof img> => img !== null && img.area > 10000);
-            
+              .filter(
+                (img): img is NonNullable<typeof img> =>
+                  img !== null && img.area > 10000
+              );
+
             if (validImages.length > 0) {
               // 스코어가 높은 순으로 정렬
               validImages.sort((a, b) => b.score - a.score);
@@ -812,7 +907,9 @@ export class GenericScraper {
           });
           if (imgSrc) {
             imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
-            console.log(`✅ 제품 영역에서 이미지 발견: ${imageUrl.substring(0, 60)}...`);
+            console.log(
+              `✅ 제품 영역에서 이미지 발견: ${imageUrl.substring(0, 60)}...`
+            );
           }
         } catch {
           // 무시
@@ -825,19 +922,28 @@ export class GenericScraper {
           try {
             const imageElement = await page.$(selector);
             if (imageElement) {
-              const src = 
+              const src =
                 (await imageElement.getAttribute("src")) ||
                 (await imageElement.getAttribute("data-src")) ||
                 (await imageElement.getAttribute("data-lazy-src")) ||
                 (await imageElement.getAttribute("data-original")) ||
                 null;
-              
+
               if (src) {
                 const lowerSrc = src.toLowerCase();
                 // 배너, 로고 제외
-                if (!lowerSrc.includes("logo") && !lowerSrc.includes("banner") && !lowerSrc.includes("icon")) {
+                if (
+                  !lowerSrc.includes("logo") &&
+                  !lowerSrc.includes("banner") &&
+                  !lowerSrc.includes("icon")
+                ) {
                   imageUrl = normalizeUrl(src, this.siteConfig.baseUrl);
-                  console.log(`✅ 셀렉터로 이미지 발견: ${imageUrl.substring(0, 60)}... (셀렉터: ${selector})`);
+                  console.log(
+                    `✅ 셀렉터로 이미지 발견: ${imageUrl.substring(
+                      0,
+                      60
+                    )}... (셀렉터: ${selector})`
+                  );
                   break;
                 }
               }
@@ -863,14 +969,22 @@ export class GenericScraper {
               "[class*='product-image'] img:first-of-type",
               "[class*='product-img'] img:first-of-type",
             ];
-            
+
             for (const selector of selectors) {
               const img = document.querySelector(selector);
               if (img) {
-                const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+                const src =
+                  img.getAttribute("src") ||
+                  img.getAttribute("data-src") ||
+                  img.getAttribute("data-lazy-src") ||
+                  img.getAttribute("data-original");
                 if (src) {
                   const lowerSrc = src.toLowerCase();
-                  if (!lowerSrc.includes("logo") && !lowerSrc.includes("banner") && !lowerSrc.includes("icon")) {
+                  if (
+                    !lowerSrc.includes("logo") &&
+                    !lowerSrc.includes("banner") &&
+                    !lowerSrc.includes("icon")
+                  ) {
                     return src;
                   }
                 }
@@ -880,7 +994,9 @@ export class GenericScraper {
           });
           if (imgSrc) {
             imageUrl = normalizeUrl(imgSrc, this.siteConfig.baseUrl);
-            console.log(`✅ 갤러리에서 이미지 발견: ${imageUrl.substring(0, 60)}...`);
+            console.log(
+              `✅ 갤러리에서 이미지 발견: ${imageUrl.substring(0, 60)}...`
+            );
           }
         } catch {
           // 무시
@@ -894,12 +1010,16 @@ export class GenericScraper {
             const images = Array.from(document.querySelectorAll("img"));
             const validImages = images
               .map((img) => {
-                const src = img.getAttribute("src") || img.getAttribute("data-src") || img.getAttribute("data-lazy-src") || img.getAttribute("data-original");
+                const src =
+                  img.getAttribute("src") ||
+                  img.getAttribute("data-src") ||
+                  img.getAttribute("data-lazy-src") ||
+                  img.getAttribute("data-original");
                 if (!src) return null;
-                
+
                 const lowerSrc = src.toLowerCase();
                 const lowerAlt = (img.getAttribute("alt") || "").toLowerCase();
-                
+
                 // 배너, 로고, 아이콘 제외
                 if (
                   lowerSrc.includes("logo") ||
@@ -915,15 +1035,15 @@ export class GenericScraper {
                 ) {
                   return null;
                 }
-                
+
                 const width = img.naturalWidth || img.width || 0;
                 const height = img.naturalHeight || img.height || 0;
-                
+
                 // 최소 크기 필터 (더 큰 이미지 선호)
                 if (width < 200 || height < 200) {
                   return null;
                 }
-                
+
                 return {
                   src,
                   width,
@@ -931,8 +1051,11 @@ export class GenericScraper {
                   area: width * height,
                 };
               })
-              .filter((img): img is NonNullable<typeof img> => img !== null && img.area > 40000); // 최소 크기 필터 증가 (200x200 이상)
-            
+              .filter(
+                (img): img is NonNullable<typeof img> =>
+                  img !== null && img.area > 40000
+              ); // 최소 크기 필터 증가 (200x200 이상)
+
             if (validImages.length > 0) {
               // 가장 큰 이미지 선택
               validImages.sort((a, b) => b.area - a.area);

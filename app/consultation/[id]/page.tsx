@@ -12,11 +12,57 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
-import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
-import { ConsultationRating } from "@/components/consultation-rating"
-import { ChatHistoryCollapsible } from "@/components/consultation/chat-history-collapsible"
+import type { IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
+
+// 클라이언트 컴포넌트들을 동적 import로 분리
+const IcfVisualization = dynamic(
+  () => import("@/components/features/analysis/icf-visualization").then((mod) => ({ default: mod.IcfVisualization })),
+  {
+    loading: () => <div className="h-64 bg-muted/50 animate-pulse rounded-lg" />,
+  },
+)
+
+const ProductRecommendationCard = dynamic(
+  () => import("@/components/product-recommendation-card").then((mod) => ({ default: mod.ProductRecommendationCard })),
+  {
+    loading: () => (
+      <div className="h-96 bg-muted/50 animate-pulse rounded-lg border border-border" />
+    ),
+  },
+)
+
+const ConsultationRating = dynamic(
+  () => import("@/components/consultation-rating").then((mod) => ({ default: mod.ConsultationRating })),
+  {
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
+        </CardHeader>
+        <CardContent>
+          <div className="h-32 bg-muted animate-pulse rounded" />
+        </CardContent>
+      </Card>
+    ),
+  },
+)
+
+const ChatHistoryCollapsible = dynamic(
+  () => import("@/components/consultation/chat-history-collapsible").then((mod) => ({ default: mod.ChatHistoryCollapsible })),
+  {
+    loading: () => (
+      <Card>
+        <CardHeader>
+          <div className="h-6 bg-muted animate-pulse rounded w-1/3" />
+        </CardHeader>
+        <CardContent>
+          <div className="h-48 bg-muted animate-pulse rounded" />
+        </CardContent>
+      </Card>
+    ),
+  },
+)
 
 // 플로팅 액션 메뉴 (클라이언트 컴포넌트)
 const FloatingActionMenu = dynamic(

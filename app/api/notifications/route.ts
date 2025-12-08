@@ -62,7 +62,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 })
     }
 
-    return NextResponse.json({ notifications: data ?? [] })
+    // 캐싱 헤더 추가 (알림은 자주 업데이트되므로 짧은 캐시)
+    const headers = new Headers()
+    if (unreadOnly) {
+      // 읽지 않은 알림만 조회하는 경우 더 짧은 캐시
+      headers.set("Cache-Control", "private, s-maxage=5, stale-while-revalidate=15")
+    } else {
+      // 전체 알림 조회는 조금 더 긴 캐시
+      headers.set("Cache-Control", "private, s-maxage=15, stale-while-revalidate=30")
+    }
+
+    return NextResponse.json({ notifications: data ?? [] }, { headers })
   } catch (error) {
     console.error("[Notifications] Unexpected error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

@@ -89,7 +89,11 @@ export async function GET() {
     return NextResponse.json({ error: "Failed to load consultations" }, { status: 500 })
   }
 
-  return NextResponse.json({ consultations: data ?? [] })
+  // 캐싱 헤더 추가 (사용자별 데이터이므로 짧은 캐시)
+  const headers = new Headers()
+  headers.set("Cache-Control", "private, s-maxage=10, stale-while-revalidate=30")
+
+  return NextResponse.json({ consultations: data ?? [] }, { headers })
 }
 
 export async function POST(request: Request) {

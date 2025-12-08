@@ -45,6 +45,33 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="ko" data-scroll-behavior="smooth">
         <head>
+          {/* 이미지 프리로딩 - LCP 개선 (메인 페이지 Hero 섹션) */}
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1762264643661-d889726815cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4MTYyMzB8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwY2l0eSUyMGFic3RyYWN0JTIwYnJpZ2h0fGVufDB8MHx8fDE3NjUxNTkwMzN8MA&ixlib=rb-4.1.0&q=80&w=1920"
+            fetchPriority="high"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1723433892471-62f113c8c9a0?auto=format&fit=crop&w=600&q=80"
+            fetchPriority="high"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1585244129648-5dc1f9cd9d7a?auto=format&fit=crop&w=600&q=80"
+            fetchPriority="low"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1651326659270-59bbb788199a?auto=format&fit=crop&w=600&q=80"
+            fetchPriority="low"
+          />
+          {/* DNS 프리페치 (Unsplash 도메인) */}
+          <link rel="dns-prefetch" href="https://images.unsplash.com" />
           {/* Google Tag Manager */}
           <Script
             id="gtm-base"

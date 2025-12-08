@@ -16,7 +16,12 @@
     "debug:html": "tsx scripts/crawlers/debug-html-structure.ts",
     "test:products": "tsx scripts/test-crawled-products.ts",
     "test:api": "tsx scripts/test-product-api.ts",
-    "test:recommendation": "tsx scripts/test-recommendation-system.ts"
+    "test:recommendation": "tsx scripts/test-recommendation-system.ts",
+    "crawl:playwright": "tsx scripts/crawl-with-playwright.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",
@@ -53,6 +58,8 @@
     "@vercel/analytics": "latest",
     "ai": "^5.0.102",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.13.2",
+    "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
@@ -64,12 +71,14 @@
     "next-themes": "^0.4.6",
     "pdf-parse": "1.1.1",
     "playwright": "^1.57.0",
+    "puppeteer": "^24.32.0",
     "react": "19.2.1",
     "react-day-picker": "9.8.0",
     "react-dom": "19.2.1",
     "react-hook-form": "^7.60.0",
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
+    "selenium-webdriver": "^4.39.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
@@ -77,6 +86,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",

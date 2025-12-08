@@ -158,11 +158,14 @@ export function Footer() {
           <p>{t("footer.copyright")}</p>
           </div>
           <div className="flex gap-6 w-full sm:w-auto justify-center sm:justify-end">
-            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialLinkedIn")}>
-              {t("footer.socialLinkedIn")}
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialKakao")}>
+              {t("footer.socialKakao")}
             </Link>
-            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialTwitter")}>
-              {t("footer.socialTwitter")}
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialInstagram")}>
+              {t("footer.socialInstagram")}
+            </Link>
+            <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialThreads")}>
+              {t("footer.socialThreads")}
             </Link>
             <Link href="#" className="hover:text-foreground transition-colors" aria-label={t("footer.socialContact")}>
               {t("footer.socialContact")}

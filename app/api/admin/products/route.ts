@@ -68,8 +68,106 @@ export async function POST(request: Request) {
     manufacturer?: string | null
     category?: string | null
     is_active?: boolean
+    products?: Array<{
+      name: string
+      iso_code: string
+      price?: number | null
+      purchase_link?: string | null
+      image_url?: string | null
+      manufacturer?: string | null
+      description?: string | null
+      category?: string | null
+    }>
   }
 
+  // 일괄 등록 (크롤링 결과 등록용)
+  if (body.products && Array.isArray(body.products)) {
+    let created = 0
+    let updated = 0
+    let failed = 0
+
+    for (const product of body.products) {
+      if (!product.name || !product.iso_code) {
+        failed++
+        continue
+      }
+
+      try {
+        const parsedPrice =
+          typeof product.price === "string"
+            ? Number(product.price)
+            : typeof product.price === "number"
+              ? product.price
+              : null
+
+        // purchase_link로 중복 확인
+        const { data: existing } = await supabase
+          .from("products")
+          .select("id")
+          .eq("purchase_link", product.purchase_link || "")
+          .maybeSingle()
+
+        if (existing) {
+          // 업데이트
+          const { error } = await supabase
+            .from("products")
+            .update({
+              name: product.name,
+              iso_code: product.iso_code,
+              description: product.description ?? null,
+              price: parsedPrice,
+              image_url: product.image_url ?? null,
+              manufacturer: product.manufacturer ?? null,
+              category: product.category ?? null,
+              is_active: true,
+            })
+            .eq("id", existing.id)
+
+          if (error) {
+            console.error(`[Admin Products] Update error for ${product.name}:`, error)
+            failed++
+          } else {
+            updated++
+          }
+        } else {
+          // 생성
+          const { error } = await supabase
+            .from("products")
+            .insert({
+              name: product.name,
+              iso_code: product.iso_code,
+              description: product.description ?? null,
+              price: parsedPrice,
+              purchase_link: product.purchase_link ?? null,
+              image_url: product.image_url ?? null,
+              manufacturer: product.manufacturer ?? null,
+              category: product.category ?? null,
+              is_active: true,
+            })
+
+          if (error) {
+            console.error(`[Admin Products] Insert error for ${product.name}:`, error)
+            failed++
+          } else {
+            created++
+          }
+        }
+      } catch (error) {
+        console.error(`[Admin Products] Error processing ${product.name}:`, error)
+        failed++
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      created,
+      updated,
+      failed,
+      total: body.products.length,
+    })
+  }
+
+  // 단일 상품 등록
   if (!body.name || !body.iso_code) {
     return NextResponse.json({ error: "상품 이름과 ISO 코드는 필수입니다." }, { status: 400 })
   }

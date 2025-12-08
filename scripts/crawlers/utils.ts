@@ -43,16 +43,19 @@ export function parsePrice(priceText: string): number | null {
  */
 export function normalizeUrl(url: string | null, baseUrl: string): string {
   if (!url) return ""
+  // 절대 경로는 그대로 반환
   if (url.startsWith("http://") || url.startsWith("https://")) {
     return url
   }
+  // 프로토콜 생략 //example.com
   if (url.startsWith("//")) {
     return `https:${url}`
   }
-  if (url.startsWith("/")) {
-    const base = new URL(baseUrl)
-    return `${base.origin}${url}`
+  try {
+    // new URL을 사용해 상대 경로 ../, ./ 모두 처리
+    return new URL(url, baseUrl).toString()
+  } catch {
+    return url
   }
-  return url
 }
 

@@ -89,6 +89,14 @@ interface Message {
   timestamp: Date;
 }
 
+type IsoMatch = {
+  isoCode: string;
+  label: string;
+  description: string;
+  reason: string;
+  score: number;
+};
+
 export function ChatInterface() {
   const { t } = useLanguage();
   const { isSignedIn, isLoaded } = useAuth();
@@ -117,6 +125,7 @@ export function ChatInterface() {
   const [hasRecommendations, setHasRecommendations] = useState(false);
   const [showRecommendationCTA, setShowRecommendationCTA] = useState(false);
   const [showFlowGuide, setShowFlowGuide] = useState(false);
+  const [isoMatches, setIsoMatches] = useState<IsoMatch[]>([]);
   const [previewRecommendations, setPreviewRecommendations] = useState<any[]>(
     []
   );
@@ -368,6 +377,7 @@ export function ChatInterface() {
                 followUpQuestions?: string[];
                 icfAnalysis?: IcfAnalysisBuckets | null;
                 problemDescription?: string;
+                isoMatches?: IsoMatch[];
               };
 
               if (!consultationId && payload.consultationId) {
@@ -388,6 +398,10 @@ export function ChatInterface() {
                   payload.icfAnalysis
                 );
                 setIcfAnalysis(payload.icfAnalysis);
+              }
+
+              if (payload.isoMatches) {
+                setIsoMatches(payload.isoMatches);
               }
 
               if (payload.icfAnalysis && payload.consultationId) {
@@ -787,6 +801,10 @@ export function ChatInterface() {
                                   fill
                                   className="object-cover"
                                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                  loading="lazy"
+                                  quality={85}
+                                  placeholder="blur"
+                                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                                 />
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center bg-muted">
@@ -838,6 +856,31 @@ export function ChatInterface() {
                   <div className="flex justify-center px-4 py-6">
                     <div className="w-full max-w-2xl">
                       <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 text-center">
+                        {isoMatches.length > 0 && (
+                          <div className="mb-4 text-left space-y-3">
+                            <p className="text-sm font-semibold text-primary">
+                              ISO 매칭 결과
+                            </p>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              {isoMatches.slice(0, 3).map((match) => (
+                                <div
+                                  key={`${match.isoCode}-${match.label}`}
+                                  className="rounded-lg border border-primary/20 bg-background px-3 py-2 text-left"
+                                >
+                                  <div className="text-xs text-muted-foreground">
+                                    ISO {match.isoCode}
+                                  </div>
+                                  <div className="font-semibold text-foreground">
+                                    {match.label}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                                    {match.reason || match.description}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         {isLoadingRecommendations ? (
                           <div className="flex flex-col items-center gap-3">
                             <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -854,9 +897,17 @@ export function ChatInterface() {
                               variant="recommendations"
                               href={`/recommendations/${consultationId}`}
                               size="lg"
+                              onClick={() =>
+                                trackEvent("cta_recommendation_from_chat", {
+                                  consultation_id: consultationId,
+                                })
+                              }
                             >
                               {t("chat.viewRecommendations")}
                             </CTAButton>
+                            <p className="text-xs text-muted-foreground max-w-md">
+                              {t("chat.recommendationsHint")}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -881,6 +932,8 @@ export function ChatInterface() {
                       fill
                       className="object-cover"
                       sizes="64px"
+                      quality={90}
+                      unoptimized={imagePreview.startsWith("data:")}
                     />
                   </div>
                   <div className="flex-1 min-w-0">

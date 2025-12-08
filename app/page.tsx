@@ -1,11 +1,84 @@
 import type { Metadata } from "next"
+import dynamic from "next/dynamic"
+import { Suspense } from "react"
 
-import { Header } from "@/components/header"
-import { HeroSection } from "@/components/hero-section"
-import { FeaturesSection } from "@/components/features-section"
-import { HowItWorksSection } from "@/components/how-it-works-section"
-import { CTASection } from "@/components/cta-section"
-import { Footer } from "@/components/footer"
+// Header는 서버 컴포넌트이지만 GlobalNav를 동적 import로 분리
+const Header = dynamic(() => import("@/components/header").then((mod) => ({ default: mod.Header })), {
+  ssr: true,
+})
+
+// Hero 섹션은 첫 화면에 중요하지만 동적 import로 지연 로딩 (이미지 프리로딩으로 보완)
+const HeroSection = dynamic(() => import("@/components/hero-section").then((mod) => ({ default: mod.HeroSection })), {
+  loading: () => (
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#fff3e0] via-[#fff8f0] to-[#eef7f4] py-20 md:py-32">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="mx-auto max-w-4xl text-center space-y-8">
+          <div className="h-16 bg-muted/50 animate-pulse rounded-lg" />
+          <div className="h-8 bg-muted/50 animate-pulse rounded-lg max-w-2xl mx-auto" />
+        </div>
+      </div>
+    </section>
+  ),
+  ssr: true,
+})
+
+// Features, HowItWorks, CTA 섹션은 스크롤 후 보이므로 동적 import
+const FeaturesSection = dynamic(
+  () => import("@/components/features-section").then((mod) => ({ default: mod.FeaturesSection })),
+  {
+    loading: () => (
+      <section className="py-20 md:py-32 bg-background">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="h-12 bg-muted/50 animate-pulse rounded-lg max-w-2xl mx-auto mb-16" />
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-muted/50 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </section>
+    ),
+  },
+)
+
+const HowItWorksSection = dynamic(
+  () => import("@/components/how-it-works-section").then((mod) => ({ default: mod.HowItWorksSection })),
+  {
+    loading: () => (
+      <section className="py-20 md:py-32 bg-muted/30">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="h-12 bg-muted/50 animate-pulse rounded-lg max-w-2xl mx-auto mb-16" />
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-48 bg-muted/50 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </section>
+    ),
+  },
+)
+
+const CTASection = dynamic(() => import("@/components/cta-section").then((mod) => ({ default: mod.CTASection })), {
+  loading: () => (
+    <section className="py-20 md:py-32 bg-background">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="h-64 bg-muted/50 animate-pulse rounded-lg" />
+      </div>
+    </section>
+  ),
+})
+
+// Footer는 페이지 하단이므로 동적 import
+const Footer = dynamic(() => import("@/components/footer").then((mod) => ({ default: mod.Footer })), {
+  loading: () => (
+    <footer className="border-t border-border bg-muted/30">
+      <div className="container mx-auto px-4 md:px-6 py-12">
+        <div className="h-32 bg-muted/50 animate-pulse rounded-lg" />
+      </div>
+    </footer>
+  ),
+})
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 const ogImage = `${baseUrl}/elderly-person-happily-using-tablet-in-cozy-home-e.jpg`
@@ -45,9 +118,13 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
+      <Suspense fallback={<div className="h-16 bg-muted/50 animate-pulse" />}>
+        <Header />
+      </Suspense>
       <main className="flex-1">
-        <HeroSection />
+        <Suspense fallback={<div className="h-96 bg-muted/30 animate-pulse" />}>
+          <HeroSection />
+        </Suspense>
         <FeaturesSection />
         <HowItWorksSection />
         <CTASection />

@@ -9,6 +9,7 @@ import { buildPrompt, buildStreamingPrompt } from "@/core/assessment/prompt-engi
 import { parseAnalysis } from "@/core/assessment/parser"
 import { enforceIcfConsistency } from "@/core/assessment/icf-validator"
 import { callGemini } from "@/lib/gemini"
+import { getIsoMatches } from "@/core/matching/iso-mapping"
 
 type ChatHistoryItem = {
   role: "user" | "assistant"
@@ -277,12 +278,17 @@ export async function POST(request: Request) {
             payload: { consultationId },
           })
 
+          const isoMatches = parsedAnalysis
+            ? getIsoMatches(parsedAnalysis.normalizedCodes ?? [])
+            : []
+
           sendEvent("analysis", {
             consultationId,
             followUpQuestions: parsedAnalysis?.questions ?? [],
             icfAnalysis: parsedAnalysis?.icf_analysis ?? null,
             problemDescription:
               parsedAnalysis?.needs || trimmedMessage?.slice(0, 120) || "상담 내용을 요약해 주세요.",
+            isoMatches,
           })
 
           sendEvent("done", { consultationId })

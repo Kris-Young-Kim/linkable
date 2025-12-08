@@ -433,8 +433,9 @@ export const translations = {
     "flowGuide.toastDescriptionWithCount": "{count}개의 맞춤형 보조기기 추천을 확인하세요.",
 
     // Footer socials
-    "footer.socialLinkedIn": "링크드인",
-    "footer.socialTwitter": "트위터",
+    "footer.socialKakao": "카카오톡",
+    "footer.socialInstagram": "인스타그램",
+    "footer.socialThreads": "스레드",
     "footer.socialContact": "문의하기",
   },
   en: {
@@ -797,8 +798,9 @@ export const translations = {
     "flowGuide.toastDescriptionWithCount": "Check {count} personalized assistive device recommendations.",
 
     // Footer socials
-    "footer.socialLinkedIn": "LinkedIn",
-    "footer.socialTwitter": "Twitter",
+    "footer.socialKakao": "KakaoTalk",
+    "footer.socialInstagram": "Instagram",
+    "footer.socialThreads": "Threads",
     "footer.socialContact": "Contact",
   },
   ja: {
@@ -1180,8 +1182,9 @@ export const translations = {
     "flowGuide.toastDescriptionWithCount": "{count}個のパーソナライズされた補助機器の推奨を確認してください。",
 
     // Footer socials
-    "footer.socialLinkedIn": "LinkedIn",
-    "footer.socialTwitter": "Twitter",
+    "footer.socialKakao": "カカオトーク",
+    "footer.socialInstagram": "Instagram",
+    "footer.socialThreads": "Threads",
     "footer.socialContact": "お問い合わせ",
   },
 } as const;

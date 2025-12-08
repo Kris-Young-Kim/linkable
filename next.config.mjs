@@ -22,6 +22,13 @@ const nextConfig = {
   images: {
     // 이미지 최적화 활성화 (성능 개선)
     unoptimized: false,
+    // 이미지 포맷 최적화 (WebP 우선, AVIF 지원)
+    formats: ["image/avif", "image/webp"],
+    // 디바이스별 이미지 크기 최적화
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // 이미지 최적화 품질 (기본값: 75, 범위: 1-100)
+    minimumCacheTTL: 60,
     // 외부 이미지 도메인 허용
     remotePatterns: [
       {
