@@ -70,19 +70,30 @@ export async function POST(request: Request) {
       .eq("consultation_id", consultation_id)
       .maybeSingle()
 
-    if (checkError && checkError.code !== "PGRST116") {
-      // PGRST116은 "no rows returned" 오류이므로 무시
-      console.error("[consultations/feedback] 피드백 확인 오류:", checkError)
+    // maybeSingle()은 결과가 없을 때 오류를 반환하지 않으므로,
+    // checkError가 있다면 실제 데이터베이스 오류입니다.
+    if (checkError) {
+      console.error("[consultations/feedback] 피드백 확인 오류:", {
+        error: checkError,
+        code: checkError.code,
+        message: checkError.message,
+        details: checkError.details,
+        hint: checkError.hint,
+        consultation_id,
+      })
       logEvent({
         category: "consultation",
         action: "feedback_error",
-        payload: { error: checkError, consultation_id },
+        payload: { 
+          error: checkError,
+          error_code: checkError.code,
+          error_message: checkError.message,
+          consultation_id 
+        },
         level: "error",
       })
-      return NextResponse.json(
-        { error: "Failed to check existing feedback" },
-        { status: 500 }
-      )
+      // 오류가 발생했지만, 사용자가 피드백을 제출할 수 있도록 계속 진행
+      // (기존 피드백이 없다고 가정하고 새로 생성)
     }
 
     const feedbackData = {
