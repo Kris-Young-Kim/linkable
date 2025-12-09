@@ -151,6 +151,20 @@ export async function hybridMatch(
       context.consultationHistory || []
     );
 
+    // 7단계: 의도 기반 재가중치
+    const intent = detectPrimaryIntent(context);
+    const intentWeighted = applyIntentWeights(adjusted, intent);
+
+    // 8단계: 의도 기반 하드 필터 (전혀 다른 카테고리 제거)
+    const intentFiltered = filterByIntent(intentWeighted, intent);
+
+    // 9단계: 핵심/보조 분리 태깅
+    // 핵심: 점수 상위 3개 + 점수 0.1 이상
+    const tagged = intentFiltered.map((item, idx) => ({
+      ...item,
+      category: idx < 3 && item.score >= 0.1 ? "primary" : "secondary",
+    }));
+
     const duration = Date.now() - startTime;
     logEvent({
       category: "matching",
@@ -163,7 +177,7 @@ export async function hybridMatch(
       },
     });
 
-    return adjusted.slice(0, finalConfig.topK);
+    return tagged.slice(0, finalConfig.topK);
   } catch (error) {
     console.error("[hybrid-matcher] Hybrid matching failed:", error);
     logEvent({
@@ -253,6 +267,122 @@ function applyFeedbackCorrection(
       ...match,
       score: Math.min(match.score * boost, 1.0),
     };
+  });
+}
+
+type PrimaryIntent =
+  | "mobility_wheelchair"
+  | "mobility_walking_aid"
+  | "vision"
+  | "communication"
+  | "self_care_feeding"
+  | "unknown";
+
+function normalizeIsoCode(isoCode: string) {
+  return isoCode.replace(/\s+/g, "").toLowerCase();
+}
+
+function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
+  const text = `${context.userMessage ?? ""} ${context.analysisSummary ?? ""}`.toLowerCase();
+  const icfSet = new Set(context.icfCodes.map((c) => c.toLowerCase()));
+
+  const hasIcf = (prefix: string) => Array.from(icfSet).some((c) => c.startsWith(prefix));
+  const includesAny = (keywords: string[]) => keywords.some((k) => text.includes(k));
+
+  // 휠체어/이동
+  if (
+    includesAny(["휠체어", "wheelchair", "전동 휠체어", "수동 휠체어"]) ||
+    hasIcf("d46") ||
+    hasIcf("d450")
+  ) {
+    return "mobility_wheelchair";
+  }
+
+  // 보행 보조
+  if (includesAny(["보행기", "워커", "지팡이", "walking aid"]) || hasIcf("d410")) {
+    return "mobility_walking_aid";
+  }
+
+  // 시각
+  if (hasIcf("b210") || includesAny(["시각", "저시력", "vision"])) {
+    return "vision";
+  }
+
+  // 의사소통
+  if (hasIcf("d3") || includesAny(["의사소통", "말하기", "communication"])) {
+    return "communication";
+  }
+
+  // 식사/자가관리
+  if (hasIcf("d55") || includesAny(["식사", "먹기", "feeding", "음식"])) {
+    return "self_care_feeding";
+  }
+
+  return "unknown";
+}
+
+function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatch[] {
+  if (intent === "unknown") return matches;
+
+  // 의도별 우선/페널티 ISO 코드 (공백 제거 기준)
+  const boost: Record<PrimaryIntent, string[]> = {
+    mobility_wheelchair: ["1222", "1223", "1806", "1830", "1206"],
+    mobility_walking_aid: ["1206", "1806", "1830"],
+    vision: ["2203", "2206", "1806"],
+    communication: ["2230", "2109"],
+    self_care_feeding: ["0903", "0904", "0909"],
+    unknown: [],
+  };
+
+  const penalty: Record<PrimaryIntent, string[]> = {
+    mobility_wheelchair: ["090", "150", "2203"],
+    mobility_walking_aid: ["090", "150"],
+    vision: ["090", "1206", "1222", "1223"],
+    communication: ["090", "1206", "1222", "1223"],
+    self_care_feeding: ["1222", "1223", "1206"],
+    unknown: [],
+  };
+
+  const boosted = boost[intent];
+  const penalized = penalty[intent];
+
+  return matches
+    .map((m) => {
+      const isoNorm = normalizeIsoCode(m.isoCode);
+      let score = m.score;
+
+      // 부스팅: 핵심 의도에 맞는 ISO는 1.15배
+      if (boosted.some((p) => isoNorm.startsWith(p))) {
+        score *= 1.15;
+      }
+
+      // 페널티: 의도와 거리가 먼 ISO는 0.75배
+      if (penalized.some((p) => isoNorm.startsWith(p))) {
+        score *= 0.75;
+      }
+
+      return { ...m, score };
+    })
+    .sort((a, b) => b.score - a.score);
+}
+
+function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent): IsoMatch[] {
+  if (intent === "unknown") return matches;
+
+  // 의도별 하드 제외 리스트 (공백 제거된 ISO prefix)
+  const exclude: Record<PrimaryIntent, string[]> = {
+    mobility_wheelchair: ["220", "0903", "0904", "0909"], // 시각, 식사 카테고리 제거
+    mobility_walking_aid: ["220", "0903", "0904", "0909"],
+    vision: ["1206", "1222", "1223"], // 이동 보조 제거
+    communication: ["1206", "1222", "1223"],
+    self_care_feeding: ["1222", "1223", "1206"], // 이동 보조 제거
+    unknown: [],
+  };
+
+  const excludes = exclude[intent];
+  return matches.filter((m) => {
+    const isoNorm = normalizeIsoCode(m.isoCode);
+    return !excludes.some((p) => isoNorm.startsWith(p));
   });
 }
 

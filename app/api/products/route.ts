@@ -121,6 +121,33 @@ const parseIcfCodes = (raw: string | null) =>
     .map((code) => code.trim().toLowerCase())
     .filter(Boolean) ?? [];
 
+// 간단한 장애 유형 추론 (휴리스틱)
+const detectDisabilityType = (
+  icfCodes: string[],
+  summary?: string | null
+): string | undefined => {
+  const text = (summary ?? "").toLowerCase();
+  const has = (prefix: string) => icfCodes.some((c) => c.startsWith(prefix.toLowerCase()));
+  const includesAny = (keywords: string[]) => keywords.some((k) => text.includes(k));
+
+  if (has("d46") || has("d450") || includesAny(["휠체어", "보행", "이동", "wheelchair"])) {
+    return "mobility_impairment";
+  }
+  if (has("b210") || includesAny(["시각", "저시력", "시력", "vision"])) {
+    return "visual_impairment";
+  }
+  if (has("d3") || includesAny(["의사소통", "말하기", "소통", "communication"])) {
+    return "communication_impairment";
+  }
+  if (has("d55") || includesAny(["식사", "먹기", "feeding", "음식"])) {
+    return "self_care_impairment";
+  }
+  if (has("b1") || includesAny(["인지", "기억", "주의", "cognitive"])) {
+    return "cognitive_impairment";
+  }
+  return undefined;
+};
+
 const fetchAnalysisIcfCodes = async (consultationId: string) => {
   const { data, error } = await supabase
     .from("analysis_results")
@@ -202,7 +229,21 @@ export async function GET(request: Request) {
   let ippaData: { importance?: number; currentDifficulty?: number } | null =
     null;
   let analysisSummary: string | null = null;
+  let disabilityType: string | undefined;
+  let disabilitySeverity: string | undefined;
+
   if (consultationId) {
+    const { data: consultationRow } = await supabase
+      .from("consultations")
+      .select("disability_type, disability_severity")
+      .eq("id", consultationId)
+      .maybeSingle();
+
+    if (consultationRow) {
+      disabilityType = consultationRow.disability_type ?? undefined;
+      disabilitySeverity = consultationRow.disability_severity ?? undefined;
+    }
+
     const { data: analysisData } = await supabase
       .from("analysis_results")
       .select("icf_codes, summary, identified_problems")
@@ -230,6 +271,9 @@ export async function GET(request: Request) {
     ) {
       analysisSummary = analysisData.identified_problems;
     }
+
+    disabilityType =
+      disabilityType ?? detectDisabilityType(icfCodes, analysisSummary);
   }
 
   // 하이브리드 매칭 시스템 사용
@@ -245,6 +289,10 @@ export async function GET(request: Request) {
       userMessage: analysisSummary,
       analysisSummary,
       consultationHistory: consultationId ? [] : undefined, // TODO: 실제 히스토리 조회
+      userProfile: {
+        disabilityType,
+        disabilitySeverity,
+      },
     });
   } else {
     // 빠른 매칭 (규칙 + 키워드, 기존 방식)

@@ -35,6 +35,8 @@ type ChatRequestBody = {
     base64: string;
     mimeType?: string;
   };
+  disabilityType?: string;
+  disabilitySeverity?: string;
 };
 
 const supabase = getSupabaseServerClient();
@@ -91,7 +93,9 @@ const ensureUserRecord = async (clerkUserId: string) => {
 const createConsultationIfNeeded = async (
   existingId: string | undefined,
   userId: string,
-  titleSeed: string
+  titleSeed: string,
+  disabilityType?: string,
+  disabilitySeverity?: string
 ) => {
   if (existingId) {
     return existingId;
@@ -104,6 +108,8 @@ const createConsultationIfNeeded = async (
       user_id: userId,
       status: "in_progress",
       title,
+      disability_type: disabilityType ?? null,
+      disability_severity: disabilitySeverity ?? null,
     })
     .select("id")
     .single();
@@ -348,8 +354,21 @@ export async function POST(request: Request) {
     const consultationId = await createConsultationIfNeeded(
       body.consultationId,
       supabaseUserId,
-      trimmedMessage || "이미지 첨부"
+      trimmedMessage || "이미지 첨부",
+      body.disabilityType,
+      body.disabilitySeverity
     );
+
+    // 기존 상담에 대해 장애 정보가 넘어오면 업데이트
+    if (consultationId && (body.disabilityType || body.disabilitySeverity)) {
+      await supabase
+        .from("consultations")
+        .update({
+          disability_type: body.disabilityType ?? null,
+          disability_severity: body.disabilitySeverity ?? null,
+        })
+        .eq("id", consultationId);
+    }
 
     await insertChatMessage(
       consultationId,
@@ -409,6 +428,7 @@ export async function POST(request: Request) {
 
         try {
           let streamedAssistantReply = "";
+          let parsedAnalysis: any = null;
 
           const result = await streamText({
             model: google("gemini-flash-lite-latest"),
@@ -432,20 +452,6 @@ export async function POST(request: Request) {
             sendEvent("text", { delta });
           }
 
-          // 평가 컨텍스트에 ICF 코드 추가
-          if (evaluationContext && parsedAnalysis?.icf_analysis?.d) {
-            evaluationContext.extractedIcfCodes = parsedAnalysis.icf_analysis.d;
-            const evaluatedCodes = new Set(
-              evaluationContext.evaluatedActivities.map((a: any) => a.icfCode)
-            );
-            const pendingCodes = evaluationContext.extractedIcfCodes.filter(
-              (code: string) => !evaluatedCodes.has(code)
-            );
-            if (pendingCodes.length > 0) {
-              evaluationContext.currentActivityIndex = 0;
-            }
-          }
-          
           const structuredPrompt = buildPrompt({
             persona: body.persona,
             history: [
@@ -467,7 +473,6 @@ export async function POST(request: Request) {
             body.image?.mimeType
           );
 
-          let parsedAnalysis = null;
           let assistantReplyForStorage =
             streamedAssistantReply || rawText || FALLBACK_RESPONSE;
 
@@ -520,6 +525,20 @@ export async function POST(request: Request) {
             parsedAnalysis,
             body.mediaDescription
           );
+
+          // 평가 컨텍스트에 ICF 코드 추가 (분석 파싱 후)
+          if (evaluationContext && parsedAnalysis?.icf_analysis?.d) {
+            evaluationContext.extractedIcfCodes = parsedAnalysis.icf_analysis.d;
+            const evaluatedCodes = new Set(
+              evaluationContext.evaluatedActivities.map((a: any) => a.icfCode)
+            );
+            const pendingCodes = evaluationContext.extractedIcfCodes.filter(
+              (code: string) => !evaluatedCodes.has(code)
+            );
+            if (pendingCodes.length > 0) {
+              evaluationContext.currentActivityIndex = 0;
+            }
+          }
 
           // 채팅에서 평가 데이터 수집 및 저장
           await processEvaluationFromChat(

@@ -116,6 +116,10 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
   // 필터 상태
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [dateFilter, setDateFilter] = useState<string>("all")
+  const [customDateRange, setCustomDateRange] = useState<{ start: string; end: string }>({
+    start: "",
+    end: "",
+  })
   const [favoriteFilter, setFavoriteFilter] = useState<boolean>(false)
   
   // 선택 상태
@@ -152,6 +156,19 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
             return diffDays <= 7
           case "month":
             return diffDays <= 30
+          case "3months":
+            return diffDays <= 90
+          case "6months":
+            return diffDays <= 183
+          case "custom": {
+            if (!customDateRange.start || !customDateRange.end) return true
+            const start = new Date(customDateRange.start)
+            const end = new Date(customDateRange.end)
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) return true
+            const maxRangeMs = 183 * 24 * 60 * 60 * 1000
+            if (end.getTime() - start.getTime() > maxRangeMs) return false
+            return created >= start && created <= end
+          }
           default:
             return true
         }
@@ -316,8 +333,16 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
                 <SelectItem value="archived">보관됨</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-[140px]">
+            <Select
+              value={dateFilter}
+              onValueChange={(value) => {
+                setDateFilter(value)
+                if (value !== "custom") {
+                  setCustomDateRange({ start: "", end: "" })
+                }
+              }}
+            >
+              <SelectTrigger className="w-[160px]">
                 <SelectValue placeholder="기간" />
               </SelectTrigger>
               <SelectContent>
@@ -325,8 +350,35 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
                 <SelectItem value="today">오늘</SelectItem>
                 <SelectItem value="week">최근 7일</SelectItem>
                 <SelectItem value="month">최근 30일</SelectItem>
+                <SelectItem value="3months">최근 3개월</SelectItem>
+                <SelectItem value="6months">최근 6개월</SelectItem>
+                <SelectItem value="custom">직접 선택</SelectItem>
               </SelectContent>
             </Select>
+            {dateFilter === "custom" && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input
+                  type="date"
+                  value={customDateRange.start}
+                  onChange={(e) =>
+                    setCustomDateRange((prev) => ({ ...prev, start: e.target.value }))
+                  }
+                  className="h-9 rounded-md border border-input bg-background px-2 text-foreground"
+                />
+                <span className="text-muted-foreground">~</span>
+                <input
+                  type="date"
+                  value={customDateRange.end}
+                  onChange={(e) =>
+                    setCustomDateRange((prev) => ({ ...prev, end: e.target.value }))
+                  }
+                  className="h-9 rounded-md border border-input bg-background px-2 text-foreground"
+                />
+                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  최대 6개월
+                </span>
+              </div>
+            )}
             {(statusFilter !== "all" || dateFilter !== "all" || favoriteFilter) && (
               <Button
                 variant="outline"
@@ -334,6 +386,7 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
                 onClick={() => {
                   setStatusFilter("all")
                   setDateFilter("all")
+                  setCustomDateRange({ start: "", end: "" })
                   setFavoriteFilter(false)
                 }}
               >

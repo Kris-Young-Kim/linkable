@@ -193,6 +193,10 @@ export function RecommendationsViewWithFilters({
     )
   }
 
+  // 핵심/보조 분리: 상위 3개를 핵심 추천, 나머지를 추가 고려로 표시
+  const primary = filteredAndSortedProducts.slice(0, 3)
+  const secondary = filteredAndSortedProducts.slice(3)
+
   return (
     <div className="space-y-6">
       {/* 필터 및 정렬 컨트롤 */}
@@ -268,33 +272,79 @@ export function RecommendationsViewWithFilters({
         </p>
       </div>
 
-      {/* 추천 카드 목록 */}
-      <div className="space-y-6">
-        {filteredAndSortedProducts.map((product) => (
-            <ProductRecommendationCard
-              key={product.id}
-              productName={product.name}
-              functionalSupport={product.category ?? t("recommendations.defaultCategory")}
-              description={product.description}
-              imageUrl={product.image_url ?? undefined}
-              isoCode={product.iso_code}
-              isoLabel={product.match_label}
-              matchScore={product.match_score}
-              matchReason={product.match_reason}
-              matchedIcf={product.matched_icf}
-              price={product.price}
-              purchaseLink={product.purchase_link}
-              recommendationId={product.recommendation_id}
-              adminActions={
-                <CardActionButtons
-                  onDelete={() => handleRemoveProduct(product)}
-                  deleteLabel="추천 삭제"
-                  isDeleteDisabled={removingId === product.id}
-                />
-              }
-            />
-        ))}
-      </div>
+      {/* 핵심 추천 */}
+      {primary.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-primary" />
+            <span className="text-sm font-semibold text-foreground">핵심 추천</span>
+          </div>
+          <div className="space-y-6">
+            {primary.map((product) => (
+              <ProductRecommendationCard
+                key={product.id}
+                productName={product.name}
+                functionalSupport={product.category ?? t("recommendations.defaultCategory")}
+                description={product.description}
+                imageUrl={product.image_url ?? undefined}
+                isoCode={product.iso_code}
+                isoLabel={product.match_label}
+                matchScore={product.match_score}
+                matchReason={product.match_reason}
+                matchedIcf={product.matched_icf}
+                price={product.price}
+                purchaseLink={product.purchase_link}
+                recommendationId={product.recommendation_id}
+                adminActions={
+                  <CardActionButtons
+                    onDelete={() => handleRemoveProduct(product)}
+                    deleteLabel="추천 삭제"
+                    isDeleteDisabled={removingId === product.id}
+                  />
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 추가로 도움이 될 수 있는 보조기기 */}
+      {secondary.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-muted-foreground" />
+            <span className="text-sm font-semibold text-foreground">
+              추가로 도움이 될 수 있는 보조기기
+            </span>
+          </div>
+          <div className="space-y-6">
+            {secondary.map((product) => (
+              <ProductRecommendationCard
+                key={product.id}
+                productName={product.name}
+                functionalSupport={product.category ?? t("recommendations.defaultCategory")}
+                description={product.description}
+                imageUrl={product.image_url ?? undefined}
+                isoCode={product.iso_code}
+                isoLabel={product.match_label}
+                matchScore={product.match_score}
+                matchReason={product.match_reason}
+                matchedIcf={product.matched_icf}
+                price={product.price}
+                purchaseLink={product.purchase_link}
+                recommendationId={product.recommendation_id}
+                adminActions={
+                  <CardActionButtons
+                    onDelete={() => handleRemoveProduct(product)}
+                    deleteLabel="추천 삭제"
+                    isDeleteDisabled={removingId === product.id}
+                  />
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 쿠팡 파트너스 활동 시 주의사항 */}
       <PartnershipNotice />

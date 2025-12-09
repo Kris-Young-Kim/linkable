@@ -58,6 +58,13 @@ import { useAuth, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { CTAButton } from "@/components/ui/cta-button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DisclaimerModal } from "@/components/disclaimer-modal";
 import { ProductRecommendationCard } from "@/components/product-recommendation-card";
 import {
@@ -129,6 +136,9 @@ export function ChatInterface() {
   const [previewRecommendations, setPreviewRecommendations] = useState<any[]>(
     []
   );
+  const [disabilityType, setDisabilityType] = useState<string>("none");
+  const [disabilitySeverity, setDisabilitySeverity] = useState<string>("none");
+  const [showIcf, setShowIcf] = useState(false);
 
   // useCallback으로 onClose 함수 메모이제이션하여 무한 루프 방지
   const handleCloseFlowGuide = useCallback(() => {
@@ -316,6 +326,9 @@ export function ChatInterface() {
         }
       }
 
+      const normalizedType = disabilityType === "none" ? undefined : disabilityType;
+      const normalizedSeverity = disabilitySeverity === "none" ? undefined : disabilitySeverity;
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -324,6 +337,8 @@ export function ChatInterface() {
           consultationId,
           history: messages.map(({ role, content }) => ({ role, content })),
           image: imagePayload,
+          disabilityType: normalizedType,
+          disabilitySeverity: normalizedSeverity,
         }),
       });
 
@@ -717,6 +732,56 @@ export function ChatInterface() {
             </p>
           </div>
 
+          {/* 장애 유형/정도 선택 (선택 입력) */}
+          <div className="shrink-0 border-b border-border bg-card/60 px-4 py-3">
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-sm font-semibold text-foreground">
+                  장애 유형 (선택)
+                </span>
+                <Select
+                  value={disabilityType}
+                  onValueChange={(v) => setDisabilityType(v)}
+                >
+                  <SelectTrigger className="w-[220px]">
+                    <SelectValue placeholder="입력 안 함" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">입력 안 함</SelectItem>
+                    <SelectItem value="mobility">지체(절단/관절/지체기능/변형)</SelectItem>
+                    <SelectItem value="brain">뇌병변</SelectItem>
+                    <SelectItem value="vision">시각</SelectItem>
+                    <SelectItem value="hearing">청각/평형</SelectItem>
+                    <SelectItem value="speech">언어/음성/구어</SelectItem>
+                    <SelectItem value="face">안면</SelectItem>
+                    <SelectItem value="internal">내부기관(신장/심장/간/호흡기/장루·요루/뇌전증)</SelectItem>
+                    <SelectItem value="mental">정신적(지적/자폐성/정신장애)</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <span className="text-sm font-semibold text-foreground">
+                  장애 정도 (선택)
+                </span>
+                <Select
+                  value={disabilitySeverity}
+                  onValueChange={(v) => setDisabilitySeverity(v)}
+                >
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue placeholder="선택 안 함" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">선택 안 함</SelectItem>
+                    <SelectItem value="mild">경증</SelectItem>
+                    <SelectItem value="severe">중증</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                선택 입력입니다. 제공 시 맞춤 추천과 ISO 매칭 정밀도가 향상됩니다. 입력하지 않아도 상담은 진행됩니다.
+              </p>
+            </div>
+          </div>
+
           {/* Messages Area */}
           <div
             ref={messagesContainerRef}
@@ -778,11 +843,23 @@ export function ChatInterface() {
                 </div>
               )}
 
-              {/* ICF Visualization */}
+              {/* ICF Visualization (선택 시 표시) */}
               {icfAnalysis && (
                 <div className="flex justify-center">
-                  <div className="w-full max-w-2xl">
-                    <IcfVisualization data={icfAnalysis} />
+                  <div className="w-full max-w-2xl space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-foreground">
+                        ICF 분석 (원할 때만 확인)
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowIcf((prev) => !prev)}
+                      >
+                        {showIcf ? "닫기" : "ICF 분석 보기"}
+                      </Button>
+                    </div>
+                    {showIcf && <IcfVisualization data={icfAnalysis} />}
                   </div>
                 </div>
               )}
@@ -982,7 +1059,7 @@ export function ChatInterface() {
                 aria-label={t("chat.attachPhoto")}
               />
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-end">
                 {/* Photo Attachment Button */}
                 <Button
                   type="button"
@@ -1004,13 +1081,16 @@ export function ChatInterface() {
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyPress}
                     placeholder={t("chat.placeholder")}
-                    className="min-h-14 resize-none pr-32 text-lg leading-relaxed"
+                    className="min-h-14 resize-none text-lg leading-relaxed"
                     rows={1}
                     aria-label="Message input"
                     disabled={requiresLogin}
                   />
-                  <div className="absolute bottom-2 right-2 flex gap-2">
-                    {/* Voice Input Button */}
+                </div>
+
+                {/* Textarea 오른쪽: 음성/전송 버튼 */}
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
                     <Button
                       type="button"
                       size="lg"
@@ -1027,8 +1107,6 @@ export function ChatInterface() {
                     >
                       <Mic className="size-6" aria-hidden="true" />
                     </Button>
-
-                    {/* Send Button */}
                     <Button
                       type="button"
                       size="lg"
