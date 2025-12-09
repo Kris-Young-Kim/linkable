@@ -286,17 +286,16 @@ export async function GET(request: Request) {
     // 정확한 매칭 (시맨틱 + 지식 그래프)
     isoMatches = await accurateMatch({
       icfCodes,
-      userMessage: analysisSummary,
-      analysisSummary,
+      userMessage: analysisSummary || undefined,
+      analysisSummary: analysisSummary || undefined,
       consultationHistory: consultationId ? [] : undefined, // TODO: 실제 히스토리 조회
       userProfile: {
-        disabilityType,
-        disabilitySeverity,
+        disabilityType: disabilityType ?? undefined,
       },
     });
   } else {
     // 빠른 매칭 (규칙 + 키워드, 기존 방식)
-    isoMatches = fastMatch(icfCodes, analysisSummary);
+    isoMatches = fastMatch(icfCodes, analysisSummary || undefined);
   }
 
   const isoCodes = isoMatches.map((match) => match.isoCode);

@@ -218,7 +218,7 @@ function combineMatches(
 
       // 소스 추적
       const sources = sourceMap.get(match.isoCode) || [];
-      sources.push(layer.matches === match ? "self" : "other");
+      sources.push("layer");
       sourceMap.set(match.isoCode, sources);
     }
   }

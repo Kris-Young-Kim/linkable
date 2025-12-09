@@ -50,7 +50,7 @@ export class SimpleScraper {
       const html = Buffer.from(response.data).toString("utf-8")
 
       // 2) Cheerio로 파싱
-      const $ = cheerio.load(html, { decodeEntities: false })
+      const $ = cheerio.load(html)
 
       // 3) 제품 정보 추출
       let productName = ""
@@ -130,7 +130,6 @@ export class SimpleScraper {
       }
 
       const product: ScrapedProduct = {
-        id: productUrl, // URL을 임시 ID로 사용
         name: productName,
         price,
         purchase_link: productUrl,
@@ -173,7 +172,7 @@ export class SimpleScraper {
 
       // UTF-8로 디코딩 (한글 인코딩 문제 해결)
       const html = Buffer.from(response.data).toString("utf-8")
-      const $ = cheerio.load(html, { decodeEntities: false })
+      const $ = cheerio.load(html)
 
       // 페이지 제목
       const title = $("title").text().trim()
@@ -247,7 +246,7 @@ export class SimpleScraper {
 
       // UTF-8로 디코딩 (한글 인코딩 문제 해결)
       const html = Buffer.from(response.data).toString("utf-8")
-      const $ = cheerio.load(html, { decodeEntities: false })
+      const $ = cheerio.load(html)
 
       const products: ScrapedProduct[] = []
 
@@ -391,7 +390,6 @@ export class SimpleScraper {
               // 제품명과 링크가 모두 있어야 제품으로 인정
               if (name && link && link.includes("goods_view.php")) {
                 products.push({
-                  id: link,
                   name: name.trim(),
                   price,
                   purchase_link: normalizeUrl(link, this.siteConfig.baseUrl),

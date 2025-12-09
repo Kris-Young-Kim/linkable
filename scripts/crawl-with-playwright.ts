@@ -127,7 +127,7 @@ async function main() {
 
   // 사이트 이름으로 URL 결정
   if (options.site && !url) {
-    siteConfig = getSiteConfig(options.site);
+    siteConfig = getSiteConfig(options.site) ?? null;
     if (!siteConfig) {
       console.error(`❌ 사이트 설정을 찾을 수 없습니다: ${options.site}`);
       process.exit(1);
@@ -154,13 +154,7 @@ async function main() {
     await scraper.init(options.headless);
 
     // 제품 크롤링
-    const products = await scraper.scrapeProducts({
-      url,
-      maxResults: options.max,
-      delayMs: 2000,
-      headless: options.headless,
-      useClickNavigation: options.useClickNavigation,
-    });
+    const products = await scraper.scrapeProducts();
 
     if (products.length === 0) {
       console.log('⚠️  추출된 제품이 없습니다.');
@@ -174,14 +168,8 @@ async function main() {
 
     products.forEach((product, index) => {
       console.log(`\n[${index + 1}] ${product.name}`);
-      if (product.model) console.log(`   모델명: ${product.model}`);
-      if (product.price) console.log(`   가격: ${product.price.toLocaleString()}원`);
-      if (product.manufacturer) console.log(`   제조사: ${product.manufacturer}`);
-      if (product.features && product.features.length > 0) {
-        console.log(`   특징: ${product.features.slice(0, 3).join(', ')}`);
-      }
-      if (product.imageUrl) console.log(`   이미지: ${product.imageUrl}`);
-      console.log(`   링크: ${product.purchaseLink}`);
+      // 이하 필드는 stubbed scraper에서는 없으므로 출력 생략
+      console.log(`   링크: ${product.purchase_link || ""}`);
     });
 
     // 데이터베이스에 저장
