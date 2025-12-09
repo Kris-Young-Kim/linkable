@@ -4,6 +4,8 @@ import Script from "next/script";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { AnalyticsEventListener } from "@/components/analytics-event-listener";
+import { AccessibilityControls } from "@/components/accessibility-controls";
 import { LanguageProvider } from "@/components/language-provider";
 import { RoleGuard } from "@/components/role-guard";
 import "./globals.css";
@@ -114,6 +116,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <LanguageProvider>
             <RoleGuard>{children}</RoleGuard>
           </LanguageProvider>
+          <AccessibilityControls />
+          <AnalyticsEventListener />
           <Analytics />
         </body>
       </html>

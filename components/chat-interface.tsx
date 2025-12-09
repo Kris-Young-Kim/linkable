@@ -229,6 +229,49 @@ export function ChatInterface() {
     }
   }, []);
 
+  // 음성 인식 초기화
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const SpeechCtor =
+      window.SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechCtor) {
+      setIsSpeechSupported(false);
+      return;
+    }
+
+    try {
+      const rec = new SpeechCtor();
+      rec.lang = "ko-KR";
+      rec.continuous = false;
+      rec.interimResults = true;
+      rec.maxAlternatives = 1;
+
+      rec.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = Array.from(event.results)
+          .map((result) => result[0]?.transcript || "")
+          .join(" ")
+          .trim();
+        if (transcript) {
+          setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
+      };
+
+      rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+        console.error("[STT] error", event.error, event.message);
+      };
+
+      rec.onend = () => {
+        setIsRecording(false);
+      };
+
+      setRecognition(rec);
+      setIsSpeechSupported(true);
+    } catch (error) {
+      console.error("[STT] init failed", error);
+      setIsSpeechSupported(false);
+    }
+  }, []);
+
   // 메시지가 추가될 때 자동 스크롤 (사용자가 맨 아래에 있을 때만)
   useEffect(() => {
     scrollToBottom(false);
