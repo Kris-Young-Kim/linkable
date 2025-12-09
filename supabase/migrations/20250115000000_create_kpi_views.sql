@@ -25,7 +25,12 @@ SELECT
   CASE 
     WHEN (SELECT COUNT(*) FROM recommendations WHERE is_clicked = true) > 0
     THEN ROUND(
-      (SELECT COUNT(*)::numeric FROM ippa_evaluations) / 
+      -- recommendation_id가 있고 해당 추천이 클릭된 평가만 카운트
+      (SELECT COUNT(*)::numeric 
+       FROM ippa_evaluations i
+       INNER JOIN recommendations r ON i.recommendation_id = r.id
+       WHERE r.is_clicked = true 
+         AND i.recommendation_id IS NOT NULL) / 
       (SELECT COUNT(*)::numeric FROM recommendations WHERE is_clicked = true) * 100,
       2
     )

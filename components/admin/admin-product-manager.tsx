@@ -1807,16 +1807,50 @@ function ProductCard({
                 >
                   ISO 코드
                 </Label>
-                <Input
-                  id="edit-iso"
-                  value={localValues.iso_code}
-                  onChange={(event) =>
-                    setLocalValues((prev) => ({
-                      ...prev,
-                      iso_code: event.target.value,
-                    }))
-                  }
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="edit-iso"
+                    value={localValues.iso_code}
+                    onChange={(event) =>
+                      setLocalValues((prev) => ({
+                        ...prev,
+                        iso_code: event.target.value,
+                      }))
+                    }
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        const response = await fetch("/api/admin/products/infer-iso", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            name: localValues.name,
+                            description: localValues.description,
+                          }),
+                        });
+                        if (response.ok) {
+                          const data = await response.json();
+                          if (data.isoCode) {
+                            setLocalValues((prev) => ({
+                              ...prev,
+                              iso_code: data.isoCode,
+                            }));
+                          }
+                        }
+                      } catch (error) {
+                        console.error("[Admin Products] ISO 추론 실패:", error);
+                      }
+                    }}
+                    className="whitespace-nowrap"
+                  >
+                    <Sparkles className="h-4 w-4 mr-1" />
+                    AI 추론
+                  </Button>
+                </div>
               </div>
               <div>
                 <Label

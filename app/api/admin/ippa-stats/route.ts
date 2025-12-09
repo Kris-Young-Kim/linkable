@@ -186,6 +186,95 @@ export async function GET(request: NextRequest) {
       stat.avgImprovement = stat.count > 0 ? stat.totalImprovement / stat.count : 0
     })
 
+    // ICF 코드별 점수 변화 통계
+    const icfCodeStats: Record<string, {
+      code: string;
+      count: number;
+      avgPreScore: number;
+      avgPostScore: number;
+      avgImprovement: number;
+      avgEffectiveness: number;
+    }> = {};
+
+    evaluationsWithActivities.forEach(evaluation => {
+      const activityScores = (evaluation.activity_scores as any)?.activities;
+      if (Array.isArray(activityScores)) {
+        activityScores.forEach((activity: any) => {
+          const icfCode = activity.icfCode;
+          if (!icfCode) return;
+
+          if (!icfCodeStats[icfCode]) {
+            icfCodeStats[icfCode] = {
+              code: icfCode,
+              count: 0,
+              avgPreScore: 0,
+              avgPostScore: 0,
+              avgImprovement: 0,
+              avgEffectiveness: 0,
+            };
+          }
+
+          const stat = icfCodeStats[icfCode];
+          stat.count++;
+          stat.avgPreScore += (activity.preDifficulty || 0);
+          stat.avgPostScore += (activity.postDifficulty || 0);
+          stat.avgImprovement += (activity.improvement || 0);
+          stat.avgEffectiveness += (activity.effectivenessScore || 0);
+        });
+      }
+    });
+
+    // 평균 계산
+    Object.keys(icfCodeStats).forEach(code => {
+      const stat = icfCodeStats[code];
+      stat.avgPreScore = stat.count > 0 ? stat.avgPreScore / stat.count : 0;
+      stat.avgPostScore = stat.count > 0 ? stat.avgPostScore / stat.count : 0;
+      stat.avgImprovement = stat.count > 0 ? stat.avgImprovement / stat.count : 0;
+      stat.avgEffectiveness = stat.count > 0 ? stat.avgEffectiveness / stat.count : 0;
+    });
+
+    // ISO 분류별 통계
+    const isoCodeStats: Record<string, {
+      isoCode: string;
+      count: number;
+      avgEffectiveness: number;
+      avgPreScore: number;
+      avgPostScore: number;
+      avgImprovement: number;
+    }> = {};
+
+    evaluations.forEach(evaluation => {
+      const isoCode = productIdToIsoCode[evaluation.product_id];
+      if (!isoCode) return;
+
+      if (!isoCodeStats[isoCode]) {
+        isoCodeStats[isoCode] = {
+          isoCode,
+          count: 0,
+          avgEffectiveness: 0,
+          avgPreScore: 0,
+          avgPostScore: 0,
+          avgImprovement: 0,
+        };
+      }
+
+      const stat = isoCodeStats[isoCode];
+      stat.count++;
+      stat.avgEffectiveness += (evaluation.effectiveness_score ? Number(evaluation.effectiveness_score) : 0);
+      stat.avgPreScore += Number(evaluation.score_difficulty_pre);
+      stat.avgPostScore += Number(evaluation.score_difficulty_post);
+      stat.avgImprovement += (Number(evaluation.score_difficulty_pre) - Number(evaluation.score_difficulty_post));
+    });
+
+    // 평균 계산
+    Object.keys(isoCodeStats).forEach(isoCode => {
+      const stat = isoCodeStats[isoCode];
+      stat.avgEffectiveness = stat.count > 0 ? stat.avgEffectiveness / stat.count : 0;
+      stat.avgPreScore = stat.count > 0 ? stat.avgPreScore / stat.count : 0;
+      stat.avgPostScore = stat.count > 0 ? stat.avgPostScore / stat.count : 0;
+      stat.avgImprovement = stat.count > 0 ? stat.avgImprovement / stat.count : 0;
+    });
+
     return NextResponse.json({
       stats: {
         totalEvaluations,
@@ -209,6 +298,26 @@ export async function GET(request: NextRequest) {
           }))
           .sort((a, b) => b.count - a.count)
           .slice(0, 20), // 상위 20개 활동
+        // ICF 코드별 점수 변화 통계
+        icfCodeStats: Object.values(icfCodeStats)
+          .map(stat => ({
+            ...stat,
+            avgPreScore: Number(stat.avgPreScore.toFixed(2)),
+            avgPostScore: Number(stat.avgPostScore.toFixed(2)),
+            avgImprovement: Number(stat.avgImprovement.toFixed(2)),
+            avgEffectiveness: Number(stat.avgEffectiveness.toFixed(2)),
+          }))
+          .sort((a, b) => b.count - a.count),
+        // ISO 분류별 통계
+        isoCodeStats: Object.values(isoCodeStats)
+          .map(stat => ({
+            ...stat,
+            avgEffectiveness: Number(stat.avgEffectiveness.toFixed(2)),
+            avgPreScore: Number(stat.avgPreScore.toFixed(2)),
+            avgPostScore: Number(stat.avgPostScore.toFixed(2)),
+            avgImprovement: Number(stat.avgImprovement.toFixed(2)),
+          }))
+          .sort((a, b) => b.count - a.count),
       },
       evaluations: evaluations.map(e => ({
         id: e.id,

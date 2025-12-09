@@ -6,6 +6,7 @@ import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { KPIBoard } from "@/components/analytics/kpi-board"
 import { KPIFilters, type DateRange, type UserGroup } from "@/components/admin/kpi-filters"
 import { AdminLogMonitor } from "@/components/admin/admin-log-monitor"
+import { EnhancedAnalytics } from "@/components/admin/enhanced-analytics"
 import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
@@ -98,6 +99,21 @@ export function AdminDashboardContent() {
                   showTrendChart={true}
                   showFilters={false}
                 />
+              </CardContent>
+            </Card>
+          </section>
+
+          {/* 향상된 통계 대시보드 */}
+          <section id="enhanced-analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">상세 통계 분석</CardTitle>
+                <CardDescription>
+                  사용자 성장률, 전환율, ICF/ISO별 통계 등 펀딩 근거로 활용 가능한 상세 지표
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <EnhancedAnalytics />
               </CardContent>
             </Card>
           </section>

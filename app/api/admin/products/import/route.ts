@@ -388,37 +388,50 @@ async function parsePdfCatalogImproved(text: string): Promise<ProductInput[]> {
   }
   
   // ISO 코드 자동 매칭 및 제품 생성
+  // 동의어 사전 활용
+  const { inferIsoFromText } = await import("@/core/matching/synonym-dictionary")
+  
   for (const block of productBlocks) {
-    // ISO 코드 자동 추천 (간단한 키워드 매칭)
+    // ISO 코드 자동 추천 (동의어 사전 + 키워드 매칭)
     let isoCode = "00 00"
     const nameLower = block.name.toLowerCase()
+    const fullText = `${block.name} ${block.description || ""}`
     
-    if (nameLower.includes("식기") || nameLower.includes("식사") || nameLower.includes("숟가락") || nameLower.includes("포크") || nameLower.includes("컵")) {
-      isoCode = "15 09"
-    } else if (nameLower.includes("전동") && nameLower.includes("휠체어")) {
-      isoCode = "12 23"
-    } else if (nameLower.includes("휠체어")) {
-      isoCode = "12 22"
-    } else if (nameLower.includes("워커") || nameLower.includes("보행기") || nameLower.includes("지팡이") || nameLower.includes("목발")) {
-      isoCode = "12 06"
-    } else if (nameLower.includes("경사로") || nameLower.includes("승강기") || nameLower.includes("램프")) {
-      isoCode = "18 30"
-    } else if (nameLower.includes("체위") || nameLower.includes("리프트")) {
-      isoCode = "12 31"
-    } else if (nameLower.includes("보청기") || nameLower.includes("청각") || nameLower.includes("난청")) {
-      isoCode = "21 06"
-    } else if (nameLower.includes("의사소통") || nameLower.includes("aac")) {
-      isoCode = "22 30"
-    } else if (nameLower.includes("확대경") || nameLower.includes("돋보기") || nameLower.includes("시각")) {
-      isoCode = "22 03"
-    } else if (nameLower.includes("목욕") || nameLower.includes("샤워") || nameLower.includes("욕조")) {
-      isoCode = "15 03"
-    } else if (nameLower.includes("착의") || nameLower.includes("의복")) {
-      isoCode = "15 04"
-    } else if (nameLower.includes("청소")) {
-      isoCode = "15 05"
-    } else if (nameLower.includes("요리") || nameLower.includes("조리")) {
-      isoCode = "15 06"
+    // 1단계: 동의어 사전 기반 추론
+    const inferredCodes = inferIsoFromText(fullText)
+    if (inferredCodes.length > 0) {
+      isoCode = inferredCodes[0]
+    }
+    
+    // 2단계: 폴백 키워드 매칭 (동의어 사전에서 찾지 못한 경우)
+    if (isoCode === "00 00") {
+      if (nameLower.includes("식기") || nameLower.includes("식사") || nameLower.includes("숟가락") || nameLower.includes("포크") || nameLower.includes("컵")) {
+        isoCode = "15 09"
+      } else if (nameLower.includes("전동") && nameLower.includes("휠체어")) {
+        isoCode = "12 23"
+      } else if (nameLower.includes("휠체어")) {
+        isoCode = "12 22"
+      } else if (nameLower.includes("워커") || nameLower.includes("보행기") || nameLower.includes("지팡이") || nameLower.includes("목발")) {
+        isoCode = "12 06"
+      } else if (nameLower.includes("경사로") || nameLower.includes("승강기") || nameLower.includes("램프")) {
+        isoCode = "18 30"
+      } else if (nameLower.includes("체위") || nameLower.includes("리프트")) {
+        isoCode = "12 31"
+      } else if (nameLower.includes("보청기") || nameLower.includes("청각") || nameLower.includes("난청")) {
+        isoCode = "21 06"
+      } else if (nameLower.includes("의사소통") || nameLower.includes("aac")) {
+        isoCode = "22 30"
+      } else if (nameLower.includes("확대경") || nameLower.includes("돋보기") || nameLower.includes("시각")) {
+        isoCode = "22 03"
+      } else if (nameLower.includes("목욕") || nameLower.includes("샤워") || nameLower.includes("욕조")) {
+        isoCode = "15 03"
+      } else if (nameLower.includes("착의") || nameLower.includes("의복")) {
+        isoCode = "15 04"
+      } else if (nameLower.includes("청소")) {
+        isoCode = "15 05"
+      } else if (nameLower.includes("요리") || nameLower.includes("조리")) {
+        isoCode = "15 06"
+      }
     }
     
     // 제품명이 너무 짧거나 긴 경우 제외

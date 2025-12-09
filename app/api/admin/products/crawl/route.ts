@@ -111,29 +111,72 @@ export async function POST(request: Request) {
       }
 
       // ISO 코드 자동 매칭 및 제품 변환
-      const productInputs: ProductInput[] = products.map((product) => {
-        const productName = product.name.toLowerCase()
-        let isoCode = body.isoCode || "00 00"
-        
-        if (isoCode === "00 00") {
-          if (productName.includes("전동") && productName.includes("휠체어")) {
-            isoCode = "12 23"
-          } else if (productName.includes("휠체어")) {
-            isoCode = "12 22"
-          } else if (productName.includes("스탠딩")) {
-            isoCode = "12 23"
-          } else if (productName.includes("워커") || productName.includes("보행기")) {
-            isoCode = "12 06"
-          } else if (productName.includes("식기")) {
-            isoCode = "15 09"
+      // AI 기반 추론과 키워드 매칭을 결합
+      const { inferIsoCodeFromProduct } = await import("@/core/matching/ai-iso-inference")
+      const { inferIsoFromText } = await import("@/core/matching/synonym-dictionary")
+      
+      const productInputs: ProductInput[] = await Promise.all(
+        products.map(async (product) => {
+          const productName = product.name.toLowerCase()
+          let isoCode = body.isoCode || "00 00"
+          
+          // 1단계: 키워드 기반 빠른 매칭 (동의어 사전 활용)
+          if (isoCode === "00 00") {
+            const keywordIsoCodes = inferIsoFromText(product.name + " " + (product.description || ""))
+            if (keywordIsoCodes.length > 0) {
+              isoCode = keywordIsoCodes[0] // 첫 번째 추론 결과 사용
+            }
           }
-        }
+          
+          // 2단계: 키워드 매칭 실패 시 AI 기반 추론 (선택적, 신뢰도 높은 경우만)
+          if (isoCode === "00 00" && body.useAiInference !== false) {
+            try {
+              const aiResult = await inferIsoCodeFromProduct({
+                name: product.name,
+                description: product.description,
+                // 이미지가 있으면 추가 가능
+              })
+              
+              if (aiResult && aiResult.confidence >= 0.7) {
+                isoCode = aiResult.isoCode
+                console.log(`[Crawl] AI 추론: ${product.name} -> ${isoCode} (신뢰도: ${aiResult.confidence})`)
+              }
+            } catch (error) {
+              console.warn(`[Crawl] AI 추론 실패 (${product.name}):`, error)
+              // AI 실패 시 폴백: 기존 키워드 매칭
+              if (productName.includes("전동") && productName.includes("휠체어")) {
+                isoCode = "12 23"
+              } else if (productName.includes("휠체어")) {
+                isoCode = "12 22"
+              } else if (productName.includes("스탠딩")) {
+                isoCode = "12 23"
+              } else if (productName.includes("워커") || productName.includes("보행기")) {
+                isoCode = "12 06"
+              } else if (productName.includes("식기")) {
+                isoCode = "15 09"
+              }
+            }
+          } else if (isoCode === "00 00") {
+            // AI 미사용 시 기존 키워드 매칭
+            if (productName.includes("전동") && productName.includes("휠체어")) {
+              isoCode = "12 23"
+            } else if (productName.includes("휠체어")) {
+              isoCode = "12 22"
+            } else if (productName.includes("스탠딩")) {
+              isoCode = "12 23"
+            } else if (productName.includes("워커") || productName.includes("보행기")) {
+              isoCode = "12 06"
+            } else if (productName.includes("식기")) {
+              isoCode = "15 09"
+            }
+          }
 
-        return {
-          ...product,
-          iso_code: isoCode,
-        }
-      })
+          return {
+            ...product,
+            iso_code: isoCode,
+          }
+        })
+      )
 
       // 미리보기 모드인 경우
       if (body.preview) {

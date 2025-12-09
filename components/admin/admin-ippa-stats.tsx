@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ClipboardCheck, TrendingUp, Users, BarChart3, Eye, X } from "lucide-react"
 import { IppaEvaluationDetail } from "./ippa-evaluation-detail"
 import { EffectivenessDashboard } from "@/components/effectiveness-dashboard"
+import { IppaStatsVisualization } from "./ippa-stats-visualization"
 
 interface IppaStats {
   totalEvaluations: number
@@ -29,6 +30,22 @@ interface IppaStats {
   activityStats?: Array<{
     icfCode: string
     count: number
+    avgImprovement: number
+  }>
+  icfCodeStats?: Array<{
+    code: string
+    count: number
+    avgPreScore: number
+    avgPostScore: number
+    avgImprovement: number
+    avgEffectiveness: number
+  }>
+  isoCodeStats?: Array<{
+    isoCode: string
+    count: number
+    avgEffectiveness: number
+    avgPreScore: number
+    avgPostScore: number
     avgImprovement: number
   }>
 }
@@ -152,35 +169,12 @@ export function AdminIppaStats() {
         </Card>
       </div>
 
-      {/* 월별 평가 추이 */}
-      <Card>
-        <CardHeader>
-          <CardTitle>월별 평가 추이</CardTitle>
-          <CardDescription>최근 6개월간의 K-IPPA 평가 통계</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {stats.evaluationsByMonth.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">데이터가 없습니다.</div>
-          ) : (
-            <div className="space-y-3">
-              {stats.evaluationsByMonth.map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-lg border">
-                  <div>
-                    <p className="font-medium">{item.month}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {item.count}개 평가
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{item.avgEffectiveness.toFixed(1)}</p>
-                    <p className="text-xs text-muted-foreground">평균 효과성</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* 통계 시각화 */}
+      <IppaStatsVisualization
+        icfCodeStats={stats.icfCodeStats}
+        isoCodeStats={stats.isoCodeStats}
+        monthlyStats={stats.evaluationsByMonth}
+      />
 
       {/* 카테고리별 통계 */}
       <Card>

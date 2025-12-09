@@ -343,6 +343,46 @@ export default async function ConsultationDetailPage({
     ? data.messages
     : [];
 
+  // K-IPPA 평가 요약 (추천 보조기기 기준)
+  let ippaSummary:
+    | {
+        total: number;
+        averageEffectiveness: number | null;
+        lastEvaluatedAt: string | null;
+      }
+    | null = null;
+
+  if (recommendations.length > 0) {
+    const recommendationIds = recommendations.map((rec) => rec.id);
+
+    const { data: ippaRows, error: ippaError } = await supabase
+      .from("ippa_evaluations")
+      .select("recommendation_id, effectiveness_score, evaluated_at")
+      .in("recommendation_id", recommendationIds);
+
+    if (ippaError) {
+      console.error("[consultation detail] K-IPPA 조회 오류:", ippaError);
+    } else if (ippaRows && ippaRows.length > 0) {
+      const total = ippaRows.length;
+      const avg =
+        ippaRows.reduce(
+          (sum, row) => sum + (row.effectiveness_score ?? 0),
+          0,
+        ) / total;
+      const lastEvaluatedAt = ippaRows
+        .map((row) => row.evaluated_at)
+        .filter(Boolean)
+        .sort()
+        .at(-1);
+
+      ippaSummary = {
+        total,
+        averageEffectiveness: Number.isFinite(avg) ? Number(avg) : null,
+        lastEvaluatedAt: lastEvaluatedAt ?? null,
+      };
+    }
+  }
+
   const statusMeta = statusBadgeMap[data.status] ?? statusBadgeMap.in_progress;
   const title = data.title || "제목 없는 상담";
 
@@ -386,115 +426,220 @@ export default async function ConsultationDetailPage({
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* 상담 내역 정리 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>상담 내역 정리</CardTitle>
-              <CardDescription>
-                AI가 상담 내용을 분석하여 정리한 핵심 정보입니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground mb-2">
-                  상담 요약
-                </p>
-                <p className="text-base leading-relaxed text-foreground">
-                  {analysisData?.summary ?? "요약 정보가 준비되지 않았습니다."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid gap-6 lg:grid-cols-[220px_1fr]">
+          {/* 사이드 내비게이션 */}
+          <div className="lg:sticky lg:top-24">
+            <Card className="shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-base">바로가기</CardTitle>
+                <CardDescription>상담 상세 메뉴</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {[
+                  { href: "#summary", label: "상담 내역" },
+                  { href: "#recommendations", label: "추천 보조기기" },
+                  { href: "#icf", label: "ICF 분석" },
+                  { href: "#kippa", label: "K-IPPA" },
+                  { href: "#chat", label: "채팅 기록" },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
 
-          {/* 추천 보조기기 목록 */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquareText
-                  className="size-5 text-primary"
-                  aria-hidden="true"
-                />
-                추천 보조기기 ({recommendations.length}개)
-              </CardTitle>
-              <CardDescription>
-                상담 내용을 바탕으로 추천된 보조기기 목록입니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {recommendations.length > 0 ? (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {recommendations.map((rec) =>
-                    rec.product ? (
-                      <ProductRecommendationCard
-                        key={rec.id}
-                        recommendationId={rec.id}
-                        productName={rec.product.name}
-                        description={
-                          rec.product.description ?? "상세 설명 준비 중입니다."
-                        }
-                        functionalSupport={rec.product.description ?? ""}
-                        imageUrl={rec.product.image_url ?? undefined}
-                        matchReason={rec.match_reason ?? undefined}
-                        matchScore={
-                          rec.rank
-                            ? 1 - Math.min(rec.rank / 10, 0.9)
-                            : undefined
-                        }
-                        isoCode={rec.product.iso_code ?? undefined}
-                        price={rec.product.price}
-                        purchaseLink={rec.product.purchase_link}
-                      />
-                    ) : null
-                  )}
-                </div>
-              ) : (
-                <div className="py-12 text-center text-muted-foreground border border-dashed rounded-lg">
-                  <p className="text-sm">추천된 보조기기가 없습니다.</p>
-                  <p className="text-xs mt-1">
-                    상담을 더 진행하면 추천이 제공됩니다.
+          {/* 메인 콘텐츠 */}
+          <div className="space-y-6">
+            {/* 상담 내역 정리 */}
+            <Card id="summary">
+              <CardHeader>
+                <CardTitle>상담 내역 정리</CardTitle>
+                <CardDescription>
+                  AI가 상담 내용을 분석하여 정리한 핵심 정보입니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-muted-foreground mb-2">
+                    상담 요약
+                  </p>
+                  <p className="text-base leading-relaxed text-foreground">
+                    {analysisData?.summary ?? "요약 정보가 준비되지 않았습니다."}
                   </p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* 상담 평가 (추천 보조기기 만족도) */}
-          <ConsultationRating
-            consultationId={data.id}
-            existingRating={
-              Array.isArray(data.feedback)
-                ? data.feedback[0]?.accuracy_rating
-                : data.feedback?.accuracy_rating
-            }
-            existingComment={
-              Array.isArray(data.feedback)
-                ? data.feedback[0]?.feedback_comment
-                : data.feedback?.feedback_comment
-            }
-          />
+            {/* 추천 보조기기 목록 */}
+            <Card id="recommendations">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquareText
+                    className="size-5 text-primary"
+                    aria-hidden="true"
+                  />
+                  추천 보조기기 ({recommendations.length}개)
+                </CardTitle>
+                <CardDescription>
+                  상담 내용을 바탕으로 추천된 보조기기 목록입니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {recommendations.length > 0 ? (
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    {recommendations.map((rec) =>
+                      rec.product ? (
+                        <ProductRecommendationCard
+                          key={rec.id}
+                          recommendationId={rec.id}
+                          productName={rec.product.name}
+                          description={
+                            rec.product.description ?? "상세 설명 준비 중입니다."
+                          }
+                          functionalSupport={rec.product.description ?? ""}
+                          imageUrl={rec.product.image_url ?? undefined}
+                          matchReason={rec.match_reason ?? undefined}
+                          matchScore={
+                            rec.rank
+                              ? 1 - Math.min(rec.rank / 10, 0.9)
+                              : undefined
+                          }
+                          isoCode={rec.product.iso_code ?? undefined}
+                          price={rec.product.price}
+                          purchaseLink={rec.product.purchase_link}
+                        />
+                      ) : null
+                    )}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center text-muted-foreground border border-dashed rounded-lg">
+                    <p className="text-sm">추천된 보조기기가 없습니다.</p>
+                    <p className="text-xs mt-1">
+                      상담을 더 진행하면 추천이 제공됩니다.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* ICF 분석 결과 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>ICF 분석 결과</CardTitle>
-              <CardDescription>
-                채팅 중 추출된 ICF 코드를 시각화하여 표시합니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {icfBuckets ? (
-                <IcfVisualization data={icfBuckets} />
-              ) : (
-                <p className="text-sm text-muted-foreground py-4">
-                  ICF 분석 데이터가 없습니다.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+            {/* K-IPPA 요약 카드 */}
+            <Card id="kippa">
+              <CardHeader>
+                <CardTitle>K-IPPA 평가</CardTitle>
+                <CardDescription>
+                  추천 보조기기에 대한 효과성 평가 결과를 확인하고 사후 평가로 이동합니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {ippaSummary ? (
+                  <>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex items-baseline gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          평균 효과성
+                        </span>
+                        <span className="text-2xl font-bold">
+                          {ippaSummary.averageEffectiveness?.toFixed(1) ?? "-"}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>평가 수</span>
+                        <Badge variant="secondary">{ippaSummary.total}</Badge>
+                      </div>
+                      {ippaSummary.lastEvaluatedAt && (
+                        <div className="text-sm text-muted-foreground">
+                          최근 평가: {formatDateTime(ippaSummary.lastEvaluatedAt)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex gap-3">
+                      {recommendations[0] ? (
+                        <Button asChild>
+                          <Link
+                            href={`/dashboard/ippa/${recommendations[0].id}`}
+                          >
+                            평가하기
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button disabled>추천이 있어야 평가할 수 있습니다</Button>
+                      )}
+                      <Button asChild variant="outline">
+                        <Link href="/dashboard/ippa">내 K-IPPA 내역</Link>
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm text-muted-foreground">
+                      아직 K-IPPA 평가가 없습니다. 추천 보조기기 사용 후 효과성을 평가해 주세요.
+                    </p>
+                    <div className="flex gap-3">
+                      {recommendations[0] ? (
+                        <Button asChild>
+                          <Link
+                            href={`/dashboard/ippa/${recommendations[0].id}`}
+                          >
+                            첫 평가 진행하기
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button disabled>추천이 있어야 평가할 수 있습니다</Button>
+                      )}
+                      <Button asChild variant="outline">
+                        <Link href="/dashboard/ippa">내 K-IPPA 내역</Link>
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* 채팅 기록 (접을 수 있게) */}
-          <ChatHistoryCollapsible messages={messages} />
+            {/* 상담 평가 (추천 보조기기 만족도) */}
+            <ConsultationRating
+              consultationId={data.id}
+              existingRating={
+                Array.isArray(data.feedback)
+                  ? data.feedback[0]?.accuracy_rating
+                  : data.feedback?.accuracy_rating
+              }
+              existingComment={
+                Array.isArray(data.feedback)
+                  ? data.feedback[0]?.feedback_comment
+                  : data.feedback?.feedback_comment
+              }
+            />
+
+            {/* ICF 분석 결과 */}
+            <Card id="icf">
+              <CardHeader>
+                <CardTitle>ICF 분석 결과</CardTitle>
+                <CardDescription>
+                  채팅 중 추출된 ICF 코드를 시각화하여 표시합니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {icfBuckets ? (
+                  <IcfVisualization data={icfBuckets} />
+                ) : (
+                  <p className="text-sm text-muted-foreground py-4">
+                    ICF 분석 데이터가 없습니다.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* 채팅 기록 (접을 수 있게) */}
+            <div id="chat">
+              <ChatHistoryCollapsible messages={messages} />
+            </div>
+          </div>
         </div>
       </div>
 

@@ -29,6 +29,15 @@ export type PromptContext = {
   history: { role: "user" | "assistant"; content: string }[];
   latestUserMessage: string;
   mediaDescription?: string;
+  evaluationContext?: {
+    extractedIcfCodes: string[];
+    evaluatedActivities: Array<{
+      icfCode: string;
+      importance?: number;
+      preDifficulty?: number;
+    }>;
+    currentActivityIndex?: number;
+  };
 };
 
 const formatHistory = (history: PromptContext["history"]) =>
@@ -44,15 +53,47 @@ export const buildPrompt = ({
   history,
   latestUserMessage,
   mediaDescription,
+  evaluationContext,
 }: PromptContext) => {
   const condensedHistory = formatHistory(history.slice(-6));
   const mediaHint = mediaDescription ? `환경 정보: ${mediaDescription}` : "";
   const personaLine = persona ? `타깃 페르소나: ${persona}` : "";
 
+  // 평가 컨텍스트 정보 구성
+  let evaluationHint = "";
+  if (evaluationContext) {
+    const { extractedIcfCodes, evaluatedActivities, currentActivityIndex } =
+      evaluationContext;
+
+    if (extractedIcfCodes && extractedIcfCodes.length > 0) {
+      const evaluatedCodes = new Set(evaluatedActivities.map((a) => a.icfCode));
+      const pendingCodes = extractedIcfCodes.filter(
+        (code) => !evaluatedCodes.has(code)
+      );
+
+      if (pendingCodes.length > 0) {
+        const currentCode =
+          currentActivityIndex !== undefined &&
+          currentActivityIndex < pendingCodes.length
+            ? pendingCodes[currentActivityIndex]
+            : pendingCodes[0];
+
+        evaluationHint = `
+평가 진행 상황:
+- 추출된 활동 코드: ${extractedIcfCodes.join(", ")}
+- 평가 완료된 활동: ${evaluatedActivities.length}개
+- 다음 평가할 활동: ${currentCode || "없음"}
+- 평가가 필요한 활동이 있으면 자연스럽게 질문하되, 한 번에 하나씩만 질문한다.
+`;
+      }
+    }
+  }
+
   return `
 ${BASE_SYSTEM_PROMPT}
 ${personaLine}
 ${mediaHint}
+${evaluationHint}
 
 최근 대화:
 ${condensedHistory}
@@ -67,30 +108,70 @@ export const buildStreamingPrompt = ({
   history,
   latestUserMessage,
   mediaDescription,
+  evaluationContext,
 }: PromptContext) => {
   const condensedHistory = formatHistory(history.slice(-6));
   const mediaHint = mediaDescription ? `환경 정보: ${mediaDescription}` : "";
   const personaLine = persona ? `타깃 페르소나: ${persona}` : "";
 
+  // 평가 컨텍스트 정보 구성
+  let evaluationHint = "";
+  if (evaluationContext) {
+    const { extractedIcfCodes, evaluatedActivities, currentActivityIndex } =
+      evaluationContext;
+
+    if (extractedIcfCodes && extractedIcfCodes.length > 0) {
+      const evaluatedCodes = new Set(evaluatedActivities.map((a) => a.icfCode));
+      const pendingCodes = extractedIcfCodes.filter(
+        (code) => !evaluatedCodes.has(code)
+      );
+
+      if (pendingCodes.length > 0) {
+        const currentCode =
+          currentActivityIndex !== undefined &&
+          currentActivityIndex < pendingCodes.length
+            ? pendingCodes[currentActivityIndex]
+            : pendingCodes[0];
+
+        evaluationHint = `
+**평가 진행 상황**
+- 추출된 활동 코드: ${extractedIcfCodes.join(", ")}
+- 평가 완료된 활동: ${evaluatedActivities.length}개
+- 다음 평가할 활동: ${currentCode || "없음"}
+- 평가가 필요한 활동이 있으면 자연스럽게 질문하되, 한 번에 하나씩만 질문한다.
+`;
+      }
+    }
+  }
+
   return `
 너는 보조공학 전문가 "링커"이다.
+
+**기본 원칙**
 - 의료 행위 금지. 기능적 해결책과 보조기기 아이디어에 집중한다.
 - 사용자가 실제 상담을 받는 것처럼 따뜻하고 공감하는 톤을 유지한다.
-- 답변의 길이는 100자 이내로 제한한다.
-- 줄바꿈을 정확하게 사용해서 한 줄에 많은 의미가 담기지 않도록 한다.
-- 한 번의 채팅에 최대 5개의 구체적인 보조기기 제안을 제시한다.
-- 동일한 내용을 반복하지 말고, 새로운 관점(설치 요령, 가격대, 대체 옵션 등)을 제공한다.
-- 보조기기 제안 시 구체적인 제품명이나 카테고리를 자연스럽게 언급하되, 데이터베이스나 기술 용어는 절대 사용하지 않는다.
-- 단계별 실행 방법, 관리 팁, 환경 개선 아이디어를 함께 제안한다.
-- 모든 제안은 구체적이고 실용적이며, 사용자의 환경과 상황에 맞게 제시한다.
-- 사용자의 요청을 정확히 이해하고, 실질적인 해결책(보조기기 추천, 활용 방법 등)을 제시한다.
-- 질문이 반복되더라도 이전 답변과 다른 관점(설치 팁, 가격대, 대체 옵션 등)을 제시한다.
+- 모든 설명은 쉽고 간단하게. 전문 용어는 피하고 일상 언어로 설명한다.
+- 짧은 문장을 사용하고, 한 번에 하나의 내용만 전달한다.
+- 답변은 2-3문단으로 구성하고, 각 문단은 2-3문장으로 제한한다.
 
-**중요: K-IPPA 평가를 위한 필수 질문**
-- 상담 중 사용자가 어려움을 호소하는 활동에 대해 반드시 다음 두 가지를 질문해야 한다:
-  1. "이 활동이 일상생활에서 얼마나 중요한가요? (1=낮음, 5=매우 높음)"
-  2. "현재 이 활동을 수행하는 것이 얼마나 어려우신가요? (1=쉬움, 5=매우 어려움)"
-- 이 질문들은 상담 흐름에 자연스럽게 포함되어야 하며, 사용자가 답변할 수 있도록 친절하게 안내한다.
+**답변 스타일**
+- 보조기기를 추천할 때는 구체적인 사용 방법과 장점을 쉽게 설명한다.
+- 예: "이런 제품이 도움이 될 수 있어요. 이렇게 사용하시면..."
+- 같은 내용을 반복하지 말고, 새로운 관점(사용 팁, 가격대, 대체 옵션 등)을 제공한다.
+- 데이터베이스나 기술 용어는 절대 사용하지 않는다.
+
+**K-IPPA 평가 권유 (부드럽고 자연스럽게)**
+- ICF 분석이 완료되고 D-Level 활동 코드가 추출되면, 자연스럽게 평가를 유도한다.
+- 한 번에 하나의 활동에 대해서만 질문한다. 여러 활동이 있어도 하나씩 순서대로 진행한다.
+- 평가가 필요한 활동이 있으면 다음과 같이 질문한다:
+  * 중요도: "이 활동(예: 걷기)이 일상생활에서 얼마나 중요한가요? 1점(별로 안 중요)부터 5점(매우 중요)까지로 답변해주세요."
+  * 어려움 정도: "지금 이 활동을 하실 때 어려움 정도는 어떤가요? 1점(쉬워요)부터 5점(거의 못 해요)까지로 답변해주세요."
+- 사용자가 숫자로 답변하거나 자연어로 답변(예: "매우 중요해요", "5점", "어려워요")해도 모두 이해한다.
+- 평가가 완료된 활동은 다시 질문하지 않는다.
+- 강요하지 않고, 사용자가 답하기 편한 분위기를 만든다.
+- 답변하지 않아도 상담은 계속 진행한다.
+- 평가 질문 후에는 사용자의 답변을 확인하고 감사 인사를 한 후 다음 활동으로 넘어간다.
+${evaluationHint}
 ${personaLine}
 ${mediaHint}
 
@@ -98,6 +179,6 @@ ${mediaHint}
 ${condensedHistory}
 사용자 최신 입력: ${latestUserMessage}
 
-위 내용을 참고하여 자연어로만 상세히 답변하라. JSON이나 코드 블록 없이 문단 형태로 작성한다.
+위 내용을 참고하여 자연어로만 쉽고 간단하게 답변하라. JSON이나 코드 블록 없이 문단 형태로 작성한다.
 `;
 };

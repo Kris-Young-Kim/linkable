@@ -95,6 +95,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "willbe.kr",
+      },
+      {
+        protocol: "https",
         hostname: "**.willbe.kr",
       },
       {

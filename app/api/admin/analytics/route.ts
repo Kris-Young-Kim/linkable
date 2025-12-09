@@ -24,23 +24,12 @@ export async function GET(request: NextRequest) {
     const clerkUser = await client.users.getUser(userId);
     const userRole = clerkUser.privateMetadata?.role as string | undefined;
 
-    console.log(
-      `[Admin Analytics] Checking role for user ${userId}: role=${userRole}`
-    );
-
     if (userRole !== "admin" && userRole !== "expert") {
-      console.log(
-        `[Admin Analytics] Access denied for user ${userId}: role=${userRole}`
-      );
       return NextResponse.json(
         { error: "Forbidden: Admin access required" },
         { status: 403 }
       );
     }
-
-    console.log(
-      `[Admin Analytics] Access granted for user ${userId}: role=${userRole}`
-    );
 
     const supabase = getSupabaseServerClient();
 
@@ -128,9 +117,21 @@ export async function GET(request: NextRequest) {
       }
 
       const totalIppaEvaluations = allIppaEvaluations?.length ?? 0;
+      
+      // recommendation_id가 있고 해당 추천이 클릭된 평가만 카운트
+      const { data: clickedRecIds } = await supabase
+        .from("recommendations")
+        .select("id")
+        .eq("is_clicked", true);
+      
+      const clickedRecIdSet = new Set(clickedRecIds?.map(r => r.id) || []);
+      const validEvaluations = allIppaEvaluations?.filter(
+        e => e.recommendation_id && clickedRecIdSet.has(e.recommendation_id)
+      ).length ?? 0;
+      
       const ippaParticipationRate =
         clickedRecommendations > 0
-          ? (totalIppaEvaluations / clickedRecommendations) * 100
+          ? (validEvaluations / clickedRecommendations) * 100
           : 0;
 
       // 전체 상담 데이터
@@ -292,6 +293,120 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 추가 지표 계산
+    // 1. 사용자 성장률
+    const { data: usersData } = await supabase
+      .from("users")
+      .select("created_at")
+      .order("created_at", { ascending: false });
+
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const sixtyDaysAgo = new Date(now);
+    sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+
+    const totalUsers = usersData?.length ?? 0;
+    const newUsersLast30Days =
+      usersData?.filter(
+        (u) => new Date(u.created_at) >= thirtyDaysAgo
+      ).length ?? 0;
+    const newUsersPrevious30Days =
+      usersData?.filter(
+        (u) =>
+          new Date(u.created_at) >= sixtyDaysAgo &&
+          new Date(u.created_at) < thirtyDaysAgo
+      ).length ?? 0;
+    const userGrowthRate =
+      newUsersPrevious30Days > 0
+        ? ((newUsersLast30Days - newUsersPrevious30Days) /
+            newUsersPrevious30Days) *
+          100
+        : newUsersLast30Days > 0
+        ? 100
+        : 0;
+
+    // 활성 사용자 (최근 30일 내 상담 또는 평가를 한 사용자)
+    const { data: activeUsersData } = await supabase
+      .from("consultations")
+      .select("user_id, created_at")
+      .gte("created_at", thirtyDaysAgo.toISOString());
+
+    const activeUserIds = new Set(
+      activeUsersData?.map((c) => c.user_id) ?? []
+    );
+    const activeUsers = activeUserIds.size;
+
+    // 2. 전환율 계산
+    const totalConsultations = Number(filteredMetrics.total_consultations);
+    const totalRecommendations = Number(
+      filteredMetrics.total_recommendations
+    );
+    const clickedRecommendations = Number(
+      filteredMetrics.clicked_recommendations
+    );
+    const totalEvaluations = Number(filteredMetrics.total_ippa_evaluations);
+
+    const consultationToRecommendationRate =
+      totalConsultations > 0
+        ? (totalRecommendations / totalConsultations) * 100
+        : 0;
+    const recommendationToClickRate =
+      totalRecommendations > 0
+        ? (clickedRecommendations / totalRecommendations) * 100
+        : 0;
+    const clickToEvaluationRate =
+      clickedRecommendations > 0
+        ? (totalEvaluations / clickedRecommendations) * 100
+        : 0;
+    const overallConversionRate =
+      totalConsultations > 0
+        ? (totalEvaluations / totalConsultations) * 100
+        : 0;
+
+    // 3. 효과성 점수 분포
+    const { data: effectivenessScoresData } = await supabase
+      .from("ippa_evaluations")
+      .select("effectiveness_score")
+      .not("effectiveness_score", "is", null);
+
+    const scores = (effectivenessScoresData ?? [])
+      .map((e) => Number(e.effectiveness_score))
+      .filter((s) => !isNaN(s))
+      .sort((a, b) => a - b);
+
+    const scoreDistribution = {
+      min: scores.length > 0 ? scores[0] : 0,
+      max: scores.length > 0 ? scores[scores.length - 1] : 0,
+      median:
+        scores.length > 0
+          ? scores.length % 2 === 0
+            ? (scores[scores.length / 2 - 1] + scores[scores.length / 2]) / 2
+            : scores[Math.floor(scores.length / 2)]
+          : 0,
+      p25: scores.length > 0 ? scores[Math.floor(scores.length * 0.25)] : 0,
+      p75: scores.length > 0 ? scores[Math.floor(scores.length * 0.75)] : 0,
+      p90: scores.length > 0 ? scores[Math.floor(scores.length * 0.9)] : 0,
+    };
+
+    // 4. 재방문율 (최근 30일 내 2회 이상 상담한 사용자)
+    const { data: repeatUsersData } = await supabase
+      .from("consultations")
+      .select("user_id")
+      .gte("created_at", thirtyDaysAgo.toISOString());
+
+    const userConsultationCounts = new Map<string, number>();
+    repeatUsersData?.forEach((c) => {
+      const count = userConsultationCounts.get(c.user_id) || 0;
+      userConsultationCounts.set(c.user_id, count + 1);
+    });
+
+    const repeatUsers = Array.from(userConsultationCounts.values()).filter(
+      (count) => count >= 2
+    ).length;
+    const retentionRate =
+      activeUsers > 0 ? (repeatUsers / activeUsers) * 100 : 0;
+
     const response: any = {
       metrics: {
         recommendationAccuracy: {
@@ -322,6 +437,40 @@ export async function GET(request: NextRequest) {
         averageEffectiveness: Number(
           filteredMetrics.average_effectiveness_score
         ),
+        // 추가 지표
+        userGrowth: {
+          totalUsers,
+          newUsersLast30Days,
+          userGrowthRate: Number(userGrowthRate.toFixed(2)),
+          activeUsers,
+          activeUserRate:
+            totalUsers > 0
+              ? Number(((activeUsers / totalUsers) * 100).toFixed(2))
+              : 0,
+        },
+        conversionFunnel: {
+          consultationToRecommendationRate: Number(
+            consultationToRecommendationRate.toFixed(2)
+          ),
+          recommendationToClickRate: Number(
+            recommendationToClickRate.toFixed(2)
+          ),
+          clickToEvaluationRate: Number(clickToEvaluationRate.toFixed(2)),
+          overallConversionRate: Number(overallConversionRate.toFixed(2)),
+          totalConsultations,
+          totalRecommendations,
+          clickedRecommendations,
+          totalEvaluations,
+        },
+        effectivenessDistribution: {
+          ...scoreDistribution,
+          totalScores: scores.length,
+        },
+        retention: {
+          repeatUsers,
+          retentionRate: Number(retentionRate.toFixed(2)),
+          activeUsers,
+        },
       },
       timestamp: new Date().toISOString(),
     };

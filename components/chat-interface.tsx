@@ -151,10 +151,12 @@ export function ChatInterface() {
     async (currentConsultationId: string) => {
       // ICF 분석이 완료되지 않았으면 추천을 로드하지 않음
       if (!icfAnalysis) {
-        console.log("[chat] ICF analysis not completed, skipping recommendation preload");
+        console.log(
+          "[chat] ICF analysis not completed, skipping recommendation preload"
+        );
         return;
       }
-      
+
       setShowRecommendationCTA(true);
       setIsLoadingRecommendations(true);
 
@@ -171,7 +173,10 @@ export function ChatInterface() {
             setHasRecommendations(true);
             setPreviewRecommendations(recommendationsData.products.slice(0, 3));
             // 추천이 준비되면 플로우 가이드 표시 (모달 또는 토스트)
-            if (recommendationsData.products && recommendationsData.products.length > 0) {
+            if (
+              recommendationsData.products &&
+              recommendationsData.products.length > 0
+            ) {
               setShowFlowGuide(true);
             }
           }
@@ -199,8 +204,9 @@ export function ChatInterface() {
     }
 
     // 사용자가 수동으로 스크롤을 올렸는지 확인
-    const isNearBottom = 
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
 
     // 사용자가 맨 아래에 있거나 강제 스크롤인 경우에만 스크롤
     if (force || isNearBottom) {
@@ -228,16 +234,16 @@ export function ChatInterface() {
       // 스크롤 중에는 자동 스크롤 방지
       isUserScrollingRef.current = true;
       clearTimeout(scrollTimeout);
-      
+
       // 스크롤이 멈춘 후 일정 시간이 지나면 다시 자동 스크롤 허용
       scrollTimeout = setTimeout(() => {
         isUserScrollingRef.current = false;
       }, 150);
     };
 
-    container.addEventListener('scroll', handleScroll);
+    container.addEventListener("scroll", handleScroll);
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener("scroll", handleScroll);
       clearTimeout(scrollTimeout);
     };
   }, []);
@@ -378,10 +384,19 @@ export function ChatInterface() {
                 icfAnalysis?: IcfAnalysisBuckets | null;
                 problemDescription?: string;
                 isoMatches?: IsoMatch[];
+                isGreeting?: boolean;
               };
 
               if (!consultationId && payload.consultationId) {
                 setConsultationId(payload.consultationId);
+              }
+
+              // 인사 메시지인 경우 분석 결과를 표시하지 않음
+              if (payload.isGreeting) {
+                console.log(
+                  "[chat] Greeting message detected, skipping analysis display"
+                );
+                break;
               }
 
               if (payload.followUpQuestions) {
@@ -392,7 +407,9 @@ export function ChatInterface() {
 
               if (payload.icfAnalysis) {
                 // 접근성: 분석 완료 알림
-                announceToScreenReader("ICF 분석이 완료되었습니다. 추천을 확인할 수 있습니다.");
+                announceToScreenReader(
+                  "ICF 분석이 완료되었습니다. 추천을 확인할 수 있습니다."
+                );
                 console.log(
                   "[chat] Received ICF analysis:",
                   payload.icfAnalysis
@@ -608,7 +625,6 @@ export function ChatInterface() {
     textareaRef.current?.focus();
   };
 
-
   return (
     <>
       <DisclaimerModal
@@ -702,7 +718,7 @@ export function ChatInterface() {
           </div>
 
           {/* Messages Area */}
-          <div 
+          <div
             ref={messagesContainerRef}
             className="flex-1 overflow-y-auto px-4 py-6 min-h-0"
           >
@@ -862,9 +878,9 @@ export function ChatInterface() {
                               ISO 매칭 결과
                             </p>
                             <div className="grid gap-3 sm:grid-cols-2">
-                              {isoMatches.slice(0, 3).map((match) => (
+                              {isoMatches.slice(0, 3).map((match, index) => (
                                 <div
-                                  key={`${match.isoCode}-${match.label}`}
+                                  key={`${match.isoCode}-${match.label}-${index}`}
                                   className="rounded-lg border border-primary/20 bg-background px-3 py-2 text-left"
                                 >
                                   <div className="text-xs text-muted-foreground">

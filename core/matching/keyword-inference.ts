@@ -1,5 +1,6 @@
 import { findIcfCode } from "@/core/assessment/icf-codes"
 import type { IsoMatch } from "@/core/matching/iso-mapping"
+import { normalizeKeyword, extractAndNormalizeKeywords, inferIsoFromText } from "./synonym-dictionary"
 
 type ProductKeywordRule = {
   isoCode: string
@@ -173,13 +174,31 @@ export const appendKeywordIsoMatches = ({
   const isoSet = new Set(matches.map((match) => match.isoCode))
   const additions: IsoMatch[] = []
 
+  // 동의어 사전을 활용한 키워드 정규화
+  const normalizedKeywords = text ? extractAndNormalizeKeywords(text) : []
+  const inferredIsoCodes = text ? inferIsoFromText(text) : []
+
   for (const rule of keywordRules) {
+    // 기존 키워드 매칭
     const textTriggered =
       normalizedText.length > 0 &&
-      rule.keywords.some((keyword) => normalizedText.includes(keyword.toLowerCase()))
+      rule.keywords.some((keyword) => {
+        const normalizedKeyword = normalizeKeyword(keyword)
+        return normalizedText.includes(keyword.toLowerCase()) ||
+               normalizedKeywords.includes(normalizedKeyword)
+      })
+    
+    // 동의어 사전 기반 매칭
+    const synonymTriggered = normalizedKeywords.some((keyword) =>
+      rule.keywords.some((ruleKeyword) => normalizeKeyword(ruleKeyword) === keyword)
+    )
+    
+    // 추론된 ISO 코드와 일치하는지 확인
+    const isoInferred = inferredIsoCodes.includes(rule.isoCode)
+    
     const icfTriggered = rule.icfTriggers?.some((code) => icfSet.has(code.toLowerCase()))
 
-    if (!textTriggered && !icfTriggered) {
+    if (!textTriggered && !synonymTriggered && !isoInferred && !icfTriggered) {
       continue
     }
 
@@ -187,11 +206,14 @@ export const appendKeywordIsoMatches = ({
       continue
     }
 
+    // 동의어 매칭이면 점수 보너스
+    const score = synonymTriggered || isoInferred ? 1.2 : 1.15
+
     additions.push({
       isoCode: rule.isoCode,
       label: rule.label,
       description: rule.description ?? "",
-      score: 1.15,
+      score,
       matchedIcf: buildMatchedIcf(rule.icfTriggers),
       reason: rule.reason ?? `사용자가 ${rule.label}을(를) 직접 언급했습니다.`,
     })
