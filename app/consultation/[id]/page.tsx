@@ -87,30 +87,6 @@ const FloatingActionMenu = dynamic(() =>
   }))
 );
 
-// K-IPPA 설문 컴포넌트 (클라이언트 컴포넌트)
-const IppaConsultationFormWrapper = dynamic(
-  () =>
-    import("@/components/consultation/ippa-consultation-form-wrapper").then(
-      (mod) => ({ default: mod.IppaConsultationFormWrapper })
-    ),
-  {
-    loading: () => (
-      <Card>
-        <CardHeader>
-          <div className="h-6 bg-muted animate-pulse rounded w-1/2" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="h-20 bg-muted animate-pulse rounded" />
-            <div className="h-10 bg-muted animate-pulse rounded" />
-          </div>
-        </CardContent>
-      </Card>
-    ),
-  }
-);
-import { IppaConsultationForm } from "@/components/ippa-consultation-form";
-
 type MessageRow = {
   id: string;
   sender: "user" | "ai" | "system";
@@ -519,26 +495,6 @@ export default async function ConsultationDetailPage({
 
           {/* 채팅 기록 (접을 수 있게) */}
           <ChatHistoryCollapsible messages={messages} />
-
-          {/* K-IPPA 중요도, 어려움 정도 설문 */}
-          <Card>
-            <CardHeader>
-              <CardTitle>K-IPPA 중요도 및 어려움 정도 설문</CardTitle>
-              <CardDescription>
-                ICF 코드별 활동의 중요도와 현재 어려움 정도를 평가해주세요.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <IppaConsultationFormWrapper
-                consultationId={data.id}
-                problemDescription={
-                  analysisData?.identified_problems ||
-                  analysisData?.summary ||
-                  undefined
-                }
-              />
-            </CardContent>
-          </Card>
         </div>
       </div>
 

@@ -526,43 +526,87 @@ export default async function RecommendationsDetailPage({
           <ConsultationFeedbackForm consultationId={consultation.id} />
         )}
 
-        {/* 기초선 평가 안내 */}
+        {/* 기초선 평가 안내 - 개선된 사용자 여정 */}
         {!consultation.hasBaselineEvaluation ? (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">기초선 평가</CardTitle>
+          <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-primary/3 to-transparent">
+            <CardHeader className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-primary/10 p-2">
+                  <ClipboardCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 space-y-1">
+                  <CardTitle className="text-lg">
+                    보조기기 효과를 정확히 측정하려면
+                  </CardTitle>
+                  <CardDescription className="text-sm leading-relaxed">
+                    지금 상태를 간단히 기록해두시면, 보조기기 사용 후 얼마나
+                    개선되었는지
+                    <span className="font-semibold text-foreground">
+                      {" "}
+                      수치로 확인
+                    </span>
+                    할 수 있습니다.
+                  </CardDescription>
+                </div>
               </div>
-              <CardDescription>
-                현재 상태를 평가해주시면, 보조기기 사용 후 개선도를 정확히
-                측정할 수 있습니다.
-              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Button className="w-full" asChild>
-                <Link href={`/dashboard/ippa/baseline/${consultation.id}`}>
-                  기초선 평가 시작하기
-                </Link>
-              </Button>
-              <p className="mt-2 text-xs text-muted-foreground text-center">
-                평가는 선택사항이며, 나중에 대시보드에서도 진행할 수 있습니다.
+            <CardContent className="space-y-4">
+              {/* 가치 제시 - Progressive Disclosure */}
+              <div className="rounded-lg bg-background/50 p-4 space-y-2 border border-border/50">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  평가를 통해 얻을 수 있는 것
+                </p>
+                <ul className="space-y-1.5 text-sm text-foreground">
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>보조기기 사용 전후 개선도 비교</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>개인 맞춤형 효과 리포트 제공</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-primary mt-0.5">✓</span>
+                    <span>약 2-3분 소요, 언제든 중단 가능</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button className="flex-1" asChild>
+                  <Link href={`/dashboard/ippa/baseline/${consultation.id}`}>
+                    지금 평가하기
+                  </Link>
+                </Button>
+                <Button variant="outline" className="flex-1" asChild>
+                  <Link href={`/recommendations/${consultationId}`}>
+                    나중에 하기
+                  </Link>
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center leading-relaxed">
+                평가는 선택사항입니다. 원하실 때 언제든 대시보드에서 진행하실 수
+                있어요.
               </p>
             </CardContent>
           </Card>
         ) : (
-          <Card className="border-emerald-200 bg-emerald-50/50">
+          <Card className="border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-emerald-50/30">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="h-5 w-5 text-emerald-600" />
-                <CardTitle className="text-lg text-emerald-900">
-                  기초선 평가 완료
-                </CardTitle>
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-emerald-100 p-2">
+                  <ClipboardCheck className="h-5 w-5 text-emerald-700" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg text-emerald-900">
+                    기초선 평가 완료
+                  </CardTitle>
+                  <CardDescription className="text-emerald-700/90 mt-1">
+                    보조기기 사용 후 효과를 측정할 준비가 되었습니다.
+                  </CardDescription>
+                </div>
               </div>
-              <CardDescription className="text-emerald-700">
-                기초선 평가가 완료되었습니다. 보조기기 사용 후 효과를 측정할
-                준비가 되었습니다.
-              </CardDescription>
             </CardHeader>
           </Card>
         )}
