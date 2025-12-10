@@ -16,7 +16,10 @@
     "debug:html": "tsx scripts/crawlers/debug-html-structure.ts",
     "test:products": "tsx scripts/test-crawled-products.ts",
     "test:api": "tsx scripts/test-product-api.ts",
-    "test:recommendation": "tsx scripts/test-recommendation-system.ts"
+    "test:recommendation": "tsx scripts/test-recommendation-system.ts",
+    "test:clean": "if exist test-results rmdir /s /q test-results",
+    "test:e2e": "npm run test:clean && playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",
@@ -80,6 +83,7 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@tailwindcss/postcss": "^4.1.9",
     "@types/node": "^22",
     "@types/react": "^19",
