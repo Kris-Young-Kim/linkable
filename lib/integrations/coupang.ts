@@ -73,67 +73,11 @@ export class CoupangApiClient {
     // 경로는 쿼리 파라미터를 포함하지 않을 수도 있음 (시도 1: 경로만 사용)
     const message = `${method}\n${path}\n${timestamp}\n${this.config.accessKey}`
 
-    // 디버깅용 (항상 출력)
-    console.log("[Coupang API Debug] 서명 메시지:")
-    console.log(message.replace(/\n/g, "\\n"))
-    console.log(`[Coupang API Debug] 타임스탬프: ${timestamp}`)
-    console.log(`[Coupang API Debug] 경로: ${path}`)
-    console.log(`[Coupang API Debug] 메서드: ${method}`)
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId: "debug-session",
-        runId: "run-hmac1",
-        hypothesisId: "H1",
-        location: "lib/integrations/coupang.ts:generateSignature",
-        message: "Signature payload",
-        data: { method, path, timestamp, accessKeyPrefix: this.config.accessKey?.slice(0, 6) },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {})
-    // #endregion
-
     // HMAC-SHA256 서명 생성
     const signature = crypto
       .createHmac("sha256", this.config.secretKey)
       .update(message, "utf-8")
       .digest("base64")
-
-    console.log(`[Coupang API Debug] 생성된 서명: ${signature.substring(0, 30)}...`)
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId: "debug-session",
-        runId: "run-hmac1",
-        hypothesisId: "H1",
-        location: "lib/integrations/coupang.ts:generateSignature",
-        message: "Signature generated",
-        data: { signaturePrefix: signature.substring(0, 16) },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {})
-    // #endregion
-    // #region agent log
-    try {
-      fs.appendFileSync(
-        ".cursor/debug.log",
-        JSON.stringify({
-          sessionId: "debug-session",
-          runId: "run-hmac1",
-          hypothesisId: "H1",
-          location: "lib/integrations/coupang.ts:generateSignature",
-          message: "Signature generated (fs)",
-          data: { signaturePrefix: signature.substring(0, 16) },
-          timestamp: Date.now(),
-        }) + "\n",
-        { encoding: "utf-8" }
-      )
-    } catch {}
-    // #endregion
 
     return signature
   }
@@ -153,41 +97,6 @@ export class CoupangApiClient {
 
     // Authorization 헤더 형식: CEA algorithm=HmacSHA256, access-key={ACCESS_KEY}, signed-date={timestamp}, signature={signature}
     const authorization = `CEA algorithm=HmacSHA256, access-key=${this.config.accessKey}, signed-date=${timestamp}, signature=${signature}`
-
-    console.log(`[Coupang API Debug] 생성된 서명: ${signature.substring(0, 30)}...`)
-    console.log(`[Coupang API Debug] Authorization 헤더: ${authorization.substring(0, 100)}...`)
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sessionId: "debug-session",
-        runId: "run-hmac1",
-        hypothesisId: "H2",
-        location: "lib/integrations/coupang.ts:getHeaders",
-        message: "Header built",
-        data: { method, path, timestamp, authPreview: authorization.substring(0, 60) },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {})
-    // #endregion
-    // #region agent log
-    try {
-      fs.appendFileSync(
-        ".cursor/debug.log",
-        JSON.stringify({
-          sessionId: "debug-session",
-          runId: "run-hmac1",
-          hypothesisId: "H2",
-          location: "lib/integrations/coupang.ts:getHeaders",
-          message: "Header built (fs)",
-          data: { method, path, timestamp, authPreview: authorization.substring(0, 60) },
-          timestamp: Date.now(),
-        }) + "\n",
-        { encoding: "utf-8" }
-      )
-    } catch {}
-    // #endregion
 
     return {
       Authorization: authorization,
