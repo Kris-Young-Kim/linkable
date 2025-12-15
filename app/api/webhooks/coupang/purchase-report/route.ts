@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createCoupangClient } from "@/lib/integrations/coupang";
-import { createClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/logging";
 
 export async function GET(request: NextRequest) {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Purchase Report] ${purchases.length}건의 구매 내역 발견`);
 
-    const supabase = createClient();
+    const supabase = getSupabaseServerClient();
     let successCount = 0;
     let errorCount = 0;
 
@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
           .from("recommendations")
           .select("id, product_id, consultation_id, user_id")
           .eq("is_clicked", true) // 클릭된 추천만 대상
+          .eq("product_id", purchase.productId) // 구매 상품과 매칭
           .limit(100); // 최근 100개만 조회 (성능 고려)
 
         if (recError) {

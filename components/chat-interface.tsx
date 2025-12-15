@@ -157,27 +157,6 @@ export function ChatInterface() {
 
   const preloadRecommendations = useCallback(
     async (currentConsultationId: string) => {
-      // #region agent log
-      fetch(
-        "http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            location: "components/chat-interface.tsx:preloadRecommendations",
-            message: "Preload recommendations start",
-            data: {
-              consultationId: currentConsultationId,
-              hasIcfAnalysis: !!icfAnalysis,
-            },
-            timestamp: Date.now(),
-            sessionId: "debug-session",
-            runId: "run2",
-            hypothesisId: "D",
-          }),
-        }
-      ).catch(() => {});
-      // #endregion
       // ICF 분석이 완료되지 않았으면 추천을 로드하지 않음
       if (!icfAnalysis) {
         console.log(
@@ -193,51 +172,8 @@ export function ChatInterface() {
         const recommendationsResponse = await fetch(
           `/api/products?consultationId=${currentConsultationId}&limit=3`
         );
-        // #region agent log
-        fetch(
-          "http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              location:
-                "components/chat-interface.tsx:preloadRecommendations:api",
-              message: "Recommendations API response",
-              data: {
-                ok: recommendationsResponse.ok,
-                status: recommendationsResponse.status,
-              },
-              timestamp: Date.now(),
-              sessionId: "debug-session",
-              runId: "run2",
-              hypothesisId: "D",
-            }),
-          }
-        ).catch(() => {});
-        // #endregion
         if (recommendationsResponse.ok) {
           const recommendationsData = await recommendationsResponse.json();
-          // #region agent log
-          fetch(
-            "http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                location:
-                  "components/chat-interface.tsx:preloadRecommendations:data",
-                message: "Recommendations parsed",
-                data: {
-                  productsCount: recommendationsData.products?.length || 0,
-                },
-                timestamp: Date.now(),
-                sessionId: "debug-session",
-                runId: "run2",
-                hypothesisId: "D",
-              }),
-            }
-          ).catch(() => {});
-          // #endregion
           if (
             recommendationsData.products &&
             recommendationsData.products.length > 0

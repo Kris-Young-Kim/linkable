@@ -9,9 +9,9 @@
  * 참고: Meta Pixel Conversions API를 사용하여 서버 사이드 이벤트를 받을 수 있습니다.
  */
 
-import { NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
-import { logEvent } from "@/lib/logging"
+import { NextRequest, NextResponse } from "next/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { logEvent } from "@/lib/logging";
 
 /**
  * Meta Pixel 구매 이벤트 데이터 타입
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Purchase value is required" }, { status: 400 })
     }
 
-    const supabase = createClient()
+    const supabase = getSupabaseServerClient();
 
     // 구매 데이터 파싱
     const purchaseAmount = parseFloat(String(body.custom_data.value || 0))

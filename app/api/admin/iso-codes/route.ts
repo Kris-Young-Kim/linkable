@@ -43,9 +43,9 @@ export async function GET(request: NextRequest) {
     isoCodes = searchIsoCodes(search);
   }
 
-  // 클래스로 필터링
+  // 클래스로 필터링 (검색 결과에도 적용)
   if (classCode) {
-    isoCodes = getIsoCodesByClass(classCode);
+    isoCodes = isoCodes.filter((item) => item.class === classCode);
   }
 
   // 응답 형식 변환

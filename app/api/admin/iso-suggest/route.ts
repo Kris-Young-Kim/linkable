@@ -308,13 +308,20 @@ export async function POST(request: Request) {
   for (const match of allMatches) {
     const existing = matchMap.get(match.iso);
     if (existing) {
-      // 더 높은 점수로 업데이트
+      const mergedKeywords = [
+        ...new Set([...existing.matchedKeywords, ...match.matchedKeywords]),
+      ];
+
       if (match.score > existing.score) {
         matchMap.set(match.iso, {
           ...match,
-          matchedKeywords: [
-            ...new Set([...existing.matchedKeywords, ...match.matchedKeywords]),
-          ],
+          matchedKeywords: mergedKeywords,
+        });
+      } else {
+        // 점수는 유지하되 키워드 정보는 병합
+        matchMap.set(match.iso, {
+          ...existing,
+          matchedKeywords: mergedKeywords,
         });
       }
     } else {
