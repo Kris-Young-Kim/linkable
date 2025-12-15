@@ -232,6 +232,7 @@ export async function POST(request: Request) {
     label: string;
     description: string;
     score: number;
+    matchedKeywords?: string[];
   }> = [];
 
   try {
@@ -259,6 +260,7 @@ export async function POST(request: Request) {
             label: isoInfo.label,
             description: isoInfo.description,
             score: aiResult.confidence * 1.5,
+            matchedKeywords: [],
           });
         }
       }
@@ -288,6 +290,7 @@ export async function POST(request: Request) {
                   label: altIsoInfo.label,
                   description: altIsoInfo.description,
                   score: altCode.confidence * 1.0,
+                  matchedKeywords: [],
                 });
               }
             }
@@ -309,7 +312,10 @@ export async function POST(request: Request) {
     const existing = matchMap.get(match.iso);
     if (existing) {
       const mergedKeywords = [
-        ...new Set([...existing.matchedKeywords, ...match.matchedKeywords]),
+        ...new Set([
+          ...(existing.matchedKeywords ?? []),
+          ...(match.matchedKeywords ?? []),
+        ]),
       ];
 
       if (match.score > existing.score) {
