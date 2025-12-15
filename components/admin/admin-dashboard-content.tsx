@@ -13,6 +13,7 @@ import {
   ClipboardCheck, 
   BarChart3,
   Package,
+  Sparkles,
 } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 
@@ -73,6 +74,7 @@ export function AdminDashboardContent() {
             { label: "사용자 리스트", href: "/admin/usersstat", icon: <Users className="size-4" /> },
             { label: "K-IPPA 통계", href: "/admin/logs", icon: <ClipboardCheck className="size-4" /> },
             { label: "상품 관리", href: "/admin/products", icon: <Package className="size-4" /> },
+            { label: "ICF 확장 관리", href: "/admin/icf-expansion", icon: <Sparkles className="size-4" /> },
           ]}
         />
 

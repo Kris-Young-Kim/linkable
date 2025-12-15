@@ -126,46 +126,60 @@ export function IsoCodeSelector({
                 ))}
               </CommandGroup>
             )}
-            <CommandGroup heading="전체 ISO 코드">
-              {sortedIsoCodes.map((code) => {
-                const isSuggestion = suggestions.some((s) => s.iso === code.iso)
-                return (
-                  <CommandItem
-                    key={code.iso}
-                    value={`${code.iso} ${code.label} ${code.description}`}
-                    onSelect={() => {
-                      onValueChange(code.iso)
-                      setOpen(false)
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === code.iso ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">ISO {code.iso}</span>
-                        {isSuggestion && (
-                          <Badge variant="secondary" className="text-xs">
-                            <Sparkles className="mr-1 h-3 w-3" />
-                            추천
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {code.label}
-                      </span>
-                      <span className="text-xs text-muted-foreground/70">
-                        {code.description}
-                      </span>
-                    </div>
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
+            {/* 클래스별로 그룹화하여 표시 */}
+            {(() => {
+              const groupedByClass = sortedIsoCodes.reduce((acc, code) => {
+                const classCode = (code as any).class || code.iso.split(" ")[0]
+                if (!acc[classCode]) {
+                  acc[classCode] = []
+                }
+                acc[classCode].push(code)
+                return acc
+              }, {} as Record<string, typeof sortedIsoCodes>)
+
+              return Object.entries(groupedByClass).map(([classCode, codes]) => (
+                <CommandGroup key={classCode} heading={`클래스 ${classCode}`}>
+                  {codes.map((code) => {
+                    const isSuggestion = suggestions.some((s) => s.iso === code.iso)
+                    return (
+                      <CommandItem
+                        key={code.iso}
+                        value={`${code.iso} ${code.label} ${code.description}`}
+                        onSelect={() => {
+                          onValueChange(code.iso)
+                          setOpen(false)
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === code.iso ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">ISO {code.iso}</span>
+                            {isSuggestion && (
+                              <Badge variant="secondary" className="text-xs">
+                                <Sparkles className="mr-1 h-3 w-3" />
+                                추천
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {code.label}
+                          </span>
+                          <span className="text-xs text-muted-foreground/70">
+                            {code.description}
+                          </span>
+                        </div>
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+              ))
+            })()}
           </CommandList>
         </Command>
       </PopoverContent>

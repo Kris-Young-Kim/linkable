@@ -276,6 +276,19 @@ export async function GET(request: Request) {
       disabilityType ?? detectDisabilityType(icfCodes, analysisSummary);
   }
 
+  // ICF 코드 사용 로깅 (비동기, 에러가 발생해도 메인 플로우에 영향 없음)
+  if (icfCodes.length > 0 && consultationId) {
+    import("@/lib/icf-tracking").then(({ logIcfCodeUsageBatch }) => {
+      logIcfCodeUsageBatch(icfCodes, "semantic_match", {
+        consultationId,
+        keywords: analysisSummary ? [analysisSummary] : undefined,
+      }).catch((err) => {
+        // 로깅 실패는 조용히 무시 (메인 플로우에 영향 없음)
+        console.error("[ICF Tracking] Failed to log ICF codes:", err);
+      });
+    });
+  }
+
   // 하이브리드 매칭 시스템 사용
   // 빠른 응답이 필요한 경우 fastMatch, 정확도가 중요한 경우 accurateMatch
   const useHybridMatching = process.env.ENABLE_HYBRID_MATCHING === "true";

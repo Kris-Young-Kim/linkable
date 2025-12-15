@@ -426,3 +426,185 @@ async function learnFromFeedback(
 - [ISO 9999:2022 표준](https://www.iso.org/obp/ui/#iso:std:iso:9999:ed-7:v1:en)
 - [Vector Embeddings 가이드](https://www.pinecone.io/learn/vector-embeddings/)
 - [Semantic Similarity Matching](https://arxiv.org/html/2404.03122v1)
+
+---
+
+## 🔄 ICF 코드 확장 전략 (2025-02-11 추가)
+
+### 문제점
+
+현재 `icfCoreSet`에는 약 160개의 ICF 코드만 포함되어 있으나, 실제 사용 중에는 Core Set에 없는 코드가 자주 등장합니다. 이러한 코드들은 기본 설명만 제공되며, ISO 매핑 힌트가 없어 매칭 정확도가 떨어집니다.
+
+### 해결 방안: 점진적 확장 시스템
+
+#### 1. 동적 ICF 코드 처리 (방안 2 적용)
+
+**구현 완료** (`core/assessment/icf-codes.ts`):
+
+- `findIcfCode` 함수가 Core Set에 없는 코드도 동적으로 처리
+- 카테고리(b/d/e) 기반 기본 설명 자동 생성
+- Core Set에 있는 코드는 상세 정보 반환, 없는 코드는 기본 정보 반환
+
+```typescript
+// Core Set에 없는 코드도 처리 가능
+const code = findIcfCode("d710"); // Core Set에 없어도 기본 정보 반환
+// { code: "D710", description: "활동 및 참여 - 대인관계 상호작용 (d710)", category: "d" }
+```
+
+#### 2. ICF 코드 사용 통계 수집 시스템
+
+**데이터베이스 스키마** (`supabase/migrations/20250211000000_add_icf_code_usage_tracking.sql`):
+
+- `icf_code_usage_logs`: 모든 ICF 코드 사용 이벤트 기록
+- `icf_code_statistics`: 코드별 집계 통계 (자동 업데이트)
+- `icf_code_expansion_priority`: 확장 우선순위 분석 뷰
+
+**로깅 시스템** (`lib/icf-tracking.ts`):
+
+- 주요 사용 지점에 자동 로깅:
+  - `chat_analysis`: 채팅 분석에서 추출된 ICF 코드
+  - `semantic_match`: 제품 매칭 시 사용된 ICF 코드
+  - `keyword_inference`: 키워드 기반 추론에서 사용된 코드
+  - `manual_input`: 수동 입력된 코드
+
+**로깅 지점**:
+
+- ✅ `app/api/chat/route.ts`: `upsertAnalysis` 함수
+- ✅ `app/api/products/route.ts`: 제품 매칭 API
+- ⚠️ `core/matching/keyword-inference.ts`: 클라이언트 사이드에서 호출 시 로깅 필요
+- ⚠️ `core/matching/semantic-matcher.ts`: 서버 사이드에서만 로깅 가능
+
+#### 3. 확장 우선순위 분석 API
+
+**엔드포인트**: `GET /api/admin/analytics/icf-expansion`
+
+**기능**:
+
+- Core Set에 없는 코드 목록 조회
+- 사용 빈도 및 우선순위 점수 계산
+- 확장 권장 코드 자동 추천
+
+**우선순위 점수 계산**:
+
+```sql
+priority_score = 
+  total_usage_count * 1.0 +
+  unique_consultations * 2.0 +
+  최근성 보너스 (7일 이내: +5.0, 30일 이내: +2.0)
+```
+
+#### 4. 점진적 확장 프로세스
+
+**단계별 확장 전략**:
+
+1. **데이터 수집 (현재 단계)**
+   - 모든 ICF 코드 사용 이벤트 자동 로깅
+   - 통계 집계 및 우선순위 분석
+
+2. **우선순위 기반 확장 (1-2주 후)**
+   - 우선순위 점수 20 이상 코드부터 Core Set에 추가
+   - ISO 매핑 힌트 수동/자동 추가
+   - 전문가 검토 후 승인
+
+3. **전체 확장 (1-2개월 후)**
+   - 누적 통계 기반으로 전체 확장 계획 수립
+   - 배치 작업으로 대량 코드 추가
+   - 자동화된 ISO 매핑 힌트 생성 (AI 기반)
+
+**확장 시 고려사항**:
+
+- **점진적 확장**: 우선순위가 높은 코드부터 단계적으로 추가
+- **전체 확장**: 모든 누적 데이터를 기반으로 한 번에 확장
+- **무리 없는 처리**: 두 방식 모두 지원하도록 설계
+
+#### 5. 데이터 수집 및 분석
+
+**수집 데이터**:
+
+- ICF 코드 사용 빈도
+- 사용 출처 (chat_analysis, semantic_match 등)
+- 함께 사용된 ISO 코드
+- 함께 사용된 키워드
+- 첫 사용일 및 최근 사용일
+
+**분석 지표**:
+
+- 총 사용 횟수
+- 고유 상담 수
+- 출처별 사용 분포
+- 연관 ISO 코드 및 키워드
+
+#### 6. 확장 자동화 (향후 계획)
+
+**AI 기반 ISO 매핑 힌트 생성**:
+
+```typescript
+// 향후 구현 예정
+async function generateIsoHintsForIcfCode(icfCode: string): Promise<string[]> {
+  // 1. 사용 통계에서 연관 ISO 코드 추출
+  const associatedIsoCodes = await getAssociatedIsoCodes(icfCode);
+  
+  // 2. AI를 활용한 의미론적 매핑
+  const semanticMatches = await findSemanticIsoMatches(icfCode);
+  
+  // 3. 전문가 지식 그래프 기반 추론
+  const graphMatches = inferIsoFromGraph(icfCode);
+  
+  // 4. 결과 통합 및 우선순위 정렬
+  return combineAndRank(associatedIsoCodes, semanticMatches, graphMatches);
+}
+```
+
+### 구현 상태
+
+- ✅ 동적 ICF 코드 처리 (방안 2)
+- ✅ 데이터베이스 스키마 및 통계 수집 시스템
+- ✅ 로깅 시스템 (`lib/icf-tracking.ts`)
+- ✅ 주요 사용 지점 로깅 추가
+- ✅ 확장 우선순위 분석 API
+- ✅ 관리자 대시보드 UI (`/admin/icf-expansion`)
+- ✅ AI 기반 ISO 매핑 힌트 자동 생성 (`lib/icf-iso-generator.ts`)
+- ✅ 자동 확장 워크플로우 (`POST /api/admin/icf/auto-expand`)
+- ⏳ 스케줄러/크론 작업 설정 (향후 구현)
+
+### 사용 방법
+
+**관리자가 확장 우선순위 확인**:
+
+```bash
+GET /api/admin/analytics/icf-expansion?limit=50&min_usage=5
+```
+
+**응답 예시**:
+
+```json
+{
+  "codes": [
+    {
+      "code": "d710",
+      "category": "d",
+      "priorityScore": 25.5,
+      "totalUsageCount": 15,
+      "uniqueConsultations": 8,
+      "usageBySource": {
+        "chat_analysis": 10,
+        "semantic_match": 5
+      },
+      "recommendedForExpansion": true
+    }
+  ],
+  "summary": {
+    "totalMissingCodes": 45,
+    "highPriorityCodes": 12,
+    "mediumPriorityCodes": 18,
+    "lowPriorityCodes": 15,
+    "recommendedForExpansion": 12
+  }
+}
+```
+
+### 다음 단계
+
+1. **관리자 대시보드 UI 구현**: 확장 우선순위 시각화 및 일괄 추가 기능
+2. **자동 확장 워크플로우**: 우선순위 기반 자동 Core Set 업데이트
+3. **AI 기반 ISO 매핑**: 누적 데이터를 활용한 자동 ISO 힌트 생성

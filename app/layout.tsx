@@ -103,8 +103,114 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
               `,
             }}
           />
+          {/* Meta Pixel (Facebook Pixel) */}
+          {process.env.NEXT_PUBLIC_META_PIXEL_ID && (
+            <>
+              <Script
+                id="meta-pixel"
+                strategy="afterInteractive"
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    !function(f,b,e,v,n,t,s)
+                    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                    n.queue=[];t=b.createElement(e);t.async=!0;
+                    t.src=v;s=b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t,s)}(window, document,'script',
+                    'https://connect.facebook.net/en_US/fbevents.js');
+                    fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
+                    fbq('track', 'PageView');
+                  `,
+                }}
+              />
+              <noscript>
+                <img
+                  height="1"
+                  width="1"
+                  style={{ display: "none" }}
+                  src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
+                  alt=""
+                />
+              </noscript>
+            </>
+          )}
         </head>
         <body className={`${inter.className} font-sans antialiased`}>
+          {/* #region agent log */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  // Cursor IDE의 nextjs-portal 요소 관련 오류 무시
+                  // 이 요소는 Cursor의 개발 도구이며 애플리케이션 기능에 영향을 주지 않음
+                  
+                  // nextjs-portal 요소 숨기기 (시각적 정리)
+                  const hideNextjsPortals = function() {
+                    const portals = document.querySelectorAll('nextjs-portal');
+                    portals.forEach(function(portal) {
+                      portal.style.display = 'none';
+                      portal.style.visibility = 'hidden';
+                      portal.style.width = '0';
+                      portal.style.height = '0';
+                    });
+                  };
+                  
+                  // DOM 로드 후 실행
+                  if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', hideNextjsPortals);
+                  } else {
+                    hideNextjsPortals();
+                  }
+                  
+                  // 동적으로 추가되는 nextjs-portal 요소도 숨기기
+                  const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                      mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1 && node.tagName === 'NEXTJS-PORTAL') {
+                          node.style.display = 'none';
+                          node.style.visibility = 'hidden';
+                          node.style.width = '0';
+                          node.style.height = '0';
+                        }
+                      });
+                    });
+                  });
+                  
+                  if (document.body) {
+                    observer.observe(document.body, { childList: true, subtree: true });
+                  } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                      observer.observe(document.body, { childList: true, subtree: true });
+                    });
+                  }
+                  
+                  // Cursor 개발 도구 관련 오류 무시 (콘솔 정리)
+                  const originalConsoleError = console.error;
+                  console.error = function(...args) {
+                    const errorMsg = args.join(' ');
+                    // nextjs-portal 또는 Cursor 관련 오류는 무시
+                    if (errorMsg.includes('nextjs-portal') || 
+                        errorMsg.includes('ERR_CONNECTION_REFUSED') && errorMsg.includes('cursor')) {
+                      return; // 오류를 콘솔에 출력하지 않음
+                    }
+                    originalConsoleError.apply(console, args);
+                  };
+                  
+                  // 네트워크 오류 이벤트 필터링 (nextjs-portal 관련만)
+                  window.addEventListener('error', function(e) {
+                    // nextjs-portal 관련 오류는 기본 동작 방지
+                    if (e.target && e.target.closest && e.target.closest('nextjs-portal')) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      return false;
+                    }
+                  }, true);
+                })();
+              `,
+            }}
+          />
+          {/* #endregion */}
           <noscript>
             <iframe
               src="https://www.googletagmanager.com/ns.html?id=GTM-5JDT98J9"

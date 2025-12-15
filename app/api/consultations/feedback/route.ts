@@ -120,15 +120,43 @@ export async function POST(request: Request) {
     }
 
     if (saveError) {
-      console.error("[consultations/feedback] 저장 오류:", saveError)
+      console.error("[consultations/feedback] 저장 오류:", {
+        error: saveError,
+        code: saveError.code,
+        message: saveError.message,
+        details: saveError.details,
+        hint: saveError.hint,
+        consultation_id,
+        feedbackData,
+      })
       logEvent({
         category: "consultation",
         action: "feedback_error",
-        payload: { error: saveError, consultation_id },
+        payload: { 
+          error: saveError,
+          error_code: saveError.code,
+          error_message: saveError.message,
+          error_details: saveError.details,
+          consultation_id,
+          feedbackData,
+        },
         level: "error",
       })
+      
+      // 더 자세한 오류 메시지 반환 (개발 환경에서만)
+      const errorMessage = process.env.NODE_ENV === 'development' 
+        ? `Failed to save feedback: ${saveError.message || saveError.code || 'Unknown error'}`
+        : "Failed to save feedback"
+      
       return NextResponse.json(
-        { error: "Failed to save feedback" },
+        { 
+          error: errorMessage,
+          details: process.env.NODE_ENV === 'development' ? {
+            code: saveError.code,
+            message: saveError.message,
+            hint: saveError.hint,
+          } : undefined,
+        },
         { status: 500 }
       )
     }

@@ -173,6 +173,23 @@ const upsertAnalysis = async (
       payload: { error },
       level: "error",
     });
+  } else {
+    // ICF 코드 사용 로깅 (비동기, 에러가 발생해도 메인 플로우에 영향 없음)
+    const allCodes = [
+      ...(parsedAnalysis.icf_analysis.b || []),
+      ...(parsedAnalysis.icf_analysis.d || []),
+      ...(parsedAnalysis.icf_analysis.e || []),
+    ];
+    if (allCodes.length > 0) {
+      import("@/lib/icf-tracking").then(({ logIcfCodeUsageBatch }) => {
+        logIcfCodeUsageBatch(allCodes, "chat_analysis", {
+          consultationId,
+        }).catch((err) => {
+          // 로깅 실패는 조용히 무시 (메인 플로우에 영향 없음)
+          console.error("[ICF Tracking] Failed to log ICF codes:", err);
+        });
+      });
+    }
   }
 };
 

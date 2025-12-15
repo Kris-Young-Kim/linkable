@@ -159,5 +159,159 @@ export const icfCoreSet: IcfCode[] = [
   { code: "e360", description: "다른 전문가", category: "e" },
 ]
 
-export const findIcfCode = (code: string) => icfCoreSet.find((item) => item.code === code)
+/**
+ * ICF 코드 카테고리별 기본 설명 맵
+ * Core Set에 없는 코드의 기본 설명 생성에 사용
+ */
+const getDefaultDescription = (code: string, category: IcfCategory): string => {
+  const codeNum = code.substring(1)
+  
+  // 카테고리별 기본 설명 패턴
+  const categoryNames = {
+    b: "신체 기능",
+    d: "활동 및 참여",
+    e: "환경 요소",
+  }
+  
+  // 주요 코드 범위별 세부 설명
+  if (category === "b") {
+    if (codeNum.startsWith("1")) return `${categoryNames.b} - 정신 기능 (${code})`
+    if (codeNum.startsWith("2")) return `${categoryNames.b} - 감각 기능 (${code})`
+    if (codeNum.startsWith("3")) return `${categoryNames.b} - 음성 및 말 기능 (${code})`
+    if (codeNum.startsWith("4")) return `${categoryNames.b} - 심혈관, 혈액, 면역 및 호흡 기능 (${code})`
+    if (codeNum.startsWith("5")) return `${categoryNames.b} - 소화, 대사 및 내분비 기능 (${code})`
+    if (codeNum.startsWith("6")) return `${categoryNames.b} - 비뇨생식 및 생식 기능 (${code})`
+    if (codeNum.startsWith("7")) return `${categoryNames.b} - 신경근골격 및 운동 관련 기능 (${code})`
+    if (codeNum.startsWith("8")) return `${categoryNames.b} - 피부 및 관련 구조 기능 (${code})`
+  } else if (category === "d") {
+    if (codeNum.startsWith("1")) return `${categoryNames.d} - 학습 및 지식 적용 (${code})`
+    if (codeNum.startsWith("2")) return `${categoryNames.d} - 일반적인 과제와 요구사항 (${code})`
+    if (codeNum.startsWith("3")) return `${categoryNames.d} - 의사소통 (${code})`
+    if (codeNum.startsWith("4")) return `${categoryNames.d} - 이동 (${code})`
+    if (codeNum.startsWith("5")) return `${categoryNames.d} - 자가관리 (${code})`
+    if (codeNum.startsWith("6")) return `${categoryNames.d} - 가정생활 (${code})`
+    if (codeNum.startsWith("7")) return `${categoryNames.d} - 대인관계 상호작용 (${code})`
+    if (codeNum.startsWith("8")) return `${categoryNames.d} - 주요 생활 영역 (${code})`
+    if (codeNum.startsWith("9")) return `${categoryNames.d} - 여가 및 레크리에이션 (${code})`
+  } else if (category === "e") {
+    if (codeNum.startsWith("1")) return `${categoryNames.e} - 제품 및 기술 (${code})`
+    if (codeNum.startsWith("2")) return `${categoryNames.e} - 자연 환경 및 인간이 만든 환경 변화 (${code})`
+    if (codeNum.startsWith("3")) return `${categoryNames.e} - 지원 및 관계 (${code})`
+    if (codeNum.startsWith("4")) return `${categoryNames.e} - 태도 (${code})`
+    if (codeNum.startsWith("5")) return `${categoryNames.e} - 서비스, 체계 및 정책 (${code})`
+  }
+  
+  return `${categoryNames[category]} (${code})`
+}
+
+/**
+ * ICF 코드 카테고리 추론
+ */
+const inferCategory = (code: string): IcfCategory | null => {
+  const firstChar = code[0]?.toLowerCase()
+  if (firstChar === "b" || firstChar === "d" || firstChar === "e") {
+    return firstChar as IcfCategory
+  }
+  return null
+}
+
+/**
+ * ICF 코드 조회 (동적 처리 지원)
+ * 
+ * Core Set에 있는 코드는 상세 정보를 반환하고,
+ * 없는 코드는 기본 정보를 동적으로 생성하여 반환합니다.
+ * 
+ * 확장된 코드는 데이터베이스에서 조회합니다 (비동기).
+ * 
+ * @param code ICF 코드 (예: "b210", "d710")
+ * @returns ICF 코드 정보 또는 null
+ */
+export const findIcfCode = (code: string): IcfCode | null => {
+  if (!code || typeof code !== "string") {
+    return null
+  }
+  
+  // Core Set에서 먼저 찾기
+  const found = icfCoreSet.find((item) => item.code.toLowerCase() === code.toLowerCase())
+  if (found) {
+    return found
+  }
+  
+  // Core Set에 없으면 카테고리 추론
+  const category = inferCategory(code)
+  if (!category) {
+    return null
+  }
+  
+  // 동적으로 기본 정보 생성
+  // 확장된 코드는 findIcfCodeAsync에서 데이터베이스 조회
+  return {
+    code: code.toUpperCase(),
+    description: getDefaultDescription(code, category),
+    category,
+    // ISO 힌트는 비동기 함수에서 데이터베이스 조회
+  }
+}
+
+/**
+ * ICF 코드 조회 (비동기, 확장된 코드 포함)
+ * 
+ * Core Set과 데이터베이스의 확장된 코드를 모두 확인합니다.
+ * 
+ * @param code ICF 코드
+ * @param supabase Supabase 클라이언트 (선택적)
+ * @returns ICF 코드 정보 또는 null
+ */
+export async function findIcfCodeAsync(
+  code: string,
+  supabase?: any
+): Promise<IcfCode | null> {
+  // 먼저 동기 함수로 Core Set 확인
+  const coreSetCode = findIcfCode(code)
+  if (coreSetCode && isInCoreSet(code)) {
+    return coreSetCode
+  }
+
+  // 확장된 코드는 데이터베이스에서 조회
+  if (supabase) {
+    try {
+      const { data: expansion } = await supabase
+        .from("icf_code_expansions")
+        .select("icf_code, iso_hints")
+        .eq("icf_code", code.toUpperCase())
+        .order("expanded_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (expansion) {
+        return {
+          code: code.toUpperCase(),
+          description: coreSetCode?.description || getDefaultDescription(code, inferCategory(code) || "b"),
+          category: inferCategory(code) || "b",
+          isoHints: expansion.iso_hints || undefined,
+        }
+      }
+    } catch (error) {
+      console.error(`[findIcfCodeAsync] Database lookup failed for ${code}:`, error)
+      // 데이터베이스 조회 실패 시 기본 정보 반환
+    }
+  }
+
+  // 데이터베이스 조회 실패하거나 supabase가 없으면 기본 정보 반환
+  return coreSetCode
+}
+
+/**
+ * ICF 코드가 Core Set에 포함되어 있는지 확인
+ */
+export const isInCoreSet = (code: string): boolean => {
+  return icfCoreSet.some((item) => item.code.toLowerCase() === code.toLowerCase())
+}
+
+/**
+ * Core Set에 없는 ICF 코드 목록 추출
+ */
+export const getMissingCodes = (codes: string[]): string[] => {
+  return codes.filter((code) => !isInCoreSet(code))
+}
 

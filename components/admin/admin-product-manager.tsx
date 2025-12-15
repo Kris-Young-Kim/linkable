@@ -184,16 +184,18 @@ export function AdminProductManager({
 
         if (response.ok) {
           const data = await response.json();
-          setIsoSuggestions(data.suggestions || []);
+          const suggestions = data.suggestions || [];
+          setIsoSuggestions(suggestions);
 
-          // 첫 번째 추천이 있으면 자동으로 선택 (선택적)
-          if (
-            data.suggestions &&
-            data.suggestions.length > 0 &&
-            !formValues.iso_code
-          ) {
-            // 자동 선택은 하지 않고, 사용자가 선택하도록 함
+          // 로그 출력 (디버깅용)
+          if (suggestions.length > 0) {
+            console.log("[ISO Suggest] 추천 결과:", suggestions);
+          } else {
+            console.log("[ISO Suggest] 추천 결과 없음");
           }
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          console.error("[ISO Suggest] API 오류:", response.status, errorData);
         }
       } catch (error) {
         console.error("[Admin Products] ISO suggestion error:", error);

@@ -2,6 +2,22 @@
 
 문서 참고: `docs/DIR.md`, `docs/Mermaid.md`, `docs/Read.md`, `docs/MRD.md`, `docs/PRD.md`, `docs/TRD.md`
 
+## 최근 완료된 작업 (2025-12-10)
+
+### 인프라/빌드
+
+- Next.js 16 `middleware` → `proxy` 전환 (Clerk 미들웨어 유지), Turbopack 빌드 경고 제거
+- Playwright 설정 정비: `@playwright/test` 추가, `test:clean`/`test:e2e`/`test:e2e:ui` 스크립트 추가, 실패한 테스트만 trace/스크린샷/비디오 보존
+- 불필요 산출물 정리: `test-results`, `playwright-report`, 디버그 스크린샷, 중복 `styles/` 폴더 제거 및 .gitignore 패턴 추가
+- pnpm-lock 동기화 완료 (frozen-lockfile 오류 해결)
+
+### 기능/버그픽스
+
+- 상담 피드백 API 오류 로깅 강화: DB 오류 코드/메시지/힌트 로깅, 개발 환경에서는 상세 오류 반환
+- 피드백 저장 실패 시에도 원인 파악용 로그 추가, 기존 흐름(consultation_feedback 저장 → conversion_events/point_transactions 기록) 유지
+
+---
+
 ## 최근 완료된 작업 (2025-01-22)
 
 ### K-IPPA 사용자 여정 개선
@@ -174,6 +190,61 @@ K-IPPA 사후 평가 제출 (/dashboard/ippa/[recommendationId])
 - [ ] MVP 제외 범위 준비:
   - 결제 연동(PG) 설계 메모.
   - 커뮤니티 기능(사용자 후기/질문) MVP 범위 정의.
+
+## Phase 4.5 — ICF 코드 확장 전략 (2025-02-11 완료)
+
+### 목표
+
+Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수집하여 점진적 확장을 지원합니다.
+
+### 구현 완료
+
+- [x] **동적 ICF 코드 처리 (방안 2)**
+  - `findIcfCode` 함수가 Core Set에 없는 코드도 기본 정보 반환
+  - 카테고리(b/d/e) 기반 기본 설명 자동 생성
+  - Core Set에 있는 코드는 상세 정보, 없는 코드는 기본 정보 반환
+
+- [x] **ICF 코드 사용 통계 수집 시스템**
+  - 데이터베이스 스키마: `icf_code_usage_logs`, `icf_code_statistics`, `icf_code_expansion_priority` 뷰
+  - 로깅 시스템: `lib/icf-tracking.ts` 생성
+  - 주요 사용 지점에 자동 로깅 추가:
+    - `app/api/chat/route.ts`: 채팅 분석에서 추출된 ICF 코드
+    - `app/api/products/route.ts`: 제품 매칭 시 사용된 ICF 코드
+
+- [x] **확장 우선순위 분석 API**
+  - `GET /api/admin/analytics/icf-expansion`: Core Set에 없는 코드 목록 및 우선순위 점수
+  - 우선순위 점수 = 사용 빈도 + 고유 상담 수 + 최근성 보너스
+
+### 구현 완료 (2025-02-11)
+
+- [x] **관리자 대시보드 UI**
+  - 확장 우선순위 시각화 (`/admin/icf-expansion`)
+  - 우선순위 기반 일괄 Core Set 추가 기능
+  - ISO 매핑 힌트 수동/자동 추가 기능
+  - 자동 확장 설정 UI
+
+- [x] **자동 확장 워크플로우**
+  - 우선순위 점수 기반 자동 Core Set 추가 API (`POST /api/admin/icf/auto-expand`)
+  - 자동 확장 설정 관리 API (`GET/POST /api/admin/icf/auto-expand-config`)
+  - 스케줄러/크론에서 호출 가능한 워크플로우
+
+- [x] **AI 기반 ISO 매핑 힌트 자동 생성**
+  - 누적 데이터를 활용한 의미론적 매핑 (`lib/icf-iso-generator.ts`)
+  - Gemini API를 활용한 AI 기반 ISO 힌트 생성
+  - 유사한 ICF 코드의 ISO 매핑 조회
+  - 통합 ISO 힌트 생성 API (`POST /api/admin/icf/generate-iso-hints`)
+
+### 향후 작업
+
+- [ ] **스케줄러 설정**
+  - 자동 확장 워크플로우를 주기적으로 실행하는 크론 작업 설정
+  - n8n 또는 Vercel Cron을 활용한 자동화
+
+### 참고 문서
+
+- `docs/icf-iso-matching-improvement-plan.md`: ICF 코드 확장 전략 상세 설명
+- `supabase/migrations/20250211000000_add_icf_code_usage_tracking.sql`: 데이터베이스 스키마
+- `lib/icf-tracking.ts`: 로깅 유틸리티
 
 ## Phase 5 — 프론트엔드 완성도 향상 (Post-MVP)
 
@@ -523,11 +594,17 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
          - [ ] Active 토글 ON
          - [ ] Executions에서 실행 내역 확인
          - [ ] Supabase에서 데이터 확인
-   - [ ] 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts` 구현) (API 확보 후)
-     - [ ] API 키 발급 및 환경 변수 설정
-     - [ ] 상품 검색 API 구현 (`searchProducts`)
-     - [ ] 상품 상세 정보 조회 API 구현 (`getProductDetails`)
-     - [ ] 제휴 링크 자동 생성 (`generateAffiliateLink`)
+   - [x] 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts` 구현) ✅
+     - [x] API 키 발급 및 환경 변수 설정
+     - [x] 상품 검색 API 구현 (`searchProducts`)
+     - [x] 상품 상세 정보 조회 API 구현 (`getProductDetails`)
+     - [x] 제휴 링크 자동 생성 (`generateAffiliateLink`)
+     - [x] **구매 리포트 조회 API 구현** (`getPurchaseReport`) ✅
+       - [x] 구매 리포트 조회 메서드 추가 (`lib/integrations/coupang.ts`)
+       - [x] 구매 리포트 조회 엔드포인트 생성 (`/api/webhooks/coupang/purchase-report`)
+       - [x] 주기적으로 구매 리포트 조회 및 DB 업데이트 기능
+       - [x] 구매 완료 이벤트를 `conversion_events` 테이블에 저장
+       - [x] `recommendations` 테이블에 구매 완료 상태 업데이트
 3. [ ] `scripts/crawlers/coupang-partners.ts` 프로토타입 (API 확보 후)
 4. [ ] Supabase `products` 테이블 스키마 확장 (제휴사, 재고, 가격 이력)
    - 참고: 현재 구조로도 ISO 코드별 여러 상품 등록 가능 (추가 스키마 변경 불필요)
@@ -538,8 +615,30 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
    - 상품 추가/수정/삭제 기능
    - purchase_link 검증 및 업데이트
 8. [ ] 제휴 링크 상태 체크 함수 (`lib/integrations/link-validator.ts`) 구현
-9. [ ] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback
-10. [ ] **Meta Pixel 연동 및 도식화된 구매 전송 플로우 구현**: 상대방 홈페이지 → 영기님 서비스 픽셀 → 구매 정보 전송 → 영기님 DB 흐름을 추적/시각화. 구현 예정 기능으로 @docs/TODO.md 기준으로 관리.
+9. [x] 추천 카드 클릭 시 Supabase 이벤트 로깅 + dead link fallback ✅
+10. [x] **구매 완료 추적 시스템 구현** ✅
+    - [x] **쿠팡 파트너스 Postback URL 엔드포인트** ✅
+      - [x] `/api/webhooks/coupang/purchase` 엔드포인트 생성
+      - [x] 쿠팡 파트너스에서 구매 완료 시 자동 호출
+      - [x] 구매 완료 이벤트를 `conversion_events` 테이블에 저장
+      - [x] `recommendations` 테이블에 구매 완료 상태 업데이트
+      - [x] 구매 금액, 수수료, 구매 일시 기록
+    - [x] **Meta Pixel 연동** ✅
+      - [x] Meta Pixel 스크립트 설치 (`app/layout.tsx`)
+      - [x] Meta Pixel 유틸리티 모듈 생성 (`lib/integrations/meta-pixel.ts`)
+      - [x] 구매 링크 클릭 시 `InitiateCheckout` 이벤트 전송
+      - [x] Meta Pixel 구매 이벤트 Webhook 엔드포인트 생성 (`/api/webhooks/meta/purchase`)
+      - [x] 외부 판매 사이트에서 구매 완료 시 `Purchase` 이벤트 수신
+      - [x] 구매 완료 이벤트를 DB에 저장
+    - [x] **DB 스키마 업데이트** ✅
+      - [x] `conversion_events` 테이블에 `purchase_completed` 이벤트 타입 추가
+      - [x] 구매 금액, 수수료, 구매 일시, 추적 소스 필드 추가
+      - [x] `recommendations` 테이블에 구매 완료 상태 필드 추가
+      - [x] 인덱스 추가 (구매 완료 이벤트 조회 성능 향상)
+    - [x] **구매 추적 흐름** ✅
+      - [x] 사용자 구매 링크 클릭 → GA4 + Meta Pixel 이벤트 전송
+      - [x] 외부 사이트에서 구매 완료 → Postback/Meta Pixel/API로 알림
+      - [x] 구매 완료 이벤트 저장 → `conversion_events` + `recommendations` 업데이트
 
 **구현 방향:**
 
@@ -694,3 +793,30 @@ _각 Phase 종료 시 문서(`README` or Notion)로 진행 상황을 요약하�
 17. [x] 파트너 PoC 후보 리스트 + 제안서 템플릿 작성
 18. [x] 사용자 인터뷰 가이드 및 일정표 수립
 19. [x] KPI 대시보드(추천 CTR, K-IPPA 참여율) 시각화 MVP 제작
+
+# Nginx 설치 (Amazon Linux 2023)
+
+sudo dnf install -y nginx
+
+# SSL 인증서 디렉토리 생성
+
+sudo mkdir -p /etc/nginx/ssl
+
+# nginx 설정
+
+sudo tee /etc/nginx/conf.d/n8n.conf << 'EOF'
+
+# WebSocket 업그레이드 맵
+
+map $http_upgrade $connection_upgrade {
+default upgrade;
+'' close;
+}
+
+# HTTP → HTTPS 리다이렉트
+
+server {
+listen 80;
+server_name n8n.firstmover.store;
+return 301 https://$server_name$request_uri;
+}

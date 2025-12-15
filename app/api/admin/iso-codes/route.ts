@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { verifyAdminAccess } from "@/lib/auth/verify-admin"
-import { isoMappingTable } from "@/core/matching/iso-mapping"
+import { getAllIsoCodes, searchIsoCodes, getIsoCodesByClass } from "@/lib/iso-9999-catalog"
 
 const mapReasonToStatus = (reason: "not_authenticated" | "insufficient_permissions" | "error") => {
   if (reason === "not_authenticated") return 401
@@ -10,9 +10,13 @@ const mapReasonToStatus = (reason: "not_authenticated" | "insufficient_permissio
 
 /**
  * ISO 코드 목록 조회 API
- * 드롭다운 및 검색에 사용
+ * ISO 9999:2022 전체 카테고리 제공
+ * 
+ * 쿼리 파라미터:
+ * - search: 검색어 (선택)
+ * - class: 클래스 코드로 필터링 (선택, 예: "12", "15")
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const access = await verifyAdminAccess()
 
   if (!access.hasAccess) {
@@ -22,27 +26,33 @@ export async function GET() {
     )
   }
 
-  // isoMappingTable에서 고유한 ISO 코드 추출
-  const isoCodeMap = new Map<string, { label: string; description: string }>()
+  const { searchParams } = new URL(request.url)
+  const search = searchParams.get("search")
+  const classCode = searchParams.get("class")
 
-  for (const rule of isoMappingTable) {
-    if (!isoCodeMap.has(rule.iso)) {
-      isoCodeMap.set(rule.iso, {
-        label: rule.label,
-        description: rule.description,
-      })
-    }
+  let isoCodes = getAllIsoCodes()
+
+  // 검색어로 필터링
+  if (search) {
+    isoCodes = searchIsoCodes(search)
   }
 
-  // ISO 코드로 정렬
-  const isoCodes = Array.from(isoCodeMap.entries())
-    .map(([iso, info]) => ({
-      iso,
-      label: info.label,
-      description: info.description,
-    }))
-    .sort((a, b) => a.iso.localeCompare(b.iso))
+  // 클래스로 필터링
+  if (classCode) {
+    isoCodes = getIsoCodesByClass(classCode)
+  }
 
-  return NextResponse.json({ isoCodes })
+  // 응답 형식 변환
+  const result = isoCodes.map((item) => ({
+    iso: item.iso,
+    label: item.label,
+    description: item.description,
+    class: item.class,
+  }))
+
+  return NextResponse.json({
+    isoCodes: result,
+    total: result.length,
+  })
 }
 

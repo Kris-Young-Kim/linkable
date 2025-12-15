@@ -839,4 +839,170 @@ N8N_BASIC_AUTH_PASSWORD=password
 
 ---
 
-**마지막 업데이트**: 2025-12-01
+## 12. 구매 완료 추적 자동화 워크플로우
+
+### 12-1. 쿠팡 파트너스 구매 리포트 자동 조회
+
+쿠팡 파트너스 API를 통해 구매 리포트를 주기적으로 조회하고 DB에 저장하는 워크플로우입니다.
+
+#### 워크플로우 구조
+
+```
+Schedule Trigger → HTTP Request (구매 리포트 조회) → Code (데이터 변환) → 
+Split In Batches → Supabase (구매 이벤트 저장) → Wait → 다음 배치
+```
+
+#### 설정 방법
+
+1. **Schedule Trigger 노드 추가**
+   - 노드 이름: `매일 구매 리포트 조회`
+   - **Trigger Times**: 매일 오전 2시
+   - Cron Expression: `0 2 * * *`
+
+2. **HTTP Request 노드 추가**
+   - 노드 이름: `쿠팡 구매 리포트 조회`
+   - **Method**: GET
+   - **URL**: `https://your-domain.com/api/webhooks/coupang/purchase-report`
+   - **Query Parameters**:
+     - `startDate`: `={{ $now.minus({days: 7}).toFormat('yyyy-MM-dd') }}` (7일 전)
+     - `endDate`: `={{ $now.minus({days: 1}).toFormat('yyyy-MM-dd') }}` (어제)
+     - `status`: `APPROVED`
+
+3. **Code 노드 추가** (선택적 - 데이터 변환)
+   - 구매 리포트 데이터를 필요한 형식으로 변환
+
+4. **Supabase 노드 추가** (자동 저장됨)
+   - 구매 리포트 조회 API가 자동으로 DB에 저장하므로 생략 가능
+   - 또는 추가 처리가 필요한 경우 사용
+
+#### 실행 주기 설정
+
+- **권장**: 매일 오전 2시 (하루 전 구매 내역 조회)
+- **대안**: 6시간마다 (`0 */6 * * *`)
+
+### 12-2. 쿠팡 Postback URL 설정
+
+쿠팡 파트너스에서 구매 완료 시 자동으로 호출하는 Postback URL을 설정합니다.
+
+#### 설정 방법
+
+1. **쿠팡 파트너스 대시보드 접속**
+   - https://partners.coupang.com/ 접속
+   - 로그인
+
+2. **Postback URL 설정**
+   - 설정 메뉴 → Postback URL
+   - URL 입력: `https://your-domain.com/api/webhooks/coupang/purchase`
+   - 저장
+
+3. **테스트**
+   - 구매 완료 시 자동으로 호출되는지 확인
+   - n8n Executions에서 호출 내역 확인
+
+### 12-3. Meta Pixel 구매 이벤트 수신
+
+Meta Pixel에서 구매 완료 이벤트를 받아서 DB에 저장하는 워크플로우입니다.
+
+#### 워크플로우 구조
+
+```
+Webhook (POST) → Code (데이터 변환) → Supabase (구매 이벤트 저장)
+```
+
+#### 설정 방법
+
+1. **Webhook 노드 추가**
+   - 노드 이름: `Meta Pixel 구매 이벤트`
+   - **HTTP Method**: POST
+   - **Path**: `/webhook/meta/purchase`
+   - **Response Mode**: "Respond to Webhook"
+
+2. **Code 노드 추가** (선택적)
+   - Meta Pixel 이벤트 데이터를 필요한 형식으로 변환
+
+3. **HTTP Request 노드 추가**
+   - 노드 이름: `구매 이벤트 저장`
+   - **Method**: POST
+   - **URL**: `https://your-domain.com/api/webhooks/meta/purchase`
+   - **Body**: Meta Pixel 이벤트 데이터 전달
+
+#### 외부 판매 사이트 설정
+
+외부 판매 사이트에 Meta Pixel을 설치하고 구매 완료 시 `Purchase` 이벤트를 전송하도록 설정:
+
+```javascript
+// 구매 완료 페이지에서 실행
+fbq('track', 'Purchase', {
+  value: 50000,
+  currency: 'KRW',
+  content_ids: ['product123'],
+  contents: [{ id: 'product123', quantity: 1 }],
+  order_id: 'ORDER123'
+});
+```
+
+### 12-4. 구매 추적 통계 대시보드
+
+구매 완료 추적 데이터를 분석하는 워크플로우입니다.
+
+#### 워크플로우 구조
+
+```
+Schedule Trigger → Supabase (구매 이벤트 조회) → Code (통계 계산) → 
+Supabase (통계 저장) 또는 Email (알림)
+```
+
+#### 설정 방법
+
+1. **Schedule Trigger 노드 추가**
+   - 매일 오전 9시 실행
+   - Cron Expression: `0 9 * * *`
+
+2. **Supabase 노드 추가**
+   - **Operation**: Get Many
+   - **Table**: `conversion_events`
+   - **Filter**: 
+     - `event_type` = `purchase_completed`
+     - `purchase_date` >= 어제
+
+3. **Code 노드 추가**
+   - 구매 완료 통계 계산
+   - 총 구매 금액, 수수료, 전환율 등
+
+4. **Email 노드 추가** (선택적)
+   - 일일 구매 통계 리포트 전송
+
+### 12-5. 환경 변수 설정
+
+n8n에서 사용할 환경 변수를 설정합니다.
+
+```env
+# 쿠팡 파트너스 API
+COUPANG_ACCESS_KEY=your_access_key
+COUPANG_SECRET_KEY=your_secret_key
+COUPANG_LINK_ID=your_link_id
+
+# Meta Pixel
+NEXT_PUBLIC_META_PIXEL_ID=your_pixel_id
+```
+
+### 12-6. 구매 추적 흐름도
+
+```
+사용자 구매 링크 클릭
+    ↓
+GA4 + Meta Pixel 이벤트 전송
+    ↓
+외부 판매 사이트에서 구매 완료
+    ├─ 쿠팡: Postback URL 자동 호출
+    ├─ Meta Pixel: Purchase 이벤트 전송
+    └─ 쿠팡 API: 주기적으로 구매 리포트 조회
+    ↓
+구매 완료 이벤트 저장
+    ├─ conversion_events: purchase_completed 이벤트
+    └─ recommendations: purchase_completed = true
+```
+
+---
+
+**마지막 업데이트**: 2025-02-10

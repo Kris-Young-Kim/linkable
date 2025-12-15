@@ -17,6 +17,7 @@
     "test:products": "tsx scripts/test-crawled-products.ts",
     "test:api": "tsx scripts/test-product-api.ts",
     "test:recommendation": "tsx scripts/test-recommendation-system.ts",
+    "test:coupang": "tsx scripts/test-coupang-api.ts",
     "test:clean": "if exist test-results rmdir /s /q test-results",
     "test:e2e": "npm run test:clean && playwright test",
     "test:e2e:ui": "playwright test --ui"

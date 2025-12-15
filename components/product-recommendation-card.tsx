@@ -78,6 +78,16 @@ export function ProductRecommendationCard({
           recommendation_id: recommendationId,
           source: source,
         })
+
+        // Meta Pixel 이벤트 추적 (구매 링크 클릭)
+        if (typeof window !== "undefined" && window.fbq) {
+          window.fbq("track", "InitiateCheckout", {
+            content_name: productName,
+            content_ids: [recommendationId],
+            value: price || 0,
+            currency: "KRW",
+          })
+        }
       } catch (error) {
         console.error("[recommendations] click_track_error", error)
       } finally {

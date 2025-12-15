@@ -219,9 +219,107 @@ const links = getIsoCodeLinks("15 09")
    - [ ] 플랫폼별 우선순위 설정
    - [ ] 클릭률 기반 자동 랭킹
 
+## 구매 완료 추적 시스템
+
+### 개요
+사용자가 추천된 상품의 구매 링크를 통해 외부 판매 사이트로 이동하여 실제 구매가 이루어진 경우를 추적하고 수익화하는 시스템입니다.
+
+### 구현된 기능
+
+#### 1. 쿠팡 파트너스 API 구매 리포트 조회
+- **엔드포인트**: `GET /api/webhooks/coupang/purchase-report`
+- **기능**: 쿠팡 파트너스 API를 통해 구매 리포트를 조회하고 DB에 저장
+- **사용 방법**:
+  ```bash
+  # 최근 7일 구매 리포트 조회
+  GET /api/webhooks/coupang/purchase-report?startDate=2025-02-01&endDate=2025-02-10
+  ```
+- **자동화**: Vercel Cron 또는 스케줄러로 주기적 실행 (예: 매일 오전 2시)
+
+#### 2. 쿠팡 파트너스 Postback URL
+- **엔드포인트**: `POST /api/webhooks/coupang/purchase`
+- **기능**: 쿠팡 파트너스에서 구매 완료 시 자동으로 호출
+- **설정 방법**:
+  1. 쿠팡 파트너스 대시보드 접속
+  2. Postback URL 설정: `https://your-domain.com/api/webhooks/coupang/purchase`
+  3. 구매 완료 시 자동으로 이벤트 저장
+
+#### 3. Meta Pixel 연동
+- **클라이언트 사이드**: `lib/integrations/meta-pixel.ts`
+- **Webhook 엔드포인트**: `POST /api/webhooks/meta/purchase`
+- **기능**:
+  - 구매 링크 클릭 시 `InitiateCheckout` 이벤트 전송
+  - 외부 판매 사이트에서 구매 완료 시 `Purchase` 이벤트 수신
+  - Facebook/Instagram 광고와 연동하여 리타겟팅 가능
+- **설정 방법**:
+  1. Facebook Business Manager에서 Pixel ID 발급
+  2. `.env.local`에 `NEXT_PUBLIC_META_PIXEL_ID` 추가
+  3. 외부 판매 사이트에 Meta Pixel 설치
+
+### 데이터베이스 구조
+
+#### conversion_events 테이블
+```sql
+-- 구매 완료 이벤트 타입 추가
+event_type: 'purchase_completed'
+
+-- 추가 필드
+purchase_amount DECIMAL(10, 2)      -- 구매 금액
+commission_amount DECIMAL(10, 2)    -- 수수료 금액
+purchase_date TIMESTAMP             -- 구매 완료 일시
+tracking_source VARCHAR(50)         -- 추적 소스 ('coupang_api', 'postback', 'meta_pixel')
+```
+
+#### recommendations 테이블
+```sql
+-- 구매 완료 상태 필드 추가
+purchase_completed BOOLEAN          -- 구매 완료 여부
+purchase_completed_at TIMESTAMP     -- 구매 완료 일시
+purchase_amount DECIMAL(10, 2)      -- 구매 금액
+```
+
+### 구매 추적 흐름
+
+```
+1. 사용자가 구매 링크 클릭
+   ├─ GA4: product_clicked 이벤트
+   ├─ Meta Pixel: InitiateCheckout 이벤트
+   └─ DB: recommendation.is_clicked = true
+
+2. 외부 판매 사이트에서 구매 완료
+   ├─ 쿠팡: Postback URL로 자동 알림
+   ├─ Meta Pixel: Purchase 이벤트 전송
+   └─ 쿠팡 API: 주기적으로 구매 리포트 조회
+
+3. 구매 완료 이벤트 저장
+   ├─ conversion_events: purchase_completed 이벤트 저장
+   ├─ recommendations: purchase_completed = true 업데이트
+   └─ 구매 금액, 수수료, 추적 소스 기록
+```
+
+### 환경 변수 설정
+
+```env
+# 쿠팡 파트너스 API
+COUPANG_ACCESS_KEY=your_access_key
+COUPANG_SECRET_KEY=your_secret_key
+COUPANG_LINK_ID=your_link_id
+
+# Meta Pixel
+NEXT_PUBLIC_META_PIXEL_ID=your_pixel_id
+```
+
+### 수익화 전략
+
+1. **제휴 수수료 추적**: 쿠팡 파트너스를 통한 구매 시 수수료 자동 계산
+2. **전환율 분석**: 클릭 대비 구매 완료 비율 추적
+3. **ROI 분석**: 광고 비용 대비 수익 분석 (Meta Pixel 연동)
+4. **리타겟팅**: 구매하지 않은 사용자에게 재타겟팅 광고 (Meta Pixel)
+
 ## 참고사항
 
 - 현재 `app/api/products/route.ts`는 이미 ISO 코드별 여러 상품을 조회하고 랭킹합니다.
 - `products` 테이블에 ISO 코드별로 여러 상품을 등록하면 자동으로 추천됩니다.
 - 추가 구현이 필요한 부분은 상품 데이터 수집 및 관리자 UI입니다.
+- **구매 완료 추적 시스템이 구현되어 수익화 전략 수립이 가능합니다.**
 
