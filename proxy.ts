@@ -1,10 +1,8 @@
 // proxy.ts
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
-  return clerkMiddleware()(request);
-}
+// Clerk 권장 형태: 기본 내보내기된 미들웨어
+export default clerkMiddleware();
 
 export const config = {
   matcher: [

@@ -110,38 +110,40 @@ export async function POST(request: NextRequest) {
     }
 
     // conversion_events에 purchase_completed 이벤트 저장
-    const { error: insertError } = await supabase.from("conversion_events").insert({
-      user_id: userId,
-      event_type: "purchase_completed",
-      recommendation_id: recommendationId,
-      product_id: productId,
-      consultation_id: consultationId,
-      purchase_amount: purchaseAmount,
-      commission_amount: 0, // Meta Pixel에서는 수수료 정보가 없음
-      purchase_date: purchaseDate,
-      tracking_source: "meta_pixel",
-      metadata: {
-        order_id: orderId,
-        currency,
-        product_ids: productIds,
-        contents: body.custom_data.contents,
-        product_name: body.custom_data.content_name,
-        event_source_url: body.event_source_url,
-        action_source: body.action_source,
-        user_data: {
-          client_ip: body.user_data?.client_ip_address,
-          user_agent: body.user_data?.client_user_agent,
-          fbc: body.user_data?.fbc,
-          fbp: body.user_data?.fbp,
+    const { error: insertError } = await supabase
+      .from("conversion_events")
+      .insert({
+        user_id: userId,
+        event_type: "purchase_completed",
+        recommendation_id: recommendationId,
+        product_id: productId,
+        consultation_id: consultationId,
+        purchase_amount: purchaseAmount,
+        commission_amount: 0, // Meta Pixel에서는 수수료 정보가 없음
+        purchase_date: purchaseDate,
+        tracking_source: "meta_pixel",
+        metadata: {
+          order_id: orderId,
+          currency,
+          product_ids: productIds,
+          contents: body.custom_data.contents,
+          product_name: body.custom_data.content_name,
+          event_source_url: body.event_source_url,
+          action_source: body.action_source,
+          user_data: {
+            client_ip: body.user_data?.client_ip_address,
+            user_agent: body.user_data?.client_user_agent,
+            fbc: body.user_data?.fbc,
+            fbp: body.user_data?.fbp,
+          },
+          raw_data: body, // 원본 데이터 보관
         },
-        raw_data: body, // 원본 데이터 보관
-      },
-    })
+      })
 
     if (insertError) {
       console.error("[Meta Pixel Purchase] 이벤트 저장 오류:", insertError)
       logEvent({
-        category: "purchase_tracking",
+        category: "product",
         action: "meta_pixel_insert_error",
         payload: { error: insertError, orderId },
         level: "error",
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     logEvent({
-      category: "purchase_tracking",
+      category: "product",
       action: "purchase_completed_from_meta_pixel",
       payload: {
         orderId,
@@ -186,7 +188,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[Meta Pixel Purchase] 처리 중 오류:", error)
     logEvent({
-      category: "purchase_tracking",
+      category: "product",
       action: "meta_pixel_error",
       payload: { error: error instanceof Error ? error.message : String(error) },
       level: "error",

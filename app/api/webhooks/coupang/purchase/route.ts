@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       console.error("[Coupang Postback] 이벤트 저장 오류:", insertError)
       logEvent({
-        category: "purchase_tracking",
+          category: "product",
         action: "postback_insert_error",
         payload: { error: insertError, orderId: body.orderId },
         level: "error",
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
     }
 
     logEvent({
-      category: "purchase_tracking",
+      category: "product",
       action: "purchase_completed_from_postback",
       payload: {
         orderId: body.orderId,
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[Coupang Postback] 처리 중 오류:", error)
     logEvent({
-      category: "purchase_tracking",
+      category: "product",
       action: "postback_error",
       payload: { error: error instanceof Error ? error.message : String(error) },
       level: "error",

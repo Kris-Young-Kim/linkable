@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
           successCount++;
 
           logEvent({
-            category: "purchase_tracking",
+            category: "product",
             action: "purchase_completed_from_api",
             payload: {
               orderId: purchase.orderId,
@@ -144,7 +144,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("[Purchase Report] 구매 리포트 조회 중 오류:", error);
     logEvent({
-      category: "purchase_tracking",
+      category: "product",
       action: "purchase_report_error",
       payload: {
         error: error instanceof Error ? error.message : String(error),

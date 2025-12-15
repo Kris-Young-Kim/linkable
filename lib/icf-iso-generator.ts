@@ -105,13 +105,22 @@ ISO 9999:2022 표준에 따라 이 ICF 코드와 가장 관련이 높은 보조�
 }`
 
   try {
-    const response = await callGemini({
-      prompt,
-      temperature: 0.3, // 낮은 온도로 일관성 있는 응답
-    })
+    // callGemini는 (prompt, imageBase64?, mimeType?) 시그니처를 사용
+    const response = await callGemini(prompt)
 
-    // JSON 파싱
-    const jsonMatch = response.match(/\{[\s\S]*\}/)
+    // callGemini 반환: { rawText: string; json: any }
+    const text = response.rawText ?? ""
+    const parsedJson = response.json
+
+    // 1) JSON 응답에 isoCodes 배열이 있는 경우
+    if (parsedJson && Array.isArray(parsedJson.isoCodes)) {
+      return parsedJson.isoCodes.filter(
+        (iso: string) => typeof iso === "string" && iso.trim().length > 0
+      )
+    }
+
+    // 2) 텍스트에서 JSON을 추출하여 isoCodes 파싱 시도
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0])
       if (Array.isArray(parsed.isoCodes)) {
@@ -121,9 +130,9 @@ ISO 9999:2022 표준에 따라 이 ICF 코드와 가장 관련이 높은 보조�
       }
     }
 
-    // JSON 파싱 실패 시 텍스트에서 ISO 코드 추출
+    // 3) JSON 파싱 실패 시 텍스트에서 ISO 코드 패턴 추출
     const isoCodePattern = /\b\d{2}\s\d{2}(?:\s\d{2})?\b/g
-    const matches = response.match(isoCodePattern)
+    const matches = text.match(isoCodePattern)
     return matches ? Array.from(new Set(matches)) : []
   } catch (error) {
     console.error("[ICF ISO Generator] AI call error:", error)

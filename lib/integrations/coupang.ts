@@ -174,7 +174,14 @@ export class CoupangApiClient {
       // 참고: 쿠팡 API는 경로와 쿼리를 함께 서명에 포함
       // 시도 1: 경로에 쿼리 파라미터 포함
       const headers = this.getHeaders("GET", fullPath)
-      console.log(`[Coupang API Debug] Authorization 헤더: ${headers.Authorization?.substring(0, 100)}...`)
+      // Authorization 미리보기 (Record 형태일 때만)
+      const authPreview =
+        (headers as Record<string, string>)?.Authorization ||
+        (Array.isArray(headers) ? headers.find((h) => h[0]?.toLowerCase?.() === "authorization")?.[1] : undefined) ||
+        (headers instanceof Headers ? headers.get("Authorization") || undefined : undefined)
+      if (authPreview) {
+        console.log(`[Coupang API Debug] Authorization 헤더: ${authPreview.substring(0, 100)}...`)
+      }
 
       const response = await fetch(url.toString(), {
         method: "GET",

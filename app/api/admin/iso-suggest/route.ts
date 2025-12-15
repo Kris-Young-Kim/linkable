@@ -232,7 +232,7 @@ export async function POST(request: Request) {
     label: string;
     description: string;
     score: number;
-    matchedKeywords?: string[];
+    matchedKeywords: string[];
   }> = [];
 
   try {
@@ -331,7 +331,10 @@ export async function POST(request: Request) {
         });
       }
     } else {
-      matchMap.set(match.iso, match);
+      matchMap.set(match.iso, {
+        ...match,
+        matchedKeywords: match.matchedKeywords ?? [],
+      });
     }
   }
 
