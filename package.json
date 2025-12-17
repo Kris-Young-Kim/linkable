@@ -20,7 +20,8 @@
     "test:coupang": "tsx scripts/test-coupang-api.ts",
     "test:clean": "if exist test-results rmdir /s /q test-results",
     "test:e2e": "npm run test:clean && playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "scrape:icf": "tsx scripts/scrape-icf-browser-v3.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",
