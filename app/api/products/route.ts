@@ -295,6 +295,17 @@ export async function GET(request: Request) {
 
   let isoMatches: Awaited<ReturnType<typeof getIsoMatches>>;
 
+  // 사용자 ID 조회 (컨텍스트 가중치용)
+  let userId: string | undefined;
+  if (consultationId) {
+    const { data: consultation } = await supabase
+      .from("consultations")
+      .select("user_id")
+      .eq("id", consultationId)
+      .maybeSingle();
+    userId = consultation?.user_id;
+  }
+
   if (useHybridMatching) {
     // 정확한 매칭 (시맨틱 + 지식 그래프)
     isoMatches = await accurateMatch({
@@ -304,6 +315,9 @@ export async function GET(request: Request) {
       consultationHistory: consultationId ? [] : undefined, // TODO: 실제 히스토리 조회
       userProfile: {
         disabilityType: disabilityType ?? undefined,
+        disabilitySeverity: disabilitySeverity ?? undefined,
+        userId: userId,
+        consultationId: consultationId,
       },
     });
   } else {

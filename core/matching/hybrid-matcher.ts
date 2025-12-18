@@ -11,6 +11,7 @@ import { semanticMatch } from "./semantic-matcher";
 import { inferIsoFromGraph } from "./knowledge-graph";
 import { applyFeedbackCorrection as applyFeedbackCorrectionFromScorer } from "./feedback-scorer";
 import { applyCorrelationBonuses } from "./icf-correlation";
+import { applyContextWeights, type UserContext } from "./context-weights";
 import type { IsoMatch } from "./iso-mapping";
 import { logEvent } from "@/lib/logging";
 
@@ -50,7 +51,10 @@ interface MatchContext {
   userProfile?: {
     ageGroup?: string;
     disabilityType?: string;
+    disabilitySeverity?: string;
     environment?: string;
+    userId?: string;
+    consultationId?: string;
   };
 }
 
@@ -159,14 +163,25 @@ export async function hybridMatch(
       context.icfCodes
     );
 
-    // 8단계: 의도 기반 재가중치
-    const intent = detectPrimaryIntent(context);
-    const intentWeighted = applyIntentWeights(adjusted, intent);
+    // 8단계: 사용자 컨텍스트 가중치 적용 (비동기)
+    const userContext: UserContext = {
+      ageGroup: context.userProfile?.ageGroup,
+      disabilityType: context.userProfile?.disabilityType,
+      disabilitySeverity: context.userProfile?.disabilitySeverity,
+      environment: context.userProfile?.environment,
+      userId: context.userProfile?.userId,
+      consultationId: context.userProfile?.consultationId,
+    };
+    const contextWeighted = await applyContextWeights(adjusted, userContext);
 
-    // 9단계: 의도 기반 하드 필터 (전혀 다른 카테고리 제거)
+    // 9단계: 의도 기반 재가중치
+    const intent = detectPrimaryIntent(context);
+    const intentWeighted = applyIntentWeights(contextWeighted, intent);
+
+    // 10단계: 의도 기반 하드 필터 (전혀 다른 카테고리 제거)
     const intentFiltered = filterByIntent(intentWeighted, intent);
 
-    // 10단계: 핵심/보조 분리 태깅
+    // 11단계: 핵심/보조 분리 태깅
     // 핵심: 점수 상위 3개 + 점수 0.1 이상
     const tagged = intentFiltered.map((item, idx) => ({
       ...item,
