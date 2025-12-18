@@ -9,39 +9,55 @@
 
 ---
 
-## B. BODY FUNCTIONS
+## B. 신체 기능
 
 **총 코드 수**: 493개
 
 ### B1: b1 CHAPTER 1 MENTAL FUNCTIONS
 
+**한국어 챕터명**: 정신 기능
+
 ---
 
 ### B2: b2 CHAPTER 2 SENSORY FUNCTIONS AND PAIN
+
+**한국어 챕터명**: 감각 기능 및 통증
 
 ---
 
 ### B3: b3 CHAPTER 3 VOICE AND SPEECH FUNCTIONS
 
+**한국어 챕터명**: 음성 및 말 기능
+
 ---
 
 ### B4: b4 CHAPTER 4 FUNCTIONS OF THE CARDIOVASCULAR, HAEMATOLOGICAL, IMMUNOLOGICAL AND RESPIRATORY SYSTEMS
+
+**한국어 챕터명**: 심혈관, 혈액, 면역 및 호흡계 기능
 
 ---
 
 ### B5: b5 CHAPTER 5 FUNCTIONS OF THE DIGESTIVE, METABOLIC AND ENDOCRINE SYSTEMS
 
+**한국어 챕터명**: 소화, 대사 및 내분비계 기능
+
 ---
 
 ### B6: b6 CHAPTER 6 GENITOURINARY AND REPRODUCTIVE FUNCTIONS
+
+**한국어 챕터명**: 비뇨생식계 기능
 
 ---
 
 ### B7: b7 CHAPTER 7 NEUROMUSCULOSKELETAL AND MOVEMENT-RELATED FUNCTIONS
 
+**한국어 챕터명**: 신경근골격 및 운동관련 기능
+
 ---
 
 ### B8: b8 CHAPTER 8 FUNCTIONS OF THE SKIN AND RELATED STRUCTURES
+
+**한국어 챕터명**: 피부 및 관련 구조 기능
 
 ---
 
@@ -1985,39 +2001,55 @@
 
 ---
 
-## S. BODY STRUCTURES
+## S. 신체 구조
 
 **총 코드 수**: 310개
 
 ### S1: s1 CHAPTER 1 STRUCTURES OF THE NERVOUS SYSTEM
 
+**한국어 챕터명**: 신경계 구조
+
 ---
 
 ### S2: s2 CHAPTER 2 THE EYE, EAR AND RELATED STRUCTURES
+
+**한국어 챕터명**: 눈, 귀 및 관련 구조
 
 ---
 
 ### S3: s3 CHAPTER 3 STRUCTURES INVOLVED IN VOICE AND SPEECH
 
+**한국어 챕터명**: 음성 및 말 관련 구조
+
 ---
 
 ### S4: s4 CHAPTER 4 STRUCTURES OF THE CARDIOVASCULAR, IMMUNOLOGICAL AND RESPIRATORY SYSTEMS
+
+**한국어 챕터명**: 심혈관, 면역 및 호흡계 구조
 
 ---
 
 ### S5: s5 CHAPTER 5 STRUCTURES RELATED TO THE DIGESTIVE, METABOLIC AND ENDOCRINE SYSTEMS
 
+**한국어 챕터명**: 소화, 대사 및 내분비계 관련 구조
+
 ---
 
 ### S6: s6 CHAPTER 6 STRUCTURES RELATED TO THE GENITOURINARY AND REPRODUCTIVE SYSTEMS
+
+**한국어 챕터명**: 비뇨생식계 관련 구조
 
 ---
 
 ### S7: s7 CHAPTER 7 STRUCTURES RELATED TO MOVEMENT
 
+**한국어 챕터명**: 이동 관련 구조
+
 ---
 
 ### S8: s8 CHAPTER 8 SKIN AND RELATED STRUCTURES
+
+**한국어 챕터명**: 피부 및 관련 구조
 
 ---
 
@@ -3229,43 +3261,61 @@
 
 ---
 
-## D. ACTIVITIES AND PARTICIPATION
+## D. 활동과 참여
 
 **총 코드 수**: 289개
 
 ### D1: d1 CHAPTER 1 LEARNING AND APPLYING KNOWLEDGE
 
+**한국어 챕터명**: 학습 및 지식 적용
+
 ---
 
 ### D2: d2 CHAPTER 2 GENERAL TASKS AND DEMANDS
+
+**한국어 챕터명**: 일반적 과제 및 요구
 
 ---
 
 ### D3: d3 CHAPTER 3 COMMUNICATION
 
+**한국어 챕터명**: 의사소통
+
 ---
 
 ### D4: d4 CHAPTER 4 MOBILITY
+
+**한국어 챕터명**: 이동
 
 ---
 
 ### D5: d5 CHAPTER 5 SELF-CARE
 
+**한국어 챕터명**: 자가 관리
+
 ---
 
 ### D6: d6 CHAPTER 6 DOMESTIC LIFE
+
+**한국어 챕터명**: 가정생활
 
 ---
 
 ### D7: d7 CHAPTER 7 INTERPERSONAL INTERACTIONS AND RELATIONSHIPS
 
+**한국어 챕터명**: 대인 상호작용 및 관계
+
 ---
 
 ### D8: d8 CHAPTER 8 MAJOR LIFE AREAS
 
+**한국어 챕터명**: 인생의 주요 영역
+
 ---
 
 ### D9: d9 CHAPTER 9 COMMUNITY, SOCIAL AND CIVIC LIFE
+
+**한국어 챕터명**: 지역사회, 사회 및 시민생활
 
 ---
 
@@ -4389,11 +4439,13 @@
 
 ---
 
-## E. ENVIRONMENTAL FACTORS
+## E. 환경 요인
 
 **총 코드 수**: 200개
 
 ### E1: e1 CHAPTER 1 PRODUCTS AND TECHNOLOGY
+
+**한국어 챕터명**: 제품 및 기술
 
 ---
 
@@ -4667,6 +4719,8 @@
 
 ### E2: e2 CHAPTER 2 NATURAL ENVIRONMENT AND HUMAN-MADE CHANGES TO ENVIRONMENT
 
+**한국어 챕터명**: 자연환경 및 환경의 인위적 변화
+
 ---
 
 ### E210: e210 Physical geography
@@ -4867,6 +4921,8 @@
 
 ### E3: e3 CHAPTER 3 SUPPORT AND RELATIONSHIPS
 
+**한국어 챕터명**: 지지 및 관계
+
 ---
 
 ### E310: e310 Immediate family
@@ -4922,6 +4978,8 @@
 ---
 
 ### E4: e4 CHAPTER 4 ATTITUDES
+
+**한국어 챕터명**: 태도
 
 ---
 
@@ -4982,6 +5040,8 @@
 ---
 
 ### E5: e5 CHAPTER 5 SERVICES, SYSTEMS AND POLICIES
+
+**한국어 챕터명**: 서비스, 시스템 및 정책
 
 ---
 

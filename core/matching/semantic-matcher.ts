@@ -2,13 +2,18 @@
  * 시맨틱 임베딩 기반 ICF-ISO 매칭
  *
  * 의미론적 유사도를 활용하여 더 정확한 매칭을 수행합니다.
- * 
- * Note: @ai-sdk/google에는 embed 함수가 없으므로 임베딩 기능은 현재 폴백 구현을 사용합니다.
+ * Supabase pgvector를 활용한 벡터 유사도 검색을 사용합니다.
  */
 
 import type { IsoMatch } from "./iso-mapping";
 import { getIsoMatches } from "./iso-mapping";
 import { findIcfCode } from "../assessment/icf-codes";
+import {
+  searchSimilarIcfIsoMappings,
+  updateEmbeddingStats,
+} from "@/lib/embeddings/vector-store";
+import { createEmbedding } from "@/lib/embeddings/gemini-embedding";
+import { logEvent } from "@/lib/logging";
 
 interface SemanticMatchConfig {
   useEmbeddings: boolean;
@@ -54,9 +59,65 @@ export async function semanticMatch(
   try {
     // 2. 사용자 컨텍스트 + ICF 코드를 임베딩
     const queryText = buildQueryText(icfCodes, userContext);
-    const queryEmbedding = await createEmbedding(queryText);
 
-    // 3. ISO 코드별 임베딩과 유사도 계산
+    // 3. 벡터 DB에서 유사한 매핑 검색
+    const vectorMatches = await searchSimilarIcfIsoMappings(
+      queryText,
+      config.similarityThreshold,
+      config.topK
+    );
+
+    // 4. 벡터 검색 결과가 있으면 우선 사용, 없으면 규칙 기반 매칭 보강
+    if (vectorMatches.length > 0) {
+      const enhanced = vectorMatches.map((vm) => {
+        // 벡터 검색 결과를 IsoMatch 형식으로 변환
+        const baseMatch = ruleMatches.find((rm) => rm.isoCode === vm.isoCode);
+
+        return {
+          isoCode: vm.isoCode,
+          label: vm.isoLabel,
+          description: vm.isoDescription || "",
+          score: Math.min(
+            (vm.baseScore * 0.4 + vm.similarity * 0.4 + (vm.successRate * 0.2)) * 1.0,
+            1.0
+          ),
+          matchedIcf: icfCodes.map((code) => {
+            const meta = findIcfCode(code);
+            return {
+              code,
+              description: meta?.description || code,
+            };
+          }),
+          reason: `벡터 유사도 검색 (유사도: ${(vm.similarity * 100).toFixed(1)}%, 성공률: ${(vm.successRate * 100).toFixed(1)}%)`,
+        } as IsoMatch;
+      });
+
+      logEvent({
+        category: "matching",
+        action: "semantic_vector_search",
+        payload: {
+          icfCodes,
+          vectorMatchesCount: vectorMatches.length,
+          avgSimilarity:
+            vectorMatches.length > 0
+              ? vectorMatches.reduce((sum, vm) => sum + vm.similarity, 0) /
+                vectorMatches.length
+              : 0,
+        },
+      });
+
+      // 통계 업데이트 (비동기, 에러 무시)
+      for (const vm of vectorMatches) {
+        updateEmbeddingStats(vm.icfCodes, vm.isoCode, false).catch(() => {
+          // 통계 업데이트 실패는 무시
+        });
+      }
+
+      return enhanced;
+    }
+
+    // 5. 벡터 검색 결과가 없으면 규칙 기반 매칭에 임베딩 보강 적용
+    const queryEmbedding = await createEmbedding(queryText);
     const enhancedMatches = await enhanceMatchesWithSemantics(
       ruleMatches,
       icfCodes,
@@ -70,6 +131,12 @@ export async function semanticMatch(
       "[semantic-matcher] Embedding failed, falling back to rule-based:",
       error
     );
+    logEvent({
+      category: "matching",
+      action: "semantic_match_error",
+      payload: { error: String(error), icfCodes },
+      level: "error",
+    });
     return ruleMatches;
   }
 }
@@ -88,36 +155,7 @@ function buildQueryText(icfCodes: string[], userContext: string): string {
   return `${icfDescriptions}. 사용자 상황: ${userContext || "정보 없음"}`;
 }
 
-/**
- * 텍스트를 벡터 임베딩으로 변환
- * 
- * 현재는 Google Embedding API를 직접 호출하는 방식으로 구현 예정
- * @ai-sdk/google에는 embed 함수가 없으므로 직접 API 호출 필요
- */
-async function createEmbedding(text: string): Promise<number[]> {
-  // TODO: Google Embedding API 직접 호출 구현
-  // 현재는 임베딩 기능을 사용하지 않으므로 빈 배열 반환
-  // 실제 구현 시:
-  // 1. Google Embedding API 엔드포인트 호출
-  // 2. 또는 다른 임베딩 서비스 (OpenAI, Cohere 등) 사용
-  
-  console.warn("[semantic-matcher] Embedding API not implemented, using fallback");
-  
-  // 임시: 간단한 해시 기반 임베딩 (실제 임베딩 대체)
-  // 실제로는 Google Embedding API를 직접 호출해야 함
-  const hash = text.split("").reduce((acc, char) => {
-    const hash = char.charCodeAt(0);
-    return ((acc << 5) - acc) + hash;
-  }, 0);
-  
-  // 간단한 128차원 벡터 생성 (실제 임베딩은 768차원 등)
-  const embedding: number[] = [];
-  for (let i = 0; i < 128; i++) {
-    embedding.push(Math.sin(hash + i) * 0.1);
-  }
-  
-  return embedding;
-}
+// createEmbedding은 lib/embeddings/gemini-embedding.ts에서 import
 
 /**
  * 규칙 기반 매칭 결과를 시맨틱 정보로 보강
