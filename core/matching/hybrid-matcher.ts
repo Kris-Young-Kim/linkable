@@ -10,6 +10,7 @@ import { appendKeywordIsoMatches } from "./keyword-inference";
 import { semanticMatch } from "./semantic-matcher";
 import { inferIsoFromGraph } from "./knowledge-graph";
 import { applyFeedbackCorrection as applyFeedbackCorrectionFromScorer } from "./feedback-scorer";
+import { applyCorrelationBonuses } from "./icf-correlation";
 import type { IsoMatch } from "./iso-mapping";
 import { logEvent } from "@/lib/logging";
 
@@ -146,20 +147,26 @@ export async function hybridMatch(
       finalConfig.minScore
     );
 
-    // 6단계: 피드백 기반 보정 (비동기)
-    const adjusted = await applyFeedbackCorrectionFromScorer(
+    // 6단계: ICF 상관관계 보너스 적용 (비동기)
+    const correlationBoosted = await applyCorrelationBonuses(
       combined,
       context.icfCodes
     );
 
-    // 7단계: 의도 기반 재가중치
+    // 7단계: 피드백 기반 보정 (비동기)
+    const adjusted = await applyFeedbackCorrectionFromScorer(
+      correlationBoosted,
+      context.icfCodes
+    );
+
+    // 8단계: 의도 기반 재가중치
     const intent = detectPrimaryIntent(context);
     const intentWeighted = applyIntentWeights(adjusted, intent);
 
-    // 8단계: 의도 기반 하드 필터 (전혀 다른 카테고리 제거)
+    // 9단계: 의도 기반 하드 필터 (전혀 다른 카테고리 제거)
     const intentFiltered = filterByIntent(intentWeighted, intent);
 
-    // 9단계: 핵심/보조 분리 태깅
+    // 10단계: 핵심/보조 분리 태깅
     // 핵심: 점수 상위 3개 + 점수 0.1 이상
     const tagged = intentFiltered.map((item, idx) => ({
       ...item,
