@@ -5,6 +5,9 @@ import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/s
 import { logEvent } from "@/lib/logging"
 
 async function ensureUserRecord(clerkUserId: string) {
+  // System-level operation: use server client to bypass RLS
+  const supabase = getSupabaseServerClient()
+
   const { data, error } = await supabase
     .from("users")
     .select("id")

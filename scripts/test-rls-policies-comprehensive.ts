@@ -105,7 +105,7 @@ if (missingVars.length > 0) {
 }
 
 // Service Role Key를 사용하는 클라이언트 (테스트 데이터 생성용)
-const supabaseAdmin = createClient<Database>(supabaseUrl, serviceRoleKey, {
+const supabaseAdmin = createClient<Database>(supabaseUrl as string, serviceRoleKey as string, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
@@ -143,7 +143,7 @@ function createSupabaseClientWithJWT(clerkUserId: string, role: string = "user",
     expiresIn: 3600,
   })
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  return createClient<Database>(supabaseUrl as string, supabaseAnonKey as string, {
     global: {
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -423,7 +423,7 @@ async function main() {
 
     await test("get_current_user_id 함수 테스트", async () => {
       const supabaseUser1 = createSupabaseClientWithJWT(testUser1Id, "user")
-      const { data, error } = await supabaseUser1.rpc("get_current_user_id")
+      const { data, error } = await (supabaseUser1 as any).rpc("get_current_user_id")
 
       if (error && error.code !== "P0001") {
         // P0001은 함수 실행 오류 (예: NULL 반환)이므로 정상일 수 있음
@@ -436,7 +436,7 @@ async function main() {
 
     await test("get_current_user_role 함수 테스트", async () => {
       const supabaseUser1 = createSupabaseClientWithJWT(testUser1Id, "user")
-      const { data, error } = await supabaseUser1.rpc("get_current_user_role")
+      const { data, error } = await (supabaseUser1 as any).rpc("get_current_user_role")
 
       if (error && error.code !== "P0001") {
         throw new Error(`함수 호출 실패: ${error.message} (코드: ${error.code})`)
@@ -447,7 +447,7 @@ async function main() {
 
     await test("is_admin_or_manager 함수 테스트 (일반 사용자)", async () => {
       const supabaseUser1 = createSupabaseClientWithJWT(testUser1Id, "user")
-      const { data, error } = await supabaseUser1.rpc("is_admin_or_manager")
+      const { data, error } = await (supabaseUser1 as any).rpc("is_admin_or_manager")
 
       if (error && error.code !== "P0001") {
         throw new Error(`함수 호출 실패: ${error.message} (코드: ${error.code})`)
@@ -462,7 +462,7 @@ async function main() {
 
     await test("is_admin_or_manager 함수 테스트 (관리자)", async () => {
       const supabaseAdminClient = createSupabaseClientWithJWT(testAdminId, "admin")
-      const { data, error } = await supabaseAdminClient.rpc("is_admin_or_manager")
+      const { data, error } = await (supabaseAdminClient as any).rpc("is_admin_or_manager")
 
       if (error && error.code !== "P0001") {
         throw new Error(`함수 호출 실패: ${error.message} (코드: ${error.code})`)

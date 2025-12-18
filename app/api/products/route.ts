@@ -306,15 +306,15 @@ export async function GET(request: Request) {
 
   let isoMatches: Awaited<ReturnType<typeof getIsoMatches>>;
 
-  // 사용자 ID 조회 (컨텍스트 가중치용)
-  let userId: string | undefined;
+  // 사용자 ID 조회 (컨텍스트 가중치용) - Supabase users 테이블의 ID
+  let supabaseUserId: string | undefined;
   if (consultationId) {
     const { data: consultation } = await supabase
       .from("consultations")
       .select("user_id")
       .eq("id", consultationId)
       .maybeSingle();
-    userId = consultation?.user_id;
+    supabaseUserId = consultation?.user_id;
   }
 
   if (useHybridMatching) {
@@ -327,7 +327,7 @@ export async function GET(request: Request) {
       userProfile: {
         disabilityType: disabilityType ?? undefined,
         disabilitySeverity: disabilitySeverity ?? undefined,
-        userId: userId,
+        userId: supabaseUserId,
         consultationId: consultationId,
       },
     });

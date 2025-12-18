@@ -63,7 +63,7 @@ async function main() {
   // 1. RLS 활성화 확인 (SQL 직접 실행)
   await test("RLS 활성화 확인", async () => {
     // Service Role Key를 사용하므로 직접 SQL 실행
-    const { data, error } = await supabase.rpc("exec_sql", {
+    const { data, error } = await (supabase as any).rpc("exec_sql", {
       query: `
         SELECT 
           tablename,
@@ -97,9 +97,9 @@ async function main() {
   // 2. 헬퍼 함수 존재 확인 (함수 호출로 확인)
   await test("헬퍼 함수 존재 확인", async () => {
     const functions = [
-      { name: "get_current_user_id", test: () => supabase.rpc("get_current_user_id") },
-      { name: "get_current_user_role", test: () => supabase.rpc("get_current_user_role") },
-      { name: "is_admin_or_manager", test: () => supabase.rpc("is_admin_or_manager") },
+      { name: "get_current_user_id", test: () => (supabase as any).rpc("get_current_user_id") },
+      { name: "get_current_user_role", test: () => (supabase as any).rpc("get_current_user_role") },
+      { name: "is_admin_or_manager", test: () => (supabase as any).rpc("is_admin_or_manager") },
     ]
 
     for (const { name, test: testFn } of functions) {

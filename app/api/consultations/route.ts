@@ -1,33 +1,39 @@
-import { NextResponse } from "next/server"
-import { auth, currentUser } from "@clerk/nextjs/server"
-import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server"
-import { logEvent } from "@/lib/logging"
+﻿import { NextResponse } from "next/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
+import {
+  getSupabaseServerClient,
+  getSupabaseUserClient,
+} from "@/lib/supabase/server";
+import { logEvent } from "@/lib/logging";
 
 async function ensureUserRecord(clerkUserId: string) {
+  // System-level operation: use server client to bypass RLS
+  const supabase = getSupabaseServerClient();
+
   const { data, error } = await supabase
     .from("users")
     .select("id")
     .eq("clerk_id", clerkUserId)
-    .single()
+    .single();
 
   if (data?.id) {
-    return data.id
+    return data.id;
   }
 
   if (error && error.code !== "PGRST116") {
-    throw error
+    throw error;
   }
 
-  const user = await currentUser()
+  const user = await currentUser();
   const email =
     user?.primaryEmailAddress?.emailAddress ??
     user?.emailAddresses?.[0]?.emailAddress ??
-    `${clerkUserId}@linkable.local`
+    `${clerkUserId}@linkable.local`;
 
-  const fullName = user?.fullName ?? user?.username ?? null
-  
+  const fullName = user?.fullName ?? user?.username ?? null;
+
   // Clerk 메타데이터에서 role 가져오기 (있으면)
-  const role = (user?.publicMetadata?.role as string) || "user"
+  const role = (user?.publicMetadata?.role as string) || "user";
 
   const { data: insertData, error: insertError } = await supabase
     .from("users")
@@ -38,29 +44,29 @@ async function ensureUserRecord(clerkUserId: string) {
       role,
     })
     .select("id")
-    .single()
+    .single();
 
   if (insertError) {
-    throw insertError
+    throw insertError;
   }
 
   logEvent({
     category: "system",
     action: "user_created",
     payload: { clerkUserId },
-  })
+  });
 
-  return insertData.id
+  return insertData.id;
 }
 
 export async function GET() {
-  const { userId } = await auth()
+  const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await getSupabaseUserClient()
-  const userRowId = await ensureUserRecord(userId)
+  const supabase = await getSupabaseUserClient();
+  const userRowId = await ensureUserRecord(userId);
 
   const { data, error } = await supabase
     .from("consultations")
@@ -76,7 +82,7 @@ export async function GET() {
       `
     )
     .eq("user_id", userRowId)
-    .order("created_at", { ascending: false })
+    .order("created_at", { ascending: false });
 
   if (error) {
     logEvent({
@@ -84,30 +90,38 @@ export async function GET() {
       action: "fetch_error",
       payload: { error },
       level: "error",
-    })
-    return NextResponse.json({ error: "Failed to load consultations" }, { status: 500 })
+    });
+    return NextResponse.json(
+      { error: "Failed to load consultations" },
+      { status: 500 }
+    );
   }
 
   // 캐싱 헤더 추가 (사용자별 데이터이므로 짧은 캐시)
-  const headers = new Headers()
-  headers.set("Cache-Control", "private, s-maxage=10, stale-while-revalidate=30")
+  const headers = new Headers();
+  headers.set(
+    "Cache-Control",
+    "private, s-maxage=10, stale-while-revalidate=30"
+  );
 
-  return NextResponse.json({ consultations: data ?? [] }, { headers })
+  return NextResponse.json({ consultations: data ?? [] }, { headers });
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth()
+  const { userId } = await auth();
   if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { title } = (await request.json().catch(() => ({}))) as { title?: string }
+  const { title } = (await request.json().catch(() => ({}))) as {
+    title?: string;
+  };
   if (!title) {
-    return NextResponse.json({ error: "title is required" }, { status: 400 })
+    return NextResponse.json({ error: "title is required" }, { status: 400 });
   }
 
-  const supabase = await getSupabaseUserClient()
-  const userRowId = await ensureUserRecord(userId)
+  const supabase = await getSupabaseUserClient();
+  const userRowId = await ensureUserRecord(userId);
 
   const { data, error } = await supabase
     .from("consultations")
@@ -116,7 +130,7 @@ export async function POST(request: Request) {
       user_id: userRowId,
     })
     .select("*")
-    .single()
+    .single();
 
   if (error) {
     logEvent({
@@ -124,16 +138,18 @@ export async function POST(request: Request) {
       action: "create_error",
       payload: { error },
       level: "error",
-    })
-    return NextResponse.json({ error: "Failed to create consultation" }, { status: 500 })
+    });
+    return NextResponse.json(
+      { error: "Failed to create consultation" },
+      { status: 500 }
+    );
   }
 
   logEvent({
     category: "consultation",
     action: "created",
     payload: { userId, consultationId: data.id },
-  })
+  });
 
-  return NextResponse.json({ consultation: data }, { status: 201 })
+  return NextResponse.json({ consultation: data }, { status: 201 });
 }
-

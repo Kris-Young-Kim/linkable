@@ -69,7 +69,7 @@ export function createSupabaseJWT(
     aud: "authenticated",
     exp: now + expiresIn,
     iat: now,
-    iss: supabaseUrl,
+    iss: supabaseUrl as string,
     sub: clerkUserId, // Supabase user ID 대신 clerk_id 사용
     email: options?.email,
     role: options?.role || "authenticated",
@@ -84,7 +84,7 @@ export function createSupabaseJWT(
     },
   }
 
-  return jwt.sign(payload, supabaseJwtSecret, {
+  return jwt.sign(payload, supabaseJwtSecret as string, {
     algorithm: "HS256",
   })
 }
@@ -97,7 +97,7 @@ export function createSupabaseJWT(
  */
 export function verifySupabaseJWT(token: string): SupabaseJWTPayload | null {
   try {
-    const decoded = jwt.verify(token, supabaseJwtSecret, {
+    const decoded = jwt.verify(token, supabaseJwtSecret as string, {
       algorithms: ["HS256"],
     }) as SupabaseJWTPayload
 

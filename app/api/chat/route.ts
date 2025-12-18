@@ -373,7 +373,13 @@ export async function POST(request: Request) {
 
   try {
     // 사용자 인증이 적용된 Supabase 클라이언트 생성 (RLS 정책 적용)
-    const supabaseUser = await getSupabaseUserClient();
+    let supabaseUser;
+    try {
+      supabaseUser = await getSupabaseUserClient();
+    } catch (jwtError) {
+      console.error("[Chat API] Failed to create Supabase user client:", jwtError);
+      throw new Error(`인증 오류: ${jwtError instanceof Error ? jwtError.message : String(jwtError)}`);
+    }
     
     const supabaseUserId = await ensureUserRecord(userId);
     const consultationId = await createConsultationIfNeeded(
@@ -635,12 +641,33 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    console.error("[Chat API] Error:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
     logEvent({
       category: "consultation",
       action: "chat_api_error",
-      payload: { error },
+      payload: { 
+        error: errorMessage,
+        stack: errorStack,
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+      },
       level: "error",
     });
+    
+    // 개발 환경에서는 상세 에러 정보 반환
+    if (process.env.NODE_ENV === "development") {
+      return NextResponse.json(
+        { 
+          error: "Failed to process request. 잠시 후 다시 시도해 주세요.",
+          details: errorMessage,
+          stack: errorStack,
+        },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json(
       { error: "Failed to process request. 잠시 후 다시 시도해 주세요." },
       { status: 500 }

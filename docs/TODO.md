@@ -406,11 +406,42 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 ### 향후 작업
 
-- [ ] **클라이언트 측 인증 통합** (선택적)
+- [x] **클라이언트 측 인증 통합** (2025-02-19 완료)
 
-  - [ ] Clerk JWT 템플릿 생성 (Supabase용)
-  - [ ] 클라이언트 측 Supabase 클라이언트 수정
-  - [ ] Clerk JWT를 Supabase에 전달하는 로직 구현
+  **목표**: 클라이언트 측에서도 Clerk 인증 정보를 Supabase JWT로 변환하여 RLS 정책이 적용되도록 함
+
+  **구현 완료**:
+
+  1. **API Route 생성** (`app/api/auth/supabase-token/route.ts`)
+
+     - [x] Clerk 세션 토큰을 받아서 Supabase JWT로 변환하는 엔드포인트 생성
+     - [x] `getSupabaseUserClient()` 로직 재사용하여 JWT 생성
+     - [x] JWT 만료 시간 설정 (기본 1시간)
+     - [x] 에러 처리 및 인증 실패 시 적절한 응답
+
+  2. **클라이언트 유틸 수정** (`lib/supabase/client.ts`)
+
+     - [x] `createSupabaseBrowserClient()` 함수 유지 (기존 방식)
+     - [x] `createSupabaseClientWithAuth()` 함수 추가 (Clerk JWT 사용)
+     - [x] `useSupabaseClient()` React Hook 추가
+     - [x] `/api/auth/supabase-token` 엔드포인트 호출하여 JWT 획득
+     - [x] 획득한 JWT를 Authorization 헤더에 포함하여 Supabase 클라이언트 생성
+     - [x] JWT 캐싱 및 만료 시 자동 갱신 로직 구현
+
+  3. **JWT 갱신 로직**
+
+     - [x] JWT 만료 시간 추적
+     - [x] 만료 전 자동 갱신 (만료 5분 전)
+     - [x] 갱신 실패 시 에러 처리
+
+  4. **문서화**
+     - [x] 클라이언트 측 인증 통합 가이드 작성 (`docs/client-auth-integration-guide.md`)
+
+  **참고 문서**:
+
+  - `docs/client-auth-integration-guide.md`: 클라이언트 측 인증 통합 가이드
+  - `app/api/auth/supabase-token/route.ts`: JWT 생성 API Route
+  - `lib/supabase/client.ts`: 클라이언트 측 Supabase 유틸리티
 
 - [ ] **Supabase Edge Function 활용** (선택적)
   - [ ] Clerk JWT 변환 Edge Function 생성
