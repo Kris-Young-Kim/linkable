@@ -407,7 +407,7 @@ class IcfBrowserScraper {
 
       try {
         // 링크 클릭 (여러 방법 시도)
-        const clicked = await this.page.evaluate((href, code, title) => {
+        const clicked = await this.page.evaluate(({ href, code, title }: { href: string; code: string; title: string }) => {
           // 방법 1: href로 찾기
           let link = document.querySelector<HTMLAnchorElement>(`a[href="${href.replace(/"/g, '\\"')}"]`);
           
@@ -434,7 +434,7 @@ class IcfBrowserScraper {
             return true;
           }
           return false;
-        }, item.href, item.code, item.title);
+        }, { href: item.href, code: item.code, title: item.title });
 
         if (!clicked) {
           console.log(`    ⚠️  ${item.code} 링크를 찾을 수 없음`);

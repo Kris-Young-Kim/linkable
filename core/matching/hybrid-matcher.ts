@@ -9,6 +9,7 @@ import { getIsoMatches } from "./iso-mapping";
 import { appendKeywordIsoMatches } from "./keyword-inference";
 import { semanticMatch } from "./semantic-matcher";
 import { inferIsoFromGraph } from "./knowledge-graph";
+import { applyFeedbackCorrection as applyFeedbackCorrectionFromScorer } from "./feedback-scorer";
 import type { IsoMatch } from "./iso-mapping";
 import { logEvent } from "@/lib/logging";
 
@@ -145,10 +146,10 @@ export async function hybridMatch(
       finalConfig.minScore
     );
 
-    // 6단계: 피드백 기반 보정 (선택적)
-    const adjusted = applyFeedbackCorrection(
+    // 6단계: 피드백 기반 보정 (비동기)
+    const adjusted = await applyFeedbackCorrectionFromScorer(
       combined,
-      context.consultationHistory || []
+      context.icfCodes
     );
 
     // 7단계: 의도 기반 재가중치
@@ -243,32 +244,8 @@ function combineMatches(
   return combined;
 }
 
-/**
- * 피드백 기반 점수 보정
- *
- * 과거 상담에서 성공한 매칭은 점수를 높이고,
- * 실패한 매칭은 점수를 낮춥니다.
- */
-function applyFeedbackCorrection(
-  matches: IsoMatch[],
-  consultationHistory: string[]
-): IsoMatch[] {
-  // TODO: 실제 피드백 데이터를 DB에서 조회하여 적용
-  // 현재는 플레이스홀더
-
-  // 예시: 특정 ISO 코드가 과거에 높은 클릭률을 보였다면 점수 보너스
-  const feedbackBoost: Record<string, number> = {
-    // '15 09': 1.1, // 식사 보조기기는 과거 성공률이 높음
-  };
-
-  return matches.map((match) => {
-    const boost = feedbackBoost[match.isoCode] || 1.0;
-    return {
-      ...match,
-      score: Math.min(match.score * boost, 1.0),
-    };
-  });
-}
+// 피드백 기반 점수 보정은 feedback-scorer.ts로 이동됨
+// 이제 applyFeedbackCorrectionFromScorer를 사용합니다.
 
 type PrimaryIntent =
   | "mobility_wheelchair"

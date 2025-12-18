@@ -423,6 +423,7 @@ async function learnFromFeedback(
 ## 📚 참고 자료
 
 - [WHO ICF 공식 문서](https://www.who.int/standards/classifications/international-classification-of-functioning-disability-and-health)
+- [WHO full category](https://apps.who.int/classifications/icfbrowser/Default.aspx)
 - [ISO 9999:2022 표준](https://www.iso.org/obp/ui/#iso:std:iso:9999:ed-7:v1:en)
 - [Vector Embeddings 가이드](https://www.pinecone.io/learn/vector-embeddings/)
 - [Semantic Similarity Matching](https://arxiv.org/html/2404.03122v1)
@@ -487,7 +488,7 @@ const code = findIcfCode("d710"); // Core Set에 없어도 기본 정보 반환
 **우선순위 점수 계산**:
 
 ```sql
-priority_score = 
+priority_score =
   total_usage_count * 1.0 +
   unique_consultations * 2.0 +
   최근성 보너스 (7일 이내: +5.0, 30일 이내: +2.0)
@@ -498,10 +499,12 @@ priority_score =
 **단계별 확장 전략**:
 
 1. **데이터 수집 (현재 단계)**
+
    - 모든 ICF 코드 사용 이벤트 자동 로깅
    - 통계 집계 및 우선순위 분석
 
 2. **우선순위 기반 확장 (1-2주 후)**
+
    - 우선순위 점수 20 이상 코드부터 Core Set에 추가
    - ISO 매핑 힌트 수동/자동 추가
    - 전문가 검토 후 승인
@@ -543,13 +546,13 @@ priority_score =
 async function generateIsoHintsForIcfCode(icfCode: string): Promise<string[]> {
   // 1. 사용 통계에서 연관 ISO 코드 추출
   const associatedIsoCodes = await getAssociatedIsoCodes(icfCode);
-  
+
   // 2. AI를 활용한 의미론적 매핑
   const semanticMatches = await findSemanticIsoMatches(icfCode);
-  
+
   // 3. 전문가 지식 그래프 기반 추론
   const graphMatches = inferIsoFromGraph(icfCode);
-  
+
   // 4. 결과 통합 및 우선순위 정렬
   return combineAndRank(associatedIsoCodes, semanticMatches, graphMatches);
 }
@@ -608,3 +611,199 @@ GET /api/admin/analytics/icf-expansion?limit=50&min_usage=5
 1. **관리자 대시보드 UI 구현**: 확장 우선순위 시각화 및 일괄 추가 기능
 2. **자동 확장 워크플로우**: 우선순위 기반 자동 Core Set 업데이트
 3. **AI 기반 ISO 매핑**: 누적 데이터를 활용한 자동 ISO 힌트 생성
+
+---
+
+## 🎯 매칭 정확도 개선 전략 (2025-02-17 추가)
+
+### 현재 상태 분석
+
+#### ✅ 이미 구현된 기능
+
+- 하이브리드 매칭 시스템 (규칙 + 시맨틱 + 지식 그래프)
+- 피드백 수집 시스템 (클릭, 구매, K-IPPA 평가)
+- ICF 코드 사용 통계 수집
+- 키워드 기반 보강 매칭
+
+#### ⚠️ 주요 문제점
+
+1. **점수 계산이 단순함**: `baseScore + coverage * 0.4`
+2. **피드백 데이터 미활용**: 클릭/구매/효과성 점수 데이터를 점수 계산에 반영하지 않음
+3. **ICF 코드 간 상관관계 미반영**: 코드 간 의미론적 관계 고려 부족
+4. **사용자 컨텍스트 활용 부족**: 연령, 환경, 장애 유형 등 고려 안 함
+
+### 우선순위별 개선 전략
+
+#### 🔥 즉시 효과 (1-2주) - 최우선
+
+##### 1. 피드백 기반 점수 보정 강화
+
+**목표**: 실제 사용자 행동 데이터를 점수 계산에 반영
+
+**구현 내용**:
+
+- `core/matching/feedback-scorer.ts` 생성
+- 클릭률, 구매 전환율, K-IPPA 효과성 점수를 점수에 반영
+- ICF 코드 조합별 통계 수집 및 활용
+
+**점수 계산 공식**:
+
+```typescript
+finalScore =
+  baseScore +
+  clickRate * 0.3 + // 클릭률 보너스 (최대 0.3)
+  purchaseRate * 0.4 + // 구매 전환 보너스 (최대 0.4)
+  (effectivenessScore / 100) * 0.3 * confidence; // 효과성 보너스
+```
+
+**예상 효과**: +5-10% 정확도 향상
+
+**데이터 소스**:
+
+- `conversion_events`: 클릭 및 구매 이벤트
+- `recommendations`: 추천별 클릭 통계
+- `ippa_evaluations`: 효과성 점수
+
+##### 2. ICF 코드 간 상관관계 반영
+
+**목표**: 함께 나타나는 ICF 코드 조합에 가중치 부여
+
+**구현 내용**:
+
+- `core/matching/icf-correlation.ts` 생성
+- ICF 코드 조합별 상관관계 데이터 구축
+- 상관관계가 높은 조합에 보너스 점수 부여
+
+**예시**:
+
+- `b765`(손 떨림) + `d550`(식사) = 강한 상관관계 (0.9)
+- `b230`(청각) + `d115`(듣기) = 강한 상관관계 (0.85)
+
+**점수 계산**:
+
+```typescript
+correlationBonus = sum(correlation(code1, code2)) * 0.2;
+// 최대 0.2 보너스
+```
+
+**예상 효과**: +3-5% 정확도 향상
+
+#### 📈 중기 효과 (2-4주)
+
+##### 3. 사용자 컨텍스트 기반 가중치
+
+**목표**: 사용자 특성에 맞는 제품 우선순위 조정
+
+**구현 내용**:
+
+- `core/matching/context-weights.ts` 생성
+- 연령대, 환경, 장애 유형별 가중치 적용
+- 이전 사용 제품과의 유사도 반영
+
+**가중치 예시**:
+
+- 노인 사용자 → 안전성 제품 +0.15
+- 실내 환경 → 실내용 제품 +0.1
+- 이전 사용 제품 유사 → +0.2
+
+**예상 효과**: +5-8% 정확도 향상
+
+##### 4. 규칙 기반 점수 계산 개선
+
+**목표**: 현재 단순한 점수 계산을 개선
+
+**개선 사항**:
+
+```typescript
+// 기존: baseScore + coverage * 0.4
+// 개선:
+score =
+  baseScore +
+  (coverage === 1.0 ? 0.3 : coverage >= 0.8 ? 0.2 : coverage * 0.15) + // 커버리지 보너스 (비선형)
+  Math.min(matched.length * 0.05, 0.15) + // 코드 개수 보너스
+  correlationBonus; // 상관관계 보너스
+```
+
+**예상 효과**: +3-5% 정확도 향상
+
+#### 🚀 장기 효과 (1-2개월)
+
+##### 5. 벡터 DB 구축 및 시맨틱 매칭 강화
+
+**목표**: 의미론적 유사도 기반 정확한 매칭
+
+**구현 내용**:
+
+- Supabase pgvector 확장 활용
+- ICF-ISO 매핑 임베딩 생성 및 저장
+- 사용자 입력 임베딩과 유사도 검색
+- 실시간 학습 및 업데이트
+
+**예상 효과**: +10-15% 정확도 향상
+
+### 구현 로드맵
+
+#### 1주차: 피드백 기반 점수 보정
+
+- [ ] `core/matching/feedback-scorer.ts` 생성
+- [ ] `conversion_events`, `recommendations`, `ippa_evaluations`에서 통계 수집
+- [ ] `hybrid-matcher.ts`에 피드백 점수 통합
+- [ ] 테스트 및 검증
+
+**예상 효과**: +5-10% 정확도
+
+#### 2주차: ICF 상관관계 반영
+
+- [ ] `core/matching/icf-correlation.ts` 생성
+- [ ] `icf_code_usage_logs`에서 상관관계 데이터 추출
+- [ ] `getIsoMatches` 점수 계산에 상관관계 보너스 추가
+- [ ] 테스트 및 검증
+
+**예상 효과**: +3-5% 정확도
+
+#### 3-4주차: 사용자 컨텍스트 가중치
+
+- [ ] `core/matching/context-weights.ts` 생성
+- [ ] 사용자 프로필 데이터 수집 강화
+- [ ] 컨텍스트별 가중치 로직 구현
+- [ ] 테스트 및 검증
+
+**예상 효과**: +5-8% 정확도
+
+#### 5-8주차: 벡터 DB 구축
+
+- [ ] Supabase pgvector 확장 설정
+- [ ] ICF-ISO 매핑 임베딩 생성 파이프라인
+- [ ] 시맨틱 매칭 강화
+- [ ] 실시간 학습 시스템 구축
+
+**예상 효과**: +10-15% 정확도
+
+### 예상 효과 요약
+
+| 단계     | 기간              | 예상 정확도 | 누적 효과 |
+| -------- | ----------------- | ----------- | --------- |
+| 현재     | -                 | 60-70%      | -         |
+| 1-2주 후 | 피드백 + 상관관계 | 70-75%      | +5-10%    |
+| 1개월 후 | + 컨텍스트        | 80-85%      | +15-20%   |
+| 2개월 후 | + 벡터 DB         | 85-90%      | +25-30%   |
+
+### 구현 우선순위
+
+**최우선 (즉시 시작)**:
+
+1. ✅ 피드백 기반 점수 보정 - 이미 데이터 수집 중이므로 즉시 활용 가능
+2. ✅ ICF 상관관계 반영 - `icf_code_usage_logs` 데이터 활용
+
+**중기 (1개월 내)**: 3. 사용자 컨텍스트 가중치 4. 규칙 기반 점수 계산 개선
+
+**장기 (2개월 내)**: 5. 벡터 DB 구축 및 시맨틱 매칭 강화
+
+### 참고 파일
+
+- `core/matching/hybrid-matcher.ts`: 하이브리드 매칭 메인 로직
+- `core/matching/iso-mapping.ts`: 규칙 기반 매칭 및 점수 계산
+- `core/matching/semantic-matcher.ts`: 시맨틱 매칭 (현재 기본 구현)
+- `core/matching/knowledge-graph.ts`: 지식 그래프 추론
+- `supabase/migrations/20250210000000_add_purchase_tracking.sql`: 구매 추적 스키마
+- `supabase/migrations/20250211000000_add_icf_code_usage_tracking.sql`: ICF 코드 사용 통계
