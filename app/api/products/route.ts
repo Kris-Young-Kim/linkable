@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server";
 import { getIsoMatches } from "@/core/matching/iso-mapping";
 import { appendKeywordIsoMatches } from "@/core/matching/keyword-inference";
 import { fastMatch, accurateMatch } from "@/core/matching/hybrid-matcher";
@@ -7,7 +7,6 @@ import { rankProducts } from "@/core/matching/ranking";
 import { logEvent } from "@/lib/logging";
 import { getMultipleIsoCodeLinksFromEnv } from "@/lib/config/iso-links-env";
 
-const supabase = getSupabaseServerClient();
 const MAX_LIMIT = 30;
 
 type RecommendationPersistenceItem = {
@@ -18,11 +17,12 @@ type RecommendationPersistenceItem = {
 
 const persistRecommendations = async (
   consultationId: string,
-  items: RecommendationPersistenceItem[]
+  items: RecommendationPersistenceItem[],
+  supabaseClient: ReturnType<typeof getSupabaseServerClient>
 ) => {
   const mapping = new Map<string, string>();
 
-  const { error: deleteError } = await supabase
+  const { error: deleteError } = await supabaseClient
     .from("recommendations")
     .delete()
     .eq("consultation_id", consultationId);
@@ -48,7 +48,7 @@ const persistRecommendations = async (
     rank: item.rank,
   }));
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("recommendations")
     .insert(insertPayload)
     .select("id, product_id");
@@ -87,7 +87,7 @@ const persistRecommendations = async (
     );
 
     // 추천이 생성되면 상담 상태를 자동으로 'completed'로 변경
-    const { error: statusUpdateError } = await supabase
+    const { error: statusUpdateError } = await supabaseClient
       .from("consultations")
       .update({
         status: "completed",
@@ -148,8 +148,11 @@ const detectDisabilityType = (
   return undefined;
 };
 
-const fetchAnalysisIcfCodes = async (consultationId: string) => {
-  const { data, error } = await supabase
+const fetchAnalysisIcfCodes = async (
+  consultationId: string,
+  supabaseClient: ReturnType<typeof getSupabaseServerClient>
+) => {
+  const { data, error } = await supabaseClient
     .from("analysis_results")
     .select("icf_codes")
     .eq("consultation_id", consultationId)
@@ -196,6 +199,14 @@ export const revalidate = 30; // ISR: 30초마다 재검증
 export const dynamic = "force-dynamic"; // 동적 데이터이므로 force-dynamic
 
 export async function GET(request: Request) {
+  // 사용자 인증이 적용된 Supabase 클라이언트 생성 (RLS 정책 적용)
+  // consultationId가 있으면 사용자 인증 필요, 없으면 익명 접근 가능
+  const { auth } = await import("@clerk/nextjs/server");
+  const { userId } = await auth();
+  const supabase = userId 
+    ? await getSupabaseUserClient() 
+    : getSupabaseServerClient();
+
   const { searchParams } = new URL(request.url);
   const icfParam = parseIcfCodes(searchParams.get("icf"));
   const consultationId = searchParams.get("consultationId") ?? undefined;
@@ -222,7 +233,7 @@ export async function GET(request: Request) {
     icfParam.length > 0
       ? icfParam
       : consultationId
-      ? await fetchAnalysisIcfCodes(consultationId)
+      ? await fetchAnalysisIcfCodes(consultationId, supabase)
       : [];
 
   // K-IPPA 데이터 및 요약 정보
@@ -514,7 +525,8 @@ export async function GET(request: Request) {
 
     recommendationMap = await persistRecommendations(
       consultationId,
-      persistenceItems
+      persistenceItems,
+      supabase
     );
   }
 

@@ -3,7 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { streamText } from "ai";
 import { google } from "@ai-sdk/google";
 
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/logging";
 import {
   buildPrompt,
@@ -95,14 +95,15 @@ const createConsultationIfNeeded = async (
   userId: string,
   titleSeed: string,
   disabilityType?: string,
-  disabilitySeverity?: string
+  disabilitySeverity?: string,
+  supabaseClient = supabase
 ) => {
   if (existingId) {
     return existingId;
   }
 
   const title = titleSeed.slice(0, 80) || "AI Consultation";
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("consultations")
     .insert({
       user_id: userId,
@@ -130,9 +131,10 @@ const createConsultationIfNeeded = async (
 const insertChatMessage = async (
   consultationId: string,
   sender: "user" | "ai",
-  message_text: string
+  message_text: string,
+  supabaseClient = supabase
 ) => {
-  const { error } = await supabase.from("chat_messages").insert({
+  const { error } = await supabaseClient.from("chat_messages").insert({
     consultation_id: consultationId,
     sender,
     message_text,
@@ -151,11 +153,12 @@ const insertChatMessage = async (
 const upsertAnalysis = async (
   consultationId: string,
   parsedAnalysis: ReturnType<typeof parseAnalysis> | null,
-  mediaDescription?: string
+  mediaDescription?: string,
+  supabaseClient = supabase
 ) => {
   if (!parsedAnalysis) return;
 
-  const { error } = await supabase.from("analysis_results").upsert(
+  const { error } = await supabaseClient.from("analysis_results").upsert(
     {
       consultation_id: consultationId,
       summary: parsedAnalysis.needs ?? null,
@@ -200,14 +203,15 @@ const saveIppaActivityScore = async (
   consultationId: string,
   icfCode: string,
   importance: number | null,
-  difficulty: number | null
+  difficulty: number | null,
+  supabaseClient = supabase
 ) => {
   if (!icfCode || (!importance && !difficulty)) {
     return;
   }
 
   // 기존 평가 데이터 조회
-  const { data: consultation, error: fetchError } = await supabase
+  const { data: consultation, error: fetchError } = await supabaseClient
     .from("consultations")
     .select("ippa_activities")
     .eq("id", consultationId)
@@ -255,7 +259,7 @@ const saveIppaActivityScore = async (
     collectedAt: new Date().toISOString(),
   };
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await supabaseClient
     .from("consultations")
     .update({
       ippa_activities: ippaActivitiesData,
@@ -290,7 +294,8 @@ const processEvaluationFromChat = async (
   consultationId: string,
   userMessage: string,
   assistantReply: string,
-  parsedAnalysis: ReturnType<typeof parseAnalysis> | null
+  parsedAnalysis: ReturnType<typeof parseAnalysis> | null,
+  supabaseClient = supabase
 ) => {
   // AI 응답이 평가 질문인지 확인
   if (!isEvaluationQuestion(assistantReply)) {
@@ -337,12 +342,12 @@ const processEvaluationFromChat = async (
   if (isImportanceQuestion) {
     const importance = extractScoreFromAnswer(userMessage, "importance");
     if (importance) {
-      await saveIppaActivityScore(consultationId, targetIcfCode, importance, null);
+      await saveIppaActivityScore(consultationId, targetIcfCode, importance, null, supabaseClient);
     }
   } else if (isDifficultyQuestion) {
     const difficulty = extractScoreFromAnswer(userMessage, "difficulty");
     if (difficulty) {
-      await saveIppaActivityScore(consultationId, targetIcfCode, null, difficulty);
+      await saveIppaActivityScore(consultationId, targetIcfCode, null, difficulty, supabaseClient);
     }
   }
 };
@@ -367,18 +372,22 @@ export async function POST(request: Request) {
   }
 
   try {
+    // 사용자 인증이 적용된 Supabase 클라이언트 생성 (RLS 정책 적용)
+    const supabaseUser = await getSupabaseUserClient();
+    
     const supabaseUserId = await ensureUserRecord(userId);
     const consultationId = await createConsultationIfNeeded(
       body.consultationId,
       supabaseUserId,
       trimmedMessage || "이미지 첨부",
       body.disabilityType,
-      body.disabilitySeverity
+      body.disabilitySeverity,
+      supabaseUser
     );
 
     // 기존 상담에 대해 장애 정보가 넘어오면 업데이트
     if (consultationId && (body.disabilityType || body.disabilitySeverity)) {
-      await supabase
+      await supabaseUser
         .from("consultations")
         .update({
           disability_type: body.disabilityType ?? null,
@@ -390,7 +399,8 @@ export async function POST(request: Request) {
     await insertChatMessage(
       consultationId,
       "user",
-      trimmedMessage || "이미지 첨부"
+      trimmedMessage || "이미지 첨부",
+      supabaseUser
     );
 
     const history = (body.history ?? []).slice(-6);
@@ -398,7 +408,7 @@ export async function POST(request: Request) {
     // 기존 평가 데이터 조회 (평가 컨텍스트 구성용)
     let evaluationContext: any = undefined;
     if (body.consultationId) {
-      const { data: consultation } = await supabase
+      const { data: consultation } = await supabaseUser
         .from("consultations")
         .select("ippa_activities")
         .eq("id", body.consultationId)
@@ -535,12 +545,14 @@ export async function POST(request: Request) {
           await insertChatMessage(
             consultationId,
             "ai",
-            assistantReplyForStorage
+            assistantReplyForStorage,
+            supabaseUser
           );
           await upsertAnalysis(
             consultationId,
             parsedAnalysis,
-            body.mediaDescription
+            body.mediaDescription,
+            supabaseUser
           );
 
           // 평가 컨텍스트에 ICF 코드 추가 (분석 파싱 후)
@@ -562,7 +574,8 @@ export async function POST(request: Request) {
             consultationId,
             trimmedMessage || "",
             assistantReplyForStorage,
-            parsedAnalysis
+            parsedAnalysis,
+            supabaseUser
           );
 
           logEvent({

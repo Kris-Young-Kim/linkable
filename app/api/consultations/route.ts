@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth, currentUser } from "@clerk/nextjs/server"
-import { getSupabaseServerClient } from "@/lib/supabase/server"
+import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
-
-const supabase = getSupabaseServerClient()
 
 async function ensureUserRecord(clerkUserId: string) {
   const { data, error } = await supabase
@@ -61,6 +59,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  const supabase = await getSupabaseUserClient()
   const userRowId = await ensureUserRecord(userId)
 
   const { data, error } = await supabase
@@ -107,6 +106,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "title is required" }, { status: 400 })
   }
 
+  const supabase = await getSupabaseUserClient()
   const userRowId = await ensureUserRecord(userId)
 
   const { data, error } = await supabase

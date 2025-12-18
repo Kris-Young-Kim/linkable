@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server"
 import { auth, currentUser } from "@clerk/nextjs/server"
 
-import { getSupabaseServerClient } from "@/lib/supabase/server"
+import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
-
-const supabase = getSupabaseServerClient()
 
 async function ensureUserRecord(clerkUserId: string) {
   const { data, error } = await supabase
@@ -65,6 +63,7 @@ export async function DELETE(
 
   const { id } = await context.params
 
+  const supabase = await getSupabaseUserClient()
   const userRowId = await ensureUserRecord(userId)
 
   const { data: recommendation, error: recommendationError } = await supabase
