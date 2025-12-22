@@ -1063,11 +1063,19 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 포인트 조회 API (`app/api/incentives/points/route.ts`)
     - 추천 클릭, K-IPPA 평가, 피드백 제출 시 포인트 적립 및 알림
 
-- [ ] **추천 카드 개선**
-  - 상품 이미지 품질 향상
-  - 가격 정보 명확히 표시
-  - 리뷰/평점 표시 (있는 경우)
+- [x] **추천 카드 개선** ✅
+  - [x] 상품 이미지 품질 향상
+    - 이미지 품질 85 → 95로 향상
+    - 고정 높이(h-48) → aspect-video 비율로 변경 (더 큰 이미지 영역)
+    - hover 시 scale-105 효과 추가
+    - 이미지 오버레이 그라데이션 추가
+    - ProductRecommendationCard 및 ChatInterface 컴포넌트 적용
+  - [ ] 가격 정보 명확히 표시
+  - [ ] 리뷰/평점 표시 (있는 경우)
   - 예상 효과: 클릭률 15-25% 향상
+  - **구현 완료**:
+    - `components/product-recommendation-card.tsx`: 이미지 품질 95, aspect-video, hover 효과
+    - `components/chat-interface.tsx`: 동일한 이미지 품질 향상 적용
 
 #### 중기 작업 (5-8주)
 

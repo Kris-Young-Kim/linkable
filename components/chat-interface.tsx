@@ -978,7 +978,7 @@ export function ChatInterface() {
                             key={product.id || index}
                             className="flex flex-col"
                           >
-                            <div className="relative h-48 w-full overflow-hidden rounded-t-lg bg-muted">
+                            <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-muted/50 group">
                               {product.image_url ? (
                                 <Image
                                   src={product.image_url}
@@ -987,10 +987,10 @@ export function ChatInterface() {
                                     t("recommendations.defaultCategory")
                                   }
                                   fill
-                                  className="object-cover"
+                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
                                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                   loading="lazy"
-                                  quality={85}
+                                  quality={95}
                                   placeholder="blur"
                                   blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
                                 />
@@ -1002,6 +1002,8 @@ export function ChatInterface() {
                                   />
                                 </div>
                               )}
+                              {/* 이미지 오버레이 그라데이션 */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
                             </div>
                             <div className="flex-1 rounded-b-lg border border-t-0 border-border bg-card p-4">
                               <h3 className="mb-2 line-clamp-2 text-base font-semibold text-foreground">
