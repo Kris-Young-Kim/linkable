@@ -1,0 +1,624 @@
+{
+  "testCases": [
+    {
+      "id": "TC001",
+      "category": "시각",
+      "userInput": "시각이 나빠서 책을 읽기 어려워요",
+      "expectedIcf": {
+        "b": ["b210", "b215"],
+        "d": ["d110", "d166"],
+        "e": ["e240"]
+      },
+      "expectedIso": ["22 03", "22 06"],
+      "description": "저시력으로 인한 읽기 어려움"
+    },
+    {
+      "id": "TC002",
+      "category": "시각",
+      "userInput": "밤에 안보여서 불편해요",
+      "expectedIcf": {
+        "b": ["b210"],
+        "d": ["d110"],
+        "e": ["e240"]
+      },
+      "expectedIso": ["22 03", "18 06"],
+      "description": "야간 시력 저하"
+    },
+    {
+      "id": "TC003",
+      "category": "시각",
+      "userInput": "저시력으로 인해 글씨가 안보여요",
+      "expectedIcf": {
+        "b": ["b210"],
+        "d": ["d110", "d166"],
+        "e": ["e240", "e150"]
+      },
+      "expectedIso": ["22 03", "22 06"],
+      "description": "저시력으로 인한 글씨 인식 어려움"
+    },
+    {
+      "id": "TC004",
+      "category": "청각",
+      "userInput": "귀가 잘 안들려서 대화가 힘들어요",
+      "expectedIcf": {
+        "b": ["b230"],
+        "d": ["d115", "d310", "d330"],
+        "e": ["e125"]
+      },
+      "expectedIso": ["21 06", "22 30"],
+      "description": "난청으로 인한 의사소통 어려움"
+    },
+    {
+      "id": "TC005",
+      "category": "청각",
+      "userInput": "보청기가 필요해요",
+      "expectedIcf": {
+        "b": ["b230"],
+        "d": ["d115"],
+        "e": []
+      },
+      "expectedIso": ["21 06"],
+      "description": "보청기 필요"
+    },
+    {
+      "id": "TC006",
+      "category": "의사소통",
+      "userInput": "말하기가 어려워서 대화가 힘들어요",
+      "expectedIcf": {
+        "b": ["b240"],
+        "d": ["d320", "d330"],
+        "e": ["e125"]
+      },
+      "expectedIso": ["22 30", "21 09"],
+      "description": "말하기 어려움"
+    },
+    {
+      "id": "TC007",
+      "category": "의사소통",
+      "userInput": "의사소통이 어려워요",
+      "expectedIcf": {
+        "b": ["b167", "b240"],
+        "d": ["d310", "d320", "d330", "d350", "d360"],
+        "e": ["e125"]
+      },
+      "expectedIso": ["22 30"],
+      "description": "일반적인 의사소통 어려움"
+    },
+    {
+      "id": "TC008",
+      "category": "의사소통",
+      "userInput": "말을 이해하기 어려워요",
+      "expectedIcf": {
+        "b": ["b167"],
+        "d": ["d310", "d350"],
+        "e": ["e125"]
+      },
+      "expectedIso": ["22 30"],
+      "description": "언어 이해 어려움"
+    },
+    {
+      "id": "TC009",
+      "category": "인지",
+      "userInput": "기억력이 나빠서 잊어버려요",
+      "expectedIcf": {
+        "b": ["b144"],
+        "d": ["d160", "d163"],
+        "e": ["e130", "e150"]
+      },
+      "expectedIso": ["04 03", "22 33"],
+      "description": "기억력 저하"
+    },
+    {
+      "id": "TC010",
+      "category": "인지",
+      "userInput": "집중이 안되어서 일하기 어려워요",
+      "expectedIcf": {
+        "b": ["b140"],
+        "d": ["d160"],
+        "e": []
+      },
+      "expectedIso": ["04 03"],
+      "description": "주의 집중 어려움"
+    },
+    {
+      "id": "TC011",
+      "category": "인지",
+      "userInput": "생각하기가 어려워서 판단을 못해요",
+      "expectedIcf": {
+        "b": ["b160", "b164"],
+        "d": ["d175", "d177"],
+        "e": ["e130"]
+      },
+      "expectedIso": ["04 03"],
+      "description": "사고 기능 저하"
+    },
+    {
+      "id": "TC012",
+      "category": "인지",
+      "userInput": "문제 해결이 어려워요",
+      "expectedIcf": {
+        "b": ["b160", "b164"],
+        "d": ["d175"],
+        "e": []
+      },
+      "expectedIso": ["04 03"],
+      "description": "문제 해결 능력 저하"
+    },
+    {
+      "id": "TC013",
+      "category": "자세",
+      "userInput": "앉기 어려워서 불편해요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d410", "d415"],
+        "e": ["e110", "e120"]
+      },
+      "expectedIso": ["12 31", "18 09"],
+      "description": "앉기 어려움"
+    },
+    {
+      "id": "TC014",
+      "category": "자세",
+      "userInput": "균형이 안잡혀서 넘어질 것 같아요",
+      "expectedIcf": {
+        "b": ["b235", "b760"],
+        "d": ["d415", "d450"],
+        "e": ["e120", "e1818"]
+      },
+      "expectedIso": ["12 08", "18 18"],
+      "description": "균형 유지 어려움"
+    },
+    {
+      "id": "TC015",
+      "category": "자세",
+      "userInput": "자세가 나빠서 아파요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d410", "d415", "d420"],
+        "e": ["e110", "e120"]
+      },
+      "expectedIso": ["12 31", "18 09"],
+      "description": "자세 문제"
+    },
+    {
+      "id": "TC016",
+      "category": "이동",
+      "userInput": "걷기가 어려워서 지팡이가 필요해요",
+      "expectedIcf": {
+        "b": ["b760"],
+        "d": ["d450"],
+        "e": []
+      },
+      "expectedIso": ["12 03", "12 06"],
+      "description": "보행 어려움"
+    },
+    {
+      "id": "TC017",
+      "category": "이동",
+      "userInput": "계단을 오르기 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d450", "d460"],
+        "e": ["e120"]
+      },
+      "expectedIso": ["18 30", "18 12 10"],
+      "description": "계단 오르기 어려움"
+    },
+    {
+      "id": "TC018",
+      "category": "이동",
+      "userInput": "휠체어가 필요해요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d465", "d450"],
+        "e": []
+      },
+      "expectedIso": ["12 22", "12 23"],
+      "description": "휠체어 필요"
+    },
+    {
+      "id": "TC019",
+      "category": "식사",
+      "userInput": "손이 떨려서 식사하기 어려워요",
+      "expectedIcf": {
+        "b": ["b765"],
+        "d": ["d550"],
+        "e": []
+      },
+      "expectedIso": ["15 09"],
+      "description": "손 떨림으로 인한 식사 어려움"
+    },
+    {
+      "id": "TC020",
+      "category": "식사",
+      "userInput": "식사 도구를 잡기 어려워요",
+      "expectedIcf": {
+        "b": ["b730", "b760"],
+        "d": ["d440", "d550"],
+        "e": []
+      },
+      "expectedIso": ["15 09", "24 06"],
+      "description": "식사 도구 사용 어려움"
+    },
+    {
+      "id": "TC021",
+      "category": "자가관리",
+      "userInput": "씻기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d510", "d520"],
+        "e": ["e110"]
+      },
+      "expectedIso": ["09 33"],
+      "description": "세면 어려움"
+    },
+    {
+      "id": "TC022",
+      "category": "자가관리",
+      "userInput": "옷 입기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d540"],
+        "e": []
+      },
+      "expectedIso": ["09 18"],
+      "description": "옷 입기 어려움"
+    },
+    {
+      "id": "TC023",
+      "category": "자가관리",
+      "userInput": "배변 관리가 어려워요",
+      "expectedIcf": {
+        "b": [],
+        "d": ["d530"],
+        "e": []
+      },
+      "expectedIso": ["09 12"],
+      "description": "배변 관리 어려움"
+    },
+    {
+      "id": "TC024",
+      "category": "가정생활",
+      "userInput": "요리하기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d630", "d640"],
+        "e": []
+      },
+      "expectedIso": ["15 03"],
+      "description": "요리 어려움"
+    },
+    {
+      "id": "TC025",
+      "category": "가정생활",
+      "userInput": "청소하기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d640", "d650"],
+        "e": []
+      },
+      "expectedIso": ["15 12"],
+      "description": "청소 어려움"
+    },
+    {
+      "id": "TC026",
+      "category": "가정생활",
+      "userInput": "물건을 들기 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d430", "d435"],
+        "e": []
+      },
+      "expectedIso": ["24 03"],
+      "description": "물건 들기 어려움"
+    },
+    {
+      "id": "TC027",
+      "category": "환경",
+      "userInput": "집에 계단이 있어서 불편해요",
+      "expectedIcf": {
+        "b": [],
+        "d": ["d450", "d460"],
+        "e": ["e120"]
+      },
+      "expectedIso": ["18 30", "18 12 10"],
+      "description": "계단 접근성 문제"
+    },
+    {
+      "id": "TC028",
+      "category": "환경",
+      "userInput": "문턱이 높아서 넘기기 어려워요",
+      "expectedIcf": {
+        "b": [],
+        "d": ["d450"],
+        "e": ["e110", "e120"]
+      },
+      "expectedIso": ["18 24", "18 30"],
+      "description": "문턱 접근성 문제"
+    },
+    {
+      "id": "TC029",
+      "category": "환경",
+      "userInput": "욕실에 손잡이가 필요해요",
+      "expectedIcf": {
+        "b": ["b235", "b760"],
+        "d": ["d410", "d415"],
+        "e": ["e110", "e120"]
+      },
+      "expectedIso": ["18 18"],
+      "description": "욕실 안전 시설 필요"
+    },
+    {
+      "id": "TC030",
+      "category": "복합",
+      "userInput": "시각이 나빠서 책을 읽기 어려워요. 확대경이나 돋보기가 필요해요",
+      "expectedIcf": {
+        "b": ["b210", "b215"],
+        "d": ["d110", "d166"],
+        "e": ["e240"]
+      },
+      "expectedIso": ["22 03", "22 06"],
+      "description": "시각 문제 + 구체적 요구사항"
+    },
+    {
+      "id": "TC031",
+      "category": "복합",
+      "userInput": "손이 떨리고 균형이 안잡혀서 일상생활이 어려워요",
+      "expectedIcf": {
+        "b": ["b235", "b765", "b760"],
+        "d": ["d415", "d440", "d550"],
+        "e": []
+      },
+      "expectedIso": ["15 09", "12 08", "24 06"],
+      "description": "손 떨림 + 균형 문제"
+    },
+    {
+      "id": "TC032",
+      "category": "복합",
+      "userInput": "기억력이 나빠서 약을 먹는 것을 깜빡해요",
+      "expectedIcf": {
+        "b": ["b144"],
+        "d": ["d160", "d163", "d570"],
+        "e": ["e130", "e150"]
+      },
+      "expectedIso": ["04 03", "22 33"],
+      "description": "기억력 저하 + 건강 관리"
+    },
+    {
+      "id": "TC033",
+      "category": "복합",
+      "userInput": "시각과 청각이 모두 나빠서 의사소통이 어려워요",
+      "expectedIcf": {
+        "b": ["b210", "b230"],
+        "d": ["d115", "d310", "d330"],
+        "e": ["e125"]
+      },
+      "expectedIso": ["22 30", "21 06", "22 03"],
+      "description": "시각 + 청각 문제"
+    },
+    {
+      "id": "TC034",
+      "category": "인지",
+      "userInput": "계산하기가 어려워요",
+      "expectedIcf": {
+        "b": ["b117", "b160"],
+        "d": ["d150", "d172"],
+        "e": ["e130"]
+      },
+      "expectedIso": ["22 33", "04 03"],
+      "description": "계산 능력 저하"
+    },
+    {
+      "id": "TC035",
+      "category": "인지",
+      "userInput": "읽기와 쓰기가 어려워요",
+      "expectedIcf": {
+        "b": ["b117", "b167"],
+        "d": ["d140", "d145", "d166", "d170"],
+        "e": ["e130"]
+      },
+      "expectedIso": ["22 33"],
+      "description": "읽기 쓰기 어려움"
+    },
+    {
+      "id": "TC036",
+      "category": "이동",
+      "userInput": "보행기가 필요해요",
+      "expectedIcf": {
+        "b": ["b730", "b760"],
+        "d": ["d450"],
+        "e": []
+      },
+      "expectedIso": ["12 06"],
+      "description": "보행기 필요"
+    },
+    {
+      "id": "TC037",
+      "category": "이동",
+      "userInput": "전동 휠체어를 사용하고 있어요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d465", "d450"],
+        "e": []
+      },
+      "expectedIso": ["12 23"],
+      "description": "전동 휠체어 사용"
+    },
+    {
+      "id": "TC038",
+      "category": "자가관리",
+      "userInput": "목욕하기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d520"],
+        "e": ["e110"]
+      },
+      "expectedIso": ["09 33"],
+      "description": "목욕 어려움"
+    },
+    {
+      "id": "TC039",
+      "category": "자가관리",
+      "userInput": "샤워하기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d510", "d520"],
+        "e": ["e110"]
+      },
+      "expectedIso": ["09 33"],
+      "description": "샤워 어려움"
+    },
+    {
+      "id": "TC040",
+      "category": "가정생활",
+      "userInput": "가사 일하기가 어려워요",
+      "expectedIcf": {
+        "b": ["b730"],
+        "d": ["d640", "d650"],
+        "e": []
+      },
+      "expectedIso": ["15 03", "15 12"],
+      "description": "가사 일 어려움"
+    },
+    {
+      "id": "TC041",
+      "category": "가정생활",
+      "userInput": "도구를 사용하기 어려워요",
+      "expectedIcf": {
+        "b": ["b730", "b760"],
+        "d": ["d660"],
+        "e": []
+      },
+      "expectedIso": ["24 06"],
+      "description": "도구 사용 어려움"
+    },
+    {
+      "id": "TC042",
+      "category": "환경",
+      "userInput": "집 구조를 개선하고 싶어요",
+      "expectedIcf": {
+        "b": [],
+        "d": ["d450", "d460"],
+        "e": ["e110", "e155"]
+      },
+      "expectedIso": ["18 24", "18 30"],
+      "description": "집 구조 개선 필요"
+    },
+    {
+      "id": "TC043",
+      "category": "환경",
+      "userInput": "조명이 부족해서 불편해요",
+      "expectedIcf": {
+        "b": ["b210"],
+        "d": ["d110"],
+        "e": ["e240"]
+      },
+      "expectedIso": ["18 06", "22 03"],
+      "description": "조명 부족"
+    },
+    {
+      "id": "TC044",
+      "category": "여가",
+      "userInput": "여가 활동을 즐기기 어려워요",
+      "expectedIcf": {
+        "b": [],
+        "d": ["d910", "d920"],
+        "e": ["e140"]
+      },
+      "expectedIso": ["30 03"],
+      "description": "여가 활동 어려움"
+    },
+    {
+      "id": "TC045",
+      "category": "여가",
+      "userInput": "취미 활동을 하기 어려워요",
+      "expectedIcf": {
+        "b": [],
+        "d": ["d920"],
+        "e": ["e140"]
+      },
+      "expectedIso": ["30 03"],
+      "description": "취미 활동 어려움"
+    },
+    {
+      "id": "TC046",
+      "category": "복합",
+      "userInput": "시각이 나빠서 독서가 어렵고, 손도 떨려서 책을 잡기 어려워요",
+      "expectedIcf": {
+        "b": ["b210", "b765"],
+        "d": ["d110", "d166", "d440"],
+        "e": ["e240"]
+      },
+      "expectedIso": ["22 03", "22 06", "15 09", "24 06"],
+      "description": "시각 + 손 떨림 복합 문제"
+    },
+    {
+      "id": "TC047",
+      "category": "복합",
+      "userInput": "기억력이 나빠서 약 먹는 것을 깜빡하고, 집중도 안돼요",
+      "expectedIcf": {
+        "b": ["b140", "b144"],
+        "d": ["d160", "d163", "d570"],
+        "e": ["e130", "e150"]
+      },
+      "expectedIso": ["04 03", "22 33"],
+      "description": "기억력 + 집중력 문제"
+    },
+    {
+      "id": "TC048",
+      "category": "복합",
+      "userInput": "균형이 안잡혀서 넘어질 것 같고, 계단도 오르기 어려워요",
+      "expectedIcf": {
+        "b": ["b235", "b760"],
+        "d": ["d415", "d450", "d460"],
+        "e": ["e120"]
+      },
+      "expectedIso": ["12 08", "18 30", "18 12 10"],
+      "description": "균형 + 계단 문제"
+    },
+    {
+      "id": "TC049",
+      "category": "복합",
+      "userInput": "의사소통이 어렵고, 인지 기능도 저하되어 있어요",
+      "expectedIcf": {
+        "b": ["b167", "b160", "b164"],
+        "d": ["d310", "d320", "d330", "d175"],
+        "e": ["e125", "e130"]
+      },
+      "expectedIso": ["22 30", "04 03"],
+      "description": "의사소통 + 인지 문제"
+    },
+    {
+      "id": "TC050",
+      "category": "복합",
+      "userInput": "시각이 나빠서 독서가 어렵고, 기억력도 나빠서 읽은 내용을 잊어버려요",
+      "expectedIcf": {
+        "b": ["b210", "b144"],
+        "d": ["d110", "d166", "d160", "d163"],
+        "e": ["e240", "e130"]
+      },
+      "expectedIso": ["22 03", "22 06", "04 03", "22 33"],
+      "description": "시각 + 기억력 문제"
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "createdAt": "2025-02-20",
+    "totalCases": 50,
+    "categories": {
+      "시각": 3,
+      "청각": 2,
+      "의사소통": 3,
+      "인지": 6,
+      "자세": 3,
+      "이동": 4,
+      "식사": 2,
+      "자가관리": 4,
+      "가정생활": 3,
+      "환경": 4,
+      "여가": 2,
+      "복합": 14
+    }
+  }
+}
+

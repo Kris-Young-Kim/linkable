@@ -7,6 +7,7 @@ import { KPIBoard } from "@/components/analytics/kpi-board"
 import { KPIFilters, type DateRange, type UserGroup } from "@/components/admin/kpi-filters"
 import { AdminLogMonitor } from "@/components/admin/admin-log-monitor"
 import { EnhancedAnalytics } from "@/components/admin/enhanced-analytics"
+import { AiQualityMetrics } from "@/components/admin/ai-quality-metrics"
 import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
@@ -14,6 +15,7 @@ import {
   BarChart3,
   Package,
   Sparkles,
+  Brain,
 } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 
@@ -131,6 +133,11 @@ export function AdminDashboardContent() {
                 <AnalyticsDashboard apiEndpoint={apiEndpoint} />
               </CardContent>
             </Card>
+          </section>
+
+          {/* AI 매칭 품질 측정 */}
+          <section id="ai-quality">
+            <AiQualityMetrics />
           </section>
 
           <section id="logs">
