@@ -1107,11 +1107,11 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 단기 작업 (1-2주)
 
-- [ ] **모니터링 시스템 강화**
+- [x] **모니터링 시스템 강화**
 
-  - Vercel Analytics 실시간 대시보드 구축
-  - Supabase Edge Function 로그 모니터링
-  - 에러 알림 시스템 구축 (Slack/Discord 웹훅)
+  - [x] google Analytics GA4 실시간 대시보드 구축
+  - [x] Supabase Edge Function 로그 모니터링 (관리자 로그 모니터 연동)
+  - [x] 에러 알림 시스템 구축 (notion/n8n 웹훅)
   - 예상 효과: 문제 감지 시간 80% 단축
 
 - [ ] **자동 복구 시스템**

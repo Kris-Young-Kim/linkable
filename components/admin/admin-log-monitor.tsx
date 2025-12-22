@@ -28,33 +28,11 @@ export function AdminLogMonitor() {
       setIsLoading(true)
       setError(null)
       try {
-        // 실제 API 호출로 대체 필요
-        // const response = await fetch("/api/admin/logs")
-        // if (!response.ok) throw new Error("Failed to fetch logs")
-        // const data = await response.json()
-        
-        // 샘플 데이터 (실제 구현 시 제거)
-        const sampleLogs: LogEntry[] = [
-          {
-            id: "1",
-            timestamp: new Date().toISOString(),
-            level: "info",
-            category: "system",
-            action: "server_started",
-            message: "서버가 정상적으로 시작되었습니다.",
-          },
-          {
-            id: "2",
-            timestamp: new Date(Date.now() - 3600000).toISOString(),
-            level: "warn",
-            category: "product",
-            action: "link_validation_failed",
-            message: "상품 링크 검증 실패",
-            details: { url: "https://example.com/product" },
-          },
-        ]
-        
-        setLogs(sampleLogs)
+        const url = `/api/admin/logs?limit=50${filterLevel !== "all" ? `&level=${filterLevel}` : ""}`
+        const response = await fetch(url)
+        if (!response.ok) throw new Error("로그를 불러오는데 실패했습니다.")
+        const data = await response.json()
+        setLogs(data.logs || [])
       } catch (err) {
         console.error("[Log Monitor] Fetch error:", err)
         setError(err instanceof Error ? err.message : "알 수 없는 오류")

@@ -3,7 +3,12 @@
  * 
  * CTA 버튼의 위치, 텍스트, 색상, 크기를 A/B 테스트하여
  * 클릭률을 최적화합니다.
+ * 
+ * 주의: 이 파일은 서버 사이드 전용입니다.
+ * 클라이언트 컴포넌트에서 사용하려면 API route를 통해 호출하세요.
  */
+
+import "server-only";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/logging";

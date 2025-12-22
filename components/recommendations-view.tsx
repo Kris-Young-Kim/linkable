@@ -26,6 +26,7 @@ export type RecommendationProduct = {
   match_label?: string | null
   matched_icf?: Array<{ code: string; description: string }>
   recommendation_id?: string | null
+  consultation_id?: string | null
 }
 
 type RecommendationsViewProps = {

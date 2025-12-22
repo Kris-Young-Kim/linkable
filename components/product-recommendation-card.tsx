@@ -75,13 +75,13 @@ export function ProductRecommendationCard({
       try {
         // 활성화된 테스트 설정 조회
         const { getActiveCtaAbTestConfig } = await import(
-          "@/lib/cta-ab-testing"
+          "@/lib/cta-ab-testing-client"
         );
         const testConfig = await getActiveCtaAbTestConfig();
 
         if (testConfig && mounted) {
           // 변형 할당
-          const { assignCtaVariant } = await import("@/lib/cta-ab-testing");
+          const { assignCtaVariant } = await import("@/lib/cta-ab-testing-client");
           const variant = await assignCtaVariant(
             testConfig.id,
             userId || undefined,
@@ -95,7 +95,7 @@ export function ProductRecommendationCard({
             const impressionStartTime = Date.now();
             setImpressionTime(impressionStartTime);
 
-            const { logCtaPerformance } = await import("@/lib/cta-ab-testing");
+            const { logCtaPerformance } = await import("@/lib/cta-ab-testing-client");
             await logCtaPerformance(variant.id, "impression", {
               userId: userId || undefined,
               consultationId: consultationId || undefined,
@@ -164,7 +164,7 @@ export function ProductRecommendationCard({
               ? "secondary_click"
               : "tertiary_click";
 
-          const { logCtaPerformance } = await import("@/lib/cta-ab-testing");
+          const { logCtaPerformance } = await import("@/lib/cta-ab-testing-client");
           await logCtaPerformance(ctaVariant.id, eventType, {
             userId: userId || undefined,
             consultationId: consultationId || undefined,
@@ -317,6 +317,15 @@ export function ProductRecommendationCard({
       ? `${variant.secondary_button_color} hover:opacity-90`
       : "";
 
+    // 버튼 크기 매핑 (md -> default, xl -> lg)
+    const mapButtonSize = (size: "sm" | "md" | "lg" | "xl"): "default" | "sm" | "lg" | "icon" | "icon-sm" | "icon-lg" | undefined => {
+      if (size === "md") return "default";
+      if (size === "xl") return "lg";
+      if (size === "sm") return "sm";
+      if (size === "lg") return "lg";
+      return undefined;
+    };
+
     return (
       <div className="flex flex-col gap-3 w-full">
         {/* 긴급성 텍스트 */}
@@ -343,7 +352,7 @@ export function ProductRecommendationCard({
           {/* 주요 버튼 */}
           <Button
             className={`flex-1 min-h-[44px] ${primaryButtonClass}`}
-            size={variant.primary_button_size}
+            size={mapButtonSize(variant.primary_button_size)}
             variant={variant.primary_button_variant as any}
             type="button"
             onClick={() => handleClick("primary", "primary")}
@@ -363,7 +372,7 @@ export function ProductRecommendationCard({
           <Button
             variant={variant.secondary_button_variant as any}
             className={`flex-1 min-h-[44px] ${secondaryButtonClass}`}
-            size={variant.secondary_button_size}
+            size={mapButtonSize(variant.secondary_button_size)}
             type="button"
             onClick={() => handleClick("secondary", "secondary")}
             disabled={isButtonDisabled || isSecondaryPending}
@@ -384,7 +393,7 @@ export function ProductRecommendationCard({
           <Button
             variant="ghost"
             className="w-full"
-            size="md"
+            size="default"
             type="button"
             onClick={() => handleClick("secondary", "tertiary")}
             disabled={isButtonDisabled}

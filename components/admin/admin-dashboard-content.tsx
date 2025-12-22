@@ -10,6 +10,7 @@ import { EnhancedAnalytics } from "@/components/admin/enhanced-analytics"
 import { AiQualityMetrics } from "@/components/admin/ai-quality-metrics"
 import { ConversionRatesDashboard } from "@/components/admin/conversion-rates-dashboard"
 import { FeedbackAnalysisDashboard } from "@/components/admin/feedback-analysis-dashboard"
+import { RealtimeStats } from "@/components/admin/realtime-stats"
 import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
@@ -83,6 +84,11 @@ export function AdminDashboardContent() {
         />
 
         <div className="space-y-8">
+          {/* 실시간 모니터링 섹션 */}
+          <section id="realtime-monitoring">
+            <RealtimeStats />
+          </section>
+
           {/* 필터 바 */}
           <KPIFilters
             dateRange={dateRange}

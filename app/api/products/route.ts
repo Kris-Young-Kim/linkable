@@ -546,9 +546,10 @@ export async function GET(request: Request) {
 
     // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
     if (icfCodes.length > 0 && recommendationMap) {
+      const mapForLearning = recommendationMap; // 타입 가드를 위한 로컬 변수
       import("@/lib/realtime-learning").then(({ updateRealtimeLearningStats }) => {
         // 각 추천된 제품에 대해 impression 이벤트 기록
-        for (const [productId, recommendationId] of recommendationMap.entries()) {
+        for (const [productId, recommendationId] of mapForLearning.entries()) {
           const product = ranked.find((p) => p.id === productId);
           if (product?.iso_code) {
             updateRealtimeLearningStats(

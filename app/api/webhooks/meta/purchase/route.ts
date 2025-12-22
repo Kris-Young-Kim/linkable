@@ -185,9 +185,9 @@ export async function POST(request: NextRequest) {
           
           if (assignment?.variant_id) {
             await logCtaPerformance(assignment.variant_id, "purchase", {
-              userId,
-              consultationId,
-              recommendationId,
+              userId: userId || undefined,
+              consultationId: consultationId || undefined,
+              recommendationId: recommendationId || undefined,
             });
           }
         } catch (err) {

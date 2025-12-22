@@ -46,6 +46,7 @@ export interface SimilarMatch {
   baseScore: number;
   usageCount: number;
   successRate: number;
+  adjustedScore?: number;
 }
 
 /**

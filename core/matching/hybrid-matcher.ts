@@ -33,6 +33,7 @@ interface HybridMatchConfig {
   };
   minScore: number;
   topK: number;
+  similarityThreshold?: number;
 }
 
 const DEFAULT_CONFIG: HybridMatchConfig = {

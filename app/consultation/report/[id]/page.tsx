@@ -1,14 +1,27 @@
 import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
+import dynamicImport from "next/dynamic"
 import { CalendarDays, CheckCircle2, Download, MessageSquare } from "lucide-react"
 
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { IcfVisualization, type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization"
-import { ProductRecommendationCard } from "@/components/product-recommendation-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+
+// 클라이언트 컴포넌트를 동적 import로 분리
+const DynamicProductRecommendationCard = dynamicImport(
+  () =>
+    import("@/components/product-recommendation-card").then((mod) => ({
+      default: mod.ProductRecommendationCard,
+    })),
+  {
+    loading: () => (
+      <div className="h-96 bg-muted/50 animate-pulse rounded-lg border border-border" />
+    ),
+  }
+)
 
 type RecommendationRow = {
   id: string
@@ -247,7 +260,7 @@ export default async function ConsultationReportPage({ params }: { params: Promi
             <div className="grid gap-4 md:grid-cols-2">
               {recommendations.map((rec) =>
                 rec.product ? (
-                  <ProductRecommendationCard
+                  <DynamicProductRecommendationCard
                     key={rec.id}
                     recommendationId={rec.id}
                     productName={rec.product.name}
