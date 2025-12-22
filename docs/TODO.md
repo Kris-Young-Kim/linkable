@@ -1000,10 +1000,18 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 사용자 행동 이벤트 기록 (impression, click, purchase, feedback)
     - 관리 API (`app/api/admin/realtime-learning/route.ts`)
 
-- [ ] **ICF 코드 확장 자동화**
+- [x] **ICF 코드 확장 자동화** ✅
   - 자주 사용되는 ICF 코드 자동 Core Set 추가
   - ISO 매핑 힌트 자동 생성 및 검증
   - 예상 효과: 새로운 케이스 대응 속도 향상
+  - **구현 완료**:
+    - ICF 자동 확장 설정 테이블 (`icf_auto_expand_config`)
+    - 확장 후보 테이블 (`icf_auto_expand_candidates`)
+    - 확장 후보 자동 생성 함수 (`generate_icf_expansion_candidates`)
+    - 자동 확장 실행 함수 (`execute_icf_auto_expansion`)
+    - ICF 전체 카탈로그 동기화 스크립트 (`scripts/sync-icf-full-catalog.ts`)
+    - 자동 확장 라이브러리 (`lib/icf-auto-expansion.ts`)
+    - 관리 API (`app/api/admin/icf/auto-expand/route.ts`)
 
 **예상 점수 향상**: +0.9 (3.3 → 4.2)
 
