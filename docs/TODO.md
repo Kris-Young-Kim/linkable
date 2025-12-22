@@ -818,22 +818,25 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 단기 작업 (1-2주)
 
-- [ ] **이미지 프리로딩 구현**
+- [x] **이미지 프리로딩 구현** ✅
 
   - Hero 섹션 이미지 `<link rel="preload">` 추가
   - 중요 상품 이미지 우선 로딩 (Above the fold)
   - 예상 효과: LCP 2.8초 → 2.3초 (목표 2.5초 달성)
+  - **구현 완료**: `app/layout.tsx`에 Hero 섹션 첫 3개 이미지 프리로딩 추가
 
-- [ ] **코드 스플리팅 확대**
+- [x] **코드 스플리팅 확대** ✅
 
   - 라우트 레벨 코드 스플리팅 (`app/` 디렉토리)
   - 큰 컴포넌트 분리 (ChatInterface, RecommendationsView 등)
   - 예상 효과: 초기 번들 350KB → 280KB (20% 감소)
+  - **구현 완료**: `app/page.tsx`, `app/chat/page.tsx`, `app/recommendations/[consultationId]/page.tsx`에 동적 import 적용
 
-- [ ] **API 응답 최적화**
+- [x] **API 응답 최적화** ✅
   - `/api/chat` 스트리밍 응답 최적화
   - `/api/products` 응답 크기 최적화 (불필요한 필드 제거)
   - 예상 효과: TTFB 560ms → 450ms (목표 달성)
+  - **구현 완료**: `app/api/products/route.ts`에서 `created_at`, `updated_at` 필드 제거
 
 #### 중기 작업 (3-4주)
 
