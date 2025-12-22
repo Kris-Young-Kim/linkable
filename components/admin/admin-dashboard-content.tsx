@@ -8,6 +8,7 @@ import { KPIFilters, type DateRange, type UserGroup } from "@/components/admin/k
 import { AdminLogMonitor } from "@/components/admin/admin-log-monitor"
 import { EnhancedAnalytics } from "@/components/admin/enhanced-analytics"
 import { AiQualityMetrics } from "@/components/admin/ai-quality-metrics"
+import { ConversionRatesDashboard } from "@/components/admin/conversion-rates-dashboard"
 import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
@@ -138,6 +139,11 @@ export function AdminDashboardContent() {
           {/* AI 매칭 품질 측정 */}
           <section id="ai-quality">
             <AiQualityMetrics />
+          </section>
+
+          {/* 전환율 측정 */}
+          <section id="conversion-rates">
+            <ConversionRatesDashboard />
           </section>
 
           <section id="logs">

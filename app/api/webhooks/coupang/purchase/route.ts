@@ -61,19 +61,24 @@ export async function POST(request: NextRequest) {
 
     if (body.linkId) {
       // linkId로 매칭 (가장 정확)
-      // 실제로는 purchase_link에 linkId가 포함되어 있을 수 있음
-      const { data: rec } = await supabase
+      // purchase_link에 linkId가 포함되어 있는지 확인
+      const { data: recs } = await supabase
         .from("recommendations")
-        .select("id, product_id, consultation_id, user_id")
+        .select("id, product_id, consultation_id, user_id, purchase_link")
         .eq("is_clicked", true)
-        .limit(1)
-        .single()
+        .not("purchase_link", "is", null)
 
-      if (rec) {
-        recommendationId = rec.id
-        userId = rec.user_id
-        productId = rec.product_id
-        consultationId = rec.consultation_id
+      // purchase_link에 linkId가 포함된 추천 찾기
+      const matchedRec = recs?.find((rec) => {
+        if (!rec.purchase_link) return false
+        return rec.purchase_link.includes(body.linkId || "")
+      })
+
+      if (matchedRec) {
+        recommendationId = matchedRec.id
+        userId = matchedRec.user_id
+        productId = matchedRec.product_id
+        consultationId = matchedRec.consultation_id
       }
     }
 
