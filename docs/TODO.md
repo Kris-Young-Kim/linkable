@@ -1048,11 +1048,20 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - ProductRecommendationCard 통합
     - 관리 API (`app/api/admin/cta-ab-test/route.ts`)
 
-- [ ] **인센티브 시스템 활성화**
+- [x] **인센티브 시스템 활성화** ✅
 
   - 포인트 적립 안내 강화 (UI에 명확히 표시)
   - 쿠폰 발급 프로세스 간소화
   - 예상 효과: 전환율 20-30% 향상
+  - **구현 완료**:
+    - 포인트 적립 Toast 알림 시스템 (`components/incentive-notification.tsx`)
+    - 포인트 표시 컴포넌트 (`components/points-display.tsx`) - GlobalNav 통합
+    - 추천 카드에 포인트 적립 안내 배지 추가
+    - 쿠폰 발급 API (`app/api/incentives/coupons/route.ts`)
+    - 쿠폰 샵 페이지 (`app/dashboard/coupons/page.tsx`)
+    - 인센티브 라이브러리 (`lib/incentives.ts`)
+    - 포인트 조회 API (`app/api/incentives/points/route.ts`)
+    - 추천 클릭, K-IPPA 평가, 피드백 제출 시 포인트 적립 및 알림
 
 - [ ] **추천 카드 개선**
   - 상품 이미지 품질 향상

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { showIncentiveToast } from "@/components/incentive-notification"
 
 interface ConsultationRatingProps {
   consultationId: string
@@ -18,12 +19,12 @@ export function ConsultationRating({
   existingRating,
   existingComment,
 }: ConsultationRatingProps) {
+  const { toast } = useToast()
   const [rating, setRating] = useState(existingRating || 0)
   const [hoveredStar, setHoveredStar] = useState(0)
   const [comment, setComment] = useState(existingComment || "")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(!!existingRating)
-  const { toast } = useToast()
 
   const ratingMessages: Record<number, string> = {
     5: "매우 만족",
@@ -62,10 +63,16 @@ export function ConsultationRating({
 
       const data = await response.json()
       setSubmitted(true)
-      toast({
-        title: "리뷰가 제출되었습니다",
-        description: data.pointsEarned ? `${data.pointsEarned} 포인트가 적립되었습니다.` : "소중한 피드백 감사합니다.",
-      })
+      
+      // 포인트 적립 알림 표시
+      if (data.pointsEarned && data.pointsEarned > 0) {
+        showIncentiveToast(toast, "points_earned", data.pointsEarned)
+      } else {
+        toast({
+          title: "리뷰가 제출되었습니다",
+          description: "소중한 피드백 감사합니다.",
+        })
+      }
     } catch (error) {
       console.error("[Consultation Rating] Submit error:", error)
       toast({

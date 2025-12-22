@@ -5,11 +5,13 @@ import Image from "next/image"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ExternalLink, ShoppingCart, Package } from "lucide-react"
+import { ExternalLink, ShoppingCart, Package, Sparkles } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { useAuth } from "@clerk/nextjs"
 import { trackEvent } from "@/lib/analytics"
 import type { CtaVariant } from "@/lib/cta-ab-testing"
+import { useToast } from "@/hooks/use-toast"
+import { showIncentiveToast } from "@/components/incentive-notification"
 
 type ClickSource = "primary" | "secondary"
 
@@ -148,11 +150,23 @@ export function ProductRecommendationCard({
           });
         }
 
-        await fetch(`/api/recommendations/${recommendationId}/click`, {
+        const clickResponse = await fetch(`/api/recommendations/${recommendationId}/click`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ source }),
         })
+        
+        // 포인트 적립 알림 표시
+        if (clickResponse.ok) {
+          try {
+            const data = await clickResponse.json()
+            if (data.pointsEarned && data.pointsEarned > 0) {
+              showIncentiveToast(toast, "points_earned", data.pointsEarned)
+            }
+          } catch (err) {
+            // 응답 파싱 실패는 무시
+          }
+        }
 
         // GA4 이벤트 추적
         trackEvent("product_clicked", {
@@ -367,11 +381,18 @@ export function ProductRecommendationCard({
       )}
 
       <CardContent className="pt-6 space-y-4">
-        {matchPercentage && (
-          <Badge variant="outline" className="text-sm">
-            {t("recommendations.matchScore")} {matchPercentage}
+        <div className="flex items-center justify-between gap-2">
+          {matchPercentage && (
+            <Badge variant="outline" className="text-sm">
+              {t("recommendations.matchScore")} {matchPercentage}
+            </Badge>
+          )}
+          {/* 포인트 적립 안내 */}
+          <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
+            <Sparkles className="mr-1 h-3 w-3" />
+            클릭 시 10P 적립
           </Badge>
-        )}
+        </div>
         <p className="text-base text-muted-foreground leading-relaxed">{description}</p>
 
         {matchedIcf?.length ? (

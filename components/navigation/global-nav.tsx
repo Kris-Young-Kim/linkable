@@ -16,6 +16,7 @@ import { useLanguage } from "@/components/language-provider"
 import { LanguageSelector } from "@/components/language-selector"
 import { AdminLink } from "@/components/admin-link"
 import { NotificationsBell } from "@/components/notifications-bell"
+import { PointsDisplay } from "@/components/points-display"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 

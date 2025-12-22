@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Sparkles, CheckCircle2, AlertCircle } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
 import { trackEvent } from "@/lib/analytics"
+import { useToast } from "@/hooks/use-toast"
+import { showIncentiveToast } from "@/components/incentive-notification"
 import { getIcfActivityByCode, type IcfActivity } from "@/core/assessment/icf-activities"
 
 type ActivityPostScore = {
@@ -42,6 +44,7 @@ export function IppaForm({
   onSuccess,
   onCancel,
 }: IppaFormProps) {
+  const { toast } = useToast()
   const { t } = useLanguage()
   const [baselineActivities, setBaselineActivities] = useState<Array<{
     icfCode: string
@@ -152,6 +155,11 @@ export function IppaForm({
       })
       setSubmitted(true)
       onSuccess?.(data.result)
+
+      // 포인트 적립 알림 표시
+      if (data.pointsEarned && data.pointsEarned > 0) {
+        showIncentiveToast(toast, "points_earned", data.pointsEarned)
+      }
 
       // GA4 이벤트 추적
       if (data.evaluationId) {

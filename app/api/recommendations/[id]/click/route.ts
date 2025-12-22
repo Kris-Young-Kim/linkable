@@ -95,6 +95,8 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
+    let pointsEarned = 0 // 포인트 적립 변수 초기화
+
     if (!recommendation.is_clicked) {
       const { error: updateError } = await supabase
         .from("recommendations")
@@ -136,14 +138,18 @@ export async function POST(
         })
 
         // 포인트 지급 (추천 클릭 시 10포인트)
-        await supabase.from("point_transactions").insert({
+        const pointsAwarded = 10
+        const { error: pointsError } = await supabase.from("point_transactions").insert({
           user_id: supabaseUserId,
-          points: 10,
+          points: pointsAwarded,
           transaction_type: "earned_recommendation_click",
           description: "추천 상품 클릭 보상",
           reference_id: recommendationId,
           reference_type: "recommendation",
         })
+        
+        // 포인트 적립 성공 여부를 응답에 포함
+        pointsEarned = pointsError ? 0 : pointsAwarded
 
         // 매칭 성능 로그 업데이트 (비동기, 에러 무시)
         import("@/lib/matching-performance-updater").then(({ updateMatchingPerformanceOnClick }) => {
@@ -194,7 +200,10 @@ export async function POST(
       }
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ 
+      success: true,
+      pointsEarned: pointsEarned || 0,
+    })
   } catch (error) {
     logEvent({
       category: "matching",
