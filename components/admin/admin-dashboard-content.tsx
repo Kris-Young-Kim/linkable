@@ -9,6 +9,7 @@ import { AdminLogMonitor } from "@/components/admin/admin-log-monitor"
 import { EnhancedAnalytics } from "@/components/admin/enhanced-analytics"
 import { AiQualityMetrics } from "@/components/admin/ai-quality-metrics"
 import { ConversionRatesDashboard } from "@/components/admin/conversion-rates-dashboard"
+import { FeedbackAnalysisDashboard } from "@/components/admin/feedback-analysis-dashboard"
 import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
@@ -144,6 +145,11 @@ export function AdminDashboardContent() {
           {/* 전환율 측정 */}
           <section id="conversion-rates">
             <ConversionRatesDashboard />
+          </section>
+
+          {/* 피드백 데이터 분석 */}
+          <section id="feedback-analysis">
+            <FeedbackAnalysisDashboard />
           </section>
 
           <section id="logs">

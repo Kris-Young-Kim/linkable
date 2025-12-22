@@ -1,8 +1,8 @@
 -- =========================================================
 -- [LinkAble] MVP Database DDL Script
 -- Database: PostgreSQL (Supabase)
--- Version: 1.0
--- Generated: 2025-02-11
+-- Version: 1.2
+-- Generated: 2025-02-20
 -- =========================================================
 -- 
 -- 이 스크립트는 모든 마이그레이션을 통합한 완전한 DDL입니다.
@@ -23,6 +23,14 @@ DROP VIEW IF EXISTS view_user_analytics CASCADE;
 DROP VIEW IF EXISTS view_daily_stats CASCADE;
 DROP VIEW IF EXISTS view_platform_stats CASCADE;
 
+DROP VIEW IF EXISTS view_consultation_icf_codes_jsonb CASCADE;
+DROP VIEW IF EXISTS view_consultation_icf_codes_detail CASCADE;
+DROP VIEW IF EXISTS view_products_with_codes CASCADE;
+DROP TABLE IF EXISTS consultation_icf_codes CASCADE;
+DROP TABLE IF EXISTS icf_codes CASCADE;
+DROP TABLE IF EXISTS iso_codes CASCADE;
+DROP TABLE IF EXISTS manufacturers CASCADE;
+DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS icf_auto_expand_config CASCADE;
 DROP TABLE IF EXISTS icf_code_expansions CASCADE;
 DROP TABLE IF EXISTS icf_code_statistics CASCADE;
@@ -41,6 +49,7 @@ DROP TABLE IF EXISTS consultations CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
+DROP FUNCTION IF EXISTS get_consultation_icf_codes CASCADE;
 DROP FUNCTION IF EXISTS calculate_period_stats CASCADE;
 DROP FUNCTION IF EXISTS calculate_user_kpi CASCADE;
 DROP FUNCTION IF EXISTS update_icf_code_statistics CASCADE;
@@ -89,25 +98,125 @@ COMMENT ON TABLE users IS '사용자 정보 (Clerk Auth 연동)';
 COMMENT ON COLUMN users.role IS '권한 구분: user(일반), manager(전문가), admin(관리자)';
 COMMENT ON COLUMN users.points IS '사용자 포인트 (K-IPPA 평가, 추천 클릭 등으로 획득)';
 
--- 2. Products (보조기기 상품)
-CREATE TABLE products (
+-- 2. ISO Codes (ISO 9999 코드 마스터) - 정규화
+CREATE TABLE iso_codes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name VARCHAR(255) NOT NULL,
-    iso_code VARCHAR(50) NOT NULL, -- ISO 9999 분류 코드
-    manufacturer VARCHAR(100),
-    description TEXT,
-    image_url TEXT,
-    purchase_link TEXT, -- 제휴 수익 링크
-    price DECIMAL(10, 2),
-    category VARCHAR(100),
+    code VARCHAR(50) NOT NULL UNIQUE, -- ISO 9999 코드 (예: "15 09", "12 03")
+    name VARCHAR(255) NOT NULL, -- 코드명 (예: "식사 보조기기", "보행 보조기기")
+    description TEXT, -- 상세 설명
+    parent_code VARCHAR(50), -- 상위 코드 (계층 구조용)
+    level INTEGER DEFAULT 1, -- 코드 레벨 (1: 대분류, 2: 중분류, 3: 소분류)
     is_active BOOLEAN DEFAULT TRUE,
+    display_order INTEGER DEFAULT 0, -- 표시 순서
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    CONSTRAINT fk_iso_codes_parent FOREIGN KEY (parent_code) REFERENCES iso_codes(code) ON DELETE SET NULL
+);
+
+COMMENT ON TABLE iso_codes IS 'ISO 9999 보조기기 분류 코드 마스터';
+COMMENT ON COLUMN iso_codes.code IS 'ISO 9999 코드 (고유값)';
+COMMENT ON COLUMN iso_codes.name IS '코드명 (한글)';
+COMMENT ON COLUMN iso_codes.parent_code IS '상위 코드 (계층 구조)';
+COMMENT ON COLUMN iso_codes.level IS '코드 레벨: 1(대분류), 2(중분류), 3(소분류)';
+
+-- 3. Manufacturers (제조사 마스터) - 정규화
+CREATE TABLE manufacturers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(50) NOT NULL UNIQUE, -- 제조사 코드 (예: "OTTOBOCK", "SUNRISE")
+    name VARCHAR(255) NOT NULL, -- 제조사명 (예: "오토복", "선라이즈")
+    name_en VARCHAR(255), -- 영문명
+    country VARCHAR(100), -- 국가
+    website_url TEXT, -- 웹사이트 URL
+    is_active BOOLEAN DEFAULT TRUE,
+    display_order INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-COMMENT ON TABLE products IS '보조기기 마스터 데이터 (ISO 9999 기준)';
+COMMENT ON TABLE manufacturers IS '제조사 마스터';
+COMMENT ON COLUMN manufacturers.code IS '제조사 코드 (고유값, 대문자)';
+COMMENT ON COLUMN manufacturers.name IS '제조사명 (한글)';
+COMMENT ON COLUMN manufacturers.name_en IS '제조사명 (영문)';
 
--- 3. Consultations (상담 세션)
+-- 4. Categories (상품 카테고리 마스터) - 정규화
+CREATE TABLE categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(50) NOT NULL UNIQUE, -- 카테고리 코드 (예: "MOBILITY", "DAILY_LIVING")
+    name VARCHAR(255) NOT NULL, -- 카테고리명 (예: "이동 보조", "일상생활 보조")
+    name_en VARCHAR(255), -- 영문명
+    description TEXT, -- 상세 설명
+    parent_code VARCHAR(50), -- 상위 카테고리 (계층 구조용)
+    level INTEGER DEFAULT 1, -- 카테고리 레벨
+    is_active BOOLEAN DEFAULT TRUE,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    CONSTRAINT fk_categories_parent FOREIGN KEY (parent_code) REFERENCES categories(code) ON DELETE SET NULL
+);
+
+COMMENT ON TABLE categories IS '상품 카테고리 마스터';
+COMMENT ON COLUMN categories.code IS '카테고리 코드 (고유값, 대문자)';
+COMMENT ON COLUMN categories.name IS '카테고리명 (한글)';
+COMMENT ON COLUMN categories.parent_code IS '상위 카테고리 (계층 구조)';
+
+-- 5. ICF Codes (ICF 코드 마스터) - 정규화
+CREATE TABLE icf_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code VARCHAR(50) NOT NULL UNIQUE, -- ICF 코드 (예: "b210", "d550", "e115")
+    category CHAR(1) NOT NULL CHECK (category IN ('b', 'd', 'e', 'p')), -- 카테고리: b(신체기능), d(활동), e(환경요소), p(참여)
+    name VARCHAR(255), -- 코드명 (한글)
+    name_en VARCHAR(255), -- 코드명 (영문)
+    description TEXT, -- 상세 설명
+    parent_code VARCHAR(50), -- 상위 코드 (계층 구조용)
+    level INTEGER DEFAULT 1, -- 코드 레벨
+    is_in_core_set BOOLEAN DEFAULT FALSE, -- Core Set 포함 여부
+    is_active BOOLEAN DEFAULT TRUE,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    CONSTRAINT fk_icf_codes_parent FOREIGN KEY (parent_code) REFERENCES icf_codes(code) ON DELETE SET NULL
+);
+
+COMMENT ON TABLE icf_codes IS 'ICF 코드 마스터 (정규화)';
+COMMENT ON COLUMN icf_codes.code IS 'ICF 코드 (고유값, 소문자)';
+COMMENT ON COLUMN icf_codes.category IS '카테고리: b(신체기능), d(활동), e(환경요소), p(참여)';
+COMMENT ON COLUMN icf_codes.is_in_core_set IS 'ICF Core Set에 포함된 코드인지 여부';
+
+-- 6. Products (보조기기 상품) - 정규화 반영
+CREATE TABLE products (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    -- 기존 VARCHAR 컬럼 (하위 호환성 유지)
+    iso_code VARCHAR(50) NOT NULL, -- ISO 9999 분류 코드
+    manufacturer VARCHAR(100),
+    category VARCHAR(100),
+    -- 정규화된 FK 컬럼
+    iso_code_id UUID,
+    manufacturer_id UUID,
+    category_id UUID,
+    description TEXT,
+    image_url TEXT,
+    purchase_link TEXT, -- 제휴 수익 링크
+    price DECIMAL(10, 2),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    -- FK 제약조건
+    CONSTRAINT fk_products_iso_code FOREIGN KEY (iso_code_id) REFERENCES iso_codes(id) ON DELETE SET NULL,
+    CONSTRAINT fk_products_manufacturer FOREIGN KEY (manufacturer_id) REFERENCES manufacturers(id) ON DELETE SET NULL,
+    CONSTRAINT fk_products_category FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+);
+
+COMMENT ON TABLE products IS '보조기기 마스터 데이터 (ISO 9999 기준)';
+COMMENT ON COLUMN products.iso_code IS 'ISO 9999 코드 (하위 호환성, 정규화된 iso_code_id 사용 권장)';
+COMMENT ON COLUMN products.manufacturer IS '제조사명 (하위 호환성, 정규화된 manufacturer_id 사용 권장)';
+COMMENT ON COLUMN products.category IS '카테고리명 (하위 호환성, 정규화된 category_id 사용 권장)';
+
+-- 7. Consultations (상담 세션)
 CREATE TABLE consultations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
@@ -129,7 +238,7 @@ COMMENT ON TABLE consultations IS '사용자 상담 세션 헤더';
 COMMENT ON COLUMN consultations.is_favorite IS '사용자가 즐겨찾기로 표시한 상담인지 여부';
 COMMENT ON COLUMN consultations.ippa_activities IS 'K-IPPA 상담 단계에서 선택한 ICF 활동 및 점수 (기초선)';
 
--- 4. Chat Messages (상담 로그)
+-- 8. Chat Messages (상담 로그)
 CREATE TABLE chat_messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     consultation_id UUID NOT NULL,
@@ -144,12 +253,41 @@ CREATE TABLE chat_messages (
 
 COMMENT ON TABLE chat_messages IS '상담 상세 대화 로그';
 
--- 5. Analysis Results (AI 분석 결과)
+-- 9. Consultation ICF Codes (상담-ICF 코드 관계) - 정규화
+CREATE TABLE consultation_icf_codes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    consultation_id UUID NOT NULL,
+    icf_code_id UUID NOT NULL,
+    source VARCHAR(50) NOT NULL DEFAULT 'chat_analysis' CHECK (source IN (
+        'chat_analysis',
+        'keyword_inference',
+        'semantic_match',
+        'manual_input',
+        'ippa_evaluation'
+    )), -- ICF 코드 추출 소스
+    confidence_score DECIMAL(3, 2) DEFAULT 1.0, -- 신뢰도 점수 (0.0 ~ 1.0)
+    context JSONB, -- 추가 컨텍스트 정보
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    
+    CONSTRAINT fk_consultation_icf_consultation FOREIGN KEY (consultation_id) 
+        REFERENCES consultations(id) ON DELETE CASCADE,
+    CONSTRAINT fk_consultation_icf_code FOREIGN KEY (icf_code_id) 
+        REFERENCES icf_codes(id) ON DELETE CASCADE,
+    -- 한 상담에 동일한 ICF 코드는 하나만 (소스가 다를 수 있으므로 UNIQUE 제약은 없음)
+    CONSTRAINT unique_consultation_icf_code UNIQUE (consultation_id, icf_code_id, source)
+);
+
+COMMENT ON TABLE consultation_icf_codes IS '상담과 ICF 코드의 관계 (1:N)';
+COMMENT ON COLUMN consultation_icf_codes.source IS 'ICF 코드 추출 소스';
+COMMENT ON COLUMN consultation_icf_codes.confidence_score IS '신뢰도 점수 (0.0 ~ 1.0)';
+
+-- 10. Analysis Results (AI 분석 결과)
 CREATE TABLE analysis_results (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     consultation_id UUID NOT NULL,
     summary TEXT,
-    icf_codes JSONB, -- {"b": [...], "d": [...], "e": [...]}
+    icf_codes JSONB, -- {"b": [...], "d": [...], "e": [...]} (DEPRECATED: consultation_icf_codes 사용 권장)
+    icf_codes_deprecated JSONB, -- DEPRECATED: icf_codes JSONB 필드. consultation_icf_codes 테이블 사용 권장
     identified_problems TEXT,
     env_factors TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -161,8 +299,9 @@ CREATE TABLE analysis_results (
 );
 
 COMMENT ON TABLE analysis_results IS 'AI가 분석한 ICF 코드 및 문제 정의 (JSONB 활용)';
+COMMENT ON COLUMN analysis_results.icf_codes_deprecated IS 'DEPRECATED: icf_codes JSONB 필드. consultation_icf_codes 테이블 사용 권장';
 
--- 6. Recommendations (추천 매칭)
+-- 11. Recommendations (추천 매칭)
 CREATE TABLE recommendations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     consultation_id UUID NOT NULL,
@@ -185,7 +324,7 @@ COMMENT ON COLUMN recommendations.purchase_completed IS '구매 완료 여부';
 COMMENT ON COLUMN recommendations.purchase_completed_at IS '구매 완료 일시';
 COMMENT ON COLUMN recommendations.purchase_amount IS '구매 금액';
 
--- 7. IPPA Evaluations (K-IPPA 효과성 평가)
+-- 12. IPPA Evaluations (K-IPPA 효과성 평가)
 CREATE TABLE ippa_evaluations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
@@ -224,7 +363,7 @@ COMMENT ON COLUMN ippa_evaluations.activity_scores IS 'K-IPPA 평가에서 각 I
 -- [4] 추가 테이블 생성
 -- =========================================================
 
--- 8. Notifications (알림)
+-- 13. Notifications (알림)
 CREATE TABLE notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -240,7 +379,7 @@ CREATE TABLE notifications (
 
 COMMENT ON TABLE notifications IS '앱 내 알림 및 리마인더';
 
--- 9. Consultation Feedback (상담 피드백)
+-- 14. Consultation Feedback (상담 피드백)
 CREATE TABLE consultation_feedback (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     consultation_id UUID NOT NULL,
@@ -261,7 +400,7 @@ COMMENT ON TABLE consultation_feedback IS '상담 종료 후 ICF 분석 정확�
 COMMENT ON COLUMN consultation_feedback.accuracy_rating IS 'ICF 분석 정확도 평가 (1-5점)';
 COMMENT ON COLUMN consultation_feedback.feedback_comment IS '추가 의견 (선택사항)';
 
--- 10. Coupons (쿠폰 마스터)
+-- 15. Coupons (쿠폰 마스터)
 CREATE TABLE coupons (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code VARCHAR(50) UNIQUE NOT NULL,
@@ -284,7 +423,7 @@ COMMENT ON TABLE coupons IS '쿠폰 마스터 데이터';
 COMMENT ON COLUMN coupons.discount_type IS '할인 유형: percentage(%), fixed(고정금액), free_shipping(무료배송)';
 COMMENT ON COLUMN coupons.discount_value IS '할인 값 (percentage면 %, fixed면 원)';
 
--- 11. User Coupons (사용자 쿠폰 보유)
+-- 16. User Coupons (사용자 쿠폰 보유)
 CREATE TABLE user_coupons (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
@@ -301,7 +440,7 @@ CREATE TABLE user_coupons (
 COMMENT ON TABLE user_coupons IS '사용자가 보유한 쿠폰';
 COMMENT ON COLUMN user_coupons.used_at IS '쿠폰 사용 시각 (NULL이면 미사용)';
 
--- 12. Point Transactions (포인트 거래 이력)
+-- 17. Point Transactions (포인트 거래 이력)
 CREATE TABLE point_transactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
@@ -326,7 +465,7 @@ COMMENT ON TABLE point_transactions IS '포인트 거래 이력';
 COMMENT ON COLUMN point_transactions.transaction_type IS '거래 유형: earned(획득), redeemed(사용)';
 COMMENT ON COLUMN point_transactions.reference_id IS '관련 엔티티 ID (선택적)';
 
--- 13. Conversion Events (전환 이벤트 로깅)
+-- 18. Conversion Events (전환 이벤트 로깅)
 CREATE TABLE conversion_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID,
@@ -364,7 +503,7 @@ COMMENT ON COLUMN conversion_events.commission_amount IS '수수료 금액';
 COMMENT ON COLUMN conversion_events.purchase_date IS '구매 완료 일시';
 COMMENT ON COLUMN conversion_events.tracking_source IS '추적 소스 (coupang_api, postback, meta_pixel)';
 
--- 14. ICF Code Usage Logs (ICF 코드 사용 로그)
+-- 19. ICF Code Usage Logs (ICF 코드 사용 로그)
 CREATE TABLE icf_code_usage_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     icf_code TEXT NOT NULL,
@@ -378,7 +517,7 @@ CREATE TABLE icf_code_usage_logs (
 
 COMMENT ON TABLE icf_code_usage_logs IS 'ICF 코드 사용 로그 - 모든 ICF 코드 사용 이벤트를 기록';
 
--- 15. ICF Code Statistics (ICF 코드 통계)
+-- 20. ICF Code Statistics (ICF 코드 통계)
 CREATE TABLE icf_code_statistics (
     icf_code TEXT PRIMARY KEY,
     category TEXT NOT NULL CHECK (category IN ('b', 'd', 'e')),
@@ -395,7 +534,7 @@ CREATE TABLE icf_code_statistics (
 
 COMMENT ON TABLE icf_code_statistics IS 'ICF 코드 통계 - 코드별 집계된 사용 통계';
 
--- 16. ICF Code Expansions (ICF 코드 확장 이벤트 기록)
+-- 21. ICF Code Expansions (ICF 코드 확장 이벤트 기록)
 CREATE TABLE icf_code_expansions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     icf_code TEXT NOT NULL,
@@ -407,7 +546,7 @@ CREATE TABLE icf_code_expansions (
 
 COMMENT ON TABLE icf_code_expansions IS 'ICF 코드 확장 이벤트 기록';
 
--- 17. ICF Auto Expand Config (자동 확장 설정)
+-- 22. ICF Auto Expand Config (자동 확장 설정)
 CREATE TABLE icf_auto_expand_config (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     enabled BOOLEAN NOT NULL DEFAULT false,
@@ -431,9 +570,39 @@ ON CONFLICT DO NOTHING;
 -- Users
 CREATE INDEX idx_users_email ON users(email);
 
+-- ISO Codes
+CREATE INDEX idx_iso_codes_code ON iso_codes(code);
+CREATE INDEX idx_iso_codes_parent ON iso_codes(parent_code);
+CREATE INDEX idx_iso_codes_active ON iso_codes(is_active) WHERE is_active = TRUE;
+
+-- Manufacturers
+CREATE INDEX idx_manufacturers_code ON manufacturers(code);
+CREATE INDEX idx_manufacturers_active ON manufacturers(is_active) WHERE is_active = TRUE;
+
+-- Categories
+CREATE INDEX idx_categories_code ON categories(code);
+CREATE INDEX idx_categories_parent ON categories(parent_code);
+CREATE INDEX idx_categories_active ON categories(is_active) WHERE is_active = TRUE;
+
+-- ICF Codes
+CREATE INDEX idx_icf_codes_code ON icf_codes(code);
+CREATE INDEX idx_icf_codes_category ON icf_codes(category);
+CREATE INDEX idx_icf_codes_core_set ON icf_codes(is_in_core_set) WHERE is_in_core_set = TRUE;
+CREATE INDEX idx_icf_codes_parent ON icf_codes(parent_code);
+CREATE INDEX idx_icf_codes_active ON icf_codes(is_active) WHERE is_active = TRUE;
+
+-- Consultation ICF Codes
+CREATE INDEX idx_consultation_icf_consultation ON consultation_icf_codes(consultation_id);
+CREATE INDEX idx_consultation_icf_code ON consultation_icf_codes(icf_code_id);
+CREATE INDEX idx_consultation_icf_source ON consultation_icf_codes(source);
+CREATE INDEX idx_consultation_icf_created ON consultation_icf_codes(created_at);
+
 -- Products
 CREATE INDEX idx_products_iso_code ON products(iso_code);
 CREATE INDEX idx_products_category ON products(category);
+CREATE INDEX idx_products_iso_code_id ON products(iso_code_id);
+CREATE INDEX idx_products_manufacturer_id ON products(manufacturer_id);
+CREATE INDEX idx_products_category_id ON products(category_id);
 
 -- Consultations
 CREATE INDEX idx_consultations_user_id ON consultations(user_id);
@@ -709,6 +878,26 @@ CREATE TRIGGER update_consultations_modtime
   FOR EACH ROW 
   EXECUTE FUNCTION update_updated_at_column();
 
+CREATE TRIGGER update_iso_codes_modtime 
+  BEFORE UPDATE ON iso_codes 
+  FOR EACH ROW 
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_manufacturers_modtime 
+  BEFORE UPDATE ON manufacturers 
+  FOR EACH ROW 
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_categories_modtime 
+  BEFORE UPDATE ON categories 
+  FOR EACH ROW 
+  EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_icf_codes_modtime 
+  BEFORE UPDATE ON icf_codes 
+  FOR EACH ROW 
+  EXECUTE FUNCTION update_updated_at_column();
+
 CREATE TRIGGER update_ippa_modtime 
   BEFORE UPDATE ON ippa_evaluations 
   FOR EACH ROW 
@@ -981,8 +1170,116 @@ ORDER BY priority_score DESC;
 
 COMMENT ON VIEW icf_code_expansion_priority IS 'ICF 코드 확장 우선순위 - Core Set에 없는 코드의 확장 필요성 분석';
 
+-- 상담별 ICF 코드를 JSONB 형태로 조회하는 뷰 (기존 코드 호환성)
+CREATE OR REPLACE VIEW view_consultation_icf_codes_jsonb AS
+SELECT 
+    c.id as consultation_id,
+    jsonb_build_object(
+        'b', COALESCE(
+            jsonb_agg(DISTINCT ic.code) FILTER (WHERE ic.category = 'b'),
+            '[]'::jsonb
+        ),
+        'd', COALESCE(
+            jsonb_agg(DISTINCT ic.code) FILTER (WHERE ic.category = 'd'),
+            '[]'::jsonb
+        ),
+        'e', COALESCE(
+            jsonb_agg(DISTINCT ic.code) FILTER (WHERE ic.category = 'e'),
+            '[]'::jsonb
+        ),
+        'p', COALESCE(
+            jsonb_agg(DISTINCT ic.code) FILTER (WHERE ic.category = 'p'),
+            '[]'::jsonb
+        )
+    ) as icf_codes
+FROM consultations c
+LEFT JOIN consultation_icf_codes cic ON cic.consultation_id = c.id
+LEFT JOIN icf_codes ic ON cic.icf_code_id = ic.id
+GROUP BY c.id;
+
+COMMENT ON VIEW view_consultation_icf_codes_jsonb IS '상담별 ICF 코드를 JSONB 형태로 조회 (하위 호환성)';
+
+-- 상담별 ICF 코드 상세 조회 뷰
+CREATE OR REPLACE VIEW view_consultation_icf_codes_detail AS
+SELECT 
+    c.id as consultation_id,
+    cic.id as relation_id,
+    ic.id as icf_code_id,
+    ic.code as icf_code,
+    ic.category,
+    ic.name as icf_code_name,
+    ic.name_en as icf_code_name_en,
+    ic.description,
+    ic.is_in_core_set,
+    cic.source,
+    cic.confidence_score,
+    cic.context,
+    cic.created_at
+FROM consultations c
+INNER JOIN consultation_icf_codes cic ON cic.consultation_id = c.id
+INNER JOIN icf_codes ic ON cic.icf_code_id = ic.id
+ORDER BY c.id, ic.category, ic.code;
+
+COMMENT ON VIEW view_consultation_icf_codes_detail IS '상담별 ICF 코드 상세 조회 (정규화된 구조)';
+
+-- products 테이블 조인 뷰 (기존 코드와의 호환성 유지)
+CREATE OR REPLACE VIEW view_products_with_codes AS
+SELECT 
+    p.id,
+    p.name,
+    p.iso_code_id,
+    ic.code as iso_code,
+    ic.name as iso_code_name,
+    p.manufacturer_id,
+    m.code as manufacturer_code,
+    m.name as manufacturer,
+    p.category_id,
+    c.code as category_code,
+    c.name as category,
+    p.description,
+    p.image_url,
+    p.purchase_link,
+    p.price,
+    p.is_active,
+    p.created_at,
+    p.updated_at
+FROM products p
+LEFT JOIN iso_codes ic ON p.iso_code_id = ic.id
+LEFT JOIN manufacturers m ON p.manufacturer_id = m.id
+LEFT JOIN categories c ON p.category_id = c.id;
+
+COMMENT ON VIEW view_products_with_codes IS 'products 테이블과 코드 테이블 조인 뷰 (하위 호환성)';
+
 -- =========================================================
--- [9] 완료 메시지
+-- [10] 함수 생성 (추가)
+-- =========================================================
+
+-- 상담의 ICF 코드를 배열로 반환하는 함수
+CREATE OR REPLACE FUNCTION get_consultation_icf_codes(p_consultation_id UUID)
+RETURNS TABLE (
+    code TEXT,
+    category CHAR(1),
+    name VARCHAR(255),
+    source VARCHAR(50)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        ic.code::TEXT,
+        ic.category,
+        ic.name,
+        cic.source
+    FROM consultation_icf_codes cic
+    INNER JOIN icf_codes ic ON cic.icf_code_id = ic.id
+    WHERE cic.consultation_id = p_consultation_id
+    ORDER BY ic.category, ic.code;
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION get_consultation_icf_codes(UUID) IS '상담의 ICF 코드를 배열로 반환 (카테고리별 정렬)';
+
+-- =========================================================
+-- [11] 완료 메시지
 -- =========================================================
 
 DO $$
@@ -991,11 +1288,20 @@ BEGIN
   RAISE NOTICE 'LinkAble MVP Database DDL Script 실행 완료';
   RAISE NOTICE '=========================================================';
   RAISE NOTICE '생성된 객체:';
-  RAISE NOTICE '  - 테이블: 17개';
-  RAISE NOTICE '  - 뷰: 6개';
-  RAISE NOTICE '  - 함수: 7개';
-  RAISE NOTICE '  - 트리거: 8개';
-  RAISE NOTICE '  - 인덱스: 50개 이상';
+  RAISE NOTICE '  - 테이블: 22개 (정규화된 코드 테이블 포함)';
+  RAISE NOTICE '    * 코드 마스터: iso_codes, icf_codes, manufacturers, categories';
+  RAISE NOTICE '    * 관계 테이블: consultation_icf_codes';
+  RAISE NOTICE '  - 뷰: 9개 (하위 호환성 뷰 포함)';
+  RAISE NOTICE '  - 함수: 8개';
+  RAISE NOTICE '  - 트리거: 12개';
+  RAISE NOTICE '  - 인덱스: 60개 이상';
+  RAISE NOTICE '=========================================================';
+  RAISE NOTICE '정규화 완료:';
+  RAISE NOTICE '  - ISO 9999 코드: iso_codes 테이블';
+  RAISE NOTICE '  - ICF 코드: icf_codes + consultation_icf_codes 테이블';
+  RAISE NOTICE '  - 제조사: manufacturers 테이블';
+  RAISE NOTICE '  - 카테고리: categories 테이블';
+  RAISE NOTICE '  - products 테이블에 FK 컬럼 추가 (하위 호환성 유지)';
   RAISE NOTICE '=========================================================';
 END $$;
 

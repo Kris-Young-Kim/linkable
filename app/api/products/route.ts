@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server";
+import {
+  getSupabaseServerClient,
+  getSupabaseUserClient,
+} from "@/lib/supabase/server";
 import { getIsoMatches } from "@/core/matching/iso-mapping";
 import { appendKeywordIsoMatches } from "@/core/matching/keyword-inference";
 import { fastMatch, accurateMatch } from "@/core/matching/hybrid-matcher";
@@ -127,16 +130,25 @@ const detectDisabilityType = (
   summary?: string | null
 ): string | undefined => {
   const text = (summary ?? "").toLowerCase();
-  const has = (prefix: string) => icfCodes.some((c) => c.startsWith(prefix.toLowerCase()));
-  const includesAny = (keywords: string[]) => keywords.some((k) => text.includes(k));
+  const has = (prefix: string) =>
+    icfCodes.some((c) => c.startsWith(prefix.toLowerCase()));
+  const includesAny = (keywords: string[]) =>
+    keywords.some((k) => text.includes(k));
 
-  if (has("d46") || has("d450") || includesAny(["휠체어", "보행", "이동", "wheelchair"])) {
+  if (
+    has("d46") ||
+    has("d450") ||
+    includesAny(["휠체어", "보행", "이동", "wheelchair"])
+  ) {
     return "mobility_impairment";
   }
   if (has("b210") || includesAny(["시각", "저시력", "시력", "vision"])) {
     return "visual_impairment";
   }
-  if (has("d3") || includesAny(["의사소통", "말하기", "소통", "communication"])) {
+  if (
+    has("d3") ||
+    includesAny(["의사소통", "말하기", "소통", "communication"])
+  ) {
     return "communication_impairment";
   }
   if (has("d55") || includesAny(["식사", "먹기", "feeding", "음식"])) {
@@ -203,8 +215,8 @@ export async function GET(request: Request) {
   // consultationId가 있으면 사용자 인증 필요, 없으면 익명 접근 가능
   const { auth } = await import("@clerk/nextjs/server");
   const { userId } = await auth();
-  const supabase = userId 
-    ? await getSupabaseUserClient() 
+  const supabase = userId
+    ? await getSupabaseUserClient()
     : getSupabaseServerClient();
 
   const { searchParams } = new URL(request.url);
