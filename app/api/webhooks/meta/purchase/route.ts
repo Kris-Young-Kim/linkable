@@ -173,6 +173,28 @@ export async function POST(request: NextRequest) {
         });
       });
 
+      // CTA A/B 테스트: 구매 이벤트 기록 (비동기, 에러 무시)
+      import("@/lib/cta-ab-testing").then(async ({ logCtaPerformance }) => {
+        try {
+          // 할당된 변형 조회
+          const { data: assignment } = await supabase
+            .from("cta_ab_test_assignments")
+            .select("variant_id")
+            .eq("consultation_id", consultationId)
+            .maybeSingle();
+          
+          if (assignment?.variant_id) {
+            await logCtaPerformance(assignment.variant_id, "purchase", {
+              userId,
+              consultationId,
+              recommendationId,
+            });
+          }
+        } catch (err) {
+          console.error("[Meta Purchase] CTA AB test logging failed:", err);
+        }
+      });
+
       // 실시간 학습: 구매 이벤트 기록 (비동기, 에러 무시)
       import("@/lib/realtime-learning").then(async ({ updateRealtimeLearningStats }) => {
         try {

@@ -295,6 +295,7 @@ export function RecommendationsViewWithFilters({
                 price={product.price}
                 purchaseLink={product.purchase_link}
                 recommendationId={product.recommendation_id}
+                consultationId={consultationId}
                 adminActions={
                   <CardActionButtons
                     onDelete={() => handleRemoveProduct(product)}
@@ -333,6 +334,7 @@ export function RecommendationsViewWithFilters({
                 price={product.price}
                 purchaseLink={product.purchase_link}
                 recommendationId={product.recommendation_id}
+                consultationId={consultationId}
                 adminActions={
                   <CardActionButtons
                     onDelete={() => handleRemoveProduct(product)}

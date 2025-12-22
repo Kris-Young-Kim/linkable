@@ -1031,12 +1031,22 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 단기 작업 (2-4주)
 
-- [ ] **CTA 최적화 (A/B 테스트)**
+- [x] **CTA 최적화 (A/B 테스트)** ✅
 
   - 버튼 위치 테스트 (상단/중간/하단)
   - 버튼 텍스트 테스트 ("구매하기" vs "지원제도 확인" vs "전문가 상담")
   - 버튼 색상/크기 테스트
   - 예상 효과: 클릭률 30-50% 향상
+  - **구현 완료**:
+    - CTA A/B 테스트 설정 테이블 (`cta_ab_test_configs`)
+    - CTA 변형 테이블 (`cta_variants`)
+    - 사용자별 변형 할당 (`cta_ab_test_assignments`)
+    - CTA 성능 로그 (`cta_performance_logs`)
+    - 변형 할당 함수 (`assign_cta_variant`)
+    - 성능 집계 뷰 (`view_cta_ab_test_performance`)
+    - CTA A/B 테스트 라이브러리 (`lib/cta-ab-testing.ts`)
+    - ProductRecommendationCard 통합
+    - 관리 API (`app/api/admin/cta-ab-test/route.ts`)
 
 - [ ] **인센티브 시스템 활성화**
 

@@ -1,13 +1,15 @@
 "use client"
 
-import { useCallback, useState, type ReactNode } from "react"
+import { useCallback, useState, useEffect, type ReactNode } from "react"
 import Image from "next/image"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ExternalLink, ShoppingCart, Package } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
+import { useAuth } from "@clerk/nextjs"
 import { trackEvent } from "@/lib/analytics"
+import type { CtaVariant } from "@/lib/cta-ab-testing"
 
 type ClickSource = "primary" | "secondary"
 
@@ -24,6 +26,7 @@ interface ProductRecommendationCardProps {
   price?: number | string | null
   purchaseLink?: string | null
   recommendationId?: string | null
+  consultationId?: string | null
   adminActions?: ReactNode
 }
 
@@ -40,15 +43,70 @@ export function ProductRecommendationCard({
   price,
   purchaseLink,
   recommendationId,
+  consultationId,
   adminActions,
 }: ProductRecommendationCardProps) {
   const { t } = useLanguage()
+  const { userId } = useAuth()
   const matchPercentage = matchScore ? `${Math.round(matchScore * 100)}%` : null
 
   const [pendingSource, setPendingSource] = useState<ClickSource | null>(null)
+  const [ctaVariant, setCtaVariant] = useState<CtaVariant | null>(null)
+  const [impressionLogged, setImpressionLogged] = useState(false)
+  const [impressionTime, setImpressionTime] = useState<number | null>(null)
+
+  // CTA 변형 할당 및 노출 로깅
+  useEffect(() => {
+    let mounted = true;
+    
+    const loadCtaVariant = async () => {
+      try {
+        // 활성화된 테스트 설정 조회
+        const { getActiveCtaAbTestConfig } = await import("@/lib/cta-ab-testing");
+        const testConfig = await getActiveCtaAbTestConfig();
+        
+        if (testConfig && mounted) {
+          // 변형 할당
+          const { assignCtaVariant } = await import("@/lib/cta-ab-testing");
+          const variant = await assignCtaVariant(
+            testConfig.id,
+            userId || undefined,
+            consultationId || undefined
+          );
+          
+          if (variant && mounted) {
+            setCtaVariant(variant);
+            
+            // 노출 로깅
+            const impressionStartTime = Date.now();
+            setImpressionTime(impressionStartTime);
+            
+            const { logCtaPerformance } = await import("@/lib/cta-ab-testing");
+            await logCtaPerformance(variant.id, "impression", {
+              userId: userId || undefined,
+              consultationId: consultationId || undefined,
+              recommendationId: recommendationId || undefined,
+              screenSize: window.innerWidth < 768 ? "mobile" : window.innerWidth < 1024 ? "tablet" : "desktop",
+              userAgent: navigator.userAgent,
+            });
+            
+            setImpressionLogged(true);
+          }
+        }
+      } catch (error) {
+        console.error("[ProductRecommendationCard] CTA variant load failed:", error);
+      }
+    };
+    
+    loadCtaVariant();
+    
+    return () => {
+      mounted = false;
+    };
+  }, [userId, consultationId, recommendationId])
 
   const handleClick = useCallback(
-    async (source: ClickSource) => {
+    async (source: ClickSource, buttonType: "primary" | "secondary" | "tertiary" = "primary") => {
       // 기존 구매 링크 로직
       if (!purchaseLink) {
         return
@@ -66,6 +124,30 @@ export function ProductRecommendationCard({
       setPendingSource(source)
 
       try {
+        // CTA 성능 로깅
+        if (ctaVariant && impressionTime) {
+          const timeToClick = Date.now() - impressionTime;
+          const scrollPosition = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+          
+          const eventType = buttonType === "primary" 
+            ? "primary_click" 
+            : buttonType === "secondary" 
+            ? "secondary_click" 
+            : "tertiary_click";
+          
+          const { logCtaPerformance } = await import("@/lib/cta-ab-testing");
+          await logCtaPerformance(ctaVariant.id, eventType, {
+            userId: userId || undefined,
+            consultationId: consultationId || undefined,
+            recommendationId: recommendationId || undefined,
+            timeToClickMs: timeToClick,
+            scrollPosition: Math.min(100, Math.max(0, scrollPosition)),
+            viewportPosition: scrollPosition < 33 ? "top" : scrollPosition < 66 ? "middle" : "bottom",
+            screenSize: window.innerWidth < 768 ? "mobile" : window.innerWidth < 1024 ? "tablet" : "desktop",
+            userAgent: navigator.userAgent,
+          });
+        }
+
         await fetch(`/api/recommendations/${recommendationId}/click`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -77,6 +159,7 @@ export function ProductRecommendationCard({
           product_name: productName,
           recommendation_id: recommendationId,
           source: source,
+          cta_variant: ctaVariant?.name,
         })
 
         // Meta Pixel 이벤트 추적 (구매 링크 클릭)
@@ -95,12 +178,152 @@ export function ProductRecommendationCard({
         openLink()
       }
     },
-    [purchaseLink, recommendationId, productName, isoCode],
+    [purchaseLink, recommendationId, productName, isoCode, ctaVariant, impressionTime, userId, consultationId],
   )
 
   const isPrimaryPending = pendingSource === "primary"
   const isSecondaryPending = pendingSource === "secondary"
   const isButtonDisabled = !purchaseLink
+
+  // 아이콘 컴포넌트 동적 로드
+  const getIcon = (iconName?: string) => {
+    if (!iconName) return null;
+    switch (iconName) {
+      case "ExternalLink":
+        return <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />;
+      case "ShoppingCart":
+        return <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />;
+      default:
+        return null;
+    }
+  };
+
+  // CTA 버튼 렌더링 (A/B 테스트 변형 적용)
+  const renderCtaButtons = (variant: CtaVariant | null) => {
+    // 기본값 (변형이 없을 때)
+    if (!variant) {
+      return (
+        <div className="flex gap-3 w-full">
+          <Button
+            className="flex-1 min-h-[44px]"
+            size="lg"
+            type="button"
+            onClick={() => handleClick("primary", "primary")}
+            disabled={isButtonDisabled || isPrimaryPending}
+            aria-disabled={isButtonDisabled}
+            aria-label={
+              purchaseLink
+                ? `${productName} 상품 정보 보기 (외부 링크)`
+                : `${productName} 상품 정보 (링크 없음)`
+            }
+          >
+            <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
+            {purchaseLink ? t("recommendations.learnMore") : t("recommendations.noLink")}
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 min-h-[44px] bg-transparent"
+            size="lg"
+            type="button"
+            onClick={() => handleClick("secondary", "secondary")}
+            disabled={isButtonDisabled || isSecondaryPending}
+            aria-disabled={isButtonDisabled}
+            aria-label={
+              purchaseLink
+                ? `${productName} 구매하기 (외부 링크)`
+                : `${productName} 구매하기 (링크 없음)`
+            }
+          >
+            <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
+            {purchaseLink ? t("recommendations.buyNow") : t("recommendations.noLink")}
+          </Button>
+        </div>
+      );
+    }
+
+    // A/B 테스트 변형 적용
+    const primaryButtonClass = variant.primary_button_color 
+      ? `${variant.primary_button_color} hover:opacity-90` 
+      : "";
+    const secondaryButtonClass = variant.secondary_button_color 
+      ? `${variant.secondary_button_color} hover:opacity-90` 
+      : "";
+
+    return (
+      <div className="flex flex-col gap-3 w-full">
+        {/* 긴급성 텍스트 */}
+        {variant.show_urgency_text && variant.urgency_text && (
+          <p className="text-sm font-medium text-primary text-center animate-pulse">
+            {variant.urgency_text}
+          </p>
+        )}
+
+        {/* 가격 강조 */}
+        {variant.show_price_highlight && price && (
+          <div className="text-center">
+            <span className="text-2xl font-bold text-primary">
+              {typeof price === "number" ? price.toLocaleString() : String(price)}원
+            </span>
+          </div>
+        )}
+
+        {/* 버튼 그룹 */}
+        <div className="flex gap-3 w-full">
+          {/* 주요 버튼 */}
+          <Button
+            className={`flex-1 min-h-[44px] ${primaryButtonClass}`}
+            size={variant.primary_button_size}
+            variant={variant.primary_button_variant as any}
+            type="button"
+            onClick={() => handleClick("primary", "primary")}
+            disabled={isButtonDisabled || isPrimaryPending}
+            aria-disabled={isButtonDisabled}
+            aria-label={
+              purchaseLink
+                ? `${productName} ${variant.primary_button_text} (외부 링크)`
+                : `${productName} ${variant.primary_button_text} (링크 없음)`
+            }
+          >
+            {getIcon(variant.primary_button_icon)}
+            {variant.primary_button_text}
+          </Button>
+
+          {/* 보조 버튼 */}
+          <Button
+            variant={variant.secondary_button_variant as any}
+            className={`flex-1 min-h-[44px] ${secondaryButtonClass}`}
+            size={variant.secondary_button_size}
+            type="button"
+            onClick={() => handleClick("secondary", "secondary")}
+            disabled={isButtonDisabled || isSecondaryPending}
+            aria-disabled={isButtonDisabled}
+            aria-label={
+              purchaseLink
+                ? `${productName} ${variant.secondary_button_text} (외부 링크)`
+                : `${productName} ${variant.secondary_button_text} (링크 없음)`
+            }
+          >
+            {getIcon(variant.secondary_button_icon)}
+            {variant.secondary_button_text}
+          </Button>
+        </div>
+
+        {/* 세 번째 버튼 (있는 경우) */}
+        {variant.tertiary_button_text && (
+          <Button
+            variant="ghost"
+            className="w-full"
+            size="md"
+            type="button"
+            onClick={() => handleClick("secondary", "tertiary")}
+            disabled={isButtonDisabled}
+          >
+            {variant.tertiary_button_text}
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Card className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
@@ -167,44 +390,24 @@ export function ProductRecommendationCard({
         {matchReason && <p className="text-sm text-foreground/80 leading-relaxed">{matchReason}</p>}
       </CardContent>
 
-      <CardFooter className="flex flex-col gap-3">
-        {/* 주요 액션 버튼 (구매 관련) */}
-        <div className="flex gap-3 w-full">
-          <Button
-            className="flex-1 min-h-[44px]"
-            size="lg"
-            type="button"
-            onClick={() => handleClick("primary")}
-            disabled={isButtonDisabled || isPrimaryPending}
-            aria-disabled={isButtonDisabled}
-            aria-label={
-              purchaseLink
-                ? `${productName} 상품 정보 보기 (외부 링크)`
-                : `${productName} 상품 정보 (링크 없음)`
-            }
-          >
-            <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
-            {purchaseLink ? t("recommendations.learnMore") : t("recommendations.noLink")}
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 min-h-[44px] bg-transparent"
-            size="lg"
-            type="button"
-            onClick={() => handleClick("secondary")}
-            disabled={isButtonDisabled || isSecondaryPending}
-            aria-disabled={isButtonDisabled}
-            aria-label={
-              purchaseLink
-                ? `${productName} 구매하기 (외부 링크)`
-                : `${productName} 구매하기 (링크 없음)`
-            }
-          >
-            <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
-            {purchaseLink ? t("recommendations.buyNow") : t("recommendations.noLink")}
-          </Button>
-        </div>
-      </CardFooter>
+      {/* CTA 버튼 영역 (A/B 테스트 변형 적용) */}
+      {ctaVariant?.position === "top" && (
+        <CardFooter className="flex flex-col gap-3 border-b">
+          {renderCtaButtons(ctaVariant)}
+        </CardFooter>
+      )}
+
+      {ctaVariant?.position === "middle" && (
+        <CardContent className="flex flex-col gap-3 border-y">
+          {renderCtaButtons(ctaVariant)}
+        </CardContent>
+      )}
+
+      {(!ctaVariant || ctaVariant.position === "bottom") && (
+        <CardFooter className={ctaVariant?.position === "sticky" ? "sticky bottom-0 bg-card border-t z-10" : "flex flex-col gap-3"}>
+          {renderCtaButtons(ctaVariant)}
+        </CardFooter>
+      )}
     </Card>
   )
 }

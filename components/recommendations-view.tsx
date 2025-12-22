@@ -102,6 +102,7 @@ export function RecommendationsView({ products, errorMessage }: RecommendationsV
                     price={product.price}
                     purchaseLink={product.purchase_link}
                     recommendationId={product.recommendation_id}
+                    consultationId={product.consultation_id}
                   />
                 ))}
               </div>

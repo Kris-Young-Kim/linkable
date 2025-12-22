@@ -114,6 +114,28 @@ export async function GET(request: NextRequest) {
             });
           });
 
+          // CTA A/B 테스트: 구매 이벤트 기록 (비동기, 에러 무시)
+          import("@/lib/cta-ab-testing").then(async ({ logCtaPerformance }) => {
+            try {
+              // 할당된 변형 조회
+              const { data: assignment } = await supabase
+                .from("cta_ab_test_assignments")
+                .select("variant_id")
+                .eq("consultation_id", rec.consultation_id)
+                .maybeSingle();
+              
+              if (assignment?.variant_id) {
+                await logCtaPerformance(assignment.variant_id, "purchase", {
+                  userId: rec.user_id,
+                  consultationId: rec.consultation_id,
+                  recommendationId: rec.id,
+                });
+              }
+            } catch (err) {
+              console.error("[Coupang Purchase] CTA AB test logging failed:", err);
+            }
+          });
+
           // 실시간 학습: 구매 이벤트 기록 (비동기, 에러 무시)
           import("@/lib/realtime-learning").then(async ({ updateRealtimeLearningStats }) => {
             try {
