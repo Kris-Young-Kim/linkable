@@ -984,11 +984,21 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 중기 작업 (4-6주)
 
-- [ ] **실시간 학습 시스템 구축**
+- [x] **실시간 학습 시스템 구축** ✅
 
   - 사용자 피드백을 실시간으로 매칭 점수에 반영
   - 클릭률이 높은 매칭 조합 자동 가중치 증가
   - 예상 효과: 시간이 지날수록 정확도 지속 향상
+  - **구현 완료**:
+    - 실시간 학습 설정 테이블 (`realtime_learning_configs`)
+    - 실시간 통계 캐시 테이블 (`realtime_learning_stats`)
+    - 실시간 학습 이벤트 로그 (`realtime_learning_events`)
+    - 통계 업데이트 함수 (`update_realtime_learning_stats`)
+    - 가중치 조정 조회 함수 (`get_realtime_weight_adjustment`)
+    - 실시간 학습 라이브러리 (`lib/realtime-learning.ts`)
+    - 피드백 스코어러 통합 (`core/matching/feedback-scorer.ts`)
+    - 사용자 행동 이벤트 기록 (impression, click, purchase, feedback)
+    - 관리 API (`app/api/admin/realtime-learning/route.ts`)
 
 - [ ] **ICF 코드 확장 자동화**
   - 자주 사용되는 ICF 코드 자동 Core Set 추가

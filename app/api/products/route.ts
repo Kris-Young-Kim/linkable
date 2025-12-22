@@ -543,6 +543,25 @@ export async function GET(request: Request) {
       persistenceItems,
       supabase
     );
+
+    // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
+    if (icfCodes.length > 0 && recommendationMap) {
+      import("@/lib/realtime-learning").then(({ updateRealtimeLearningStats }) => {
+        // 각 추천된 제품에 대해 impression 이벤트 기록
+        for (const [productId, recommendationId] of recommendationMap.entries()) {
+          const product = ranked.find((p) => p.id === productId);
+          if (product?.iso_code) {
+            updateRealtimeLearningStats(
+              icfCodes,
+              product.iso_code as string,
+              "impression"
+            ).catch((err) => {
+              console.error("[Products API] Realtime learning impression failed:", err);
+            });
+          }
+        }
+      });
+    }
   }
 
   logEvent({

@@ -8,6 +8,10 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/logging";
 import type { IsoMatch } from "./iso-mapping";
+import {
+  getRealtimeWeightAdjustment,
+  updateRealtimeLearningStats,
+} from "@/lib/realtime-learning";
 
 export interface FeedbackStats {
   /** ISO 코드 */
@@ -529,7 +533,19 @@ export async function applyFeedbackCorrection(
     const normalizedIcf = normalizeIcfCodes(icfCodes);
     const icfKey = normalizedIcf.join(",");
 
-    // 3. 각 매칭 결과에 보정 계수 적용
+    // 3. 실시간 학습 가중치 조정 조회 (비동기, 에러 무시)
+    const realtimeAdjustments = new Map<string, number>();
+    try {
+      for (const match of matches) {
+        const adjustment = await getRealtimeWeightAdjustment(icfCodes, match.isoCode);
+        realtimeAdjustments.set(match.isoCode, adjustment);
+      }
+    } catch (error) {
+      console.error("[Feedback Scorer] Realtime adjustment failed:", error);
+      // 실패해도 계속 진행
+    }
+
+    // 4. 각 매칭 결과에 보정 계수 적용
     return matches.map((match) => {
       // 조합별 보정 계수 (우선순위 높음)
       const combinationKey = `${icfKey}|${match.isoCode}`;
@@ -539,8 +555,13 @@ export async function applyFeedbackCorrection(
       const generalStats = feedbackStats.get(match.isoCode);
       const generalFactor = generalStats?.correctionFactor || 1.0;
 
+      // 실시간 학습 가중치 조정 (최우선)
+      const realtimeAdjustment = realtimeAdjustments.get(match.isoCode) || 1.0;
+
       // 조합별 통계가 있으면 우선 사용, 없으면 일반 통계 사용
-      const correctionFactor = combinationFactor || generalFactor;
+      // 실시간 학습 조정을 최종적으로 적용
+      const baseCorrectionFactor = combinationFactor || generalFactor;
+      const correctionFactor = baseCorrectionFactor * realtimeAdjustment;
 
       // 점수 보정 (최대 1.0으로 제한)
       const correctedScore = Math.min(match.score * correctionFactor, 1.0);
@@ -552,6 +573,8 @@ export async function applyFeedbackCorrection(
         ...(process.env.NODE_ENV === "development" && {
           _feedback: {
             correctionFactor,
+            baseCorrectionFactor,
+            realtimeAdjustment,
             source: combinationFactor ? "combination" : "general",
             sampleCount: generalStats?.sampleCount || 0,
           },

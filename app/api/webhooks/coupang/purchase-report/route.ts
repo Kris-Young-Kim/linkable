@@ -114,6 +114,46 @@ export async function GET(request: NextRequest) {
             });
           });
 
+          // 실시간 학습: 구매 이벤트 기록 (비동기, 에러 무시)
+          import("@/lib/realtime-learning").then(async ({ updateRealtimeLearningStats }) => {
+            try {
+              // ICF 코드와 ISO 코드 조회
+              const { data: recommendationData } = await supabase
+                .from("recommendations")
+                .select(`
+                  consultation_id,
+                  product:product_id(iso_code)
+                `)
+                .eq("id", rec.id)
+                .single();
+
+              if (recommendationData?.consultation_id) {
+                // ICF 코드 조회
+                const { data: icfData } = await supabase
+                  .from("consultation_icf_codes")
+                  .select("icf_codes!icf_code_id(code)")
+                  .eq("consultation_id", recommendationData.consultation_id);
+
+                if (icfData && icfData.length > 0) {
+                  const icfCodes = icfData
+                    .map((item: any) => item.icf_codes?.code)
+                    .filter((code: string | undefined): code is string => !!code);
+
+                  const product = Array.isArray(recommendationData.product)
+                    ? recommendationData.product[0]
+                    : recommendationData.product;
+                  const isoCode = (product as any)?.iso_code;
+
+                  if (icfCodes.length > 0 && isoCode) {
+                    await updateRealtimeLearningStats(icfCodes, isoCode, "purchase");
+                  }
+                }
+              }
+            } catch (err) {
+              console.error("[Coupang Purchase] Realtime learning failed:", err);
+            }
+          });
+
           successCount++;
 
           logEvent({

@@ -168,6 +168,40 @@ export async function POST(request: Request) {
       });
     });
 
+    // 실시간 학습: 피드백 이벤트 기록 (비동기, 에러 무시)
+    import("@/lib/realtime-learning").then(async ({ updateRealtimeLearningStats }) => {
+      try {
+        // ICF 코드와 추천된 ISO 코드 조회
+        const { data: icfData } = await supabase
+          .from("consultation_icf_codes")
+          .select("icf_codes!icf_code_id(code)")
+          .eq("consultation_id", consultation_id);
+
+        const { data: recommendations } = await supabase
+          .from("recommendations")
+          .select("product:product_id(iso_code)")
+          .eq("consultation_id", consultation_id)
+          .limit(1);
+
+        if (icfData && icfData.length > 0 && recommendations && recommendations.length > 0) {
+          const icfCodes = icfData
+            .map((item: any) => item.icf_codes?.code)
+            .filter((code: string | undefined): code is string => !!code);
+
+          const product = Array.isArray(recommendations[0].product)
+            ? recommendations[0].product[0]
+            : recommendations[0].product;
+          const isoCode = (product as any)?.iso_code;
+
+          if (icfCodes.length > 0 && isoCode) {
+            await updateRealtimeLearningStats(icfCodes, isoCode, "feedback", rating);
+          }
+        }
+      } catch (err) {
+        console.error("[Consultation Feedback] Realtime learning failed:", err);
+      }
+    });
+
     // 피드백 로깅 (분석 목적)
     logEvent({
       category: "consultation",

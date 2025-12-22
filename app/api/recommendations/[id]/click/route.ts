@@ -151,6 +151,46 @@ export async function POST(
             console.error("[Recommendation Click] Performance update failed:", err);
           });
         });
+
+        // 실시간 학습: 클릭 이벤트 기록 (비동기, 에러 무시)
+        import("@/lib/realtime-learning").then(async ({ updateRealtimeLearningStats }) => {
+          try {
+            // ICF 코드와 ISO 코드 조회
+            const { data: consultationData } = await supabase
+              .from("recommendations")
+              .select(`
+                consultation_id,
+                product:product_id(iso_code)
+              `)
+              .eq("id", recommendationId)
+              .single();
+
+            if (consultationData?.consultation_id) {
+              // ICF 코드 조회
+              const { data: icfData } = await supabase
+                .from("consultation_icf_codes")
+                .select("icf_codes!icf_code_id(code)")
+                .eq("consultation_id", consultationData.consultation_id);
+
+              if (icfData && icfData.length > 0) {
+                const icfCodes = icfData
+                  .map((item: any) => item.icf_codes?.code)
+                  .filter((code: string | undefined): code is string => !!code);
+
+                const product = Array.isArray(consultationData.product)
+                  ? consultationData.product[0]
+                  : consultationData.product;
+                const isoCode = (product as any)?.iso_code;
+
+                if (icfCodes.length > 0 && isoCode) {
+                  await updateRealtimeLearningStats(icfCodes, isoCode, "click");
+                }
+              }
+            }
+          } catch (err) {
+            console.error("[Recommendation Click] Realtime learning failed:", err);
+          }
+        });
       }
     }
 
