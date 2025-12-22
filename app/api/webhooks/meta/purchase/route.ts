@@ -165,6 +165,13 @@ export async function POST(request: NextRequest) {
           purchase_amount: purchaseAmount,
         })
         .eq("id", recommendationId)
+
+      // 매칭 성능 로그 업데이트 (비동기, 에러 무시)
+      import("@/lib/matching-performance-updater").then(({ updateMatchingPerformanceOnPurchase }) => {
+        updateMatchingPerformanceOnPurchase(recommendationId).catch((err) => {
+          console.error("[Meta Purchase] Performance update failed:", err);
+        });
+      });
     }
 
     logEvent({

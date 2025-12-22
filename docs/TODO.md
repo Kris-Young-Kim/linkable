@@ -956,11 +956,18 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 단기 작업 (2-3주)
 
-- [ ] **하이브리드 매칭 시스템 최적화**
+- [x] **하이브리드 매칭 시스템 최적화** ✅
 
   - 각 매칭 전략의 가중치 조정 (규칙 30%, 시맨틱 40%, 지식 그래프 20%, 키워드 10%)
   - A/B 테스트를 통한 최적 가중치 도출
   - 예상 효과: 정확도 5-10% 향상
+  - **구현 완료**:
+    - 데이터베이스 가중치 설정 테이블 (`matching_weight_configs`)
+    - A/B 테스트 시스템 (`lib/matching-weight-loader.ts`)
+    - 성능 로깅 시스템 (`matching_performance_logs`)
+    - 가중치 관리 API (`app/api/admin/matching-weights/route.ts`)
+    - 성능 분석 API (`app/api/admin/matching-weights/performance/route.ts`)
+    - 하이브리드 매칭 시스템 통합 (`core/matching/hybrid-matcher.ts`)
 
 - [ ] **벡터 DB 활용 강화**
   - ICF-ISO 매핑 임베딩 품질 개선

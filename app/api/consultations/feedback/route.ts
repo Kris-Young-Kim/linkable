@@ -161,6 +161,13 @@ export async function POST(request: Request) {
       )
     }
 
+    // 매칭 성능 로그 업데이트 (비동기, 에러 무시)
+    import("@/lib/matching-performance-updater").then(({ updateMatchingPerformanceOnFeedback }) => {
+      updateMatchingPerformanceOnFeedback(consultation_id, rating).catch((err) => {
+        console.error("[Consultation Feedback] Performance update failed:", err);
+      });
+    });
+
     // 피드백 로깅 (분석 목적)
     logEvent({
       category: "consultation",

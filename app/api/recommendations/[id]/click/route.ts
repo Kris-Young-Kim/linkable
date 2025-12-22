@@ -144,6 +144,13 @@ export async function POST(
           reference_id: recommendationId,
           reference_type: "recommendation",
         })
+
+        // 매칭 성능 로그 업데이트 (비동기, 에러 무시)
+        import("@/lib/matching-performance-updater").then(({ updateMatchingPerformanceOnClick }) => {
+          updateMatchingPerformanceOnClick(recommendationId).catch((err) => {
+            console.error("[Recommendation Click] Performance update failed:", err);
+          });
+        });
       }
     }
 

@@ -107,6 +107,13 @@ export async function GET(request: NextRequest) {
             })
             .eq("id", rec.id);
 
+          // 매칭 성능 로그 업데이트 (비동기, 에러 무시)
+          import("@/lib/matching-performance-updater").then(({ updateMatchingPerformanceOnPurchase }) => {
+            updateMatchingPerformanceOnPurchase(rec.id).catch((err) => {
+              console.error("[Coupang Purchase] Performance update failed:", err);
+            });
+          });
+
           successCount++;
 
           logEvent({

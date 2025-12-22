@@ -14,6 +14,12 @@ import { applyCorrelationBonuses } from "./icf-correlation";
 import { applyContextWeights, type UserContext } from "./context-weights";
 import type { IsoMatch } from "./iso-mapping";
 import { logEvent } from "@/lib/logging";
+import {
+  loadActiveWeightConfig,
+  selectABTestVariant,
+  convertToHybridMatchConfig,
+  type MatchingWeightConfig,
+} from "@/lib/matching-weight-loader";
 
 interface HybridMatchConfig {
   useSemantic: boolean;
@@ -65,8 +71,46 @@ export async function hybridMatch(
   context: MatchContext,
   config: Partial<HybridMatchConfig> = {}
 ): Promise<IsoMatch[]> {
-  const finalConfig = { ...DEFAULT_CONFIG, ...config };
   const startTime = Date.now();
+  
+  // 데이터베이스에서 가중치 설정 로드 (A/B 테스트 지원)
+  let dbConfig: MatchingWeightConfig | null = null;
+  let weightConfigName = "default";
+  
+  try {
+    // A/B 테스트가 활성화되어 있으면 변형 선택
+    const abTestName = process.env.AB_TEST_MATCHING_WEIGHTS;
+    if (abTestName) {
+      dbConfig = await selectABTestVariant(
+        context.userProfile?.userId,
+        abTestName
+      );
+    } else {
+      // 기본적으로 활성화된 설정 로드
+      dbConfig = await loadActiveWeightConfig();
+    }
+    
+    if (dbConfig) {
+      weightConfigName = dbConfig.name;
+      const dbConfigConverted = convertToHybridMatchConfig(dbConfig);
+      // 데이터베이스 설정을 우선 적용
+      config = {
+        ...config,
+        weights: dbConfigConverted.weights,
+        minScore: dbConfigConverted.minScore,
+        topK: dbConfigConverted.topK,
+      };
+      
+      // 시맨틱 매칭 임계값도 설정에 포함 (semanticMatch 함수에 전달)
+      if (config.similarityThreshold === undefined) {
+        (config as any).similarityThreshold = dbConfigConverted.similarityThreshold;
+      }
+    }
+  } catch (error) {
+    console.error("[hybrid-matcher] Failed to load weight config, using default:", error);
+  }
+  
+  const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
   try {
     // 1단계: 규칙 기반 매칭 (빠른 필터링)
@@ -103,7 +147,7 @@ export async function hybridMatch(
           context.userMessage || context.analysisSummary || "",
           {
             useEmbeddings: true,
-            similarityThreshold: 0.7,
+            similarityThreshold: (finalConfig as any).similarityThreshold || 0.7,
             topK: finalConfig.topK,
           }
         );
@@ -189,6 +233,27 @@ export async function hybridMatch(
     }));
 
     const duration = Date.now() - startTime;
+    
+    // 성능 로깅 (데이터베이스에 저장)
+    logMatchingPerformance({
+      consultationId: context.userProfile?.consultationId,
+      userId: context.userProfile?.userId,
+      weightConfigId: dbConfig?.id,
+      weightConfigName,
+      icfCodes: context.icfCodes,
+      matchedIsoCodes: tagged.map((m) => m.isoCode),
+      topMatchScore: tagged[0]?.score,
+      averageMatchScore: tagged.length > 0 
+        ? tagged.reduce((sum, m) => sum + m.score, 0) / tagged.length 
+        : 0,
+      executionTimeMs: duration,
+      semanticMatchUsed: finalConfig.useSemantic,
+      knowledgeGraphUsed: finalConfig.useKnowledgeGraph,
+    }).catch((err) => {
+      // 로깅 실패는 조용히 무시 (메인 플로우에 영향 없음)
+      console.error("[hybrid-matcher] Failed to log performance:", err);
+    });
+    
     logEvent({
       category: "matching",
       action: "hybrid_match_completed",
@@ -197,6 +262,7 @@ export async function hybridMatch(
         inputIcfCount: context.icfCodes.length,
         outputMatchCount: adjusted.length,
         config: finalConfig,
+        weightConfigName,
       },
     });
 
@@ -417,4 +483,49 @@ export async function accurateMatch(
     useSemantic: true,
     useKnowledgeGraph: true,
   });
+}
+
+/**
+ * 매칭 성능 로깅 (비동기, 에러가 발생해도 메인 플로우에 영향 없음)
+ */
+async function logMatchingPerformance(data: {
+  consultationId?: string;
+  userId?: string;
+  weightConfigId?: string;
+  weightConfigName: string;
+  icfCodes: string[];
+  matchedIsoCodes: string[];
+  topMatchScore?: number;
+  averageMatchScore: number;
+  executionTimeMs: number;
+  semanticMatchUsed: boolean;
+  knowledgeGraphUsed: boolean;
+}): Promise<void> {
+  try {
+    const { getSupabaseServerClient } = await import("@/lib/supabase/server");
+    const supabase = getSupabaseServerClient();
+    
+    const { error } = await supabase.from("matching_performance_logs").insert({
+      consultation_id: data.consultationId || null,
+      user_id: data.userId || null,
+      weight_config_id: data.weightConfigId || null,
+      weight_config_name: data.weightConfigName,
+      icf_codes: data.icfCodes,
+      icf_code_count: data.icfCodes.length,
+      matched_iso_codes: data.matchedIsoCodes,
+      match_count: data.matchedIsoCodes.length,
+      top_match_score: data.topMatchScore || null,
+      average_match_score: data.averageMatchScore,
+      execution_time_ms: data.executionTimeMs,
+      semantic_match_used: data.semanticMatchUsed,
+      knowledge_graph_used: data.knowledgeGraphUsed,
+    });
+    
+    if (error) {
+      console.error("[hybrid-matcher] Performance logging error:", error);
+    }
+  } catch (error) {
+    // 로깅 실패는 조용히 무시
+    console.error("[hybrid-matcher] Performance logging failed:", error);
+  }
 }

@@ -352,6 +352,7 @@ export async function GET(request: Request) {
 
   // API 응답 최적화: 클라이언트에서 사용하지 않는 필드 제거
   // created_at, updated_at은 서버에서만 사용 (랭킹 계산용)
+  // 하지만 랭킹 계산을 위해 SELECT에는 포함해야 함
   let query = supabase.from("products").select(
     `
       id,
@@ -362,7 +363,9 @@ export async function GET(request: Request) {
       image_url,
       purchase_link,
       price,
-      category
+      category,
+      created_at,
+      updated_at
     `
   );
 
