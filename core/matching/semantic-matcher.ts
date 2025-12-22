@@ -73,14 +73,19 @@ export async function semanticMatch(
         // 벡터 검색 결과를 IsoMatch 형식으로 변환
         const baseMatch = ruleMatches.find((rm) => rm.isoCode === vm.isoCode);
 
+        // 향상된 검색의 경우 adjustedScore 사용, 없으면 하이브리드 점수 계산
+        const finalScore = vm.adjustedScore !== undefined
+          ? Math.min(vm.adjustedScore, 1.0)
+          : Math.min(
+              (vm.baseScore * 0.3 + vm.similarity * 0.5 + vm.successRate * 0.2) * 1.0,
+              1.0
+            );
+
         return {
           isoCode: vm.isoCode,
           label: vm.isoLabel,
           description: vm.isoDescription || "",
-          score: Math.min(
-            (vm.baseScore * 0.4 + vm.similarity * 0.4 + (vm.successRate * 0.2)) * 1.0,
-            1.0
-          ),
+          score: finalScore,
           matchedIcf: icfCodes.map((code) => {
             const meta = findIcfCode(code);
             return {
@@ -88,7 +93,7 @@ export async function semanticMatch(
               description: meta?.description || code,
             };
           }),
-          reason: `벡터 유사도 검색 (유사도: ${(vm.similarity * 100).toFixed(1)}%, 성공률: ${(vm.successRate * 100).toFixed(1)}%)`,
+          reason: `벡터 유사도 검색${vm.adjustedScore !== undefined ? " (향상된)" : ""} (유사도: ${(vm.similarity * 100).toFixed(1)}%, 성공률: ${(vm.successRate * 100).toFixed(1)}%, 사용 횟수: ${vm.usageCount})`,
         } as IsoMatch;
       });
 
@@ -107,11 +112,15 @@ export async function semanticMatch(
       });
 
       // 통계 업데이트 (비동기, 에러 무시)
+      // 향상된 검색에서는 이미 사용 통계가 반영되므로 선택적으로 업데이트
       for (const vm of vectorMatches) {
         updateEmbeddingStats(vm.icfCodes, vm.isoCode, false).catch(() => {
           // 통계 업데이트 실패는 무시
         });
       }
+      
+      // 벡터 검색 로깅 (비동기, 에러 무시)
+      // consultation_id는 context에서 가져와야 하지만 여기서는 없으므로 나중에 업데이트
 
       return enhanced;
     }

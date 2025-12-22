@@ -1,6 +1,6 @@
 /**
  * 매칭 성능 로그 업데이트 유틸리티
- * 
+ *
  * 사용자 행동(클릭, 구매, 피드백)을 매칭 성능 로그에 반영합니다.
  */
 
@@ -14,7 +14,7 @@ export async function updateMatchingPerformanceOnClick(
 ): Promise<void> {
   try {
     const supabase = getSupabaseServerClient();
-    
+
     // recommendation_id로 consultation_id 조회
     const { data: recommendation } = await supabase
       .from("recommendations")
@@ -50,7 +50,7 @@ export async function updateMatchingPerformanceOnPurchase(
 ): Promise<void> {
   try {
     const supabase = getSupabaseServerClient();
-    
+
     // recommendation_id로 consultation_id 조회
     const { data: recommendation } = await supabase
       .from("recommendations")
@@ -74,7 +74,10 @@ export async function updateMatchingPerformanceOnPurchase(
       .order("created_at", { ascending: false })
       .limit(1);
   } catch (error) {
-    console.error("[Matching Performance Updater] Purchase update failed:", error);
+    console.error(
+      "[Matching Performance Updater] Purchase update failed:",
+      error
+    );
   }
 }
 
@@ -87,7 +90,7 @@ export async function updateMatchingPerformanceOnFeedback(
 ): Promise<void> {
   try {
     const supabase = getSupabaseServerClient();
-    
+
     // 해당 상담의 최근 매칭 성능 로그 업데이트
     await supabase
       .from("matching_performance_logs")
@@ -100,7 +103,9 @@ export async function updateMatchingPerformanceOnFeedback(
       .order("created_at", { ascending: false })
       .limit(1);
   } catch (error) {
-    console.error("[Matching Performance Updater] Feedback update failed:", error);
+    console.error(
+      "[Matching Performance Updater] Feedback update failed:",
+      error
+    );
   }
 }
-

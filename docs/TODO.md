@@ -969,10 +969,18 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 성능 분석 API (`app/api/admin/matching-weights/performance/route.ts`)
     - 하이브리드 매칭 시스템 통합 (`core/matching/hybrid-matcher.ts`)
 
-- [ ] **벡터 DB 활용 강화**
+- [x] **벡터 DB 활용 강화** ✅
   - ICF-ISO 매핑 임베딩 품질 개선
   - 시맨틱 매칭 임계값 조정
   - 예상 효과: 정확도 10-15% 향상
+  - **구현 완료**:
+    - 향상된 임베딩 텍스트 생성 (더 풍부한 컨텍스트 포함)
+    - 동적 임계값 조정 시스템 (`vector_search_threshold_configs`)
+    - 하이브리드 스코어링 (유사도 60% + 성공률 30% + 사용 횟수 10%)
+    - 향상된 벡터 검색 함수 (`search_similar_icf_iso_mappings_enhanced`)
+    - 벡터 검색 성능 로깅 (`vector_search_performance_logs`)
+    - `lib/embeddings/vector-store.ts` 개선
+    - `core/matching/semantic-matcher.ts` 통합
 
 #### 중기 작업 (4-6주)
 

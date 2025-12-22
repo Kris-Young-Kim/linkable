@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
       query = query.eq("weight_config_name", weightConfigName);
     }
 
-    const { data: logs, error } = await query.order("created_at", { ascending: false });
+    const { data: logs, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
       console.error("[Matching Performance API] Error:", error);
@@ -109,7 +111,7 @@ export async function GET(request: NextRequest) {
       stats.avgTopMatchScore += Number(log.top_match_score || 0);
       stats.avgAverageMatchScore += Number(log.average_match_score || 0);
       stats.avgMatchCount += log.match_count || 0;
-      
+
       if (log.recommendation_clicked) {
         stats.clickedCount += 1;
       }
@@ -128,17 +130,18 @@ export async function GET(request: NextRequest) {
         ...stats,
         avgExecutionTime: count > 0 ? stats.avgExecutionTime / count : 0,
         avgTopMatchScore: count > 0 ? stats.avgTopMatchScore / count : 0,
-        avgAverageMatchScore: count > 0 ? stats.avgAverageMatchScore / count : 0,
+        avgAverageMatchScore:
+          count > 0 ? stats.avgAverageMatchScore / count : 0,
         avgMatchCount: count > 0 ? stats.avgMatchCount / count : 0,
-        avgFeedbackRating: stats.clickedCount > 0 
-          ? stats.avgFeedbackRating / stats.clickedCount 
-          : 0,
-        clickThroughRate: count > 0 
-          ? (stats.clickedCount / count) * 100 
-          : 0,
-        purchaseConversionRate: stats.clickedCount > 0
-          ? (stats.purchaseCount / stats.clickedCount) * 100
-          : 0,
+        avgFeedbackRating:
+          stats.clickedCount > 0
+            ? stats.avgFeedbackRating / stats.clickedCount
+            : 0,
+        clickThroughRate: count > 0 ? (stats.clickedCount / count) * 100 : 0,
+        purchaseConversionRate:
+          stats.clickedCount > 0
+            ? (stats.purchaseCount / stats.clickedCount) * 100
+            : 0,
       };
     });
 
@@ -148,7 +151,10 @@ export async function GET(request: NextRequest) {
       .select("*");
 
     if (abTestError) {
-      console.warn("[Matching Performance API] AB test results error:", abTestError);
+      console.warn(
+        "[Matching Performance API] AB test results error:",
+        abTestError
+      );
     }
 
     return NextResponse.json({
@@ -165,4 +171,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-

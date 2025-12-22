@@ -43,7 +43,9 @@ export async function GET(request: NextRequest) {
       query = query.eq("ab_test_name", abTestName);
     }
 
-    const { data, error } = await query.order("created_at", { ascending: false });
+    const { data, error } = await query.order("created_at", {
+      ascending: false,
+    });
 
     if (error) {
       console.error("[Matching Weights API] Error:", error);
@@ -106,7 +108,7 @@ export async function POST(request: NextRequest) {
       (weight_semantic || 0) +
       (weight_knowledge_graph || 0) +
       (weight_keyword || 0);
-    
+
     if (Math.abs(weightSum - 1.0) > 0.01) {
       return NextResponse.json(
         { error: "가중치 합계가 1.0이 되어야 합니다" },
@@ -198,10 +200,7 @@ export async function PUT(request: NextRequest) {
     const { id, ...updates } = body;
 
     if (!id) {
-      return NextResponse.json(
-        { error: "id is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "id is required" }, { status: 400 });
     }
 
     // 가중치 합계 검증
@@ -214,7 +213,9 @@ export async function PUT(request: NextRequest) {
       const supabase = getSupabaseServerClient();
       const { data: current } = await supabase
         .from("matching_weight_configs")
-        .select("weight_rule_based, weight_semantic, weight_knowledge_graph, weight_keyword")
+        .select(
+          "weight_rule_based, weight_semantic, weight_knowledge_graph, weight_keyword"
+        )
         .eq("id", id)
         .single();
 
@@ -272,4 +273,3 @@ export async function PUT(request: NextRequest) {
     );
   }
 }
-

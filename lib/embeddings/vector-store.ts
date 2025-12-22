@@ -8,6 +8,21 @@ import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { createEmbedding } from "./gemini-embedding";
 import { logEvent } from "@/lib/logging";
 
+/**
+ * 향상된 임베딩 텍스트 생성
+ * 더 풍부한 컨텍스트를 포함하여 임베딩 품질을 개선합니다.
+ */
+function generateEnhancedEmbeddingText(
+  icfCodes: string[],
+  icfCodesText: string,
+  isoCode: string,
+  isoLabel: string,
+  isoDescription?: string
+): string {
+  // 더 풍부한 컨텍스트를 포함한 텍스트 생성
+  return `ICF 코드 조합: ${icfCodes.join(", ")}. ICF 코드 설명: ${icfCodesText}. ISO 9999 분류 코드: ${isoCode}. ISO 코드명: ${isoLabel}. ${isoDescription ? `ISO 코드 설명: ${isoDescription}.` : ""} 보조기기 매칭: ICF 코드 조합에 해당하는 기능적 제한을 해결하기 위한 ISO 9999 분류 코드 ${isoCode}의 보조기기 제품.`;
+}
+
 export interface IcfIsoEmbeddingRecord {
   id: string;
   icfCodes: string[];
@@ -55,8 +70,14 @@ export async function saveIcfIsoEmbedding(
   const supabase = getSupabaseServerClient();
 
   try {
-    // 1. 임베딩 생성
-    const text = `${icfCodesText}. ISO ${isoCode}: ${isoLabel}. ${isoDescription || ""}`;
+    // 1. 향상된 임베딩 텍스트 생성 (더 풍부한 컨텍스트 포함)
+    const text = generateEnhancedEmbeddingText(
+      icfCodes,
+      icfCodesText,
+      isoCode,
+      isoLabel,
+      isoDescription
+    );
     const embedding = await createEmbedding(text);
 
     // 2. Supabase에 저장 (중복 체크)
@@ -113,12 +134,14 @@ export async function saveIcfIsoEmbedding(
  * @param queryText 검색 쿼리 텍스트
  * @param similarityThreshold 유사도 임계값 (기본 0.7)
  * @param maxResults 최대 결과 수 (기본 10)
+ * @param useEnhanced 향상된 검색 함수 사용 여부 (기본 true)
  * @returns 유사한 매핑 목록
  */
 export async function searchSimilarIcfIsoMappings(
   queryText: string,
   similarityThreshold: number = 0.7,
-  maxResults: number = 10
+  maxResults: number = 10,
+  useEnhanced: boolean = true
 ): Promise<SimilarMatch[]> {
   const supabase = getSupabaseServerClient();
 
@@ -126,30 +149,95 @@ export async function searchSimilarIcfIsoMappings(
     // 1. 쿼리 텍스트를 임베딩으로 변환
     const queryEmbedding = await createEmbedding(queryText);
 
-    // 2. Supabase 함수를 사용하여 벡터 유사도 검색
+    // 2. 활성화된 임계값 설정 로드 (향상된 검색 사용 시)
+    let thresholdConfig: any = null;
+    if (useEnhanced) {
+      try {
+        const { data: config } = await supabase
+          .from("vector_search_threshold_configs")
+          .select("*")
+          .eq("is_active", true)
+          .maybeSingle();
+        
+        if (config) {
+          thresholdConfig = config;
+          // 설정에서 기본 임계값 사용
+          similarityThreshold = Number(config.base_threshold);
+        }
+      } catch (error) {
+        console.warn("[Vector Store] Failed to load threshold config, using default:", error);
+      }
+    }
+
+    // 3. Supabase 함수를 사용하여 벡터 유사도 검색
     // pgvector는 배열을 직접 전달 (Supabase가 자동 변환)
-    const { data, error } = await supabase.rpc("search_similar_icf_iso_mappings", {
+    const rpcFunction = useEnhanced && thresholdConfig
+      ? "search_similar_icf_iso_mappings_enhanced"
+      : "search_similar_icf_iso_mappings";
+    
+    const rpcParams: any = {
       query_embedding: queryEmbedding, // 배열로 직접 전달
       similarity_threshold: similarityThreshold,
       max_results: maxResults,
-    });
+    };
+
+    // 향상된 검색 함수 사용 시 추가 파라미터
+    if (useEnhanced && thresholdConfig) {
+      rpcParams.base_threshold = Number(thresholdConfig.base_threshold);
+      rpcParams.enable_dynamic = thresholdConfig.enable_dynamic_adjustment;
+      rpcParams.min_threshold = Number(thresholdConfig.min_threshold);
+      rpcParams.max_threshold = Number(thresholdConfig.max_threshold);
+    }
+
+    const { data, error } = await supabase.rpc(rpcFunction, rpcParams);
 
     if (error) {
       throw new Error(`Failed to search embeddings: ${error.message}`);
     }
 
-    // 3. 결과 변환
-    const matches: SimilarMatch[] = (data || []).map((row: any) => ({
-      id: row.id,
-      icfCodes: row.icf_codes || [],
-      isoCode: row.iso_code,
-      isoLabel: row.iso_label,
-      isoDescription: row.iso_description,
-      similarity: Number(row.similarity) || 0,
-      baseScore: Number(row.base_score) || 0.8,
-      usageCount: Number(row.usage_count) || 0,
-      successRate: Number(row.success_rate) || 0,
-    }));
+    // 4. 결과 변환 (향상된 검색의 경우 adjusted_score 사용)
+    const matches: SimilarMatch[] = (data || []).map((row: any) => {
+      // 향상된 검색 함수는 adjusted_score를 반환
+      const finalScore = row.adjusted_score !== undefined 
+        ? Number(row.adjusted_score) 
+        : Number(row.similarity) || 0;
+      
+      return {
+        id: row.id,
+        icfCodes: row.icf_codes || [],
+        isoCode: row.iso_code,
+        isoLabel: row.iso_label,
+        isoDescription: row.iso_description,
+        similarity: Number(row.similarity) || 0,
+        baseScore: Number(row.base_score) || 0.8,
+        usageCount: Number(row.usage_count) || 0,
+        successRate: Number(row.success_rate) || 0,
+        // 향상된 검색의 경우 조정된 점수를 similarity에 반영
+        ...(row.adjusted_score !== undefined && { adjustedScore: finalScore }),
+      };
+    });
+
+    // 5. 성능 로깅 (비동기, 에러 무시)
+    if (matches.length > 0) {
+      const avgSimilarity = matches.reduce((sum, m) => sum + m.similarity, 0) / matches.length;
+      const maxSimilarity = Math.max(...matches.map(m => m.similarity));
+      const minSimilarity = Math.min(...matches.map(m => m.similarity));
+      
+      import("@/lib/vector-search-logger").then(({ logVectorSearchPerformance }) => {
+        logVectorSearchPerformance({
+          queryText: queryText.substring(0, 500), // 최대 500자
+          queryIcfCodes: matches[0]?.icfCodes || [],
+          thresholdUsed: similarityThreshold,
+          thresholdConfigId: thresholdConfig?.id,
+          resultsCount: matches.length,
+          avgSimilarity,
+          maxSimilarity,
+          minSimilarity,
+        }).catch(() => {
+          // 로깅 실패는 무시
+        });
+      });
+    }
 
     logEvent({
       category: "matching",
@@ -158,6 +246,10 @@ export async function searchSimilarIcfIsoMappings(
         queryText: queryText.substring(0, 100),
         resultsCount: matches.length,
         similarityThreshold,
+        useEnhanced,
+        avgSimilarity: matches.length > 0 
+          ? matches.reduce((sum, m) => sum + m.similarity, 0) / matches.length 
+          : 0,
       },
     });
 
