@@ -72,6 +72,25 @@ export default function RootLayout({
             href="https://images.unsplash.com/photo-1651326659270-59bbb788199a?auto=format&fit=crop&w=600&q=80"
             fetchPriority="low"
           />
+          {/* Hero 섹션 첫 3개 이미지 프리로딩 (Above the fold) */}
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1576864333223-db90dadfb975?auto=format&fit=crop&w=600&q=80"
+            fetchPriority="high"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1668983396705-3aa5deed5569?auto=format&fit=crop&w=600&q=80"
+            fetchPriority="high"
+          />
+          <link
+            rel="preload"
+            as="image"
+            href="https://images.unsplash.com/photo-1695654402339-050e6aee866b?auto=format&fit=crop&w=600&q=80"
+            fetchPriority="high"
+          />
           {/* DNS 프리페치 (Unsplash 도메인) */}
           <link rel="dns-prefetch" href="https://images.unsplash.com" />
           {/* Google Tag Manager */}

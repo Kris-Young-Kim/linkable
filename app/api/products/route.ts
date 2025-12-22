@@ -338,6 +338,8 @@ export async function GET(request: Request) {
 
   const isoCodes = isoMatches.map((match) => match.isoCode);
 
+  // API 응답 최적화: 클라이언트에서 사용하지 않는 필드 제거
+  // created_at, updated_at은 서버에서만 사용 (랭킹 계산용)
   let query = supabase.from("products").select(
     `
       id,
@@ -348,9 +350,7 @@ export async function GET(request: Request) {
       image_url,
       purchase_link,
       price,
-      category,
-      created_at,
-      updated_at
+      category
     `
   );
 
@@ -548,12 +548,18 @@ export async function GET(request: Request) {
 
   console.log("[products API] 최종 응답:", debugInfo);
 
+  // 응답 최적화: 불필요한 필드 제거 및 필수 필드만 반환
+  const optimizedProducts = ranked.map((product) => {
+    const { created_at, updated_at, ...rest } = product;
+    return {
+      ...rest,
+      recommendation_id: recommendationMap?.get(product.id as string) ?? null,
+    };
+  });
+
   return NextResponse.json(
     {
-      products: ranked.map((product) => ({
-        ...product,
-        recommendation_id: recommendationMap?.get(product.id as string) ?? null,
-      })),
+      products: optimizedProducts,
       icfCodes,
       // 개발 환경에서만 디버깅 정보 포함
       ...(process.env.NODE_ENV === "development" && { _debug: debugInfo }),
