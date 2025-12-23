@@ -2,7 +2,7 @@
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { useAuth } from "@clerk/nextjs";
-import { useEffect, useState, useCallback } from "react";
+import { fetchWithRetry } from "../api-utils";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -30,7 +30,12 @@ let tokenCache: {
  * @returns {Promise<TokenResponse>} JWT 토큰과 만료 시간
  */
 async function fetchSupabaseToken(): Promise<TokenResponse> {
-  const response = await fetch("/api/auth/supabase-token");
+  const response = await fetchWithRetry("/api/auth/supabase-token", {
+    method: "GET",
+  }, {
+    maxRetries: 3,
+    initialDelay: 500,
+  });
 
   if (!response.ok) {
     if (response.status === 401) {
@@ -87,6 +92,12 @@ export const createSupabaseBrowserClient = () =>
     auth: {
       persistSession: true,
     },
+    global: {
+      fetch: (url, init) => fetchWithRetry(url as string, init, {
+        maxRetries: 3,
+        initialDelay: 500
+      })
+    }
   });
 
 /**
@@ -106,6 +117,10 @@ export async function createSupabaseClientWithAuth(
       headers: {
         Authorization: `Bearer ${jwt}`,
       },
+      fetch: (url, init) => fetchWithRetry(url as string, init, {
+        maxRetries: 3,
+        initialDelay: 500
+      })
     },
     auth: {
       persistSession: false,

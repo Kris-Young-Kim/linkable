@@ -3,6 +3,7 @@
  */
 
 import type { LinkValidationResult } from "./types"
+import { fetchWithRetry } from "../api-utils"
 
 /**
  * URL 유효성 검증
@@ -44,10 +45,15 @@ export async function validatePurchaseLink(url: string | null | undefined): Prom
 
     // 실제 링크 접근 가능 여부 확인 (HEAD 요청)
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         method: "HEAD",
         redirect: "follow",
         signal: AbortSignal.timeout(5000), // 5초 타임아웃
+      }, {
+        maxRetries: 2,
+        initialDelay: 1000,
+        // 링크 검증은 404나 403도 에러일 수 있으므로 신중히 재시도
+        retryCondition: (res) => res.status >= 500
       })
 
       const finalUrl = response.url
@@ -68,7 +74,7 @@ export async function validatePurchaseLink(url: string | null | undefined): Prom
       }
     } catch (fetchError) {
       // 네트워크 오류는 경고만 하고 유효한 것으로 처리 (타임아웃 등)
-      console.warn("[link-validator] Link validation failed:", fetchError)
+      console.warn("[link-validator] Link validation failed after retries:", fetchError)
       return {
         isValid: true, // 네트워크 오류는 일단 유효한 것으로 처리
         error: fetchError instanceof Error ? fetchError.message : "네트워크 오류",

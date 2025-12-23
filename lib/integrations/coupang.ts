@@ -8,6 +8,7 @@
 import crypto from "crypto"
 import fs from "fs"
 import type { CoupangProduct, ProductSource } from "./types"
+import { withRetry } from "../api-utils"
 
 export interface CoupangApiConfig {
   accessKey: string
@@ -173,19 +174,23 @@ export class CoupangApiClient {
       // 쿠팡 파트너스 API는 경로에 쿼리 파라미터를 포함하여 서명
       // 참고: 쿠팡 API는 경로와 쿼리를 함께 서명에 포함
       // 시도 1: 경로에 쿼리 파라미터 포함
-      const headers = this.getHeaders("GET", fullPath)
-      // Authorization 미리보기 (Record 형태일 때만)
-      const authPreview =
-        (headers as Record<string, string>)?.Authorization ||
-        (Array.isArray(headers) ? headers.find((h) => h[0]?.toLowerCase?.() === "authorization")?.[1] : undefined) ||
-        (headers instanceof Headers ? headers.get("Authorization") || undefined : undefined)
-      if (authPreview) {
-        console.log(`[Coupang API Debug] Authorization 헤더: ${authPreview.substring(0, 100)}...`)
-      }
-
-      const response = await fetch(url.toString(), {
-        method: "GET",
-        headers,
+      const response = await withRetry(async () => {
+        const headers = this.getHeaders("GET", fullPath)
+        const res = await fetch(url.toString(), {
+          method: "GET",
+          headers,
+        })
+        
+        // 5xx 에러나 429 에러인 경우 에러를 던져서 재시도 유도
+        if (res.status >= 500 || res.status === 429) {
+          throw new Error(`Coupang API transient error: ${res.status}`)
+        }
+        
+        return res
+      }, {
+        maxRetries: 3,
+        initialDelay: 1000,
+        retryCondition: (err) => err.message.includes("transient error") || err.message.includes("fetch")
       })
 
       if (!response.ok) {
@@ -241,14 +246,27 @@ export class CoupangApiClient {
       console.log(`[Coupang API] 상품 상세 조회: ${productId}`)
 
       // HMAC-SHA256 서명 기반 헤더 생성
-      const response = await fetch(url.toString(), {
-        method: "GET",
-        headers: this.getHeaders("GET", path),
+      const response = await withRetry(async () => {
+        const headers = this.getHeaders("GET", path)
+        const res = await fetch(url.toString(), {
+          method: "GET",
+          headers,
+        })
+        
+        if (res.status >= 500 || res.status === 429) {
+          throw new Error(`Coupang API transient error: ${res.status}`)
+        }
+        
+        return res
+      }, {
+        maxRetries: 2, // 상세 조희는 2번만 재시도
+        initialDelay: 1000,
+        retryCondition: (err) => err.message.includes("transient error")
       })
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error(`[Coupang API] 상세 조회 실패: ${response.status} ${errorText}`)
+      if (!response || !response.ok) {
+        const errorText = response ? await response.text() : "No response"
+        console.error(`[Coupang API] 상세 조회 실패: ${response?.status} ${errorText}`)
         return null
       }
 
@@ -323,10 +341,22 @@ export class CoupangApiClient {
 
       console.log(`[Coupang API] 구매 리포트 조회: ${startDate} ~ ${endDate}, 상태: ${status}`)
 
-      const headers = this.getHeaders("GET", fullPath)
-      const response = await fetch(url.toString(), {
-        method: "GET",
-        headers,
+      const response = await withRetry(async () => {
+        const headers = this.getHeaders("GET", fullPath)
+        const res = await fetch(url.toString(), {
+          method: "GET",
+          headers,
+        })
+        
+        if (res.status >= 500 || res.status === 429) {
+          throw new Error(`Coupang API transient error: ${res.status}`)
+        }
+        
+        return res
+      }, {
+        maxRetries: 3,
+        initialDelay: 2000,
+        retryCondition: (err) => err.message.includes("transient error")
       })
 
       if (!response.ok) {

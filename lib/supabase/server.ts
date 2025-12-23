@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseJWT } from "./jwt-helper";
+import { fetchWithRetry } from "../api-utils";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -27,6 +28,13 @@ export const getSupabaseServerClient = () => {
         persistSession: false,
         autoRefreshToken: false,
       },
+      global: {
+        // 일시적인 네트워크 오류 시 재시도하도록 커스텀 fetch 주입
+        fetch: (url, init) => fetchWithRetry(url as string, init, {
+          maxRetries: 3,
+          initialDelay: 500
+        })
+      }
     });
   }
 
@@ -87,6 +95,11 @@ export async function getSupabaseUserClient(): Promise<SupabaseClient> {
       headers: {
         Authorization: `Bearer ${supabaseJWT}`,
       },
+      // 일시적인 네트워크 오류 시 재시도하도록 커스텀 fetch 주입
+      fetch: (url, init) => fetchWithRetry(url as string, init, {
+        maxRetries: 3,
+        initialDelay: 500
+      })
     },
     auth: {
       persistSession: false,

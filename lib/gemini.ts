@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./api-utils";
+
 const GEMINI_TEXT_MODEL = "gemini-flash-lite-latest";
 const GEMINI_VISION_MODEL = "gemini-1.5-flash-latest";
 const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com";
@@ -69,7 +71,7 @@ export const callGemini = async (prompt: string, imageBase64?: string, mimeType?
     isVisionRequest, // Vision 모델만 v1 사용
   );
 
-  const response = await fetch(`${endpoint}?key=${apiKey}`, {
+  const response = await fetchWithRetry(`${endpoint}?key=${apiKey}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -88,6 +90,10 @@ export const callGemini = async (prompt: string, imageBase64?: string, mimeType?
         maxOutputTokens: 1024,
       },
     }),
+  }, {
+    maxRetries: 3,
+    initialDelay: 2000, // Gemini는 속도 제한이 있을 수 있으므로 좀 더 긴 간격
+    retryCondition: (res) => res.status >= 500 || res.status === 429
   });
 
   if (!response.ok) {
