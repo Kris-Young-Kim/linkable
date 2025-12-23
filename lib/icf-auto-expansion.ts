@@ -40,6 +40,12 @@ export interface IcfExpansionCandidate {
   iso_hint_confidence: number;
 }
 
+export interface IcfExpansionResult {
+  icf_code: string;
+  status: string;
+  message: string;
+}
+
 /**
  * ICF 코드 확장 후보 생성
  */
@@ -87,7 +93,7 @@ export async function executeAutoExpansion(
   configId?: string,
   batchSize?: number,
   requireApproval?: boolean
-): Promise<Array<{ icf_code: string; status: string; message: string }>> {
+): Promise<IcfExpansionResult[]> {
   try {
     const supabase = getSupabaseServerClient();
     
@@ -108,7 +114,7 @@ export async function executeAutoExpansion(
       return [];
     }
     
-    const results = (data || []).map((row: any) => ({
+    const results: IcfExpansionResult[] = (data || []).map((row: any) => ({
       icf_code: row.icf_code,
       status: row.status,
       message: row.message,
