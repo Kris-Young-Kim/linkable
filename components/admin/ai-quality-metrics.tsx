@@ -1,90 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2, TrendingUp, TrendingDown } from "lucide-react";
-
-interface IcfExtractionResult {
-  timestamp: string;
-  overallAccuracy: {
-    precision: number;
-    recall: number;
-    f1: number;
-  };
-  categoryBreakdown: Record<string, {
-    count: number;
-    accuracy: { precision: number; recall: number; f1: number };
-  }>;
-  totalTests: number;
-  passedTests: number;
-  failedTests: number;
-}
-
-interface IsoMatchingResult {
-  timestamp: string;
-  overallAccuracy: {
-    precision: number;
-    recall: number;
-    f1: number;
-    top1Accuracy: number;
-    top3Accuracy: number;
-    top5Accuracy: number;
-  };
-  categoryBreakdown: Record<string, {
-    count: number;
-    accuracy: {
-      precision: number;
-      recall: number;
-      f1: number;
-      top1Accuracy: number;
-      top3Accuracy: number;
-      top5Accuracy: number;
-    };
-  }>;
-  matchingMethodComparison: {
-    ruleBased: { precision: number; recall: number; f1: number };
-    keywordBased: { precision: number; recall: number; f1: number };
-    graphBased: { precision: number; recall: number; f1: number };
-    hybrid: { precision: number; recall: number; f1: number };
-  };
-  totalTests: number;
-  passedTests: number;
-  failedTests: number;
-}
-
-interface AiQualityData {
-  icfExtraction: IcfExtractionResult | null;
-  isoMatching: IsoMatchingResult | null;
-}
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useAiQualityMetrics } from "@/lib/api-hooks";
 
 export function AiQualityMetrics() {
-  const [data, setData] = useState<AiQualityData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isLoading, isError } = useAiQualityMetrics();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch("/api/admin/analytics/ai-quality");
-        if (!response.ok) {
-          throw new Error("데이터를 불러올 수 없습니다");
-        }
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "알 수 없는 오류");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -95,11 +21,11 @@ export function AiQualityMetrics() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>{isError instanceof Error ? isError.message : "알 수 없는 오류"}</AlertDescription>
       </Alert>
     );
   }

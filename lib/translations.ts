@@ -81,7 +81,8 @@ export const translations = {
     "footer.standards": "표준",
     "footer.aboutUs": "회사 소개",
     "footer.quickLinksTitle": "빠른 이동",
-    "footer.quickLinksSubtitle": "상담, 추천, 전문가 연결을 한 번에 이동하세요.",
+    "footer.quickLinksSubtitle":
+      "상담, 추천, 전문가 연결을 한 번에 이동하세요.",
     "footer.quickStartConsult": "상담 시작",
     "footer.quickViewRecommendations": "추천 보기",
     "footer.quickContactExpert": "전문가 문의",
@@ -154,14 +155,17 @@ export const translations = {
     "chat.startVoiceRecording": "음성 녹음 시작",
     "chat.stopVoiceRecording": "음성 녹음 중지",
     "chat.attachPhoto": "환경 사진 첨부",
-    "chat.sttNotSupported": "이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 또는 Edge를 사용해 주세요.",
+    "chat.sttNotSupported":
+      "이 브라우저는 음성 인식을 지원하지 않습니다. Chrome 또는 Edge를 사용해 주세요.",
     "chat.sttError": "음성 인식 중 오류가 발생했습니다. 다시 시도해 주세요.",
     "chat.sttNoSpeech": "음성이 감지되지 않았습니다. 다시 시도해 주세요.",
-    "chat.sttNotAllowed": "마이크 사용 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해 주세요.",
+    "chat.sttNotAllowed":
+      "마이크 사용 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해 주세요.",
     "chat.removeImage": "이미지 제거",
     "chat.imageInvalidType": "이미지 파일만 업로드할 수 있습니다.",
     "chat.imageTooLarge": "이미지 크기는 5MB 이하여야 합니다.",
-    "chat.imageConversionError": "이미지 변환 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "chat.imageConversionError":
+      "이미지 변환 중 오류가 발생했습니다. 다시 시도해 주세요.",
     "chat.typing": "코디네이터가 입력 중입니다",
     "chat.thinking": "링커가 생각 중입니다...",
     "chat.yourMessage": "내 메시지",
@@ -236,14 +240,19 @@ export const translations = {
     "ippa.description": "에 대한 사용 후 평가를 진행해 주세요.",
     "ippa.problemDescription": "해결하고자 했던 문제",
     "ippa.importance": "중요도",
-    "ippa.importanceHelp": "이 문제가 일상생활에서 얼마나 중요한지 선택해 주세요. (1=낮음, 5=매우 높음)",
+    "ippa.importanceHelp":
+      "이 문제가 일상생활에서 얼마나 중요한지 선택해 주세요. (1=낮음, 5=매우 높음)",
     "ippa.difficultyPre": "사용 전 난이도",
-    "ippa.difficultyPreHelp": "보조기기를 사용하기 전 이 활동을 수행하는 것이 얼마나 어려웠는지 선택해 주세요. (1=쉬움, 5=매우 어려움)",
+    "ippa.difficultyPreHelp":
+      "보조기기를 사용하기 전 이 활동을 수행하는 것이 얼마나 어려웠는지 선택해 주세요. (1=쉬움, 5=매우 어려움)",
     "ippa.difficultyPost": "사용 후 난이도",
-    "ippa.difficultyPostHelp": "보조기기를 사용한 후 이 활동을 수행하는 것이 얼마나 쉬워졌는지 선택해 주세요. (1=쉬움, 5=매우 어려움)",
+    "ippa.difficultyPostHelp":
+      "보조기기를 사용한 후 이 활동을 수행하는 것이 얼마나 쉬워졌는지 선택해 주세요. (1=쉬움, 5=매우 어려움)",
     "ippa.feedbackComment": "추가 의견 (선택사항)",
-    "ippa.feedbackCommentPlaceholder": "보조기기 사용 경험에 대한 자유로운 의견을 남겨주세요.",
-    "ippa.feedbackCommentHelp": "의견을 남겨주시면 서비스 개선에 큰 도움이 됩니다.",
+    "ippa.feedbackCommentPlaceholder":
+      "보조기기 사용 경험에 대한 자유로운 의견을 남겨주세요.",
+    "ippa.feedbackCommentHelp":
+      "의견을 남겨주시면 서비스 개선에 큰 도움이 됩니다.",
     "ippa.previewScore": "예상 효과성 점수",
     "ippa.improvementPreview": "약 {percentage}% 개선 예상",
     "ippa.noImprovementPreview": "개선이 없거나 악화되었습니다.",
@@ -251,13 +260,15 @@ export const translations = {
     "ippa.submitting": "제출 중...",
     "ippa.cancel": "취소",
     "ippa.submitSuccess": "평가가 제출되었습니다!",
-    "ippa.submitSuccessMessage": "소중한 피드백 감사합니다. 평가 결과가 서비스 개선에 활용됩니다.",
+    "ippa.submitSuccessMessage":
+      "소중한 피드백 감사합니다. 평가 결과가 서비스 개선에 활용됩니다.",
     "ippa.effectivenessScore": "효과성 점수",
     "ippa.pointsEarned": "{points} 포인트 적립",
 
     // Error FAQ Modal
     "errorFaq.title": "에러 대응 가이드",
-    "errorFaq.description": "문제가 발생했나요? 아래 가이드를 참고하거나 고객 지원팀에 문의하세요.",
+    "errorFaq.description":
+      "문제가 발생했나요? 아래 가이드를 참고하거나 고객 지원팀에 문의하세요.",
     "errorFaq.help": "도움말",
     "errorFaq.openGuide": "에러 가이드 열기",
     "errorFaq.currentError": "현재 발생한 오류",
@@ -267,22 +278,29 @@ export const translations = {
     "errorFaq.contactSupport": "고객 지원 문의",
     "errorFaq.faqTitle": "자주 묻는 질문 (FAQ)",
     "errorFaq.q1": "페이지가 로드되지 않아요",
-    "errorFaq.a1": "브라우저를 새로고침하거나 캐시를 삭제해보세요. 문제가 계속되면 다른 브라우저에서 시도해보세요.",
+    "errorFaq.a1":
+      "브라우저를 새로고침하거나 캐시를 삭제해보세요. 문제가 계속되면 다른 브라우저에서 시도해보세요.",
     "errorFaq.q2": "상담이 중단되었어요",
-    "errorFaq.a2": "네트워크 연결을 확인하고 페이지를 새로고침하세요. 상담 내용은 자동으로 저장되므로 이전 대화를 이어서 진행할 수 있습니다.",
+    "errorFaq.a2":
+      "네트워크 연결을 확인하고 페이지를 새로고침하세요. 상담 내용은 자동으로 저장되므로 이전 대화를 이어서 진행할 수 있습니다.",
     "errorFaq.q3": "추천이 표시되지 않아요",
-    "errorFaq.a3": "상담을 완료했는지 확인하세요. 상담이 완료되지 않았다면 채팅을 계속 진행하여 ICF 분석을 완료해야 합니다.",
+    "errorFaq.a3":
+      "상담을 완료했는지 확인하세요. 상담이 완료되지 않았다면 채팅을 계속 진행하여 ICF 분석을 완료해야 합니다.",
     "errorFaq.q4": "로그인이 안 돼요",
-    "errorFaq.a4": "브라우저 쿠키를 확인하고, 다른 브라우저나 시크릿 모드에서 시도해보세요. 문제가 계속되면 비밀번호를 재설정하세요.",
+    "errorFaq.a4":
+      "브라우저 쿠키를 확인하고, 다른 브라우저나 시크릿 모드에서 시도해보세요. 문제가 계속되면 비밀번호를 재설정하세요.",
     "errorFaq.q5": "이미지가 업로드되지 않아요",
-    "errorFaq.a5": "이미지 파일 크기가 5MB 이하인지 확인하세요. 지원 형식: JPG, PNG, GIF. 문제가 계속되면 다른 이미지로 시도해보세요.",
+    "errorFaq.a5":
+      "이미지 파일 크기가 5MB 이하인지 확인하세요. 지원 형식: JPG, PNG, GIF. 문제가 계속되면 다른 이미지로 시도해보세요.",
     "errorFaq.q6": "K-IPPA 평가가 제출되지 않아요",
-    "errorFaq.a6": "모든 필수 항목을 입력했는지 확인하세요. 네트워크 연결을 확인하고 다시 시도해보세요.",
+    "errorFaq.a6":
+      "모든 필수 항목을 입력했는지 확인하세요. 네트워크 연결을 확인하고 다시 시도해보세요.",
     "errorFaq.reloadPage": "페이지 새로고침",
     "errorFaq.goToChat": "채팅으로 이동",
     "errorFaq.goToSignIn": "로그인 페이지로 이동",
     "errorFaq.needMoreHelp": "추가 도움이 필요하신가요?",
-    "errorFaq.contactDescription": "문제가 해결되지 않으면 고객 지원팀에 문의해주세요. 빠르게 도와드리겠습니다.",
+    "errorFaq.contactDescription":
+      "문제가 해결되지 않으면 고객 지원팀에 문의해주세요. 빠르게 도와드리겠습니다.",
     "errorFaq.emailSupport": "이메일로 문의",
     "errorFaq.supportCenter": "지원 센터",
     "ippa.interpretation.excellent": "매우 우수한 개선",
@@ -294,38 +312,48 @@ export const translations = {
 
     // K-IPPA Consultation (상담 단계)
     "ippa.consultation.title": "문제 이해를 돕기 위한 간단한 질문",
-    "ippa.consultation.description": "더 정확한 추천을 위해 몇 가지 정보를 알려주세요",
+    "ippa.consultation.description":
+      "더 정확한 추천을 위해 몇 가지 정보를 알려주세요",
     "ippa.consultation.currentDifficulty": "현재 난이도",
-    "ippa.consultation.importanceHelp": "이 문제가 일상생활에서 얼마나 중요한지 선택해주세요 (1=낮음, 5=매우 높음)",
-    "ippa.consultation.difficultyHelp": "현재 이 활동을 수행하는 것이 얼마나 어려운지 선택해주세요 (1=쉬움, 5=매우 어려움)",
+    "ippa.consultation.importanceHelp":
+      "이 문제가 일상생활에서 얼마나 중요한지 선택해주세요 (1=낮음, 5=매우 높음)",
+    "ippa.consultation.difficultyHelp":
+      "현재 이 활동을 수행하는 것이 얼마나 어려운지 선택해주세요 (1=쉬움, 5=매우 어려움)",
     "ippa.consultation.submit": "확인",
     "ippa.consultation.skip": "건너뛰기",
 
     // Consultation Feedback (상담 피드백)
     "consultationFeedback.title": "추천 보조기기 만족도 평가",
-    "consultationFeedback.description": "링커가 추천한 보조기기가 얼마나 마음에 드시나요? 소중한 피드백이 서비스 개선에 도움이 됩니다.",
-    "consultationFeedback.accuracyQuestion": "추천된 보조기기가 얼마나 마음에 드시나요?",
+    "consultationFeedback.description":
+      "링커가 추천한 보조기기가 얼마나 마음에 드시나요? 소중한 피드백이 서비스 개선에 도움이 됩니다.",
+    "consultationFeedback.accuracyQuestion":
+      "추천된 보조기기가 얼마나 마음에 드시나요?",
     "consultationFeedback.veryAccurate": "매우 정확함 (5점)",
     "consultationFeedback.accurate": "정확함 (4점)",
     "consultationFeedback.moderate": "보통 (3점)",
     "consultationFeedback.inaccurate": "부정확함 (2점)",
     "consultationFeedback.veryInaccurate": "매우 부정확함 (1점)",
     "consultationFeedback.commentLabel": "추가 의견 (선택사항)",
-    "consultationFeedback.commentPlaceholder": "ICF 분석에서 개선되었으면 하는 점이나 추가 의견을 자유롭게 작성해주세요.",
-    "consultationFeedback.commentHelp": "피드백은 익명으로 처리되며, 서비스 개선에만 사용됩니다.",
+    "consultationFeedback.commentPlaceholder":
+      "ICF 분석에서 개선되었으면 하는 점이나 추가 의견을 자유롭게 작성해주세요.",
+    "consultationFeedback.commentHelp":
+      "피드백은 익명으로 처리되며, 서비스 개선에만 사용됩니다.",
     "consultationFeedback.submit": "피드백 제출",
     "consultationFeedback.submitting": "제출 중...",
     "consultationFeedback.skip": "건너뛰기",
     "consultationFeedback.thankYou": "피드백을 주셔서 감사합니다!",
-    "consultationFeedback.thankYouDescription": "소중한 의견이 서비스 개선에 큰 도움이 됩니다.",
+    "consultationFeedback.thankYouDescription":
+      "소중한 의견이 서비스 개선에 큰 도움이 됩니다.",
 
     // Onboarding / Role Selection
     "onboarding.title": "역할을 선택해주세요",
-    "onboarding.subtitle": "LinkAble이 더 나은 서비스를 제공하기 위해 필요합니다",
+    "onboarding.subtitle":
+      "LinkAble이 더 나은 서비스를 제공하기 위해 필요합니다",
     "onboarding.role.user.title": "사용자 (당사자)",
     "onboarding.role.user.description": "보조기기를 직접 사용하시는 분입니다",
     "onboarding.role.manager.title": "보호자 / 전문가",
-    "onboarding.role.manager.description": "다른 사람을 대신하여 보조기기를 찾아주시는 분입니다",
+    "onboarding.role.manager.description":
+      "다른 사람을 대신하여 보조기기를 찾아주시는 분입니다",
     "onboarding.continue": "계속하기",
     "onboarding.selecting": "저장 중...",
     "onboarding.error": "역할 저장 중 오류가 발생했습니다. 다시 시도해주세요.",
@@ -378,7 +406,8 @@ export const translations = {
     "dashboard.nextStepReviewDescription":
       "추천 페이지에서 클릭 현황을 확인하세요.",
     "dashboard.ippaSectionTitle": "K-IPPA 효과성 평가",
-    "dashboard.ippaSectionDescription": "구매하신 보조기기 사용 후 평가를 진행해 주세요. 평가를 제출하시면 포인트를 적립해 드립니다.",
+    "dashboard.ippaSectionDescription":
+      "구매하신 보조기기 사용 후 평가를 진행해 주세요. 평가를 제출하시면 포인트를 적립해 드립니다.",
     "dashboard.startEvaluation": "평가 시작",
     "dashboard.unknownProduct": "알 수 없는 상품",
     "dashboard.noMatchReason": "추천 사유 없음",
@@ -429,8 +458,10 @@ export const translations = {
     "flowGuide.continueChat": "나중에 보기",
     "flowGuide.viewRecommendations": "추천 보기",
     "flowGuide.toastTitle": "맞춤 추천이 준비되었습니다",
-    "flowGuide.toastDescription": "ICF 분석을 바탕으로 맞춤형 보조기기를 추천해드립니다.",
-    "flowGuide.toastDescriptionWithCount": "{count}개의 맞춤형 보조기기 추천을 확인하세요.",
+    "flowGuide.toastDescription":
+      "ICF 분석을 바탕으로 맞춤형 보조기기를 추천해드립니다.",
+    "flowGuide.toastDescriptionWithCount":
+      "{count}개의 맞춤형 보조기기 추천을 확인하세요.",
 
     // Footer socials
     "footer.socialKakao": "카카오톡",
@@ -520,7 +551,8 @@ export const translations = {
     "footer.standards": "Standards",
     "footer.aboutUs": "About Us",
     "footer.quickLinksTitle": "Quick Links",
-    "footer.quickLinksSubtitle": "Jump straight to chat, recommendations, or expert help.",
+    "footer.quickLinksSubtitle":
+      "Jump straight to chat, recommendations, or expert help.",
     "footer.quickStartConsult": "Start Chat",
     "footer.quickViewRecommendations": "View Recommendations",
     "footer.quickContactExpert": "Contact Expert",
@@ -532,7 +564,8 @@ export const translations = {
       "LinkAble started with the belief that everyone should have easy access to assistive technology counseling. By connecting complex ICF/ISO standards and fragmented welfare information with AI, we deliver expert-grade analysis and tailored solutions whenever users describe their situation in natural language.",
     "about.back": "Back to Home",
     "privacy.title": "Privacy Policy",
-    "privacy.effective": "Effective: Jan 1, 2025 · Contact: support@linkable.ai",
+    "privacy.effective":
+      "Effective: Jan 1, 2025 · Contact: support@linkable.ai",
     "privacy.paragraph1":
       "LinkAble collects only the minimum personal information through Clerk authentication and uses it solely for identity verification and session maintenance. Data is deleted without delay after the legally required retention period.",
     "privacy.paragraph2":
@@ -566,10 +599,12 @@ export const translations = {
     "terms.section8.title": "Article 8 (Content and Intellectual Property)",
     "terms.section8.content":
       "All content and algorithms provided through the service belong to the Company or rightful owners. Users may not reproduce, distribute, or modify them without prior consent.",
-    "terms.section9.title": "Article 9 (Disclaimer and Limitation of Liability)",
+    "terms.section9.title":
+      "Article 9 (Disclaimer and Limitation of Liability)",
     "terms.section9.content":
       "The Company is not liable for damages arising from AI outputs, third-party product information, or partner API outages unless caused by willful misconduct or gross negligence. Users bear responsibility for any damages resulting from unlawful acts.",
-    "terms.section10.title": "Article 10 (Governing Law and Dispute Resolution)",
+    "terms.section10.title":
+      "Article 10 (Governing Law and Dispute Resolution)",
     "terms.section10.content":
       "These Terms are governed by the laws of the Republic of Korea, and any disputes will be resolved by the court with jurisdiction over the Company’s principal office.",
     "terms.back": "Back to Home",
@@ -593,14 +628,18 @@ export const translations = {
     "chat.startVoiceRecording": "Start Voice Recording",
     "chat.stopVoiceRecording": "Stop Voice Recording",
     "chat.attachPhoto": "Attach photo of your environment",
-    "chat.sttNotSupported": "This browser does not support speech recognition. Please use Chrome or Edge.",
-    "chat.sttError": "An error occurred during speech recognition. Please try again.",
+    "chat.sttNotSupported":
+      "This browser does not support speech recognition. Please use Chrome or Edge.",
+    "chat.sttError":
+      "An error occurred during speech recognition. Please try again.",
     "chat.sttNoSpeech": "No speech detected. Please try again.",
-    "chat.sttNotAllowed": "Microphone permission is required. Please allow microphone access in your browser settings.",
+    "chat.sttNotAllowed":
+      "Microphone permission is required. Please allow microphone access in your browser settings.",
     "chat.removeImage": "Remove Image",
     "chat.imageInvalidType": "Only image files can be uploaded.",
     "chat.imageTooLarge": "Image size must be 5MB or less.",
-    "chat.imageConversionError": "An error occurred while converting the image. Please try again.",
+    "chat.imageConversionError":
+      "An error occurred while converting the image. Please try again.",
     "chat.typing": "Coordinator is typing",
     "chat.thinking": "링커 is thinking...",
     "chat.yourMessage": "Your message",
@@ -673,11 +712,15 @@ export const translations = {
     "dashboard.verySatisfied": "Very Satisfied",
 
     // K-IPPA Consultation (상담 단계)
-    "ippa.consultation.title": "Quick Questions to Better Understand Your Needs",
-    "ippa.consultation.description": "Please share a few details to help us provide more accurate recommendations",
+    "ippa.consultation.title":
+      "Quick Questions to Better Understand Your Needs",
+    "ippa.consultation.description":
+      "Please share a few details to help us provide more accurate recommendations",
     "ippa.consultation.currentDifficulty": "Current Difficulty",
-    "ippa.consultation.importanceHelp": "How important is this problem in your daily life? (1=Low, 5=Very High)",
-    "ippa.consultation.difficultyHelp": "How difficult is it to perform this activity currently? (1=Easy, 5=Very Difficult)",
+    "ippa.consultation.importanceHelp":
+      "How important is this problem in your daily life? (1=Low, 5=Very High)",
+    "ippa.consultation.difficultyHelp":
+      "How difficult is it to perform this activity currently? (1=Easy, 5=Very Difficult)",
     "ippa.consultation.submit": "Confirm",
     "ippa.consultation.skip": "Skip",
 
@@ -685,12 +728,15 @@ export const translations = {
     "onboarding.title": "Please select your role",
     "onboarding.subtitle": "This helps LinkAble provide better service",
     "onboarding.role.user.title": "User (Self)",
-    "onboarding.role.user.description": "You are the person who will use the assistive technology",
+    "onboarding.role.user.description":
+      "You are the person who will use the assistive technology",
     "onboarding.role.manager.title": "Caregiver / Professional",
-    "onboarding.role.manager.description": "You are helping someone else find assistive technology",
+    "onboarding.role.manager.description":
+      "You are helping someone else find assistive technology",
     "onboarding.continue": "Continue",
     "onboarding.selecting": "Saving...",
-    "onboarding.error": "An error occurred while saving your role. Please try again.",
+    "onboarding.error":
+      "An error occurred while saving your role. Please try again.",
 
     // Recommendations
     "recommendations.title": "Recommended Products",
@@ -736,7 +782,8 @@ export const translations = {
     "dashboard.nextStepsDescription":
       "Fast-track your follow-ups: review recommendations, clicks, and evaluations.",
     "dashboard.ippaSectionTitle": "K-IPPA Effectiveness Evaluation",
-    "dashboard.ippaSectionDescription": "Please complete the post-use evaluation for purchased assistive devices. You will earn points for submitting evaluations.",
+    "dashboard.ippaSectionDescription":
+      "Please complete the post-use evaluation for purchased assistive devices. You will earn points for submitting evaluations.",
     "dashboard.startEvaluation": "Start Evaluation",
     "dashboard.unknownProduct": "Unknown Product",
     "dashboard.noMatchReason": "No match reason",
@@ -785,17 +832,21 @@ export const translations = {
     "flowGuide.modalTitle": "Personalized Recommendations Ready",
     "flowGuide.modalSubtitle": "ICF analysis completed",
     "flowGuide.recommendationCount": "{count} personalized assistive devices",
-    "flowGuide.recommendationsReady": "Personalized assistive device recommendations",
+    "flowGuide.recommendationsReady":
+      "Personalized assistive device recommendations",
     "flowGuide.recommendationDescription":
       "We recommend optimal assistive devices based on ICF codes and ISO 9999 standards analyzed by LinkAble.",
     "flowGuide.step1": "Check detailed information on the recommendations page",
-    "flowGuide.step2": "Select your desired assistive device and go to the purchase link",
+    "flowGuide.step2":
+      "Select your desired assistive device and go to the purchase link",
     "flowGuide.step3": "Record effectiveness with K-IPPA evaluation after use",
     "flowGuide.continueChat": "View later",
     "flowGuide.viewRecommendations": "View Recommendations",
     "flowGuide.toastTitle": "Personalized Recommendations Ready",
-    "flowGuide.toastDescription": "We recommend personalized assistive devices based on ICF analysis.",
-    "flowGuide.toastDescriptionWithCount": "Check {count} personalized assistive device recommendations.",
+    "flowGuide.toastDescription":
+      "We recommend personalized assistive devices based on ICF analysis.",
+    "flowGuide.toastDescriptionWithCount":
+      "Check {count} personalized assistive device recommendations.",
 
     // Footer socials
     "footer.socialKakao": "KakaoTalk",
@@ -883,7 +934,8 @@ export const translations = {
     "footer.standards": "基準",
     "footer.aboutUs": "会社概要",
     "footer.quickLinksTitle": "クイックリンク",
-    "footer.quickLinksSubtitle": "相談・推薦・専門家への問い合わせにすぐアクセスできます。",
+    "footer.quickLinksSubtitle":
+      "相談・推薦・専門家への問い合わせにすぐアクセスできます。",
     "footer.quickStartConsult": "相談を始める",
     "footer.quickViewRecommendations": "推薦を見る",
     "footer.quickContactExpert": "専門家に問い合わせ",
@@ -895,7 +947,8 @@ export const translations = {
       "LinkAbleは「誰もが気軽に支援機器の相談を受けられる世界」を目指して誕生しました。複雑なICF/ISO基準や分断された福祉情報をAIでつなぎ、利用者が日常の困りごとを自然な言葉で伝えるだけで、専門家レベルの分析と最適なソリューションを提供します。",
     "about.back": "ホームに戻る",
     "privacy.title": "プライバシーポリシー",
-    "privacy.effective": "施行日: 2025年1月1日 · お問い合わせ: support@linkable.ai",
+    "privacy.effective":
+      "施行日: 2025年1月1日 · お問い合わせ: support@linkable.ai",
     "privacy.paragraph1":
       "LinkAbleはClerk認証を通じて最小限の個人情報のみを収集し、本人確認とセッション維持以外の目的では利用しません。法的な保存期間満了後は速やかに削除します。",
     "privacy.paragraph2":
@@ -959,7 +1012,8 @@ export const translations = {
     "chat.removeImage": "画像を削除",
     "chat.imageInvalidType": "画像ファイルのみアップロードできます。",
     "chat.imageTooLarge": "画像サイズは5MB以下である必要があります。",
-    "chat.imageConversionError": "画像変換中にエラーが発生しました。もう一度お試しください。",
+    "chat.imageConversionError":
+      "画像変換中にエラーが発生しました。もう一度お試しください。",
     "chat.typing": "コーディネーターが入力中",
     "chat.thinking": "링커が考えています...",
     "chat.yourMessage": "自分のメッセージ",
@@ -1035,14 +1089,19 @@ export const translations = {
     "ippa.description": "の使用後評価を完了してください。",
     "ippa.problemDescription": "解決したい問題",
     "ippa.importance": "重要度",
-    "ippa.importanceHelp": "この問題が日常生活でどれほど重要か選択してください。（1=低い、5=非常に高い）",
+    "ippa.importanceHelp":
+      "この問題が日常生活でどれほど重要か選択してください。（1=低い、5=非常に高い）",
     "ippa.difficultyPre": "使用前の難易度",
-    "ippa.difficultyPreHelp": "支援機器を使用する前にこの活動を実行することがどれほど困難だったか選択してください。（1=簡単、5=非常に困難）",
+    "ippa.difficultyPreHelp":
+      "支援機器を使用する前にこの活動を実行することがどれほど困難だったか選択してください。（1=簡単、5=非常に困難）",
     "ippa.difficultyPost": "使用後の難易度",
-    "ippa.difficultyPostHelp": "支援機器を使用した後、この活動を実行することがどれほど簡単になったか選択してください。（1=簡単、5=非常に困難）",
+    "ippa.difficultyPostHelp":
+      "支援機器を使用した後、この活動を実行することがどれほど簡単になったか選択してください。（1=簡単、5=非常に困難）",
     "ippa.feedbackComment": "追加コメント（任意）",
-    "ippa.feedbackCommentPlaceholder": "この支援機器の使用経験について自由にご意見をお聞かせください。",
-    "ippa.feedbackCommentHelp": "ご意見をいただくと、サービス改善に大いに役立ちます。",
+    "ippa.feedbackCommentPlaceholder":
+      "この支援機器の使用経験について自由にご意見をお聞かせください。",
+    "ippa.feedbackCommentHelp":
+      "ご意見をいただくと、サービス改善に大いに役立ちます。",
     "ippa.previewScore": "予想効果性スコア",
     "ippa.improvementPreview": "約{percentage}%の改善が予想されます",
     "ippa.noImprovementPreview": "改善がないか、悪化しています。",
@@ -1050,7 +1109,8 @@ export const translations = {
     "ippa.submitting": "提出中...",
     "ippa.cancel": "キャンセル",
     "ippa.submitSuccess": "評価が提出されました！",
-    "ippa.submitSuccessMessage": "貴重なフィードバックありがとうございます。評価結果はサービス改善に活用されます。",
+    "ippa.submitSuccessMessage":
+      "貴重なフィードバックありがとうございます。評価結果はサービス改善に活用されます。",
     "ippa.effectivenessScore": "効果性スコア",
     "ippa.pointsEarned": "{points}ポイント獲得",
     "ippa.interpretation.excellent": "非常に優れた改善",
@@ -1062,10 +1122,13 @@ export const translations = {
 
     // K-IPPA Consultation (상담 단계)
     "ippa.consultation.title": "ニーズをよりよく理解するための簡単な質問",
-    "ippa.consultation.description": "より正確な推奨を提供するために、いくつかの情報を教えてください",
+    "ippa.consultation.description":
+      "より正確な推奨を提供するために、いくつかの情報を教えてください",
     "ippa.consultation.currentDifficulty": "現在の難易度",
-    "ippa.consultation.importanceHelp": "この問題が日常生活でどれほど重要か選択してください（1=低い、5=非常に高い）",
-    "ippa.consultation.difficultyHelp": "現在この活動を実行することがどれほど困難か選択してください（1=簡単、5=非常に困難）",
+    "ippa.consultation.importanceHelp":
+      "この問題が日常生活でどれほど重要か選択してください（1=低い、5=非常に高い）",
+    "ippa.consultation.difficultyHelp":
+      "現在この活動を実行することがどれほど困難か選択してください（1=簡単、5=非常に困難）",
     "ippa.consultation.submit": "確認",
     "ippa.consultation.skip": "スキップ",
 
@@ -1075,10 +1138,12 @@ export const translations = {
     "onboarding.role.user.title": "ユーザー（本人）",
     "onboarding.role.user.description": "支援技術を直接使用される方です",
     "onboarding.role.manager.title": "保護者 / 専門家",
-    "onboarding.role.manager.description": "他の方のために支援技術を探されている方です",
+    "onboarding.role.manager.description":
+      "他の方のために支援技術を探されている方です",
     "onboarding.continue": "続ける",
     "onboarding.selecting": "保存中...",
-    "onboarding.error": "役割の保存中にエラーが発生しました。もう一度お試しください。",
+    "onboarding.error":
+      "役割の保存中にエラーが発生しました。もう一度お試しください。",
 
     // Recommendations
     "recommendations.title": "推奨支援機器",
@@ -1121,7 +1186,8 @@ export const translations = {
     "dashboard.nextStepsDescription":
       "推奨の確認・クリック追跡・評価依頼を素早く進めましょう。",
     "dashboard.ippaSectionTitle": "K-IPPA効果性評価",
-    "dashboard.ippaSectionDescription": "購入した支援機器の使用後評価を完了してください。評価を提出するとポイントが付与されます。",
+    "dashboard.ippaSectionDescription":
+      "購入した支援機器の使用後評価を完了してください。評価を提出するとポイントが付与されます。",
     "dashboard.startEvaluation": "評価開始",
     "dashboard.unknownProduct": "不明な製品",
     "dashboard.noMatchReason": "推奨理由なし",
@@ -1178,8 +1244,10 @@ export const translations = {
     "flowGuide.continueChat": "後で見る",
     "flowGuide.viewRecommendations": "推奨を見る",
     "flowGuide.toastTitle": "パーソナライズされた推奨が準備できました",
-    "flowGuide.toastDescription": "ICF分析に基づいてパーソナライズされた補助機器を推奨します。",
-    "flowGuide.toastDescriptionWithCount": "{count}個のパーソナライズされた補助機器の推奨を確認してください。",
+    "flowGuide.toastDescription":
+      "ICF分析に基づいてパーソナライズされた補助機器を推奨します。",
+    "flowGuide.toastDescriptionWithCount":
+      "{count}個のパーソナライズされた補助機器の推奨を確認してください。",
 
     // Footer socials
     "footer.socialKakao": "カカオトーク",
@@ -1190,12 +1258,8 @@ export const translations = {
 } as const;
 
 export function getTranslation(lang: Language, key: string): string {
-  const keys = key.split(".");
-  let value: any = translations[lang];
-
-  for (const k of keys) {
-    value = value?.[k];
-  }
-
-  return value || key;
+  // translations 객체는 평면 키 구조를 사용합니다 (예: "hero.title", "features.aiAnalysis.title")
+  // 따라서 키를 직접 접근해야 합니다
+  const dictionary = translations[lang] as Record<string, string | undefined>;
+  return dictionary[key] ?? key;
 }

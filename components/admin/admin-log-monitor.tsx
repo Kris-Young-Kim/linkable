@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, Info, AlertTriangle, CheckCircle } from "lucide-react"
+import { useAdminLogs } from "@/lib/api-hooks"
 
 interface LogEntry {
   id: string
@@ -16,37 +17,8 @@ interface LogEntry {
 }
 
 export function AdminLogMonitor() {
-  const [logs, setLogs] = useState<LogEntry[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [filterLevel, setFilterLevel] = useState<"all" | "info" | "warn" | "error">("all")
-
-  useEffect(() => {
-    // TODO: 실제 로그 API 엔드포인트 연결
-    // 현재는 샘플 데이터 표시
-    const fetchLogs = async () => {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const url = `/api/admin/logs?limit=50${filterLevel !== "all" ? `&level=${filterLevel}` : ""}`
-        const response = await fetch(url)
-        if (!response.ok) throw new Error("로그를 불러오는데 실패했습니다.")
-        const data = await response.json()
-        setLogs(data.logs || [])
-      } catch (err) {
-        console.error("[Log Monitor] Fetch error:", err)
-        setError(err instanceof Error ? err.message : "알 수 없는 오류")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchLogs()
-    
-    // 실시간 로그 업데이트 (선택사항)
-    // const interval = setInterval(fetchLogs, 30000) // 30초마다 업데이트
-    // return () => clearInterval(interval)
-  }, [])
+  const { logs, isLoading, isError } = useAdminLogs(filterLevel)
 
   const filteredLogs = logs.filter((log) => filterLevel === "all" || log.level === filterLevel)
 
@@ -98,11 +70,11 @@ export function AdminLogMonitor() {
     )
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-destructive">
-          {error}
+          {isError instanceof Error ? isError.message : "로그를 불러오는데 실패했습니다."}
         </CardContent>
       </Card>
     )

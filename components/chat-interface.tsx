@@ -86,6 +86,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
+import { useRecommendations } from "@/lib/api-hooks";
 
 interface Message {
   id: string;
@@ -125,15 +126,9 @@ export function ChatInterface() {
   const [isSpeechSupported, setIsSpeechSupported] = useState(false);
   const [consultationId, setConsultationId] = useState<string | null>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
-  const [isLoadingRecommendations, setIsLoadingRecommendations] =
-    useState(false);
-  const [hasRecommendations, setHasRecommendations] = useState(false);
   const [showRecommendationCTA, setShowRecommendationCTA] = useState(false);
   const [showFlowGuide, setShowFlowGuide] = useState(false);
   const [isoMatches, setIsoMatches] = useState<IsoMatch[]>([]);
-  const [previewRecommendations, setPreviewRecommendations] = useState<any[]>(
-    []
-  );
   const [disabilityType, setDisabilityType] = useState<string>("none");
   const [disabilitySeverity, setDisabilitySeverity] = useState<string>("none");
   const [showIcf, setShowIcf] = useState(false);
@@ -155,48 +150,22 @@ export function ChatInterface() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isUserScrollingRef = useRef(false);
 
-  const preloadRecommendations = useCallback(
-    async (currentConsultationId: string) => {
-      // ICF 분석이 완료되지 않았으면 추천을 로드하지 않음
-      if (!icfAnalysis) {
-        console.log(
-          "[chat] ICF analysis not completed, skipping recommendation preload"
-        );
-        return;
-      }
+  const shouldFetchRecommendations =
+    showRecommendationCTA && Boolean(consultationId) && Boolean(icfAnalysis);
 
-      setShowRecommendationCTA(true);
-      setIsLoadingRecommendations(true);
-
-      try {
-        const recommendationsResponse = await fetch(
-          `/api/products?consultationId=${currentConsultationId}&limit=3`
-        );
-        if (recommendationsResponse.ok) {
-          const recommendationsData = await recommendationsResponse.json();
-          if (
-            recommendationsData.products &&
-            recommendationsData.products.length > 0
-          ) {
-            setHasRecommendations(true);
-            setPreviewRecommendations(recommendationsData.products.slice(0, 3));
-            // 추천이 준비되면 플로우 가이드 표시 (모달 또는 토스트)
-            if (
-              recommendationsData.products &&
-              recommendationsData.products.length > 0
-            ) {
-              setShowFlowGuide(true);
-            }
-          }
-        }
-      } catch (error) {
-        console.error("[chat] Failed to preload recommendations:", error);
-      } finally {
-        setIsLoadingRecommendations(false);
-      }
-    },
-    [icfAnalysis] // icfAnalysis가 변경될 때마다 함수 재생성
+  const {
+    products: previewRecommendations,
+    isLoading: isLoadingRecommendations,
+  } = useRecommendations(
+    shouldFetchRecommendations ? consultationId ?? undefined : undefined,
+    3
   );
+
+  useEffect(() => {
+    if (previewRecommendations.length > 0) {
+      setShowFlowGuide(true);
+    }
+  }, [previewRecommendations.length]);
 
   const isAuthResolved = isLoaded;
   const requiresLogin = isAuthResolved && !isSignedIn;
@@ -530,9 +499,7 @@ export function ChatInterface() {
                   has_recommendations: true,
                 });
 
-                if (payload.consultationId) {
-                  await preloadRecommendations(payload.consultationId);
-                }
+                setShowRecommendationCTA(true);
               }
             } catch (error) {
               console.error("[chat] Failed to parse analysis payload:", error);

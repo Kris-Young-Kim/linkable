@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -21,106 +20,13 @@ import {
   Legend,
 } from "recharts";
 import { TrendingUp, Users, Target, Activity } from "lucide-react";
-
-interface EnhancedMetrics {
-  userGrowth: {
-    totalUsers: number;
-    newUsersLast30Days: number;
-    userGrowthRate: number;
-    activeUsers: number;
-    activeUserRate: number;
-  };
-  conversionFunnel: {
-    consultationToRecommendationRate: number;
-    recommendationToClickRate: number;
-    clickToEvaluationRate: number;
-    overallConversionRate: number;
-    totalConsultations: number;
-    totalRecommendations: number;
-    clickedRecommendations: number;
-    totalEvaluations: number;
-  };
-  effectivenessDistribution: {
-    min: number;
-    max: number;
-    median: number;
-    p25: number;
-    p75: number;
-    p90: number;
-    totalScores: number;
-  };
-  retention: {
-    repeatUsers: number;
-    retentionRate: number;
-    activeUsers: number;
-  };
-}
-
-interface ICFStat {
-  code: string;
-  category: "b" | "d" | "e";
-  totalRecommendations: number;
-  clickedRecommendations: number;
-  totalEvaluations: number;
-  avgEffectivenessScore: number;
-  clickThroughRate: number;
-}
-
-interface ISOStat {
-  isoCode: string;
-  totalRecommendations: number;
-  clickedRecommendations: number;
-  totalEvaluations: number;
-  avgEffectivenessScore: number;
-  clickThroughRate: number;
-  productCount: number;
-}
+import { useEnhancedAnalytics } from "@/lib/api-hooks";
 
 export function EnhancedAnalytics() {
-  const [metrics, setMetrics] = useState<EnhancedMetrics | null>(null);
-  const [icfStats, setIcfStats] = useState<ICFStat[]>([]);
-  const [isoStats, setIsoStats] = useState<ISOStat[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        // 기본 통계 (추가 지표 포함)
-        const metricsRes = await fetch("/api/admin/analytics?daily=true");
-        const metricsData = await metricsRes.json();
-        
-        if (metricsData.metrics) {
-          setMetrics({
-            userGrowth: metricsData.metrics.userGrowth,
-            conversionFunnel: metricsData.metrics.conversionFunnel,
-            effectivenessDistribution: metricsData.metrics.effectivenessDistribution,
-            retention: metricsData.metrics.retention,
-          });
-        }
-
-        // ICF 통계
-        const icfRes = await fetch("/api/admin/analytics/icf-stats");
-        const icfData = await icfRes.json();
-        if (icfData.stats) {
-          setIcfStats(icfData.stats.slice(0, 10)); // 상위 10개
-        }
-
-        // ISO 통계
-        const isoRes = await fetch("/api/admin/analytics/iso-stats");
-        const isoData = await isoRes.json();
-        if (isoData.stats) {
-          setIsoStats(isoData.stats.slice(0, 10)); // 상위 10개
-        }
-      } catch (error) {
-        console.error("[Enhanced Analytics] Fetch error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const { data, isLoading, isError } = useEnhancedAnalytics();
+  const metrics = data?.metrics ?? null;
+  const icfStats = data?.icfStats?.slice(0, 10) ?? [];
+  const isoStats = data?.isoStats?.slice(0, 10) ?? [];
 
   if (isLoading) {
     return (
@@ -131,6 +37,18 @@ export function EnhancedAnalytics() {
           </CardContent>
         </Card>
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center py-8 text-destructive">
+            {isError instanceof Error ? isError.message : "데이터를 불러오지 못했습니다."}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 

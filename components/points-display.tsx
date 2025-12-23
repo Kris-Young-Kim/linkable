@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useAuth } from "@clerk/nextjs"
 import { Sparkles, Gift } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import type { UserCoupon } from "@/lib/incentives"
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePoints, useUserCoupons } from "@/lib/api-hooks"
 
 interface PointsDisplayProps {
   showCoupons?: boolean
@@ -17,45 +16,14 @@ interface PointsDisplayProps {
 /**
  * 포인트 표시 컴포넌트
  * 사용자 포인트와 쿠폰을 표시합니다.
+ * SWR을 사용하여 데이터를 캐싱하고 자동으로 재검증합니다.
  */
 export function PointsDisplay({ showCoupons = true, className }: PointsDisplayProps) {
   const { userId } = useAuth()
-  const [points, setPoints] = useState<number | null>(null)
-  const [coupons, setCoupons] = useState<UserCoupon[]>([])
-  const [loading, setLoading] = useState(true)
+  const { points, isLoading: pointsLoading } = usePoints()
+  const { coupons, isLoading: couponsLoading } = useUserCoupons()
 
-  useEffect(() => {
-    if (!userId) {
-      setLoading(false)
-      return
-    }
-
-    const loadData = async () => {
-      try {
-        // 포인트 조회
-        const pointsResponse = await fetch("/api/incentives/points")
-        if (pointsResponse.ok) {
-          const pointsData = await pointsResponse.json()
-          setPoints(pointsData.points || 0)
-        }
-
-        // 쿠폰 조회
-        if (showCoupons) {
-          const couponsResponse = await fetch("/api/incentives/coupons?type=user")
-          if (couponsResponse.ok) {
-            const couponsData = await couponsResponse.json()
-            setCoupons(couponsData.coupons || [])
-          }
-        }
-      } catch (error) {
-        console.error("[PointsDisplay] Load error:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadData()
-  }, [userId, showCoupons])
+  const loading = pointsLoading || (showCoupons && couponsLoading)
 
   if (loading) {
     return (
@@ -65,7 +33,7 @@ export function PointsDisplay({ showCoupons = true, className }: PointsDisplayPr
     )
   }
 
-  if (points === null) {
+  if (!userId) {
     return null
   }
 

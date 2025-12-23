@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import useSWR from "swr"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, MousePointerClick, ClipboardCheck, BarChart3 } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
@@ -34,31 +34,16 @@ interface AnalyticsDashboardProps {
 
 export function AnalyticsDashboard({ apiEndpoint = "/api/analytics" }: AnalyticsDashboardProps = {}) {
   const { t } = useLanguage()
-  const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchAnalytics = async () => {
-      setIsLoading(true)
-      setError(null)
-      try {
-        const response = await fetch(apiEndpoint)
-        if (!response.ok) {
-          throw new Error("Failed to fetch analytics")
-        }
-        const data = await response.json()
-        setMetrics(data.metrics)
-      } catch (err) {
-        console.error("[Analytics] Fetch error:", err)
-        setError(err instanceof Error ? err.message : "알 수 없는 오류")
-      } finally {
-        setIsLoading(false)
-      }
+  const { data, error, isLoading } = useSWR<{ metrics: AnalyticsMetrics }>(
+    apiEndpoint,
+    {
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+      dedupingInterval: 10000, // 10초 내 중복 요청 제거
     }
+  )
 
-    fetchAnalytics()
-  }, [apiEndpoint])
+  const metrics = data?.metrics
 
   if (isLoading) {
     return (
@@ -81,7 +66,7 @@ export function AnalyticsDashboard({ apiEndpoint = "/api/analytics" }: Analytics
     return (
       <Card>
         <CardContent className="p-6 text-center text-muted-foreground">
-          {error || "데이터를 불러올 수 없습니다"}
+          {error?.message || "데이터를 불러올 수 없습니다"}
         </CardContent>
       </Card>
     )

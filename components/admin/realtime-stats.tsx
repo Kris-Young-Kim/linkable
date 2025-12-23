@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Activity, Users, MousePointer2, MessageSquare } from "lucide-react"
 import { 
@@ -12,39 +11,10 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from "recharts"
-
-interface RealtimeData {
-  activeUsers: number
-  recentEvents: number
-  chatSessions: number
-  clicks: number
-  trend: { time: string; count: number }[]
-}
+import { useRealtimeStats } from "@/lib/api-hooks"
 
 export function RealtimeStats() {
-  const [data, setData] = useState<RealtimeData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchRealtimeData = async () => {
-    try {
-      // 실제로는 GA4 Realtime API 또는 DB의 최근 30분 데이터를 가져옴
-      const response = await fetch("/api/admin/analytics/realtime")
-      if (response.ok) {
-        const result = await response.json()
-        setData(result)
-      }
-    } catch (error) {
-      console.error("[RealtimeStats] Fetch error:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    fetchRealtimeData()
-    const interval = setInterval(fetchRealtimeData, 30000) // 30초마다 갱신
-    return () => clearInterval(interval)
-  }, [])
+  const { data, isLoading } = useRealtimeStats()
 
   if (isLoading || !data) {
     return <div className="h-48 flex items-center justify-center bg-muted/20 rounded-lg animate-pulse">실시간 데이터 로드 중...</div>

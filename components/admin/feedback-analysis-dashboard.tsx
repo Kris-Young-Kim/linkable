@@ -1,110 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, TrendingUp, TrendingDown, Star, Target, BarChart3 } from "lucide-react";
-
-interface FeedbackAnalysisData {
-  summary: {
-    overallMatchingQuality: number;
-    averageFeedbackRating: number;
-    averageEffectivenessScore: number;
-    clickThroughRate: number;
-    purchaseConversionRate: number;
-  };
-  metrics: {
-    consultationFeedback: {
-      total: number;
-      average: number;
-      distribution: {
-        1: number;
-        2: number;
-        3: number;
-        4: number;
-        5: number;
-      };
-    };
-    ippaEvaluation: {
-      total: number;
-      average: number;
-      distribution: {
-        negative: number;
-        low: number;
-        medium: number;
-        high: number;
-      };
-    };
-    recommendations: {
-      total: number;
-      clicked: number;
-      clickRate: number;
-    };
-    purchases: {
-      total: number;
-      conversionRate: number;
-      totalAmount: number;
-    };
-  };
-  icfCodeFeedback: Array<{
-    code: string;
-    name: string;
-    category: string;
-    averageRating: number;
-    feedbackCount: number;
-  }>;
-  isoCodeFeedback: Array<{
-    code: string;
-    averageFeedbackRating: number;
-    feedbackCount: number;
-    clickRate: number;
-    purchaseRate: number;
-    recommendationCount: number;
-  }>;
-  dailyStats: Array<{
-    date: string;
-    feedbackRating: number;
-    effectivenessScore: number;
-    clickRate: number;
-    purchaseRate: number;
-  }>;
-  dateRange: string;
-  timestamp: string;
-}
+import { AlertCircle, TrendingUp, Star, Target, BarChart3 } from "lucide-react";
+import { useFeedbackAnalysis } from "@/lib/api-hooks";
 
 export function FeedbackAnalysisDashboard() {
-  const [data, setData] = useState<FeedbackAnalysisData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState("30days");
+  const { data, isLoading, isError } = useFeedbackAnalysis(dateRange);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/admin/analytics/feedback-analysis?dateRange=${dateRange}`
-        );
-        if (!response.ok) {
-          throw new Error("데이터를 불러올 수 없습니다");
-        }
-        const result = await response.json();
-        setData(result);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "알 수 없는 오류");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [dateRange]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -115,11 +25,11 @@ export function FeedbackAnalysisDashboard() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>{isError instanceof Error ? isError.message : "알 수 없는 오류"}</AlertDescription>
       </Alert>
     );
   }

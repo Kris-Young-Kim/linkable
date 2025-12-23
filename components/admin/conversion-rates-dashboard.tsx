@@ -1,121 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle2, TrendingUp, TrendingDown, Target, ShoppingCart, MessageSquare, HelpCircle } from "lucide-react";
+import { AlertCircle, Target, ShoppingCart, MessageSquare } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-
-interface ConversionRatesData {
-  summary: {
-    recommendationClickRate: number;
-    expertInquiryRate: number;
-    supportProgramClickRate: number;
-    purchaseConversionRate: number;
-  };
-  metrics: {
-    recommendations: {
-      total: number;
-      clicked: number;
-      clickRate: number;
-    };
-    expertInquiries: {
-      total: number;
-      inquiryRate: number;
-    };
-    supportProgram: {
-      total: number;
-      clickRate: number;
-    };
-    purchases: {
-      total: number;
-      conversionRate: number;
-      totalAmount: number;
-      averageAmount: number;
-      totalCommission: number;
-      averageCommission: number;
-      bySource: Record<string, number>;
-    };
-  };
-  funnel: {
-    consultations: number;
-    recommendations: number;
-    clicks: number;
-    expertInquiries: number;
-    supportClicks: number;
-    purchases: number;
-    rates: {
-      consultationToRecommendation: number;
-      recommendationToClick: number;
-      clickToExpertInquiry: number;
-      clickToSupport: number;
-      clickToPurchase: number;
-      overallConversion: number;
-    };
-  };
-  goals: {
-    recommendationClickRate: {
-      target: number;
-      current: number;
-      achieved: boolean;
-      gap: number;
-    };
-    expertInquiryRate: {
-      target: number;
-      current: number;
-      achieved: boolean;
-      gap: number;
-    };
-    purchaseConversionRate: {
-      target: number;
-      current: number;
-      achieved: boolean;
-      gap: number;
-    };
-  };
-  dailyStats: Array<{
-    date: string;
-    recommendations: number;
-    clicks: number;
-    expertInquiries: number;
-    purchases: number;
-    clickRate: number;
-    purchaseRate: number;
-  }>;
-  dateRange: string;
-  timestamp: string;
-}
+import { useConversionRates } from "@/lib/api-hooks";
 
 export function ConversionRatesDashboard() {
-  const [data, setData] = useState<ConversionRatesData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState("30days");
+  const { data, isLoading, isError } = useConversionRates(dateRange);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetch(
-          `/api/admin/analytics/conversion-rates?dateRange=${dateRange}`
-        );
-        if (!response.ok) {
-          throw new Error("데이터를 불러올 수 없습니다");
-        }
-        const result = await response.json();
-        setData(result);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "알 수 없는 오류");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [dateRange]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -126,11 +24,11 @@ export function ConversionRatesDashboard() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
+        <AlertDescription>{isError instanceof Error ? isError.message : "알 수 없는 오류"}</AlertDescription>
       </Alert>
     );
   }

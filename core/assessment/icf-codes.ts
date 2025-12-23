@@ -272,23 +272,43 @@ export async function findIcfCodeAsync(
     return coreSetCode
   }
 
-  // 확장된 코드는 데이터베이스에서 조회
+  // 확장된 코드는 데이터베이스의 icf_codes 테이블에서 조회
   if (supabase) {
     try {
-      const { data: expansion } = await supabase
-        .from("icf_code_expansions")
-        .select("icf_code, iso_hints")
-        .eq("icf_code", code.toUpperCase())
-        .order("expanded_at", { ascending: false })
-        .limit(1)
+      const { data: icfCode } = await supabase
+        .from("icf_codes")
+        .select("code, name, name_en, description, category, is_in_core_set")
+        .eq("code", code.toLowerCase())
+        .eq("is_active", true)
         .maybeSingle()
 
-      if (expansion) {
+      if (icfCode) {
+        // ISO 힌트는 별도로 조회 (icf_iso_mappings 테이블 또는 icf_code_expansions)
+        let isoHints: string[] | undefined = undefined
+        
+        try {
+          // icf_code_expansions에서 ISO 힌트 조회 시도
+          const { data: expansion } = await supabase
+            .from("icf_code_expansions")
+            .select("iso_hints")
+            .eq("icf_code", code.toUpperCase())
+            .order("expanded_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          
+          if (expansion?.iso_hints && expansion.iso_hints.length > 0) {
+            isoHints = expansion.iso_hints
+          }
+        } catch (error) {
+          // ISO 힌트 조회 실패는 무시 (선택적 정보)
+          console.log(`[findIcfCodeAsync] ISO hints lookup skipped for ${code}`)
+        }
+
         return {
-          code: code.toUpperCase(),
-          description: coreSetCode?.description || getDefaultDescription(code, inferCategory(code) || "b"),
-          category: inferCategory(code) || "b",
-          isoHints: expansion.iso_hints || undefined,
+          code: icfCode.code.toUpperCase(),
+          description: icfCode.name || icfCode.name_en || icfCode.description || coreSetCode?.description || getDefaultDescription(code, (icfCode.category as IcfCategory) || inferCategory(code) || "b"),
+          category: (icfCode.category as IcfCategory) || inferCategory(code) || "b",
+          isoHints,
         }
       }
     } catch (error) {

@@ -900,11 +900,19 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 클라이언트 래퍼 컴포넌트 생성 (언어 처리용)
     - `getTranslation` 함수를 사용하여 서버 컴포넌트에서 번역 처리
 
-- [ ] **클라이언트 사이드 캐싱 도입**
+- [x] **클라이언트 사이드 캐싱 도입** ✅
 
-  - SWR 또는 React Query 도입
+  - SWR 도입 및 전역 설정
   - API 응답 클라이언트 캐싱
   - 예상 효과: 반복 요청 시 응답 시간 80% 감소
+  - **구현 완료**:
+    - SWR 설치 및 Provider 설정 (`lib/swr-provider.tsx`)
+    - API hooks 생성 (`lib/api-hooks.ts`): usePoints, useUserCoupons, useRecommendations, useConsultation, useCtaAbTestConfig, useAdminAnalytics, useRealtimeStats, useAiQualityMetrics, useConversionRates, useFeedbackAnalysis, useAdminLogs, useEnhancedAnalytics
+    - `components/points-display.tsx` SWR로 전환
+    - `components/analytics-dashboard.tsx` SWR로 전환
+    - `components/chat-interface.tsx` 추천 미리보기 SWR로 전환 (ICF 분석 완료 시 조건부 페칭)
+    - 관리자 대시보드 위젯 SWR 적용 및 캐싱 (realtime-stats, ai-quality-metrics, conversion-rates-dashboard, feedback-analysis-dashboard, enhanced-analytics, admin-log-monitor)
+    - 캐싱 전략 설정 (dedupingInterval, revalidateOnFocus 등)
 
 - [ ] **정적 생성 (SSG) 확대**
   - `/about`, `/privacy`, `/terms` 등 정적 페이지 SSG 적용
@@ -1320,11 +1328,19 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 클라이언트 래퍼 컴포넌트 생성 (언어 처리용)
     - `getTranslation` 함수를 사용하여 서버 컴포넌트에서 번역 처리
 
-- [ ] **클라이언트 사이드 캐싱 도입**
+- [x] **클라이언트 사이드 캐싱 도입** ✅
 
-  - SWR 또는 React Query 도입
+  - SWR 도입 및 전역 설정
   - API 응답 클라이언트 캐싱
   - 예상 효과: 반복 요청 시 응답 시간 80% 감소
+  - **구현 완료**:
+    - SWR 설치 및 Provider 설정 (`lib/swr-provider.tsx`)
+    - API hooks 생성 (`lib/api-hooks.ts`): usePoints, useUserCoupons, useRecommendations, useConsultation, useCtaAbTestConfig, useAdminAnalytics
+    - `components/points-display.tsx` SWR로 전환
+    - `components/analytics-dashboard.tsx` SWR로 전환
+    - `components/chat-interface.tsx` 추천 미리보기 SWR로 전환 (ICF 분석 완료 시 조건부 페칭, dedupingInterval 적용)
+    - 관리자 대시보드 위젯 SWR 적용 및 캐싱 (`components/admin/realtime-stats.tsx`, `components/admin/ai-quality-metrics.tsx`, `components/admin/conversion-rates-dashboard.tsx`, `components/admin/feedback-analysis-dashboard.tsx`, `components/admin/enhanced-analytics.tsx`, `components/admin/admin-log-monitor.tsx`)
+    - 캐싱 전략 설정 (dedupingInterval, revalidateOnFocus 등)
 
 - [ ] **정적 생성 (SSG) 확대**
   - `/about`, `/privacy`, `/terms` 등 정적 페이지 SSG 적용
