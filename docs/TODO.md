@@ -914,8 +914,8 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 관리자 대시보드 위젯 SWR 적용 및 캐싱 (realtime-stats, ai-quality-metrics, conversion-rates-dashboard, feedback-analysis-dashboard, enhanced-analytics, admin-log-monitor)
     - 캐싱 전략 설정 (dedupingInterval, revalidateOnFocus 등)
 
-- [ ] **정적 생성 (SSG) 확대**
-  - `/about`, `/privacy`, `/terms` 등 정적 페이지 SSG 적용
+- [x] **정적 생성 (SSG) 확대** ✅
+  - `/about`, `/privacy`, `/terms` 정적 페이지 SSG 적용 (dynamic import 제거, 정적 렌더)
   - ISR 전략 최적화 (재생성 주기 조정)
   - 예상 효과: 정적 페이지 TTFB 50% 감소
 
