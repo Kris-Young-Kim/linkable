@@ -122,7 +122,7 @@ export default function Home() {
       <Suspense fallback={<div className="h-16 bg-muted/50 animate-pulse" />}>
         <Header />
       </Suspense>
-      <main className="flex-1">
+      <main id="main-content" role="main" className="flex-1">
         <Suspense fallback={<div className="h-96 bg-muted/30 animate-pulse" />}>
           <HeroSection />
         </Suspense>

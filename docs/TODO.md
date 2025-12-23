@@ -953,11 +953,21 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - `ippa-form.tsx`: 활동 로딩, 제출 로딩 상태 개선, 에러 메시지 개선 (접근성 속성 추가)
     - 에러 메시지 개선: 명확한 제목, 설명, 해결 방법 안내 추가
 
-- [ ] **접근성 추가 개선**
+- [x] **접근성 추가 개선** ✅
   - 키보드 네비게이션 완전 지원
   - 스크린 리더 테스트 및 개선
   - 색상 대비 WCAG AA 준수 확인
   - 예상 효과: 접근성 점수 10% 향상
+  - **구현 완료**:
+    - Skip to main content 링크 추가 (`components/skip-to-main.tsx`)
+    - 모든 페이지에 `<main id="main-content" role="main">` 추가 (홈, 채팅, 대시보드, 추천)
+    - 키보드 네비게이션 개선: Enter/Space 버튼 활성화, Escape 키로 이미지 취소, Shift+Enter 줄바꿈
+    - aria-live 영역 개선: role="status", aria-label 추가
+    - Dialog 닫기 버튼 aria-label 개선 (한국어)
+    - 모바일 네비게이션 접근성 속성 추가 (aria-expanded, aria-controls, role="navigation")
+    - 외부 링크 열기 전 스크린 리더 알림 추가
+    - 접근성 컨트롤 패널 접근성 속성 개선 (aria-expanded, aria-controls, role="region")
+    - 전역 포커스 스타일 적용 (`app/globals.css`: focus-visible outline-2)
 
 #### 중기 작업 (3-4주)
 

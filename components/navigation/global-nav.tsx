@@ -123,15 +123,26 @@ export function GlobalNav() {
       <div className="flex items-center gap-2 md:hidden">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" aria-label="Open navigation menu">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("header.openMenu") || "내비게이션 메뉴 열기"}
+              aria-expanded="false"
+              aria-controls="mobile-navigation-menu"
+            >
               <Menu className="size-5" aria-hidden="true" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-full sm:max-w-sm">
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-sm"
+            id="mobile-navigation-menu"
+            aria-label={t("header.mobileMenu") || "모바일 내비게이션 메뉴"}
+          >
             <SheetHeader>
               <SheetTitle>LinkAble</SheetTitle>
             </SheetHeader>
-            <div className="mt-6 flex flex-col gap-4">
+            <nav className="mt-6 flex flex-col gap-4" role="navigation" aria-label={t("header.mobileNav") || "모바일 메뉴"}>
               {renderNavLinks(() => document.activeElement instanceof HTMLElement && document.activeElement.blur())}
               <div className="border-t border-border/60 pt-4 space-y-4">
                 <LanguageSelector />
@@ -159,7 +170,7 @@ export function GlobalNav() {
                   </SignUpButton>
                 </SignedOut>
               </div>
-            </div>
+            </nav>
           </SheetContent>
         </Sheet>
       </div>

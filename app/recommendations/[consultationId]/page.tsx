@@ -366,7 +366,7 @@ export default async function RecommendationsDetailPage({
         </div>
       </header>
 
-      <main className="container mx-auto px-4 md:px-6 py-8 space-y-8">
+      <main id="main-content" role="main" className="container mx-auto px-4 md:px-6 py-8 space-y-8">
         {/* 상담 컨텍스트 섹션 */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">

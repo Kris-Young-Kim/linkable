@@ -9,6 +9,7 @@ import { AccessibilityControls } from "@/components/accessibility-controls";
 import { LanguageProvider } from "@/components/language-provider";
 import { RoleGuard } from "@/components/role-guard";
 import { SWRProvider } from "@/lib/swr-provider";
+import { SkipToMain } from "@/components/skip-to-main";
 import "./globals.css";
 
 const inter = Inter({
@@ -157,6 +158,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           )}
         </head>
         <body className={`${inter.className} font-sans antialiased`}>
+          <SkipToMain />
           <noscript>
             <iframe
               src="https://www.googletagmanager.com/ns.html?id=GTM-5JDT98J9"

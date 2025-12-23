@@ -594,9 +594,15 @@ export function ChatInterface() {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
+    // Enter: 전송, Shift+Enter: 줄바꿈
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+    // Escape: 이미지 선택 취소 (있을 경우)
+    if (e.key === "Escape" && selectedImage) {
+      e.preventDefault();
+      handleRemoveImage();
     }
   };
 
@@ -724,6 +730,8 @@ export function ChatInterface() {
         className="sr-only"
         aria-live="polite"
         aria-atomic="true"
+        role="status"
+        aria-label="동적 콘텐츠 변경 알림"
       />
 
       {/* 에러 FAQ 모달 */}

@@ -37,6 +37,15 @@ export function ConversionRatesDashboard() {
     return null;
   }
 
+  // 상담→추천 완료율 목표 정보 (없을 경우 안전한 기본값)
+  const consultationGoal =
+    (data.goals as any).consultationToRecommendationView ?? {
+      target: 70,
+      current: 0,
+      achieved: false,
+      gap: 70,
+    };
+
   const formatPercentage = (value: number) => `${value.toFixed(1)}%`;
   const getStatusColor = (achieved: boolean) => {
     return achieved ? "text-green-600" : "text-yellow-600";
@@ -75,19 +84,19 @@ export function ConversionRatesDashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className={`text-2xl font-bold ${getStatusColor(data.goals.consultationToRecommendationView?.achieved ?? false)}`}>
-                  {formatPercentage(data.goals.consultationToRecommendationView?.current ?? 0)}
+                <div className={`text-2xl font-bold ${getStatusColor(consultationGoal.achieved)}`}>
+                  {formatPercentage(consultationGoal.current)}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  목표: {data.goals.consultationToRecommendationView?.target ?? 70}%
+                  목표: {consultationGoal.target}%
                 </div>
                 <Progress
-                  value={((data.goals.consultationToRecommendationView?.current ?? 0) / (data.goals.consultationToRecommendationView?.target ?? 70)) * 100}
+                  value={(consultationGoal.current / consultationGoal.target) * 100}
                   className="mt-2"
                 />
-                {!(data.goals.consultationToRecommendationView?.achieved ?? false) && (
+                {!consultationGoal.achieved && (
                   <div className="text-xs text-yellow-600 mt-1">
-                    목표까지 {formatPercentage(data.goals.consultationToRecommendationView?.gap ?? 0)} 부족
+                    목표까지 {formatPercentage(consultationGoal.gap)} 부족
                   </div>
                 )}
               </CardContent>

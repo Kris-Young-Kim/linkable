@@ -56,7 +56,12 @@ export function AccessibilityControls() {
   return (
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-3">
       {isOpen && (
-        <div className="w-[260px] rounded-lg border bg-card p-4 shadow-lg">
+        <div
+          id="accessibility-controls-panel"
+          className="w-[260px] rounded-lg border bg-card p-4 shadow-lg"
+          role="region"
+          aria-label="접근성 설정"
+        >
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-1">
               <Label className="text-sm font-semibold">고대비 모드</Label>
@@ -112,10 +117,13 @@ export function AccessibilityControls() {
       <Button
         className="h-12 w-12 rounded-full shadow-lg"
         variant="default"
-        aria-label="접근성 패널 열기"
+        aria-label={isOpen ? "접근성 패널 닫기" : "접근성 패널 열기"}
+        aria-expanded={isOpen}
+        aria-controls="accessibility-controls-panel"
         onClick={() => setIsOpen((prev) => !prev)}
       >
-        {isOpen ? "×" : "A"}
+        <span aria-hidden="true">{isOpen ? "×" : "A"}</span>
+        <span className="sr-only">{isOpen ? "접근성 패널 닫기" : "접근성 패널 열기"}</span>
       </Button>
     </div>
   );

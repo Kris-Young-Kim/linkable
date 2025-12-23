@@ -200,29 +200,31 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <Suspense
-        fallback={
-          <div className="container mx-auto px-4 py-8 space-y-6">
-            <div className="h-12 bg-muted animate-pulse rounded-lg" />
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader>
-                    <div className="h-6 bg-muted rounded w-3/4" />
-                    <div className="h-4 bg-muted rounded w-1/2 mt-2" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-4 bg-muted rounded w-full mb-2" />
-                    <div className="h-4 bg-muted rounded w-5/6" />
-                  </CardContent>
-                </Card>
-              ))}
+      <main id="main-content" role="main">
+        <Suspense
+          fallback={
+            <div className="container mx-auto px-4 py-8 space-y-6">
+              <div className="h-12 bg-muted animate-pulse rounded-lg" />
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardHeader>
+                      <div className="h-6 bg-muted rounded w-3/4" />
+                      <div className="h-4 bg-muted rounded w-1/2 mt-2" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-4 bg-muted rounded w-full mb-2" />
+                      <div className="h-4 bg-muted rounded w-5/6" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
-          </div>
-        }
-      >
-        <DashboardContent consultations={consultations} />
-      </Suspense>
+          }
+        >
+          <DashboardContent consultations={consultations} />
+        </Suspense>
+      </main>
     </div>
   )
 }

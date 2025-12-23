@@ -139,6 +139,14 @@ export function ProductRecommendationCard({
       }
 
       const openLink = () => {
+        // 접근성: 외부 링크 열기 전 스크린 리더에 알림
+        const liveRegion = document.getElementById("aria-live-region");
+        if (liveRegion) {
+          liveRegion.textContent = `${productName} 상품 페이지로 이동합니다 (새 창)`;
+          setTimeout(() => {
+            if (liveRegion) liveRegion.textContent = "";
+          }, 1000);
+        }
         window.open(purchaseLink, "_blank", "noopener,noreferrer");
       };
 
