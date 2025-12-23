@@ -88,6 +88,7 @@ import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
 import { cn } from "@/lib/utils";
+import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
 
 interface Message {
   id: string;
@@ -351,7 +352,12 @@ export function ChatInterface() {
           trackEvent("image_uploaded", { file_size: selectedImage.size });
         } catch (error) {
           console.error("[chat] Failed to convert image to base64:", error);
-          alert(t("chat.imageConversionError"));
+          setErrorState(
+            new Error(
+              t("chat.imageConversionError") ||
+                "이미지 변환에 실패했습니다. 다른 이미지로 시도해주세요."
+            )
+          );
           setIsUploadingImage(false);
           return;
         } finally {
@@ -1051,12 +1057,10 @@ export function ChatInterface() {
                           </div>
                         )}
                         {isLoadingRecommendations ? (
-                          <div className="flex flex-col items-center gap-3">
-                            <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                            <p className="text-sm text-muted-foreground">
-                              {t("chat.loadingRecommendations")}
-                            </p>
-                          </div>
+                          <LoadingSpinner
+                            size="lg"
+                            text={t("chat.loadingRecommendations") || "추천을 준비하고 있습니다..."}
+                          />
                         ) : (
                           <div className="flex flex-col items-center gap-4">
                             <p className="text-base font-medium text-foreground">
@@ -1126,9 +1130,20 @@ export function ChatInterface() {
                     variant="ghost"
                     onClick={handleRemoveImage}
                     aria-label={t("chat.removeImage")}
+                    disabled={isUploadingImage}
                   >
                     ×
                   </Button>
+                </div>
+              )}
+
+              {/* Image Upload Progress */}
+              {isUploadingImage && (
+                <div className="mb-3 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+                  <InlineSpinner size="sm" />
+                  <p className="text-sm text-muted-foreground">
+                    {t("chat.uploadingImage") || "이미지를 업로드하고 있습니다..."}
+                  </p>
                 </div>
               )}
 
@@ -1153,7 +1168,11 @@ export function ChatInterface() {
                   aria-label={t("chat.attachPhoto")}
                   disabled={requiresLogin || isUploadingImage}
                 >
-                  <Paperclip className="size-6" aria-hidden="true" />
+                  {isUploadingImage ? (
+                    <InlineSpinner size="sm" />
+                  ) : (
+                    <Paperclip className="size-6" aria-hidden="true" />
+                  )}
                 </Button>
 
                 {/* Text Input */}

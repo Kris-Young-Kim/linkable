@@ -19,6 +19,7 @@ import { trackEvent } from "@/lib/analytics";
 import type { CtaVariant } from "@/lib/cta-ab-testing";
 import { useToast } from "@/hooks/use-toast";
 import { showIncentiveToast } from "@/components/incentive-notification";
+import { InlineSpinner } from "@/components/ui/loading-states";
 
 type ClickSource = "primary" | "secondary";
 
@@ -281,10 +282,19 @@ export function ProductRecommendationCard({
                 : `${productName} 상품 정보 (링크 없음)`
             }
           >
-            <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
-            {purchaseLink
-              ? t("recommendations.learnMore")
-              : t("recommendations.noLink")}
+            {isPrimaryPending ? (
+              <>
+                <InlineSpinner size="sm" className="mr-2" />
+                {t("recommendations.loading") || "처리 중..."}
+              </>
+            ) : (
+              <>
+                <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
+                {purchaseLink
+                  ? t("recommendations.learnMore")
+                  : t("recommendations.noLink")}
+              </>
+            )}
           </Button>
           <Button
             variant="outline"
@@ -300,10 +310,19 @@ export function ProductRecommendationCard({
                 : `${productName} 구매하기 (링크 없음)`
             }
           >
-            <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
-            {purchaseLink
-              ? t("recommendations.buyNow")
-              : t("recommendations.noLink")}
+            {isSecondaryPending ? (
+              <>
+                <InlineSpinner size="sm" className="mr-2" />
+                {t("recommendations.loading") || "처리 중..."}
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
+                {purchaseLink
+                  ? t("recommendations.buyNow")
+                  : t("recommendations.noLink")}
+              </>
+            )}
           </Button>
         </div>
       );
@@ -364,8 +383,17 @@ export function ProductRecommendationCard({
                 : `${productName} ${variant.primary_button_text} (링크 없음)`
             }
           >
-            {getIcon(variant.primary_button_icon)}
-            {variant.primary_button_text}
+            {isPrimaryPending ? (
+              <>
+                <InlineSpinner size="sm" className="mr-2" />
+                {t("recommendations.loading") || "처리 중..."}
+              </>
+            ) : (
+              <>
+                {getIcon(variant.primary_button_icon)}
+                {variant.primary_button_text}
+              </>
+            )}
           </Button>
 
           {/* 보조 버튼 */}
@@ -383,8 +411,17 @@ export function ProductRecommendationCard({
                 : `${productName} ${variant.secondary_button_text} (링크 없음)`
             }
           >
-            {getIcon(variant.secondary_button_icon)}
-            {variant.secondary_button_text}
+            {isSecondaryPending ? (
+              <>
+                <InlineSpinner size="sm" className="mr-2" />
+                {t("recommendations.loading") || "처리 중..."}
+              </>
+            ) : (
+              <>
+                {getIcon(variant.secondary_button_icon)}
+                {variant.secondary_button_text}
+              </>
+            )}
           </Button>
         </div>
 

@@ -13,6 +13,7 @@ import { trackEvent } from "@/lib/analytics"
 import { useToast } from "@/hooks/use-toast"
 import { showIncentiveToast } from "@/components/incentive-notification"
 import { getIcfActivityByCode, type IcfActivity } from "@/core/assessment/icf-activities"
+import { LoadingSpinner, InlineSpinner } from "@/components/ui/loading-states"
 
 type ActivityPostScore = {
   icfCode: string
@@ -252,10 +253,20 @@ export function IppaForm({
       </CardHeader>
       <CardContent className="space-y-6">
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 p-4 flex items-start gap-3">
-            <AlertCircle className="size-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+          <div
+            className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 p-4 flex items-start gap-3"
+            role="alert"
+            aria-live="assertive"
+          >
+            <AlertCircle className="size-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" aria-hidden="true" />
             <div className="flex-1">
-              <p className="text-sm font-medium text-red-900 dark:text-red-100">{error}</p>
+              <p className="text-sm font-semibold text-red-900 dark:text-red-100 mb-1">
+                {t("ippa.errorTitle") || "오류가 발생했습니다"}
+              </p>
+              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+              <p className="text-xs text-red-700 dark:text-red-300 mt-2">
+                {t("ippa.errorHint") || "잠시 후 다시 시도해주세요. 문제가 계속되면 고객 지원에 문의해주세요."}
+              </p>
             </div>
           </div>
         )}
@@ -272,9 +283,10 @@ export function IppaForm({
 
         {/* 활동별 사후 평가 (상담 단계에서 선택한 활동이 있는 경우) */}
         {isLoadingActivities ? (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">활동 정보를 불러오는 중...</p>
-          </div>
+          <LoadingSpinner
+            size="md"
+            text={t("ippa.loadingActivities") || "활동 정보를 불러오는 중..."}
+          />
         ) : baselineActivities.length > 0 ? (
           <div className="space-y-4">
             <div>
@@ -498,7 +510,14 @@ export function IppaForm({
             className="flex-1 min-h-[44px]"
             aria-label={t("ippa.submit")}
           >
-            {isSubmitting ? t("ippa.submitting") : t("ippa.submit")}
+            {isSubmitting ? (
+              <>
+                <InlineSpinner size="sm" className="mr-2" />
+                {t("ippa.submitting") || "제출 중..."}
+              </>
+            ) : (
+              t("ippa.submit")
+            )}
           </Button>
         </div>
       </CardContent>

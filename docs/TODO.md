@@ -941,11 +941,17 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 관리자 대시보드에 상담→추천 완료율 표시 (`components/admin/conversion-rates-dashboard.tsx`)
     - 목표 달성 여부 추적 (목표: 70%)
 
-- [ ] **로딩 상태 피드백 개선**
+- [x] **로딩 상태 피드백 개선** ✅
 
   - 모든 비동기 작업에 로딩 스피너/스켈레톤 추가
   - 에러 발생 시 명확한 안내 메시지
   - 예상 효과: 사용자 혼란 감소, 만족도 향상
+  - **구현 완료**:
+    - 공통 로딩 컴포넌트 생성 (`components/ui/loading-states.tsx`): LoadingSpinner, InlineSpinner, CardSkeleton, ListSkeleton, PageLoadingOverlay, ButtonLoading
+    - `chat-interface.tsx`: 이미지 업로드 로딩 상태, 추천 로딩 상태 개선
+    - `product-recommendation-card.tsx`: 버튼 클릭 시 로딩 스피너 표시 (기본/A/B 테스트 변형 모두)
+    - `ippa-form.tsx`: 활동 로딩, 제출 로딩 상태 개선, 에러 메시지 개선 (접근성 속성 추가)
+    - 에러 메시지 개선: 명확한 제목, 설명, 해결 방법 안내 추가
 
 - [ ] **접근성 추가 개선**
   - 키보드 네비게이션 완전 지원
