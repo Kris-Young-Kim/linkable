@@ -1,11 +1,13 @@
-"use client"
-
 import { Card } from "@/components/ui/card"
 import { CheckCircle2 } from "lucide-react"
-import { useLanguage } from "@/components/language-provider"
+import { getTranslation, type Language } from "@/lib/translations"
 
-export function HowItWorksSection() {
-  const { t } = useLanguage()
+interface HowItWorksSectionProps {
+  language?: Language
+}
+
+export function HowItWorksSection({ language = "ko" }: HowItWorksSectionProps) {
+  const t = (key: string) => getTranslation(language, key)
 
   const steps = [
     {

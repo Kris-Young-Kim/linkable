@@ -1,18 +1,15 @@
-"use client"
-
 import Link from "next/link"
 import { AlertCircle } from "lucide-react"
-import { useLanguage } from "@/components/language-provider"
+import { getTranslation, type Language } from "@/lib/translations"
 import { Button } from "@/components/ui/button"
+import { FooterLanguageSelector } from "@/components/footer-language-selector"
 
-const languageOptions = [
-  { code: "ko", label: "한국어" },
-  { code: "en", label: "English" },
-  { code: "ja", label: "日本語" },
-]
+interface FooterProps {
+  language?: Language
+}
 
-export function Footer() {
-  const { t, language, setLanguage } = useLanguage()
+export function Footer({ language = "ko" }: FooterProps) {
+  const t = (key: string) => getTranslation(language, key)
 
   return (
     <footer className="border-t border-border bg-muted/30">
@@ -171,26 +168,7 @@ export function Footer() {
               {t("footer.socialContact")}
             </Link>
           </div>
-          <div className="w-full sm:hidden">
-            <label htmlFor="footer-language" className="text-xs font-semibold text-muted-foreground">
-              {t("footer.languageLabel")}
-            </label>
-            <div className="mt-1">
-              <select
-                id="footer-language"
-                value={language}
-                onChange={(event) => setLanguage(event.target.value as typeof language)}
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
-                aria-label={t("footer.languageLabel")}
-              >
-                {languageOptions.map((option) => (
-                  <option key={option.code} value={option.code}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          <FooterLanguageSelector />
         </div>
       </div>
     </footer>

@@ -1,11 +1,13 @@
-"use client"
-
 import { Card, CardContent } from "@/components/ui/card"
 import { Puzzle, HandHeart, Smile } from "lucide-react"
-import { useLanguage } from "@/components/language-provider"
+import { getTranslation, type Language } from "@/lib/translations"
 
-export function FeaturesSection() {
-  const { t } = useLanguage()
+interface FeaturesSectionProps {
+  language?: Language
+}
+
+export function FeaturesSection({ language = "ko" }: FeaturesSectionProps) {
+  const t = (key: string) => getTranslation(language, key)
 
   const features = [
     {

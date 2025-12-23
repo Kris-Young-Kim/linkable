@@ -872,7 +872,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 중기 작업 (3-4주)
 
-- [ ] **서버 컴포넌트 전환**
+- [x] **서버 컴포넌트 전환** ✅
 
   - **전환 대상 컴포넌트 식별**:
     - 정적 콘텐츠만 표시하는 컴포넌트 (Hero, Features, Footer 등)
@@ -883,10 +883,10 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 클라이언트 전용 API (useState, useEffect 등) 제거
     - 서버 컴포넌트에서 직접 데이터 페칭 (Supabase 클라이언트 사용)
   - **우선 전환 대상**:
-    - `components/hero-section.tsx`
-    - `components/features-section.tsx`
-    - `components/how-it-works-section.tsx`
-    - `components/footer.tsx`
+    - `components/hero-section.tsx` ✅
+    - `components/features-section.tsx` ✅
+    - `components/how-it-works-section.tsx` ✅
+    - `components/footer.tsx` ✅
     - 정적 페이지 컴포넌트들
   - **주의사항**:
     - 인터랙티브 요소가 필요한 부분은 Client Component로 분리
@@ -895,6 +895,10 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - Next.js 빌드 후 번들 크기 측정
     - `next build --analyze`로 번들 분석
   - 예상 효과: 번들 크기 20-30% 추가 감소
+  - **구현 완료**:
+    - 서버 컴포넌트로 전환 완료 (hero, features, how-it-works, footer)
+    - 클라이언트 래퍼 컴포넌트 생성 (언어 처리용)
+    - `getTranslation` 함수를 사용하여 서버 컴포넌트에서 번역 처리
 
 - [ ] **클라이언트 사이드 캐싱 도입**
 
@@ -1288,7 +1292,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 **작업**:
 
-- [ ] **서버 컴포넌트 전환**
+- [x] **서버 컴포넌트 전환** ✅
 
   - **전환 대상 컴포넌트 식별**:
     - 정적 콘텐츠만 표시하는 컴포넌트 (Hero, Features, Footer 등)
@@ -1299,10 +1303,10 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - 클라이언트 전용 API (useState, useEffect 등) 제거
     - 서버 컴포넌트에서 직접 데이터 페칭 (Supabase 클라이언트 사용)
   - **우선 전환 대상**:
-    - `components/hero-section.tsx`
-    - `components/features-section.tsx`
-    - `components/how-it-works-section.tsx`
-    - `components/footer.tsx`
+    - `components/hero-section.tsx` ✅
+    - `components/features-section.tsx` ✅
+    - `components/how-it-works-section.tsx` ✅
+    - `components/footer.tsx` ✅
     - 정적 페이지 컴포넌트들
   - **주의사항**:
     - 인터랙티브 요소가 필요한 부분은 Client Component로 분리
@@ -1311,6 +1315,10 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - Next.js 빌드 후 번들 크기 측정
     - `next build --analyze`로 번들 분석
   - 예상 효과: 번들 크기 20-30% 추가 감소
+  - **구현 완료**:
+    - 서버 컴포넌트로 전환 완료 (hero, features, how-it-works, footer)
+    - 클라이언트 래퍼 컴포넌트 생성 (언어 처리용)
+    - `getTranslation` 함수를 사용하여 서버 컴포넌트에서 번역 처리
 
 - [ ] **클라이언트 사이드 캐싱 도입**
 

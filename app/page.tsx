@@ -8,7 +8,8 @@ const Header = dynamic(() => import("@/components/header").then((mod) => ({ defa
 })
 
 // Hero 섹션은 첫 화면에 중요하지만 동적 import로 지연 로딩 (이미지 프리로딩으로 보완)
-const HeroSection = dynamic(() => import("@/components/hero-section").then((mod) => ({ default: mod.HeroSection })), {
+// 서버 컴포넌트로 전환되었지만 언어 처리를 위해 클라이언트 래퍼 사용
+const HeroSection = dynamic(() => import("@/components/hero-section-client").then((mod) => ({ default: mod.HeroSectionClient })), {
   loading: () => (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#fff3e0] via-[#fff8f0] to-[#eef7f4] py-20 md:py-32">
       <div className="container mx-auto px-4 md:px-6">
@@ -22,9 +23,9 @@ const HeroSection = dynamic(() => import("@/components/hero-section").then((mod)
   ssr: true,
 })
 
-// Features, HowItWorks, CTA 섹션은 스크롤 후 보이므로 동적 import
+// Features, HowItWorks 섹션은 서버 컴포넌트로 전환되었지만 언어 처리를 위해 클라이언트 래퍼 사용
 const FeaturesSection = dynamic(
-  () => import("@/components/features-section").then((mod) => ({ default: mod.FeaturesSection })),
+  () => import("@/components/features-section-client").then((mod) => ({ default: mod.FeaturesSectionClient })),
   {
     loading: () => (
       <section className="py-20 md:py-32 bg-background">
@@ -42,7 +43,7 @@ const FeaturesSection = dynamic(
 )
 
 const HowItWorksSection = dynamic(
-  () => import("@/components/how-it-works-section").then((mod) => ({ default: mod.HowItWorksSection })),
+  () => import("@/components/how-it-works-section-client").then((mod) => ({ default: mod.HowItWorksSectionClient })),
   {
     loading: () => (
       <section className="py-20 md:py-32 bg-muted/30">
@@ -69,8 +70,8 @@ const CTASection = dynamic(() => import("@/components/cta-section").then((mod) =
   ),
 })
 
-// Footer는 페이지 하단이므로 동적 import
-const Footer = dynamic(() => import("@/components/footer").then((mod) => ({ default: mod.Footer })), {
+// Footer는 서버 컴포넌트로 전환되었지만 언어 처리를 위해 클라이언트 래퍼 사용
+const Footer = dynamic(() => import("@/components/footer-client").then((mod) => ({ default: mod.FooterClient })), {
   loading: () => (
     <footer className="border-t border-border bg-muted/30">
       <div className="container mx-auto px-4 md:px-6 py-12">

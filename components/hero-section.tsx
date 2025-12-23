@@ -1,12 +1,10 @@
-"use client"
-
 import { Fragment } from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { CTAButton, CTAButtonSecondary } from "@/components/ui/cta-button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
-import { useLanguage } from "@/components/language-provider"
+import { getTranslation, type Language } from "@/lib/translations"
 
 const heroAssistiveImages = [
   {
@@ -51,8 +49,12 @@ const heroAssistiveImages = [
   },
 ]
 
-export function HeroSection() {
-  const { t } = useLanguage()
+interface HeroSectionProps {
+  language?: Language
+}
+
+export function HeroSection({ language = "ko" }: HeroSectionProps) {
+  const t = (key: string) => getTranslation(language, key)
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#fff3e0] via-[#fff8f0] to-[#eef7f4] py-20 md:py-32">
