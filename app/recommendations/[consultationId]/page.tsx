@@ -26,6 +26,7 @@ import { LocalNav } from "@/components/navigation/local-nav";
 import { Breadcrumbs } from "@/components/navigation/breadcrumbs";
 import type { RecommendationProduct } from "@/components/recommendations/recommendations-view-with-filters";
 import type { IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization";
+import { RecommendationsPageTracker } from "@/components/recommendations/recommendations-page-tracker";
 
 // 플로팅 액션 메뉴 (클라이언트 컴포넌트)
 const FloatingActionMenu = dynamic(() =>
@@ -510,6 +511,11 @@ export default async function RecommendationsDetailPage({
                 </div>
               }
             >
+              {/* 추천 페이지 방문 추적 */}
+              <RecommendationsPageTracker
+                consultationId={consultationId}
+                productCount={products.length}
+              />
               <RecommendationsViewWithFilters
                 products={products}
                 errorMessage={errorMessage}

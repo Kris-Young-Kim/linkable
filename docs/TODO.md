@@ -929,11 +929,17 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 단기 작업 (1-2주)
 
-- [ ] **상담→추천 플로우 완료율 측정 및 개선**
+- [x] **상담→추천 플로우 완료율 측정 및 개선** ✅
 
   - 현재 완료율 측정 (목표: 70%)
   - 상담 종료 시 추천 CTA 강조 (애니메이션, 하이라이트)
   - 예상 효과: 완료율 50% → 70%
+  - **구현 완료**:
+    - 추천 페이지 방문 추적 컴포넌트 생성 (`components/recommendations/recommendations-page-tracker.tsx`)
+    - 상담 완료 후 추천 페이지 방문 비율 측정 API 추가 (`app/api/admin/analytics/conversion-rates/route.ts`)
+    - `chat-interface.tsx`에서 추천 CTA 강조 (애니메이션, 하이라이트, 링 효과)
+    - 관리자 대시보드에 상담→추천 완료율 표시 (`components/admin/conversion-rates-dashboard.tsx`)
+    - 목표 달성 여부 추적 (목표: 70%)
 
 - [ ] **로딩 상태 피드백 개선**
 

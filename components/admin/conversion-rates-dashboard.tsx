@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Target, ShoppingCart, MessageSquare } from "lucide-react";
+import { AlertCircle, Target, ShoppingCart, MessageSquare, ArrowRight } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useConversionRates } from "@/lib/api-hooks";
 
@@ -66,7 +66,33 @@ export function ConversionRatesDashboard() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* 목표 달성 현황 */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm font-medium">상담→추천 완료율</CardTitle>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-2xl font-bold ${getStatusColor(data.goals.consultationToRecommendationView?.achieved ?? false)}`}>
+                  {formatPercentage(data.goals.consultationToRecommendationView?.current ?? 0)}
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  목표: {data.goals.consultationToRecommendationView?.target ?? 70}%
+                </div>
+                <Progress
+                  value={((data.goals.consultationToRecommendationView?.current ?? 0) / (data.goals.consultationToRecommendationView?.target ?? 70)) * 100}
+                  className="mt-2"
+                />
+                {!(data.goals.consultationToRecommendationView?.achieved ?? false) && (
+                  <div className="text-xs text-yellow-600 mt-1">
+                    목표까지 {formatPercentage(data.goals.consultationToRecommendationView?.gap ?? 0)} 부족
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">

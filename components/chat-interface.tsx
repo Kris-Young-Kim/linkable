@@ -87,6 +87,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
+import { cn } from "@/lib/utils";
 
 interface Message {
   id: string;
@@ -989,8 +990,19 @@ export function ChatInterface() {
                       <div className="mt-6 text-center">
                         <Button
                           size="lg"
-                          className="min-h-[44px] px-8"
+                          className={cn(
+                            "min-h-[44px] px-8",
+                            "bg-primary text-primary-foreground hover:bg-primary/90",
+                            "shadow-lg shadow-primary/30",
+                            "ring-2 ring-primary ring-offset-2",
+                            "animate-pulse hover:animate-none",
+                            "transition-all duration-300 hover:scale-105",
+                            "font-bold"
+                          )}
                           onClick={() => {
+                            trackEvent("cta_recommendation_from_chat", {
+                              consultation_id: consultationId,
+                            });
                             router.push(`/recommendations/${consultationId}`);
                           }}
                         >
@@ -1054,6 +1066,13 @@ export function ChatInterface() {
                               variant="recommendations"
                               href={`/recommendations/${consultationId}`}
                               size="lg"
+                              className={cn(
+                                "shadow-lg shadow-primary/30",
+                                "ring-2 ring-primary ring-offset-2",
+                                "animate-pulse hover:animate-none",
+                                "transition-all duration-300 hover:scale-105",
+                                "font-bold"
+                              )}
                               onClick={() =>
                                 trackEvent("cta_recommendation_from_chat", {
                                   consultation_id: consultationId,

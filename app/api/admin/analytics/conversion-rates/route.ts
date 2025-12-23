@@ -158,9 +158,46 @@ export async function GET(request: NextRequest) {
 
     const totalConsultations = consultations?.length ?? 0;
 
+    // 상담 완료 후 추천 페이지 방문 비율 측정
+    // 상담 완료된 상담 중 추천이 생성된 상담의 비율
+    const { data: completedConsultations, error: completedError } = await supabase
+      .from("consultations")
+      .select("id, created_at")
+      .eq("status", "completed")
+      .gte("created_at", startDate.toISOString());
+
+    if (completedError) {
+      console.error("[Conversion Rates] Completed consultations fetch error:", completedError);
+    }
+
+    const totalCompletedConsultations = completedConsultations?.length ?? 0;
+
+    // 상담 완료 후 추천 페이지 방문 비율
+    // 추천이 생성되었다는 것은 추천 페이지를 방문했다는 의미
+    const { data: recommendationsByConsultation } = await supabase
+      .from("recommendations")
+      .select("consultation_id")
+      .gte("created_at", startDate.toISOString());
+
+    // 상담별로 추천이 있는지 확인
+    const consultationsWithRecommendations = new Set(
+      recommendationsByConsultation?.map((r) => r.consultation_id) ?? []
+    );
+
+    // 완료된 상담 중 추천 페이지를 방문한 상담 수
+    const completedConsultationsWithRecommendations = completedConsultations?.filter(
+      (c) => consultationsWithRecommendations.has(c.id)
+    ).length ?? 0;
+
+    const consultationToRecommendationViewRate =
+      totalCompletedConsultations > 0
+        ? (completedConsultationsWithRecommendations / totalCompletedConsultations) * 100
+        : 0;
+
     // 퍼널 단계별 전환율
     const funnel = {
       consultations: totalConsultations,
+      completedConsultations: totalCompletedConsultations,
       recommendations: totalRecommendations,
       clicks: clickedRecommendations,
       expertInquiries: totalExpertInquiries,
@@ -171,6 +208,7 @@ export async function GET(request: NextRequest) {
           totalConsultations > 0
             ? (totalRecommendations / totalConsultations) * 100
             : 0,
+        consultationToRecommendationView: consultationToRecommendationViewRate, // 상담 완료 후 추천 페이지 방문 비율
         recommendationToClick: recommendationClickRate,
         clickToExpertInquiry: expertInquiryRate,
         clickToSupport: supportProgramClickRate,
@@ -182,6 +220,12 @@ export async function GET(request: NextRequest) {
 
     // 6. 목표 달성 여부
     const goals = {
+      consultationToRecommendationView: {
+        target: 70, // 상담 완료 후 추천 페이지 방문 비율 목표: 70%
+        current: Number(consultationToRecommendationViewRate.toFixed(2)),
+        achieved: consultationToRecommendationViewRate >= 70,
+        gap: Math.max(0, 70 - consultationToRecommendationViewRate),
+      },
       recommendationClickRate: {
         target: 25,
         current: Number(recommendationClickRate.toFixed(2)),
@@ -256,6 +300,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       summary: {
+        consultationToRecommendationViewRate: Number(consultationToRecommendationViewRate.toFixed(2)),
         recommendationClickRate: Number(recommendationClickRate.toFixed(2)),
         expertInquiryRate: Number(expertInquiryRate.toFixed(2)),
         supportProgramClickRate: Number(supportProgramClickRate.toFixed(2)),
