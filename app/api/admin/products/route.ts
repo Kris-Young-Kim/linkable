@@ -40,11 +40,22 @@ export async function GET() {
     .order("updated_at", { ascending: false })
 
   if (error) {
-    console.error("[Admin Products] Fetch error:", error)
-    return NextResponse.json({ error: "상품을 불러오지 못했습니다." }, { status: 500 })
+    console.error("[Admin Products API] Fetch error:", {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+      // 환경변수 확인 (민감 정보 제외)
+      hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    })
+    return NextResponse.json(
+      { error: `상품을 불러오지 못했습니다: ${error.message}` },
+      { status: 500 }
+    )
   }
 
-  console.log(`[Admin Products] Fetched ${data?.length ?? 0} products`)
+  console.log(`[Admin Products API] Fetched ${data?.length ?? 0} products`)
   return NextResponse.json({ products: data ?? [] })
 }
 
@@ -87,10 +98,20 @@ export async function POST(request: Request) {
     let failed = 0
 
     for (const product of body.products) {
-      if (!product.name || !product.iso_code) {
+      // name만 필수, iso_code는 선택 사항 (ICF 매칭 시에만 사용)
+      if (!product.name || !product.name.trim()) {
+        console.error(`[Admin Products] Validation failed:`, {
+          name: product.name,
+          iso_code: product.iso_code,
+          hasName: !!product.name,
+          nameTrimmed: product.name?.trim(),
+        })
         failed++
         continue
       }
+
+      // ISO 코드 정규화 (빈 문자열은 null로 변환)
+      const normalizedIsoCode = product.iso_code?.trim() || null;
 
       try {
         const parsedPrice =
@@ -113,7 +134,7 @@ export async function POST(request: Request) {
             .from("products")
             .update({
               name: product.name,
-              iso_code: product.iso_code,
+              iso_code: normalizedIsoCode,
               description: product.description ?? null,
               price: parsedPrice,
               image_url: product.image_url ?? null,
@@ -135,7 +156,7 @@ export async function POST(request: Request) {
             .from("products")
             .insert({
               name: product.name,
-              iso_code: product.iso_code,
+              iso_code: normalizedIsoCode,
               description: product.description ?? null,
               price: parsedPrice,
               purchase_link: product.purchase_link ?? null,
@@ -146,10 +167,21 @@ export async function POST(request: Request) {
             })
 
           if (error) {
-            console.error(`[Admin Products] Insert error for ${product.name}:`, error)
+            console.error(`[Admin Products] Insert error for ${product.name}:`, {
+              message: error.message,
+              details: error.details,
+              hint: error.hint,
+              code: error.code,
+              product: {
+                name: product.name,
+                iso_code: product.iso_code,
+                purchase_link: product.purchase_link,
+              },
+            })
             failed++
           } else {
             created++
+            console.log(`[Admin Products] Product created: ${product.name}`)
           }
         }
       } catch (error) {
@@ -168,9 +200,12 @@ export async function POST(request: Request) {
   }
 
   // 단일 상품 등록
-  if (!body.name || !body.iso_code) {
-    return NextResponse.json({ error: "상품 이름과 ISO 코드는 필수입니다." }, { status: 400 })
+  if (!body.name || !body.name.trim()) {
+    return NextResponse.json({ error: "상품 이름은 필수입니다." }, { status: 400 })
   }
+
+  // ISO 코드 정규화 (선택 사항)
+  const normalizedIsoCode = body.iso_code?.trim() || null;
 
   const parsedPrice =
     typeof body.price === "string"
@@ -183,7 +218,7 @@ export async function POST(request: Request) {
     .from("products")
     .insert({
       name: body.name,
-      iso_code: body.iso_code,
+      iso_code: normalizedIsoCode,
       description: body.description ?? null,
       price: parsedPrice,
       purchase_link: body.purchase_link ?? null,

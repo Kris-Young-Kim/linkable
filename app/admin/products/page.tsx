@@ -93,8 +93,16 @@ export default async function AdminProductsPage() {
     .order("updated_at", { ascending: false })
 
   if (error) {
-    throw new Error("상품 정보를 불러오지 못했습니다.")
+    console.error("[Admin Products Page] Supabase error:", {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code,
+    })
+    throw new Error(`상품 정보를 불러오지 못했습니다: ${error.message}`)
   }
+
+  console.log(`[Admin Products Page] Loaded ${data?.length ?? 0} products from database`)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-10">

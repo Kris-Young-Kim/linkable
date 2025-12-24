@@ -8,18 +8,35 @@
 2. [핵심 기능 흐름](#핵심-기능-흐름)
 3. [사용자 여정](#사용자-여정)
 4. [Phase 1 — Foundation & 환경 구축](#phase-1--foundation--환경-구축)
-5. [Phase 2 — Assessment 엔진](#phase-2--assessment-엔진)
-6. [Phase 3 — Matching & UX](#phase-3--matching--ux)
-7. [Phase 4 — Validation & 하드닝](#phase-4--validation--하드닝)
-8. [Phase 4.5 — ICF 코드 확장 전략](#phase-45--icf-코드-확장-전략)
-9. [Phase 4.6 — 매칭 정확도 개선](#phase-46--매칭-정확도-개선)
-10. [Phase 4.7 — RLS 정책 활성화 및 Clerk JWT 통합](#phase-47--rls-정책-활성화-및-clerk-jwt-통합)
-11. [Phase 5 — 프론트엔드 완성도 향상](#phase-5--프론트엔드-완성도-향상)
-12. [Post-MVP 전략](#post-mvp-전략)
+5. [데이터베이스 관리 원칙](#데이터베이스-관리-원칙)
+6. [Phase 2 — Assessment 엔진](#phase-2--assessment-엔진)
+7. [Phase 3 — Matching & UX](#phase-3--matching--ux)
+8. [Phase 4 — Validation & 하드닝](#phase-4--validation--하드닝)
+9. [Phase 4.5 — ICF 코드 확장 전략](#phase-45--icf-코드-확장-전략)
+10. [Phase 4.6 — 매칭 정확도 개선](#phase-46--매칭-정확도-개선)
+11. [Phase 4.7 — RLS 정책 활성화 및 Clerk JWT 통합](#phase-47--rls-정책-활성화-및-clerk-jwt-통합)
+12. [Phase 5 — 프론트엔드 완성도 향상](#phase-5--프론트엔드-완성도-향상)
+13. [Post-MVP 전략](#post-mvp-전략)
 
 ---
 
 ## 최근 완료된 작업
+
+### 2025-02-21: 데이터베이스 관리 원칙 수립
+
+- ✅ 데이터베이스 관리 원칙 문서화
+  - 절대 수정 금지 테이블 리스트 정의 (`docs/database-maintenance-guide.md`)
+  - 제한적 수정 가능 테이블 정의 (products, coupons)
+  - 운영자 체크리스트 10가지 작성
+  - 로그 모니터링 포인트 정의
+- ✅ 데이터베이스 정규화 가이드 작성 (`docs/database-normalization-guide.md`)
+  - 정규화 원칙 수립 (배열 데이터 사용 금지, 1:N 관계 사용)
+  - ICF 코드 정규화 완료 (`icf_codes` + `consultation_icf_codes`)
+  - ISO 코드 정규화 완료 (`iso_codes` + `products.iso_code_id`)
+  - 크롤링 데이터 3단계 정규화 계층 설계
+- ✅ 비개발자 데이터 관리 가이드 작성 (`docs/비개발자-데이터관리-가이드.md`)
+  - 비개발자 운영자를 위한 단계별 가이드
+  - FAQ 섹션 추가
 
 ### 2025-02-20: 피드백 데이터 분석 시스템 구축
 
@@ -175,12 +192,168 @@ K-IPPA 사후 평가 제출 (/dashboard/ippa/[recommendationId])
 - [x] 환경 변수 템플릿(`.env.example`)에 Clerk/Supabase/Gemini 키 정의.
 - [x] Supabase 스키마(`docs/Linkable-MVP.sql`)를 기준으로 테이블/관계 점검, RLS 비활성 확인.
 - [x] Logging 기본 정책 수립: 핵심 이벤트용 헬퍼 함수 또는 최소 `console.log` 위치 정의.
+- [x] **데이터베이스 관리 원칙 수립**:
+  - [x] 절대 수정 금지 테이블 리스트 정의 (`docs/database-maintenance-guide.md`)
+  - [x] 제한적 수정 가능 테이블 정의 (products, coupons)
+  - [x] 정규화 원칙 수립 (배열 데이터 사용 금지, 1:N 관계 사용)
+  - [x] 운영자 체크리스트 작성 (`docs/비개발자-데이터관리-가이드.md`)
+  - [x] 안전한 데이터 수정 방법 가이드 작성
 
 ### Deliverables
 
 - 정리된 폴더 구조
 - 동작하는 Next.js dev 환경
 - `.env.example`, 기본 로그 가이드
+
+---
+
+## 데이터베이스 관리 원칙
+
+**참고 문서**: `docs/database-maintenance-guide.md`, `docs/database-normalization-guide.md`, `docs/비개발자-데이터관리-가이드.md`
+
+### 핵심 원칙
+
+#### 1. 절대 수정 금지 테이블
+
+다음 테이블들은 **Supabase 대시보드에서 절대 수정하면 안 됩니다**:
+
+**돈 (포인트/전환)**:
+
+- `point_transactions` - 포인트 원장
+- `user_coupons` - 쿠폰 사용 이력
+- `conversion_events` - 클릭/전환/구매 이벤트 로그
+
+**시간 (상담/메시지)**:
+
+- `consultations` - 상담 세션 헤더
+- `chat_messages` - 상담 대화 원장
+- `notifications` - 사용자 알림 원장
+
+**근거 (AI분석/로그)**:
+
+- `analysis_results` - AI 분석 결과 원장
+- `recommendations` - 추천 결과 원장
+- `icf_code_usage_logs` - ICF 코드 사용 로그
+- `icf_code_statistics` - ICF 통계 (재계산으로만 갱신)
+- `icf_code_expansions` - 코드 확장 히스토리
+- `consultation_feedback` - 상담 피드백 원장
+- `ippa_evaluations` - 효과성 평가 원장
+
+**권한 (users/role)**:
+
+- `users` - 특히 `id`, `clerk_id`, `email`, `role`, `points` 필드
+
+**위험성**:
+
+- 데이터 무결성 파괴 (외래키 관계 깨짐)
+- 추적 불가능 (감사/증거 자료 손실)
+- 보안 취약 (권한 우회 가능)
+
+#### 2. 제한적 수정 가능 테이블
+
+**products (상품 카탈로그)**:
+
+- ✅ 허용: `description`, `image_url`, `purchase_link`, `price`, `is_active`, `category`
+- ❌ 금지: `id`, `iso_code` (PK/FK 필드)
+- ⚠️ 주의: 대량 일괄 수정 금지 (10건 이상은 마이그레이션 스크립트 필수)
+
+**coupons (쿠폰 정책)**:
+
+- ✅ 허용: `name`, `description`, `discount_value`, `valid_from`, `valid_until`, `is_active`, `usage_limit`
+- ❌ 금지: `id`, `code`, `usage_count` (시스템에서 관리)
+
+#### 3. 정규화 원칙
+
+**핵심 원칙**: 배열 데이터(JSONB, ARRAY)는 사용하지 않고, 별도 테이블을 만들어 1:N 관계로 관리합니다.
+
+**정규화된 구조**:
+
+- ✅ `icf_codes` + `consultation_icf_codes` (1:N 관계)
+- ✅ `iso_codes` + `products.iso_code_id` (FK 관계)
+- ✅ `manufacturers` + `products.manufacturer_id` (FK 관계)
+- ✅ `categories` + `products.category_id` (FK 관계)
+
+**정규화 필요 영역** (우선순위 HIGH):
+
+- `consultations.ippa_activities` (JSONB) → `consultation_ippa_activities` 테이블
+- `ippa_evaluations.activity_scores` (JSONB) → `ippa_evaluation_activity_scores` 테이블
+- `analysis_results.icf_codes` (JSONB) → `analysis_icf_codes` 테이블 (이미 `consultation_icf_codes` 존재)
+
+#### 4. 안전한 데이터 수정 방법
+
+**원칙**:
+
+1. **애플리케이션을 통한 수정**: 모든 데이터 수정은 API를 통해 수행
+2. **마이그레이션을 통한 수정**: 대량 데이터 수정은 마이그레이션 스크립트로 수행
+3. **읽기 전용 조회**: 대시보드에서 데이터 조회는 허용
+
+**절차**:
+
+- 10건 이하: 대시보드에서 수정 가능 (단, PK/FK 제외)
+- 10건 이상: 마이그레이션 스크립트 필수
+- DELETE 대신 `is_active = false` 사용
+- 포인트/전환 값은 수정 대신 정정 기록(INSERT) 추가
+
+#### 5. 운영자 체크리스트 (작업 전)
+
+1. ✅ 작업 대상이 절대 수정 금지 테이블인지 확인
+2. ✅ 수정 전, 대상 row를 먼저 SELECT로 '범위' 확인
+3. ✅ PK/FK는 절대 수정하지 않음
+4. ✅ DELETE는 원칙적으로 금지 (비활성화 사용)
+5. ✅ 결제/전환/포인트 값은 '정정 기록(추가 row)'로 처리
+6. ✅ 대량 UPDATE/INSERT는 마이그레이션 스크립트 사용
+7. ✅ 작업 전 "백업/복구 가능 여부" 확인
+
+#### 6. 운영자 체크리스트 (작업 후)
+
+8. ✅ 작업 후 '검증 쿼리' 실행
+9. ✅ 로그/지표 모니터링 (주 1회 이상)
+10. ✅ 권한 관련 변경은 절대 대시보드에서 즉흥적으로 하지 않음
+
+#### 7. 로그 모니터링 포인트
+
+**정기적으로 확인할 지표**:
+
+- **일 1회**: 트래킹/매출 퍼널 (`conversion_events`), 추천 시스템 (`recommendations`)
+- **주 1회**: AI 분석 파이프라인 (`analysis_results`), 어뷰징 탐지 (`point_transactions`)
+
+**경고 신호**:
+
+- ⚠️ 최근 1시간 동안 이벤트가 0건이면 트래킹 장애 가능
+- ⚠️ 추천이 0건이면 추천 시스템 장애
+- ⚠️ 상담은 생기는데 분석 결과가 없으면 파이프라인 문제
+- ⚠️ 특정 사용자가 비정상적으로 많은 포인트 적립
+
+#### 8. 크롤링 데이터 관리 원칙
+
+**3단계 정규화 계층**:
+
+- **Raw(원문 보관)**: 크롤링한 HTML/JSON 원문 저장
+- **Listing(원천 상품)**: 소스별 상품 단위 (`source_id + external_id`)
+- **Canonical(정제 상품)**: 서비스가 추천하는 표준 상품 (`products`)
+
+**주요 테이블**:
+
+- `crawl_sources` - 소스/채널 정의
+- `crawl_jobs`, `crawl_requests` - 크롤링 작업 추적
+- `raw_documents` - 원문 저장 (파티션 필요)
+- `product_listings` - 원천 상품
+- `listing_price_snapshots` - 가격/재고 변동값 (파티션 필요)
+- `product_listing_map` - 중복 제거/매핑
+
+**DBA 체크리스트**:
+
+- 데이터 폭증 테이블부터 파티션/보관정책 먼저 정하기
+- 중복 방지 키(UNIQUE) 필수 (`source_id + external_id`)
+- 원문 저장은 "DB vs 스토리지" 조기에 결정
+- 추천/구매/전환 "정답 테이블"을 하나로 고정
+- 장애/차단/재시도는 애초에 데이터 모델에 포함
+
+### 참고 문서
+
+- [데이터베이스 관리 원칙](./database-maintenance-guide.md) - 상세한 관리 원칙 및 운영자 체크리스트
+- [데이터베이스 정규화 가이드](./database-normalization-guide.md) - 정규화 관련 상세 가이드 및 크롤링 확장 DDL
+- [비개발자 데이터 관리 가이드](./비개발자-데이터관리-가이드.md) - 비개발자 운영자를 위한 가이드
 
 ---
 
@@ -494,30 +667,34 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
      - [x] Edge Function 사용 가이드 작성 (`supabase/functions/clerk-to-supabase-jwt/README.md`)
      - [x] 배포 및 설정 가이드 작성 (`docs/supabase-edge-function-guide.md`)
 
-  3. **배포 준비**
+  3. **배포 준비** (선택사항 - 현재는 API Route 방식 사용 중)
 
      - [x] Edge Function 코드 작성 완료
-     - [ ] Supabase CLI를 통한 배포 (수동 작업 필요)
-     - [ ] 환경 변수 설정 (Supabase Dashboard에서 수동 설정 필요)
-     - [ ] 배포 후 테스트
+     - [ ] **환경 변수 설정** (Supabase Dashboard에서 설정)
+       - [ ] Supabase Dashboard 접속
+       - [ ] **Settings** → **Edge Functions** → **Secrets** 이동
+       - [ ] 다음 환경 변수 추가:
+         - `SUPABASE_URL`: Supabase 프로젝트 URL
+         - `SUPABASE_JWT_SECRET`: Settings > API > JWT Settings에서 확인
+         - `SUPABASE_ANON_KEY`: Settings > API에서 확인
+     - [ ] **Edge Function 배포** (Supabase Dashboard에서 배포)
+       - [ ] Supabase Dashboard → **Edge Functions** 메뉴 이동
+       - [ ] **Create Function** 클릭
+       - [ ] Function 이름: `clerk-to-supabase-jwt`
+       - [ ] `supabase/functions/clerk-to-supabase-jwt/index.ts` 코드 복사하여 붙여넣기
+       - [ ] 배포 완료 확인
+     - [ ] **배포 후 테스트**
+       - [ ] Edge Function 엔드포인트 호출 테스트
+       - [ ] JWT 생성 검증
+       - [ ] CORS 헤더 확인
+       - [ ] 에러 처리 검증
 
-  **배포 방법**:
+  **참고**: 현재는 API Route 방식(`app/api/auth/supabase-token/route.ts`)을 사용 중이므로, Edge Function 배포는 선택사항입니다. Edge Function을 사용하면 성능 향상이 있지만, 현재 방식으로도 충분히 동작합니다.
 
-  ```bash
-  # 1. Supabase CLI 설치
-  npm install -g supabase
+  **⚠️ 주의사항**:
 
-  # 2. 프로젝트 연결
-  supabase link --project-ref your-project-ref
-
-  # 3. 환경 변수 설정 (Supabase Dashboard 또는 CLI)
-  supabase secrets set SUPABASE_URL=https://xxx.supabase.co
-  supabase secrets set SUPABASE_JWT_SECRET=your-jwt-secret
-  supabase secrets set SUPABASE_ANON_KEY=your-anon-key
-
-  # 4. Edge Function 배포
-  supabase functions deploy clerk-to-supabase-jwt
-  ```
+  - 환경 변수는 민감한 정보이므로 Supabase Dashboard의 Secrets에서만 관리
+  - Edge Function 배포는 선택사항이며, 현재 API Route 방식으로 충분히 동작함
 
   **참고 문서**:
 
@@ -767,6 +944,49 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 - [ ] Admin UI에서 상품 수동 등록/수정 화면 추가
 - [ ] 제휴 링크 상태 체크 함수 구현
 
+#### 데이터베이스 관리 원칙 적용
+
+**크롤링 데이터 관리 원칙** (참고: `docs/database-normalization-guide.md`):
+
+- [x] **3단계 정규화 계층 설계**:
+
+  - Raw(원문 보관): `raw_documents` 테이블
+  - Listing(원천 상품): `product_listings` 테이블 (`source_id + external_id` 유니크)
+  - Canonical(정제 상품): `products` 테이블
+
+- [ ] **크롤링 관련 테이블 구축**:
+
+  - [ ] `crawl_sources` - 소스/채널 정의
+  - [ ] `crawl_jobs`, `crawl_requests` - 크롤링 작업 추적 (파티션 필요)
+  - [ ] `raw_documents` - 원문 저장 (파티션 필요)
+  - [ ] `product_listings` - 원천 상품
+  - [ ] `listing_price_snapshots` - 가격/재고 변동값 (파티션 필요)
+  - [ ] `product_listing_map` - 중복 제거/매핑
+
+- [x] **DBA 체크리스트 적용**:
+  - [x] 데이터 폭증 테이블 파티션/보관정책 설정
+    - [x] `chat_messages` - 월별 파티션, 1년 보관
+    - [x] `conversion_events` - 월별 파티션, 1년 보관
+    - [x] `icf_code_usage_logs` - 월별 파티션, 1년 보관
+    - [x] `point_transactions` - 월별 파티션, 1년 보관
+    - [x] `notifications` - 월별 파티션, 1년 보관
+    - [x] `realtime_learning_events` - 월별 파티션, 1년 보관
+    - [x] 자동 파티션 생성 함수 (`create_monthly_partition`)
+    - [x] 오래된 파티션 삭제 함수 (`drop_old_partitions`)
+    - [x] 보관 정책 적용 함수 (`apply_retention_policy`)
+    - [x] 파티션 상태 모니터링 뷰 (`v_partition_status`)
+  - [ ] 중복 방지 키(UNIQUE) 설정 (`source_id + external_id`)
+  - [ ] 원문 저장 전략 결정 (DB vs 스토리지)
+  - [ ] 추천/구매/전환 "정답 테이블" 통일 (`conversion_events` 기준)
+  - [ ] 장애/차단/재시도 필드 추가 (`attempt_count`, `next_retry_at`, `error_*`)
+
+**상품 데이터 수정 원칙** (참고: `docs/database-maintenance-guide.md`):
+
+- ✅ `products` 테이블은 제한적 수정 가능 (개별 상품 정보 수정 허용)
+- ❌ PK/FK 필드 수정 금지 (`id`, `iso_code_id` 등)
+- ❌ 대량 일괄 수정 금지 (10건 이상은 마이그레이션 스크립트 필수)
+- ✅ 삭제 대신 `is_active = false` 사용
+
 ### Post-MVP Score Improvement Strategy
 
 **최종 업데이트**: 2025-02-19
@@ -973,8 +1193,9 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 - [ ] **사용자 피드백 수집 시스템**
 
+  - 보조기기 추천 완료 후 **개인 대시보드**에서 만족도/도움 여부 질문
   - 상담 종료 시 간단한 만족도 설문 (1-2문항)
-  - 추천 페이지에서 "도움이 되었나요?" 피드백 버튼
+  - 추천 페이지 또는 대시보드 위젯에 "도움이 되었나요?" 피드백 버튼
   - 예상 효과: 사용자 경험 개선 데이터 수집
 
 - [ ] **에러 복구 경험 개선**

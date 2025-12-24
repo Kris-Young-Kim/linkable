@@ -86,13 +86,30 @@ export function AdminProductManager({
   // 제품 목록 새로고침 함수
   const fetchProducts = useCallback(async () => {
     try {
+      console.log("[Admin Products] Fetching products from API...");
       const response = await fetch("/api/admin/products");
-      if (response.ok) {
-        const data = await response.json();
-        setProducts(data.products || []);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("[Admin Products] API error:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        });
+        setErrorMessage(`상품 목록을 불러오지 못했습니다 (${response.status})`);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log(`[Admin Products] Received ${data.products?.length ?? 0} products`);
+      setProducts(data.products || []);
+      
+      if (!data.products || data.products.length === 0) {
+        console.warn("[Admin Products] No products found in database");
       }
     } catch (error) {
       console.error("[Admin Products] 제품 목록 새로고침 실패:", error);
+      setErrorMessage("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
     }
   }, []);
 
@@ -131,9 +148,8 @@ export function AdminProductManager({
 
   // 크롤링 (단순화)
   const [crawlValues, setCrawlValues] = useState({
-    url: "", // 웹사이트 URL만
-    isoCode: "", // 선택 사항
-    max: "10", // 기본값
+    url: "", // 웹사이트 URL
+    max: "30", // 기본값
   });
   const [isCrawling, setIsCrawling] = useState(false);
   const [crawlResult, setCrawlResult] = useState<string | null>(null);
@@ -282,7 +298,7 @@ export function AdminProductManager({
     return `https://${trimmed}`;
   };
 
-  // 크롤링 실행 핸들러 (Playwright만 사용)
+  // 크롤링 실행 핸들러 (fetch + cheerio 기반)
   const handleCrawl = async () => {
     if (!crawlValues.url) {
       setErrorMessage("웹사이트 URL을 입력해주세요.");
@@ -295,7 +311,7 @@ export function AdminProductManager({
     setCrawlPreview([]);
     setSelectedPreviewProducts(new Set());
     setCrawlLogs([]);
-    addCrawlLog("Playwright 크롤링 시작...");
+    addCrawlLog("HTML 크롤링 시작...");
 
     try {
       const normalizedUrl = normalizeUrlInput(crawlValues.url);
@@ -309,8 +325,7 @@ export function AdminProductManager({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: normalizedUrl,
-          isoCode: crawlValues.isoCode || undefined,
-          max: crawlValues.max ? parseInt(crawlValues.max) : 10,
+          max: crawlValues.max ? parseInt(crawlValues.max) : 30,
         }),
         signal: controller.signal,
       });
@@ -333,14 +348,21 @@ export function AdminProductManager({
           new Set(result.products.map((p: { id: string }) => p.id))
         );
       } else {
-        setCrawlResult(result.message || "제품을 찾을 수 없습니다.");
+        // 디버깅 정보가 있으면 표시
+        if (result.debug) {
+          const debugMsg = `제품을 찾을 수 없습니다.\n\n디버깅 정보:\n- HTML 길이: ${result.debug.htmlLength} bytes\n- 링크 개수: ${result.debug.linkCount}개\n- 테이블 개수: ${result.debug.tableCount}개\n- 발견된 셀렉터: ${result.debug.foundSelector || "없음"}\n\n페이지 구조를 확인하거나 다른 URL을 시도해보세요.`;
+          setCrawlResult(debugMsg);
+          addCrawlLog(`디버깅: 링크 ${result.debug.linkCount}개, 테이블 ${result.debug.tableCount}개 발견`, true);
+        } else {
+          setCrawlResult(result.message || "제품을 찾을 수 없습니다.");
+        }
       }
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
         addCrawlLog("사용자에 의해 크롤링이 중단되었습니다.", true);
         setErrorMessage("크롤링이 중단되었습니다.");
       } else {
-        console.error("Playwright 크롤링 오류:", error);
+        console.error("HTML 크롤링 오류:", error);
         const errorMsg = error instanceof Error ? error.message : "크롤링 실패";
         addCrawlLog(`오류: ${errorMsg}`, true);
         setErrorMessage(errorMsg);
@@ -383,20 +405,36 @@ export function AdminProductManager({
         selectedPreviewProducts.has(p.id)
       );
 
+      // ISO 코드는 등록 시 포함하지 않음 (추후 자동 매칭 로직에서 처리)
+      const productsToRegister = selectedProducts.map((p) => ({
+        name: p.name,
+        iso_code: null, // ISO 코드는 추후 자동 매칭 로직에서 처리
+        price: p.price,
+        purchase_link: p.purchase_link,
+        image_url: p.image_url,
+        manufacturer: p.manufacturer,
+        description: p.description,
+        category: p.category,
+      }));
+
+      // 유효성 검사 (이름만 필수, ISO 코드는 선택 사항)
+      const invalidProducts = productsToRegister.filter(
+        (p) => !p.name || !p.name.trim()
+      );
+
+      if (invalidProducts.length > 0) {
+        setErrorMessage(
+          `${invalidProducts.length}개 상품의 이름이 유효하지 않습니다.`
+        );
+        setIsRegistering(false);
+        return;
+      }
+
       const response = await fetch("/api/admin/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          products: selectedProducts.map((p) => ({
-            name: p.name,
-            iso_code: p.iso_code || crawlValues.isoCode || "",
-            price: p.price,
-            purchase_link: p.purchase_link,
-            image_url: p.image_url,
-            manufacturer: p.manufacturer,
-            description: p.description,
-            category: p.category,
-          })),
+          products: productsToRegister,
         }),
       });
 
@@ -427,7 +465,7 @@ export function AdminProductManager({
       setCrawlPreview([]);
       setSelectedPreviewProducts(new Set());
       setCrawlResult(null);
-      setCrawlValues({ url: "", isoCode: "", max: "10" });
+      setCrawlValues({ url: "", max: "30" });
     } catch (error) {
       console.error("[Admin Products] Register error:", error);
       const errorMsg =
@@ -990,9 +1028,9 @@ export function AdminProductManager({
         <TabsContent value="crawl">
           <Card>
             <CardHeader>
-              <CardTitle>웹 크롤링 (Playwright)</CardTitle>
+              <CardTitle>웹 크롤링</CardTitle>
               <CardDescription>
-                웹사이트 URL을 입력하면 Playwright로 제품 정보를 자동으로
+                웹사이트 URL을 입력하면 HTML 파싱을 통해 제품 정보를 자동으로
                 수집합니다.
               </CardDescription>
             </CardHeader>
@@ -1030,26 +1068,14 @@ export function AdminProductManager({
                     className="font-mono text-sm"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    제품 목록 페이지 URL을 입력하세요. Playwright로 자동
+                    제품 목록 페이지 URL을 입력하세요. HTML 파싱을 통해 자동으로
                     크롤링됩니다.
                   </p>
                 </div>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="crawl-iso" className="mb-2 block">
-                      ISO 코드 (선택 사항)
-                    </Label>
-                    <IsoCodeSelector
-                      value={crawlValues.isoCode}
-                      onValueChange={(value) =>
-                        setCrawlValues((prev) => ({ ...prev, isoCode: value }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="crawl-max" className="mb-2 block">
-                      최대 수집 개수
-                    </Label>
+                <div>
+                  <Label htmlFor="crawl-max" className="mb-2 block">
+                    최대 수집 개수
+                  </Label>
                     <Input
                       id="crawl-max"
                       type="number"
@@ -1064,7 +1090,6 @@ export function AdminProductManager({
                       }
                     />
                   </div>
-                </div>
               </div>
               <Button
                 onClick={isCrawling ? handleCrawlStop : handleCrawl}
@@ -1096,8 +1121,8 @@ export function AdminProductManager({
                     https://www.wheelopia.co.kr/shop/goods/goods_list.php?category=011001
                   </div>
                   <div>
-                    • ISO 코드는 선택 사항이며, 입력하지 않으면 제품 정보만
-                    수집됩니다.
+                    • ISO 코드는 추후 자동 매칭 로직에서 products DB 데이터에
+                    자동으로 할당됩니다.
                   </div>
                 </div>
               </div>

@@ -3,12 +3,15 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseJWT } from "./jwt-helper";
 import { fetchWithRetry } from "../api-utils";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error("Supabase server client env vars are missing");
+  const missingVars = [];
+  if (!supabaseUrl) missingVars.push("NEXT_PUBLIC_SUPABASE_URL");
+  if (!serviceRoleKey) missingVars.push("SUPABASE_SERVICE_ROLE_KEY");
+  throw new Error(`Supabase server client env vars are missing: ${missingVars.join(", ")}`);
 }
 
 if (!supabaseAnonKey) {

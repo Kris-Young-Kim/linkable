@@ -327,8 +327,6 @@ export function ChatInterface() {
     setIcfAnalysis(null);
 
     setShowRecommendationCTA(false);
-    setPreviewRecommendations([]);
-    setHasRecommendations(false);
 
     // 첫 메시지인 경우 chat_started 이벤트 추적
     if (messages.length === 1) {
@@ -353,10 +351,8 @@ export function ChatInterface() {
         } catch (error) {
           console.error("[chat] Failed to convert image to base64:", error);
           setErrorState(
-            new Error(
-              t("chat.imageConversionError") ||
-                "이미지 변환에 실패했습니다. 다른 이미지로 시도해주세요."
-            )
+            t("chat.imageConversionError") ||
+              "이미지 변환에 실패했습니다. 다른 이미지로 시도해주세요."
           );
           setIsUploadingImage(false);
           return;

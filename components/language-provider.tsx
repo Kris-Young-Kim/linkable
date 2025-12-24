@@ -59,7 +59,15 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext)
   if (context === undefined) {
-    throw new Error("useLanguage must be used within a LanguageProvider")
+    // SSR/prerender 시 Provider 밖에서 호출될 경우를 대비한 안전장치
+    return {
+      language: DEFAULT_LANGUAGE,
+      setLanguage: () => {},
+      t: (key: string) => {
+        const dictionary = translations[DEFAULT_LANGUAGE] as Record<string, string | undefined>
+        return dictionary[key] ?? key
+      },
+    }
   }
   return context
 }

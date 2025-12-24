@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-12-24T07:24:54.285Z",
+  "date": "20251224",
+  "version": "1.0",
+  "summary": {
+    "totalTables": 27,
+    "totalRecords": 1020,
+    "tableCounts": {
+      "users": 7,
+      "consultations": 59,
+      "chat_messages": 0,
+      "analysis_results": 0,
+      "recommendations": 54,
+      "ippa_evaluations": 0,
+      "products": 49,
+      "conversion_events": 0,
+      "point_transactions": 0,
+      "user_coupons": 0,
+      "coupons": 0,
+      "consultation_feedback": 0,
+      "notifications": 0,
+      "icf_codes": 850,
+      "consultation_icf_codes": 0,
+      "icf_code_usage_logs": 0,
+      "icf_code_statistics": 0,
+      "icf_code_expansions": 0,
+      "icf_auto_expand_config": 1,
+      "iso_codes": 0,
+      "manufacturers": 0,
+      "categories": 0,
+      "icf_iso_embeddings": 0,
+      "matching_weight_configs": 0,
+      "realtime_learning_configs": 0,
+      "cta_ab_test_configs": 0,
+      "cta_variants": 0
+    }
+  }
+}

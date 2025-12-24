@@ -103,7 +103,10 @@ function calculateIcfAccuracy(
   expected: { b: string[]; d: string[]; e: string[] }
 ): TestResult["icfAccuracy"] {
   const categories = ["b", "d", "e"] as const;
-  const categoryMetrics: Record<string, { precision: number; recall: number; f1: number }> = {};
+  const categoryMetrics: Record<
+    (typeof categories)[number],
+    { precision: number; recall: number; f1: number }
+  > = { b: { precision: 0, recall: 0, f1: 0 }, d: { precision: 0, recall: 0, f1: 0 }, e: { precision: 0, recall: 0, f1: 0 } };
 
   for (const category of categories) {
     const actualCodes = actual[category].map((c) => c.toLowerCase());
