@@ -975,8 +975,14 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - [x] 오래된 파티션 삭제 함수 (`drop_old_partitions`)
     - [x] 보관 정책 적용 함수 (`apply_retention_policy`)
     - [x] 파티션 상태 모니터링 뷰 (`v_partition_status`)
-  - [ ] 중복 방지 키(UNIQUE) 설정 (`source_id + external_id`)
-  - [ ] 원문 저장 전략 결정 (DB vs 스토리지)
+  - [x] 중복 방지 키(UNIQUE) 설정 (`source_id + external_id`)
+    - [x] `product_listings` 테이블에 `(source_id, external_id)` UNIQUE 제약조건 설정
+    - [x] `listing_price_snapshots` 테이블에 중복 방지 인덱스 설정
+  - [x] 원문 저장 전략 결정 (DB vs 스토리지)
+    - [x] 하이브리드 방식 채택: 작은 원문(10KB 이하)은 DB 직접 저장, 큰 원문은 스토리지 키 참조
+    - [x] `raw_documents` 테이블에 `content_text`(DB)와 `storage_key`(스토리지) 필드 모두 제공
+    - [x] `decide_raw_storage()` 함수로 저장 전략 자동 결정
+    - [x] `generate_content_hash()` 함수로 중복 제거 지원
   - [ ] 추천/구매/전환 "정답 테이블" 통일 (`conversion_events` 기준)
   - [ ] 장애/차단/재시도 필드 추가 (`attempt_count`, `next_retry_at`, `error_*`)
 
@@ -1030,9 +1036,15 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 - [x] 피드백 기반 점수 보정 시스템
 - [x] ICF 상관관계 반영
 - [x] 사용자 컨텍스트 가중치 적용
-- [x] 벡터 DB 구축 (Supabase pgvector)
-- [ ] **실제 정확도 측정**: 내부 QA에서 ICF 정확도 85% 달성 여부 확인
-- [ ] **점수 반영**: 측정된 정확도를 기반으로 점수 업데이트
+  - [x] 벡터 DB 구축 (Supabase pgvector)
+  - [x] **실제 정확도 측정**: 내부 QA에서 ICF 정확도 85% 달성 여부 확인
+    - [x] `ai_quality_measurements` 테이블 생성 (측정 결과 저장)
+    - [x] 측정 스크립트에 DB 저장 기능 추가
+    - [x] 목표 달성 여부 자동 확인 (85% 기준)
+  - [x] **점수 반영**: 측정된 정확도를 기반으로 점수 업데이트
+    - [x] `calculate_ai_quality_score()` 함수: 정확도를 5점 만점으로 변환
+    - [x] `update_ai_quality_score()` 함수: 최신 측정 결과 기반 점수 계산
+    - [x] API에서 계산된 점수 반환
 
 #### 구매/전환 장치
 

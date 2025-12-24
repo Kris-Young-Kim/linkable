@@ -18,6 +18,29 @@ import { callGemini } from "@/lib/gemini";
 import { parseAnalysis } from "@/core/assessment/parser";
 import { buildPrompt } from "@/core/assessment/prompt-engineering";
 import { enforceIcfConsistency } from "@/core/assessment/icf-validator";
+import { createClient } from "@supabase/supabase-js";
+import { config } from "dotenv";
+import { resolve } from "path";
+
+// 환경 변수 로드
+config({ path: resolve(process.cwd(), ".env.local") });
+config({ path: resolve(process.cwd(), ".env") });
+
+// Supabase 클라이언트 초기화
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl || !serviceRoleKey) {
+  console.error("❌ Supabase 환경 변수가 설정되지 않았습니다.");
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, serviceRoleKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  },
+});
 
 interface TestCase {
   id: string;
@@ -415,6 +438,46 @@ async function main() {
     const latestPath = join(process.cwd(), "scripts/tests/results/icf-extraction-accuracy-latest.json");
     writeFileSync(latestPath, JSON.stringify(result, null, 2), "utf-8");
     console.log(`💾 최신 결과 저장: ${latestPath}`);
+
+    // 데이터베이스에 측정 결과 저장
+    try {
+      const { data, error } = await supabase.rpc('save_icf_extraction_measurement', {
+        p_overall_precision: result.overallAccuracy.precision,
+        p_overall_recall: result.overallAccuracy.recall,
+        p_overall_f1: result.overallAccuracy.f1,
+        p_total_tests: result.totalTests,
+        p_passed_tests: result.passedTests,
+        p_failed_tests: result.failedTests,
+        p_category_breakdown: result.categoryBreakdown,
+        p_measured_by: 'system',
+        p_notes: `자동 측정 (${new Date().toISOString()})`
+      });
+
+      if (error) {
+        console.error(`\n⚠️  DB 저장 실패: ${error.message}`);
+      } else {
+        console.log(`\n✅ DB 저장 완료 (ID: ${data})`);
+        
+        // 목표 달성 여부 확인
+        const targetAchieved = result.overallAccuracy.f1 >= 0.85;
+        if (targetAchieved) {
+          console.log(`\n🎉 목표 달성! ICF 정확도 ${(result.overallAccuracy.f1 * 100).toFixed(1)}% (목표: 85%)`);
+        } else {
+          console.log(`\n⚠️  목표 미달성: ICF 정확도 ${(result.overallAccuracy.f1 * 100).toFixed(1)}% (목표: 85%)`);
+        }
+
+        // 점수 계산 및 표시
+        const { data: scoreData, error: scoreError } = await supabase.rpc('update_ai_quality_score');
+        if (!scoreError && scoreData && scoreData.length > 0) {
+          const icfScore = scoreData.find((s: any) => s.measurement_type === 'icf_extraction');
+          if (icfScore) {
+            console.log(`\n📊 계산된 AI 품질 점수: ${icfScore.calculated_score.toFixed(2)}/5.0`);
+          }
+        }
+      }
+    } catch (dbError) {
+      console.error(`\n⚠️  DB 저장 중 오류:`, dbError);
+    }
 
     // 종료 코드 (실패율이 30% 이상이면 1)
     const failureRate = result.failedTests / result.totalTests;

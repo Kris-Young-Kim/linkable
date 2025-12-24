@@ -18,6 +18,12 @@ if (!supabaseAnonKey) {
   throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is required for user client");
 }
 
+// 타입 안전성을 위해 명시적으로 string 타입으로 선언
+// 위의 체크를 통과했으므로 undefined가 아님을 보장
+const supabaseUrlString: string = supabaseUrl;
+const serviceRoleKeyString: string = serviceRoleKey;
+const supabaseAnonKeyString: string = supabaseAnonKey;
+
 let cachedClient: SupabaseClient | null = null;
 
 /**
@@ -26,7 +32,7 @@ let cachedClient: SupabaseClient | null = null;
  */
 export const getSupabaseServerClient = () => {
   if (!cachedClient) {
-    cachedClient = createClient(supabaseUrl, serviceRoleKey, {
+    cachedClient = createClient(supabaseUrlString, serviceRoleKeyString, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -93,7 +99,7 @@ export async function getSupabaseUserClient(): Promise<SupabaseClient> {
   const supabaseJWT = createSupabaseJWT(userId, jwtOptions);
 
   // JWT를 사용하여 Supabase 클라이언트 생성
-  const client = createClient(supabaseUrl, supabaseAnonKey as string, {
+  const client = createClient(supabaseUrlString, supabaseAnonKeyString, {
     global: {
       headers: {
         Authorization: `Bearer ${supabaseJWT}`,
