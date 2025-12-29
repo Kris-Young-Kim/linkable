@@ -33,10 +33,47 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseServerClient();
 
+    // 필터 파라미터 파싱
+    const { searchParams } = new URL(request.url);
+    const dateRange = searchParams.get("dateRange") || "30days";
+    const limit = Number(searchParams.get("limit")) || 50;
+
+    // 날짜 범위 계산
+    const getDateRange = (range: string) => {
+      const now = new Date();
+      const start = new Date();
+
+      switch (range) {
+        case "today":
+          start.setHours(0, 0, 0, 0);
+          break;
+        case "7days":
+          start.setDate(start.getDate() - 7);
+          break;
+        case "30days":
+          start.setDate(start.getDate() - 30);
+          break;
+        case "90days":
+          start.setDate(start.getDate() - 90);
+          break;
+        case "1year":
+          start.setFullYear(start.getFullYear() - 1);
+          break;
+        default:
+          start.setDate(start.getDate() - 30);
+      }
+
+      return { start, end: now };
+    };
+
+    const { start: dateStart, end: dateEnd } = getDateRange(dateRange);
+
     // ICF 코드별 통계 계산
     const { data: analysisResults, error: analysisError } = await supabase
       .from("analysis_results")
-      .select("consultation_id, icf_codes");
+      .select("consultation_id, icf_codes, created_at")
+      .gte("created_at", dateStart.toISOString())
+      .lte("created_at", dateEnd.toISOString());
 
     if (analysisError) {
       console.error("[ICF Stats] Analysis fetch error:", analysisError);
@@ -182,17 +219,19 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 결과 정렬 (평가 수 기준)
+    // 결과 정렬 (평가 수 기준) 및 limit 적용
     const sortedStats = Object.values(icfStats)
       .map((stat) => ({
         ...stat,
         clickThroughRate: Number(stat.clickThroughRate.toFixed(2)),
         avgEffectivenessScore: Number(stat.avgEffectivenessScore.toFixed(2)),
       }))
-      .sort((a, b) => b.totalEvaluations - a.totalEvaluations);
+      .sort((a, b) => b.totalEvaluations - a.totalEvaluations)
+      .slice(0, limit);
 
     return NextResponse.json({
       stats: sortedStats,
+      dateRange,
       summary: {
         totalIcfCodes: sortedStats.length,
         totalWithRecommendations: sortedStats.filter(

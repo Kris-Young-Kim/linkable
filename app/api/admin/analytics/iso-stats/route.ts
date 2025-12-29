@@ -33,11 +33,47 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseServerClient();
 
+    // 필터 파라미터 파싱
+    const { searchParams } = new URL(request.url);
+    const dateRange = searchParams.get("dateRange") || "30days";
+    const limit = Number(searchParams.get("limit")) || 50;
+
+    // 날짜 범위 계산
+    const getDateRange = (range: string) => {
+      const now = new Date();
+      const start = new Date();
+
+      switch (range) {
+        case "today":
+          start.setHours(0, 0, 0, 0);
+          break;
+        case "7days":
+          start.setDate(start.getDate() - 7);
+          break;
+        case "30days":
+          start.setDate(start.getDate() - 30);
+          break;
+        case "90days":
+          start.setDate(start.getDate() - 90);
+          break;
+        case "1year":
+          start.setFullYear(start.getFullYear() - 1);
+          break;
+        default:
+          start.setDate(start.getDate() - 30);
+      }
+
+      return { start, end: now };
+    };
+
+    const { start: dateStart, end: dateEnd } = getDateRange(dateRange);
+
     // View를 사용하여 ISO 코드별 통계 조회
     const { data: isoStats, error: viewError } = await supabase
       .from("view_iso_code_stats")
       .select("*")
-      .order("total_ippa_evaluations", { ascending: false });
+      .order("total_ippa_evaluations", { ascending: false })
+      .limit(limit);
 
     if (viewError) {
       console.error("[ISO Stats] View fetch error:", viewError);
@@ -129,6 +165,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       stats: formattedStats,
+      dateRange,
       summary: {
         totalIsoCodes: formattedStats.length,
         totalWithRecommendations: formattedStats.filter(
