@@ -318,6 +318,9 @@ async function crawlProducts(
         const actualIndex = startIndex + relativeIndex;
         const productId = `crawled-${Date.now()}-${actualIndex}`;
 
+        // 상품명 추출을 위한 이미지 요소 먼저 찾기
+        const productImageEl = $el.find("img").first();
+
         // 상품명 추출 (에이블라이프 특화 + 범용)
         let productName = "";
 
@@ -347,7 +350,6 @@ async function crawlProducts(
 
         // 1. 이미지 alt 속성에서 추출 (에이블라이프는 이미지 alt에 상품명이 있음)
         if (!productName) {
-          const productImageEl = $el.find("img").first();
           if (productImageEl.length > 0) {
             productName =
               productImageEl.attr("alt") || productImageEl.attr("title") || "";
