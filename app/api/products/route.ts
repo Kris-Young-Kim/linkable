@@ -89,30 +89,29 @@ const persistRecommendations = async (
     },
   });
 
-    // 추천이 생성되면 상담 상태를 자동으로 'completed'로 변경
-    const { error: statusUpdateError } = await supabaseClient
-      .from("consultations")
-      .update({
-        status: "completed",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", consultationId)
-      .neq("status", "archived"); // 보관된 상담은 자동 변경하지 않음
+  // 추천이 생성되면 상담 상태를 자동으로 'completed'로 변경
+  const { error: statusUpdateError } = await supabaseClient
+    .from("consultations")
+    .update({
+      status: "completed",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", consultationId)
+    .neq("status", "archived"); // 보관된 상담은 자동 변경하지 않음
 
-    if (statusUpdateError) {
-      logEvent({
-        category: "consultation",
-        action: "auto_status_update_error",
-        payload: { error: statusUpdateError, consultationId },
-        level: "warn",
-      });
-    } else {
-      logEvent({
-        category: "consultation",
-        action: "auto_status_completed",
-        payload: { consultationId },
-      });
-    }
+  if (statusUpdateError) {
+    logEvent({
+      category: "consultation",
+      action: "auto_status_update_error",
+      payload: { error: statusUpdateError, consultationId },
+      level: "warn",
+    });
+  } else {
+    logEvent({
+      category: "consultation",
+      action: "auto_status_completed",
+      payload: { consultationId },
+    });
   }
 
   return mapping;
