@@ -29,11 +29,24 @@ interface CrawledProduct {
 
 /**
  * 가격 문자열에서 숫자만 추출
+ * 여러 가격이 있는 경우 (할인가 등) 가장 마지막 숫자를 할인가로 간주하여 추출
  */
 function parsePrice(priceText: string | null | undefined): number | null {
   if (!priceText) return null;
-  const cleaned = String(priceText).replace(/[^0-9]/g, "");
-  return cleaned ? parseInt(cleaned, 10) : null;
+  
+  // 모든 공백 제거 및 줄바꿈 정리
+  const text = String(priceText).replace(/\s+/g, " ");
+  
+  // 숫자와 쉼표 패턴 찾기 (예: 1,200,000)
+  const matches = text.match(/(\d{1,3}(?:,\d{3})+|\d+)/g);
+  
+  if (matches && matches.length > 0) {
+    // 가장 마지막에 나오는 숫자가 보통 할인가/최종가임
+    const lastPrice = matches[matches.length - 1].replace(/,/g, "");
+    return parseInt(lastPrice, 10);
+  }
+  
+  return null;
 }
 
 /**
@@ -102,12 +115,16 @@ async function crawlProducts(
 
     // 다양한 셀렉터 패턴 시도
     const productSelectors = [
-      "table tbody tr",
-      "table tr",
+      ".prd-list table td", // 에이블라이프와 같은 테이블 그리드 구조 대응
+      ".prd-list td",
+      "table tbody td",
+      "table td",
       "ul.product_list > li",
       ".product_list > li",
       ".prd-list > li",
       "ul.prd-list > li",
+      "table tbody tr",
+      "table tr",
       "li[class*='product']",
       ".board_list > li",
       "[class*='product']",
@@ -306,8 +323,10 @@ async function crawlProducts(
 
     // 셀렉터로 찾은 경우 각 상품 요소에서 정보 추출
     if (productElements && productElements.length > 0) {
-      // 테이블인 경우 첫 번째 행(헤더) 스킵
-      const startIndex = foundSelector?.includes("tr") ? 1 : 0;
+      // 테이블 행(tr)인 경우만 첫 번째 행(헤더) 스킵 시도
+      const isTableRow = foundSelector?.toLowerCase().includes("tr");
+      const startIndex = isTableRow ? 1 : 0;
+      
       const elementsToProcess = productElements.slice(
         startIndex,
         startIndex + maxProducts
