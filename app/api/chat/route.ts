@@ -437,7 +437,7 @@ export async function POST(request: Request) {
     };
 
     let evaluationContext: {
-      extractedIcfCodes?: string[];
+      extractedIcfCodes: string[];
       evaluatedActivities: Array<{
         icfCode: string;
         importance?: number;
@@ -461,8 +461,9 @@ export async function POST(request: Request) {
           preDifficulty: a.preDifficulty,
         }));
         
-        // ICF 코드는 나중에 분석 결과에서 가져옴
+        // ICF 코드는 나중에 분석 결과에서 가져옴 (일단 빈 배열로 초기화)
         evaluationContext = {
+          extractedIcfCodes: [],
           evaluatedActivities,
         };
       }
