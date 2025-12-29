@@ -3,7 +3,7 @@ import { sendErrorAlert } from "./notion-webhook"
 type LogLevel = "info" | "warn" | "error"
 
 export type LogEvent = {
-  category: "consultation" | "matching" | "validation" | "system" | "product" | "recommendation" | "cta_ab_test" | "incentives"
+  category: "consultation" | "matching" | "validation" | "system" | "product" | "recommendation" | "cta_ab_test" | "incentives" | "analytics"
   action: string
   payload?: Record<string, unknown>
   level?: LogLevel
