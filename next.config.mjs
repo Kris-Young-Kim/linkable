@@ -273,13 +273,13 @@ const nextConfig = {
             },
             // 큰 라이브러리 분리
             lib: {
-              test(module: any) {
+              test(module) {
                 return (
                   module.size() > 160000 &&
                   /node_modules[/\\]/.test(module.identifier())
                 );
               },
-              name(module: any) {
+              name(module) {
                 const hash = require("crypto")
                   .createHash("sha1")
                   .update(module.identifier())
@@ -299,7 +299,7 @@ const nextConfig = {
             },
             // 공유 모듈
             shared: {
-              name(module: any, chunks: any[]) {
+              name(module, chunks) {
                 return `shared-${require("crypto")
                   .createHash("sha1")
                   .update(chunks.reduce((acc, chunk) => acc + chunk.name, ""))
