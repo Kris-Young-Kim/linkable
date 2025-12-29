@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
 
   /* 비활성화된 코드 (참고용)
   try {
-  try {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -123,5 +122,5 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+  */
 }
-
