@@ -321,13 +321,39 @@ async function crawlProducts(
         // 상품명 추출 (에이블라이프 특화 + 범용)
         let productName = "";
 
+        // 0. 에이블라이프 특화: .dsc 클래스 요소에서 직접 추출
+        const dscElement = $el.find(".dsc").first();
+        if (dscElement.length > 0) {
+          // .dsc 요소의 모든 텍스트 노드 추출 (자식 요소 제외)
+          const dscText = dscElement
+            .clone()
+            .children() // 모든 자식 요소 제거
+            .remove()
+            .end()
+            .text()
+            .trim();
+
+          // 따옴표 제거 및 정리
+          const cleanedText = dscText.replace(/^["\s]+|["\s]+$/g, "");
+
+          if (cleanedText && cleanedText.length > 5) {
+            // "== $0" 같은 불필요한 텍스트 제거
+            const meaningfulText = cleanedText.replace(/^==\s*\$0\s*/, "").trim();
+            if (meaningfulText.length > 5) {
+              productName = meaningfulText;
+            }
+          }
+        }
+
         // 1. 이미지 alt 속성에서 추출 (에이블라이프는 이미지 alt에 상품명이 있음)
-        const productImageEl = $el.find("img").first();
-        if (productImageEl.length > 0) {
-          productName =
-            productImageEl.attr("alt") || productImageEl.attr("title") || "";
-          if (productName) {
-            productName = productName.trim();
+        if (!productName) {
+          const productImageEl = $el.find("img").first();
+          if (productImageEl.length > 0) {
+            productName =
+              productImageEl.attr("alt") || productImageEl.attr("title") || "";
+            if (productName) {
+              productName = productName.trim();
+            }
           }
         }
 
@@ -492,12 +518,23 @@ async function crawlProducts(
           "em",
         ];
 
+        // 1. 특정 셀렉터로 가격 찾기
         for (const selector of priceSelectors) {
           const priceEl = $el.find(selector).first();
           if (priceEl.length > 0) {
             const priceText = priceEl.text().trim();
             price = parsePrice(priceText);
             if (price) break;
+          }
+        }
+
+        // 2. 가격을 찾지 못한 경우, 전체 텍스트에서 숫자 패턴 검색 (에이블라이프 특화)
+        if (!price) {
+          const allText = $el.text();
+          // "2,096,000원" 같은 패턴 찾기
+          const priceMatch = allText.match(/(\d{1,3}(?:,\d{3})*)\s*원?/);
+          if (priceMatch) {
+            price = parsePrice(priceMatch[1]);
           }
         }
 
