@@ -109,23 +109,9 @@ export function reportWebVitals(
   }
 
   // web-vitals 라이브러리를 동적으로 로드
-  import("web-vitals").then(({ onCLS, onFID, onFCP, onLCP, onTTFB, onINP }) => {
+  // 참고: web-vitals 5.x에서는 onFID가 제거되고 onINP로 대체됨
+  import("web-vitals").then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
     onCLS((metric) => {
-      const webVitalsMetric: WebVitalsMetric = {
-        id: metric.id,
-        name: metric.name,
-        value: metric.value,
-        delta: metric.delta,
-        rating: getRating(metric.name, metric.value),
-        navigationType: metric.navigationType,
-        url: window.location.href,
-        timestamp: Date.now(),
-      };
-      logWebVitals(webVitalsMetric);
-      onPerfEntry?.(webVitalsMetric);
-    });
-
-    onFID((metric) => {
       const webVitalsMetric: WebVitalsMetric = {
         id: metric.id,
         name: metric.name,
