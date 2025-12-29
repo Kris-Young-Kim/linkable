@@ -51,12 +51,12 @@ export async function logIcfCodeUsage(
       continue;
     }
 
-    const isInCore = isInCoreSet(code);
-
+    // Full catalog 사용으로 인해 모든 코드는 동등하게 처리됨
+    // is_in_core_set은 하위 호환성을 위해 false로 설정
     logs.push({
       icf_code: code.toUpperCase(),
       category,
-      is_in_core_set: isInCore,
+      is_in_core_set: false, // Full catalog 사용으로 의미 없음
       consultation_id: context?.consultationId || null,
       source,
       context: context ? {
@@ -70,21 +70,6 @@ export async function logIcfCodeUsage(
         ),
       } : null,
     });
-
-    // Core Set에 없는 코드는 별도 로깅
-    if (!isInCore) {
-      logEvent({
-        category: "system",
-        action: "icf_code_missing_from_core_set",
-        payload: {
-          code: code.toUpperCase(),
-          category,
-          source,
-          consultationId: context?.consultationId,
-        },
-        level: "info",
-      });
-    }
   }
 
   if (logs.length === 0) {

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/auth/verify-admin";
 import {
-  getAllIsoCodes,
-  searchIsoCodes,
-  getIsoCodesByClass,
-} from "@/lib/iso-9999-catalog";
+  getAllIsoCodesAsync,
+  searchIsoCodesAsync,
+  getIsoCodesByClassAsync,
+} from "@/lib/iso-9999-catalog-async";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const mapReasonToStatus = (
   reason: "not_authenticated" | "insufficient_permissions" | "error"
@@ -36,16 +37,18 @@ export async function GET(request: NextRequest) {
   const search = searchParams.get("search");
   const classCode = searchParams.get("class");
 
-  let isoCodes = getAllIsoCodes();
+  const supabase = getSupabaseServerClient();
+  let isoCodes;
 
   // 검색어로 필터링
   if (search) {
-    isoCodes = searchIsoCodes(search);
-  }
-
-  // 클래스로 필터링 (검색 결과에도 적용)
-  if (classCode) {
-    isoCodes = isoCodes.filter((item) => item.class === classCode);
+    isoCodes = await searchIsoCodesAsync(search, supabase);
+  } else if (classCode) {
+    // 클래스로 필터링
+    isoCodes = await getIsoCodesByClassAsync(classCode, supabase);
+  } else {
+    // 모든 코드 반환
+    isoCodes = await getAllIsoCodesAsync(supabase);
   }
 
   // 응답 형식 변환

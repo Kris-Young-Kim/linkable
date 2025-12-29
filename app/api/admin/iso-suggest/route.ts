@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/auth/verify-admin";
 import { isoMappingTable } from "@/core/matching/iso-mapping";
-import { iso9999Catalog, searchIsoCodes } from "@/lib/iso-9999-catalog";
+import { iso9999Catalog } from "@/lib/iso-9999-catalog";
+import { searchIsoCodesAsync } from "@/lib/iso-9999-catalog-async";
 import { inferIsoCodeFromProduct } from "@/core/matching/ai-iso-inference";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const mapReasonToStatus = (
   reason: "not_authenticated" | "insufficient_permissions" | "error"
@@ -208,8 +210,9 @@ export async function POST(request: Request) {
     }
   }
 
-  // 2. ISO 카탈로그 검색 기능 활용
-  const searchMatches = searchIsoCodes(productName);
+  // 2. ISO 카탈로그 검색 기능 활용 (데이터베이스 우선)
+  const supabase = getSupabaseServerClient();
+  const searchMatches = await searchIsoCodesAsync(productName, supabase);
   for (const isoInfo of searchMatches) {
     const existing = keywordMatches.find((m) => m.iso === isoInfo.iso);
     if (!existing) {

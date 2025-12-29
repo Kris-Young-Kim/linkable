@@ -4,10 +4,24 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 
 /**
  * 자동 확장 설정 조회/저장 API
+ * 
+ * @deprecated Full ICF 코드를 모두 사용하므로 Expansion 기능이 더 이상 필요하지 않습니다.
+ *             이 API는 비활성화되었습니다.
  * GET /api/admin/icf/auto-expand-config - 조회
  * POST /api/admin/icf/auto-expand-config - 저장
  */
 export async function GET(request: NextRequest) {
+  // Full catalog 사용으로 인해 Expansion 기능 비활성화
+  return NextResponse.json(
+    { 
+      error: "이 기능은 더 이상 사용되지 않습니다. Full ICF 코드를 모두 사용하므로 Expansion이 필요하지 않습니다.",
+      deprecated: true
+    },
+    { status: 410 } // 410 Gone
+  )
+
+  /* 비활성화된 코드 (참고용)
+  try {
   try {
     const { userId } = await auth()
     if (!userId) {
@@ -55,6 +69,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  // Full catalog 사용으로 인해 Expansion 기능 비활성화
+  return NextResponse.json(
+    { 
+      error: "이 기능은 더 이상 사용되지 않습니다. Full ICF 코드를 모두 사용하므로 Expansion이 필요하지 않습니다.",
+      deprecated: true
+    },
+    { status: 410 } // 410 Gone
+  )
+
+  /* 비활성화된 코드 (참고용)
   try {
     const { userId } = await auth()
     if (!userId) {
