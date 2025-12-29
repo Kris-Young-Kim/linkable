@@ -110,8 +110,8 @@ export async function POST(request: Request) {
         continue
       }
 
-      // ISO 코드 정규화 (빈 문자열은 null로 변환)
-      const normalizedIsoCode = product.iso_code?.trim() || null;
+      // ISO 코드 정규화 (빈 문자열은 null로 변환, null일 때는 기본값 설정)
+      const normalizedIsoCode = product.iso_code?.trim() || "N999999";
 
       try {
         const parsedPrice =
