@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/components/language-provider";
 import { RoleGuard } from "@/components/role-guard";
 import { SWRProvider } from "@/lib/swr-provider";
 import { SkipToMain } from "@/components/skip-to-main";
+import { WebVitalsTracker } from "@/components/performance/web-vitals-tracker";
 import "./globals.css";
 
 const inter = Inter({
@@ -175,6 +176,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <AccessibilityControls />
           <AnalyticsEventListener />
           <Analytics />
+          <WebVitalsTracker />
         </body>
       </html>
     </ClerkProvider>

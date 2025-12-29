@@ -546,27 +546,26 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - Edge Function 생성 (`supabase/functions/clerk-to-supabase-jwt/index.ts`)
   - Edge Function 사용 가이드 및 배포 가이드 작성
 
-  3. **배포 준비** (선택사항 - 현재는 API Route 방식 사용 중)
+  3. **배포 준비** (선택사항 - 현재는 API Route 방식 사용 중) ✅ **완료** (2025-12-26)
 
      - [x] Edge Function 코드 작성 완료
-     - [ ] **환경 변수 설정** (Supabase Dashboard에서 설정)
-       - [ ] Supabase Dashboard 접속
-       - [ ] **Settings** → **Edge Functions** → **Secrets** 이동
-       - [ ] 다음 환경 변수 추가:
-         - `SUPABASE_URL`: Supabase 프로젝트 URL
-         - `SUPABASE_JWT_SECRET`: Settings > API > JWT Settings에서 확인
-         - `SUPABASE_ANON_KEY`: Settings > API에서 확인
-     - [ ] **Edge Function 배포** (Supabase Dashboard에서 배포)
-       - [ ] Supabase Dashboard → **Edge Functions** 메뉴 이동
-       - [ ] **Create Function** 클릭
-       - [ ] Function 이름: `clerk-to-supabase-jwt`
-       - [ ] `supabase/functions/clerk-to-supabase-jwt/index.ts` 코드 복사하여 붙여넣기
-       - [ ] 배포 완료 확인
-     - [ ] **배포 후 테스트**
-       - [ ] Edge Function 엔드포인트 호출 테스트
-       - [ ] JWT 생성 검증
-       - [ ] CORS 헤더 확인
-       - [ ] 에러 처리 검증
+     - [x] 배포 스크립트 작성 완료 (`scripts/deploy-edge-function.ts`)
+     - [x] 테스트 스크립트 작성 완료 (`scripts/test-edge-function.ts`)
+     - [x] **환경 변수 설정** (Supabase CLI로 설정 완료)
+       - [x] `JWT_SECRET` 설정 완료 (`npx supabase secrets set JWT_SECRET`)
+       - [x] `ANON_KEY` 설정 완료 (`npx supabase secrets set ANON_KEY`)
+       - [x] `SUPABASE_URL`은 Supabase가 자동으로 제공 (코드에서 지원)
+     - [x] **Edge Function 배포**
+       - [x] 배포 스크립트로 배포 완료 (`pnpm run deploy:edge-function`)
+       - [x] 프로젝트 연결 완료 (`sityptcwbnremuzsvbhx`)
+       - [x] Edge Function 배포 완료 (`clerk-to-supabase-jwt`)
+     - [x] **배포 후 테스트**
+       - [x] `pnpm run test:edge-function` 실행 완료
+       - [x] 모든 테스트 케이스 통과 확인 (5/5 통과, 100% 성공률)
+       - [x] JWT 생성 검증 완료
+       - [x] CORS 헤더 확인 완료
+       - [x] 에러 처리 검증 완료
+       - [x] GET 메서드 거부 확인 완료
 
   **참고**: 현재는 API Route 방식(`app/api/auth/supabase-token/route.ts`)을 사용 중이므로, Edge Function 배포는 선택사항입니다. Edge Function을 사용하면 성능 향상이 있지만, 현재 방식으로도 충분히 동작합니다.
 
@@ -747,7 +746,25 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
     - [x] `decide_raw_storage()` 함수로 저장 전략 자동 결정
     - [x] `generate_content_hash()` 함수로 중복 제거 지원
   - [ ] 추천/구매/전환 "정답 테이블" 통일 (`conversion_events` 기준)
-  - [ ] 장애/차단/재시도 필드 추가 (`attempt_count`, `next_retry_at`, `error_*`)
+  - [x] 장애/차단/재시도 필드 추가 (`attempt_count`, `next_retry_at`, `error_*`)
+    - [x] `notifications` 테이블에 재시도/에러 필드 추가
+      - [x] `attempt_count`, `max_attempts`, `next_retry_at` 필드 추가
+      - [x] `error_code`, `error_message`, `error_details` 필드 추가
+      - [x] `delivery_status` 필드 추가 (pending, sent, failed, blocked)
+      - [x] 재시도 대기 중인 알림 조회 인덱스 추가
+    - [x] `conversion_events` 테이블에 재시도/에러 필드 추가
+      - [x] `attempt_count`, `max_attempts`, `next_retry_at` 필드 추가
+      - [x] `error_code`, `error_message`, `error_details` 필드 추가
+      - [x] `processing_status` 필드 추가 (pending, processing, completed, failed, blocked)
+      - [x] 재시도 대기 중인 이벤트 조회 인덱스 추가
+    - [x] `recommendations` 테이블에 재시도/에러 필드 추가 (선택적)
+      - [x] `generation_attempt_count`, `generation_max_attempts`, `generation_next_retry_at` 필드 추가
+      - [x] `generation_error_code`, `generation_error_message`, `generation_error_details` 필드 추가
+      - [x] 재시도 대기 중인 추천 조회 인덱스 추가
+    - [x] 재시도 로직을 위한 헬퍼 함수 추가
+      - [x] `calculate_next_retry_at()` 함수 (지수 백오프 알고리즘)
+      - [x] `can_retry()` 함수 (재시도 가능 여부 확인)
+    - [x] 재시도 대기 중인 레코드 조회 뷰 추가 (`v_retry_queue`)
 
 **상품 데이터 수정 원칙** (참고: `docs/database-maintenance-guide.md`):
 

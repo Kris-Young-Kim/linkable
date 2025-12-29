@@ -24,7 +24,9 @@
     "test:rls": "tsx scripts/test-rls-policies.ts",
     "test:rls:comprehensive": "tsx scripts/test-rls-policies-comprehensive.ts",
     "scrape:icf": "tsx scripts/scrape-icf-browser-v3.ts",
-    "backup:db": "tsx scripts/backup-database-json.ts"
+    "backup:db": "tsx scripts/backup-database-json.ts",
+    "deploy:edge-function": "tsx scripts/deploy-edge-function.ts",
+    "test:edge-function": "tsx scripts/test-edge-function.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",
@@ -87,6 +89,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
+    "web-vitals": "^5.1.0",
     "zod": "3.25.76"
   },
   "devDependencies": {

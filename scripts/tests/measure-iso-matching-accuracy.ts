@@ -80,7 +80,7 @@ interface TestResult {
   };
 }
 
-interface MeasurementResult {
+export interface MeasurementResult {
   timestamp: string;
   totalTests: number;
   passedTests: number;
@@ -302,7 +302,7 @@ function calculateMethodAccuracy(
 /**
  * 전체 측정 실행
  */
-async function runMeasurement(): Promise<MeasurementResult> {
+export async function runMeasurement(): Promise<MeasurementResult> {
   console.log("🚀 ISO 매칭 정확도 측정 시작");
   console.log("=".repeat(60));
 

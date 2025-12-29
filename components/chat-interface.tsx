@@ -226,7 +226,32 @@ export function ChatInterface() {
       };
 
       rec.onerror = (event: SpeechRecognitionErrorEvent) => {
+        // "not-allowed" 에러는 마이크 권한이 거부된 경우로, 조용히 처리
+        if (event.error === "not-allowed") {
+          console.warn("[STT] Microphone permission denied");
+          setIsRecording(false);
+          // 사용자에게 권한 요청 안내 (선택적)
+          // alert("마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.");
+          return;
+        }
+        
+        // "no-speech" 에러는 사용자가 말하지 않은 경우로, 조용히 처리
+        if (event.error === "no-speech") {
+          console.warn("[STT] No speech detected");
+          setIsRecording(false);
+          return;
+        }
+        
+        // "aborted" 에러는 사용자가 중단한 경우로, 조용히 처리
+        if (event.error === "aborted") {
+          console.warn("[STT] Recognition aborted");
+          setIsRecording(false);
+          return;
+        }
+        
+        // 그 외 에러는 로그에 기록
         console.error("[STT] error", event.error, event.message);
+        setIsRecording(false);
       };
 
       rec.onend = () => {
@@ -384,7 +409,35 @@ export function ChatInterface() {
       }
 
       if (!response.ok || !response.body) {
-        throw new Error(await response.text());
+        // JSON 응답을 파싱해서 에러 메시지 추출
+        try {
+          const errorText = await response.text();
+          let errorMessage = "요청 처리 중 오류가 발생했습니다.";
+          
+          try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.error || errorMessage;
+            
+            // 개발 환경에서는 상세 정보도 표시
+            if (process.env.NODE_ENV === "development" && errorJson.details) {
+              console.error("[Chat] API Error Details:", errorJson.details);
+              if (errorJson.errorDetails) {
+                console.error("[Chat] Error Details Object:", errorJson.errorDetails);
+              }
+            }
+          } catch {
+            // JSON 파싱 실패 시 원본 텍스트 사용
+            errorMessage = errorText || errorMessage;
+          }
+          
+          throw new Error(errorMessage);
+        } catch (err) {
+          // 이미 Error 객체면 그대로 throw
+          if (err instanceof Error) {
+            throw err;
+          }
+          throw new Error("요청 처리 중 오류가 발생했습니다.");
+        }
       }
 
       const reader = response.body.getReader();

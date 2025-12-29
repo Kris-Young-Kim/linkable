@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AnalyticsDashboard } from "@/components/analytics-dashboard"
 import { KPIBoard } from "@/components/analytics/kpi-board"
+import { EnhancedAnalyticsDashboard } from "@/components/analytics/enhanced-analytics-dashboard"
 import { KPIFilters, type DateRange, type UserGroup } from "@/components/admin/kpi-filters"
 import { AdminLogMonitor } from "@/components/admin/admin-log-monitor"
 import { EnhancedAnalytics } from "@/components/admin/enhanced-analytics"
@@ -11,6 +12,7 @@ import { AiQualityMetrics } from "@/components/admin/ai-quality-metrics"
 import { ConversionRatesDashboard } from "@/components/admin/conversion-rates-dashboard"
 import { FeedbackAnalysisDashboard } from "@/components/admin/feedback-analysis-dashboard"
 import { RealtimeStats } from "@/components/admin/realtime-stats"
+import { PerformanceMonitoringDashboard } from "@/components/admin/performance-monitoring-dashboard"
 import { SideNav } from "@/components/navigation/side-nav"
 import { 
   Users, 
@@ -19,6 +21,7 @@ import {
   Package,
   Sparkles,
   Brain,
+  Gauge,
 } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 
@@ -115,8 +118,16 @@ export function AdminDashboardContent() {
             </Card>
           </section>
 
-          {/* 향상된 통계 대시보드 */}
+          {/* 향상된 통계 대시보드 (통합) */}
           <section id="enhanced-analytics">
+            <EnhancedAnalyticsDashboard 
+              apiEndpoint={apiEndpoint}
+              showFilters={false}
+            />
+          </section>
+
+          {/* 기존 상세 통계 분석 (호환성 유지) */}
+          <section id="detailed-analytics">
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl">상세 통계 분석</CardTitle>
@@ -126,19 +137,6 @@ export function AdminDashboardContent() {
               </CardHeader>
               <CardContent>
                 <EnhancedAnalytics />
-              </CardContent>
-            </Card>
-          </section>
-
-          {/* 기존 Analytics 대시보드 */}
-          <section id="overview">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">전체 플랫폼 통계</CardTitle>
-                <CardDescription>모든 사용자의 활동을 종합한 통계입니다.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AnalyticsDashboard apiEndpoint={apiEndpoint} />
               </CardContent>
             </Card>
           </section>
@@ -156,6 +154,11 @@ export function AdminDashboardContent() {
           {/* 피드백 데이터 분석 */}
           <section id="feedback-analysis">
             <FeedbackAnalysisDashboard />
+          </section>
+
+          {/* 성능 모니터링 */}
+          <section id="performance-monitoring">
+            <PerformanceMonitoringDashboard />
           </section>
 
           <section id="logs">

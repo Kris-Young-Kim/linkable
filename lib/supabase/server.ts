@@ -78,7 +78,9 @@ export async function getSupabaseUserClient(): Promise<SupabaseClient> {
     user?.emailAddresses?.[0]?.emailAddress ??
     undefined;
   const name = user?.fullName ?? user?.username ?? undefined;
-  const role = (user?.publicMetadata?.role as string) || "user";
+  // Supabase의 기본 role은 "authenticated"만 존재합니다.
+  // 커스텀 role 정보는 app_metadata에 저장하되, JWT payload의 role은 항상 "authenticated"로 설정합니다.
+  const userRole = (user?.publicMetadata?.role as string) || "user"; // 사용자 역할 정보 (app_metadata에 저장용)
 
   // Clerk 정보를 기반으로 Supabase JWT 생성
   const jwtOptions: {
@@ -86,9 +88,11 @@ export async function getSupabaseUserClient(): Promise<SupabaseClient> {
     role?: string;
     expiresIn?: number;
     name?: string;
+    userRole?: string; // 실제 사용자 역할 (app_metadata에 저장)
   } = {
     email,
-    role,
+    role: "authenticated", // Supabase JWT의 role은 항상 "authenticated"
+    userRole, // 실제 사용자 역할은 별도로 전달
     expiresIn: 3600, // 1시간
   };
 

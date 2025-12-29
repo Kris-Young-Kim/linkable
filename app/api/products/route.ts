@@ -79,15 +79,15 @@ const persistRecommendations = async (
   });
 
   // 추천 생성 로그 추가 (리마인더 연동 테스트용)
-  console.log(
-    `[Products API] 추천 생성 완료: consultationId=${consultationId}, count=${
-      data?.length ?? 0
-    }`
-  );
-  if (data && data.length > 0) {
-    console.log(
-      `[Products API] 생성된 추천 ID: ${data.map((r) => r.id).join(", ")}`
-    );
+  logEvent({
+    category: "matching",
+    action: "recommendations_created",
+    payload: {
+      consultationId,
+      count: data?.length ?? 0,
+      recommendationIds: data && data.length > 0 ? data.map((r) => r.id) : [],
+    },
+  });
 
     // 추천이 생성되면 상담 상태를 자동으로 'completed'로 변경
     const { error: statusUpdateError } = await supabaseClient
@@ -371,9 +371,12 @@ export async function GET(request: Request) {
 
   // ICF 코드가 없으면 추천을 반환하지 않음 (consultationId만 있고 ICF 분석이 없는 경우)
   if (isoCodes.length === 0 && consultationId) {
-    console.log(
-      "[products API] ICF codes not found for consultation, returning empty array"
-    );
+    logEvent({
+      category: "matching",
+      action: "no_icf_codes_for_consultation",
+      payload: { consultationId },
+      level: "warn",
+    });
     return NextResponse.json({ products: [] });
   }
 
@@ -399,27 +402,40 @@ export async function GET(request: Request) {
   // 데이터베이스에서 조회된 제품의 ISO 코드 목록
   const foundIsoCodes = new Set((data ?? []).map((p) => p.iso_code));
 
-  // 디버깅: 전체 상황 로그
-  console.log("[products API] 제품 조회 상황:", {
-    totalIsoMatches: isoMatches.length,
-    isoCodes,
-    dbProductCount: data?.length ?? 0,
-    foundIsoCodes: Array.from(foundIsoCodes),
-  });
+  // 제품 조회 상황 로깅 (개발 환경에서만 상세 로그)
+  if (process.env.NODE_ENV === "development") {
+    logEvent({
+      category: "matching",
+      action: "products_query_debug",
+      payload: {
+        totalIsoMatches: isoMatches.length,
+        isoCodes,
+        dbProductCount: data?.length ?? 0,
+        foundIsoCodes: Array.from(foundIsoCodes),
+      },
+      level: "info",
+    });
+  }
 
   // 환경 변수에서 ISO 링크 가져오기
   // 데이터베이스에 제품이 있어도 환경 변수 링크를 추가로 포함
   const envLinksMap = getMultipleIsoCodeLinksFromEnv(isoCodes);
 
-  // 디버깅: 환경 변수 조회 결과
-  console.log("[products API] 환경 변수 조회 결과:", {
-    requestedCodes: isoCodes,
-    foundLinks: Array.from(envLinksMap.entries()).map(([code, links]) => ({
-      isoCode: code,
-      linkCount: links.length,
-      links: links.slice(0, 2), // 처음 2개만 로그
-    })),
-  });
+  // 환경 변수 조회 결과 로깅 (개발 환경에서만 상세 로그)
+  if (process.env.NODE_ENV === "development" && envLinksMap.size > 0) {
+    logEvent({
+      category: "matching",
+      action: "env_links_retrieved",
+      payload: {
+        requestedCodes: isoCodes,
+        foundLinks: Array.from(envLinksMap.entries()).map(([code, links]) => ({
+          isoCode: code,
+          linkCount: links.length,
+        })),
+      },
+      level: "info",
+    });
+  }
 
   // 환경 변수 링크를 가상 제품으로 변환
   const envProducts: Array<{
@@ -438,11 +454,16 @@ export async function GET(request: Request) {
   }> = [];
 
   for (const [isoCode, links] of envLinksMap.entries()) {
-    const isoMatch = isoMatches.find((match) => match.isoCode === isoCode);
-    if (!isoMatch) {
-      console.log(`[products API] ISO 매칭 정보 없음: ${isoCode}`);
-      continue;
-    }
+      const isoMatch = isoMatches.find((match) => match.isoCode === isoCode);
+      if (!isoMatch) {
+        logEvent({
+          category: "matching",
+          action: "iso_match_not_found",
+          payload: { isoCode },
+          level: "warn",
+        });
+        continue;
+      }
 
     // 각 링크마다 별도의 제품 생성
     links.forEach((link, index) => {
@@ -462,10 +483,6 @@ export async function GET(request: Request) {
         is_active: true,
       });
     });
-
-    console.log(
-      `[products API] 환경 변수 제품 생성: ${isoCode} -> ${links.length}개`
-    );
   }
 
   // 데이터베이스 제품과 환경 변수 제품 합치기
@@ -571,17 +588,15 @@ export async function GET(request: Request) {
     payload: { count: ranked.length, hasIcfContext: icfCodes.length > 0 },
   });
 
-  // 디버깅 정보 포함
-  const debugInfo = {
+  // 디버깅 정보 (개발 환경에서만)
+  const debugInfo = process.env.NODE_ENV === "development" ? {
     icfCodes,
     isoMatches: isoMatches.map((m) => ({ isoCode: m.isoCode, label: m.label })),
     dbProductCount: data?.length ?? 0,
     envProductCount: envProducts.length,
     envIsoCodes: Array.from(envLinksMap.keys()),
     totalProducts: ranked.length,
-  };
-
-  console.log("[products API] 최종 응답:", debugInfo);
+  } : undefined;
 
   // 응답 최적화: 불필요한 필드 제거 및 필수 필드만 반환
   const optimizedProducts = ranked.map((product) => {

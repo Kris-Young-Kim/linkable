@@ -223,7 +223,7 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config, { dev }) => {
+  webpack: (config, { dev, isServer }) => {
     if (dev) {
       const currentWatchOptions = config.watchOptions || {};
       const ignored = currentWatchOptions.ignored;
@@ -250,6 +250,68 @@ const nextConfig = {
         followSymlinks: false,
         // 폴링 대신 네이티브 파일 시스템 이벤트 사용
         poll: false,
+      };
+    }
+
+    // 프로덕션 빌드 최적화
+    if (!dev && !isServer) {
+      // 코드 스플리팅 최적화
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: "all",
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // 공통 라이브러리 분리
+            framework: {
+              name: "framework",
+              chunks: "all",
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+            // 큰 라이브러리 분리
+            lib: {
+              test(module: any) {
+                return (
+                  module.size() > 160000 &&
+                  /node_modules[/\\]/.test(module.identifier())
+                );
+              },
+              name(module: any) {
+                const hash = require("crypto")
+                  .createHash("sha1")
+                  .update(module.identifier())
+                  .digest("hex")
+                  .substring(0, 8);
+                return `lib-${hash}`;
+              },
+              priority: 30,
+              minChunks: 1,
+              reuseExistingChunk: true,
+            },
+            // 공통 모듈
+            commons: {
+              name: "commons",
+              minChunks: 2,
+              priority: 20,
+            },
+            // 공유 모듈
+            shared: {
+              name(module: any, chunks: any[]) {
+                return `shared-${require("crypto")
+                  .createHash("sha1")
+                  .update(chunks.reduce((acc, chunk) => acc + chunk.name, ""))
+                  .digest("hex")
+                  .substring(0, 8)}`;
+              },
+              priority: 10,
+              minChunks: 2,
+              reuseExistingChunk: true,
+            },
+          },
+        },
       };
     }
 

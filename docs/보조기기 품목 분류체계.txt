@@ -1,0 +1,2647 @@
+보조기기 품목 분류체계
+1. 생명활동 보조기기
+1 04 측정, 자극, 또는 생리학적 / 정신적 기능 훈련용 보조기기 (ASSISTIVE
+PRODUCTS FOR MEASURING, STIMULATING OR TRAINING PHYSIOLOGICAL
+AND PSYCHOLOGIAL FUNCTIONS)
+개인의 건강 상태를 모니터링하거나 평가하는 보조기기, 신체적 및 심리적 기능을 자
+극하거나 훈련하기 위한 보조기기
+"의료적 치료"에 사용되는 보조기기가 포함됨
+보건의료전문가가 단독으로 사용하는 보조기기는 제외됨
+교육 이외의 기능이 있지만 교육에도 사용할 수 있는 장치는 주요 기능을 다루는 범주
+에 포함
+1 04 03 호흡용 보조기기 (Assistive products for respiration)
+사람의 호흡을 보조하는 장비
+1 04 03 03 흡입 공기 전처리 장치 (Inhaled-air pretreatment devices)
+주변으로부터 공기를 흡수하고 공기를 가온, 냉각, 청소함으로써 사람이 흡입하기 전에 
+생리학적으로 처리하는 장치  
+1 04 03 06 흡기 장비 (Inhalation equipment)
+흡기를 보조기하거나 수증기, 가스, 액체 스프레이나 미세먼지의 형태로 약물 투여를 
+돕는 장치.
+제트 디스펜서, 자동 흡입 디스펜서, 압력 호흡기, 초음파 분무기, 여과기, 용량조절 에
+어로졸이 있는 분무기가 포함됨
+1 04 03 12 인공호흡기 (Respirators)
+호흡이 곤란한 사람을 위하여 코, 입, 또는 기관절개시 공기 파이프의 인공구멍을 통해 
+인공환기를 제공하는 장치
+주변 공기를 여과 및 정화하는 여과기 및 인공호흡기, 지속적 기도 양압, 이단 기도 양
+압이 포함됨
+1 04 03 18 산소 공급장치 (Oxygen units)
+농축된 산소 가스를 코나 입을 통해 제공하여 호흡을 도와주는 장치
+주변 공기로부터 산소를 농축하는 장치가 포함됨
+1 04 03 21 흡인기 (Aspirators)
+폐의 분비물 또는 물질을 빨아들이는 장치
+1 04 03 24 호흡용 벤치 및 쿠션 (Benches and cushions for respiration)
+사람이 숨을 쉬거나 폐로부터 분비물을 배출할 수 있도록 해주는 자세유지 장치
+1 04 03 27 호흡근육 훈련기 (Respiration muscle trainers)
+사람이 호흡할 때 저항을 가하거나 흉벽에 직접 압박을 가하여 호흡근육을 훈련시키는 
+장치
+흡입 및 배출에 저항을 주는 마스크가 포함됨
+1 04 03 33 목젖 지지대 (Uvula supports)
+자유로운 호흡을 위하여 목젖을 지지하는 장치
+호흡을 지속시키는 장치, 코골이 방지용 장치가 포함됨
+1 04 06 혈액순환 치료용 보조기기 (Assistive products for circulation therapy)
+수동적 또는 능동적 압축에 의해서 혈액순환 기능을 보조하는 장치
+1 04 06 06 팔, 다리, 기타 신체부위용 부종방지 스타킹 (Anti-oedema stockings for
+arms and legs and other parts of the body)
+수술 후 부종과 정맥류 상처를 치료하거나 예방하기 위하여 신체쪽으로 압력이 단계적
+으로 하강하는 의복류
+튜브형 탄성 부종방지 붕대, 혈액순환 문제로 인한 부종의 감소 또는 방지용 팔과 다
+리용 스타킹이 포함됨
+1 04 06 09 공기주입식 의류 및 압박 장치 (Air-filled garments and compression units
+for circulation problems)
+공기가 주입된 압박의복 및 압축기로 구성된 장치로 손상된 신체 부위 주변을 감싸 압
+박 강도를 주기적으로 변화시켜 순환을 돕거나 순환 기능 문제로 발생한 부종을 예방
+하기 위한 장치
+1 04 08 신체 조절 및 개념화를 위한 보조기기 (Assistive products for stimulating
+body control and conceptualization)
+몸의 자세와 조절 또는 압력에 대한 신체 개념화를 촉진시키는 의류; 일상활동을 향상
+시키는데 사용되는 의복류. 압박 의류, 붕대, 테이핑이 포함됨
+1 04 09 광선치료용 보조기기 (Assistive products for light therapy)
+1 04 09 03 자외선 A(UVA) 램프 (Ultraviolet A (UVA) lamps)
+피부 상태의 치료를 위하여 주로 사용되는 장파장 자외선 치료 램프
+1 04 09 06 선택적 자외선 광치료(SUP) 및 자외선 B(UVB) 램프 (Selective Ultraviolet
+Phototherapy (SUP) and Ultraviolet B (UVB) lamps)
+피부 상태의 치료를 위하여 주로 사용되는 단파장 자외선 치료 램프
+1 04 09 09 광선치료용 보호 안경 (Protective eyeglasses for light therapy)
+자외선으로부터 눈을 보호하는 장치
+1 04 15 투석 치료용 보조기기 (Assistive products for dialysis therapy)
+사람의 혈액을 정화하는 장치
+1 04 15 03 혈액 투석장치 (Haemodialysis units (HD))
+신장기능이 좋지 않거나 신장이 없는 사람의 혈액을 정화하기 위하여 정기적으로 사용
+되는 기계
+투석장치, 모니터, 혈액 펌프, 헤파린 펌프, 공기 감지기가 포함됨
+1 04 15 06 지속적 복막 투석장치(CAPD) (Units for continuous ambulant peritoneal
+dialysis, CAPD)
+신장기능이 좋지 않거나 신장이 없는 사람의 혈액을 지속적으로 정화하기 위하여 몸에 
+착용하는 장치
+1 04 15 12 투석용 기구세트 (Instrument sets for dialysis)
+투석장치에 사람을 연결하는 장치
+1 04 19 투약용 보조기기 (Assistive products for administering medicines)
+의약품의 비율과 양을 조절해 주는 보조기기
+피부를 통해 체내로 들어가는 물약의 주입을 도와주는 장치가 포함됨
+1 04 19 04 비 액상약품 관리를 위한 보조기기 (Assistive products for administering
+non-liquid medicines)
+비 액상약품이나 알약을 위한 용량, 투약, 관리를 위한 장치
+좌약이 포함됨
+1 04 19 06 주사총 (Injection guns)
+피부를 통해 신체 내에 직접 액체 의약품을 주입하기 위한 방아쇠가 있는 장치
+1 04 19 09 주사기, 일회용 (Injection syringes, single-use)
+피부에 삽입된 바늘을 통해 신체 내에 직접 액체 의약품을 주입하기 위한 플런저가 있
+는 장치
+각각의 주사기는 일회용으로만 사용할 수 있음 
+1 04 19 12 주사기, 반복사용 (Injection syringes, multi-use)
+피부에 삽입된 바늘을 통해 신체 내에 직접 액체 의약품을 주입하기 위한 플런저가 있
+는 장치
+각각의 주사기는 멸균시켜 재사용할 수 있음 
+1 04 19 15 주사바늘, 일회용 (Injection needles, single-use)
+일회용으로만 사용할 수 있는 주사바늘
+1 04 19 18 주사바늘, 반복 또는 영구 사용 (Injection needles, multi-use or permanent
+use)
+멸균하여 재사용할 수 있는 바늘과 장기간 신체 내에 삽입될 수 있는 바늘
+1 04 19 24 주입 펌프 (Infusion pumps)
+혈관에 직접 의약품(영양제 포함)을 자동투여하기 위하여 신체에 부착하는 장치
+인슐린 펌프, 식이 펌프, 장관내(정맥내) 식이가 포함됨
+1 04 19 27 무동력 주입 장치 (Unpowered infusion systems)
+의약품 투여를 위한 정맥내 주입 시스템
+1 04 19 33 의약품 투여를 위한 기타 보조기기(Other assistive products for
+administering medicines)
+액상 의약품 측정을 위한 기기, 주사바늘을 취급하기 위한 장치 및 의약품 포장이 포
+함됨
+1 04 22 멸균 장비 (Sterilizing equipment)
+보조기기로부터 발생하는 해로운 박테리아, 바이러스, 기타 미생물을 제거하는 장치
+1 04 24 신체적, 생리학적, 그리고 생화학적 검사 장비 및 재료 (Physical, physiological
+and biochemical test equipment and materials)
+1 04 24 03 소변 분석 장비 (Urine analysis equipment)
+1 04 24 09 혈압계 (Blood pressure meters (sphygmomanometers))
+1 04 24 12 혈액 분석 장치, 장비, 재료 (Blood analysis devices, equipment and
+materials)
+혈당 모니터 등이 포함됨
+1 04 24 15 심전도 장비 (Electrocardiogram (ECG) equipment)
+심장의 활동을 관찰하고 기록하는 장비
+1 04 24 18 신체 검사 및 평가 재료 (Physical test and evaluation materials)
+관절 안정성, 관절 가동성, 근력, 지구력과 같은 기능뿐만 아니라 앉기, 서기, 구르기,
+걷기와 같은 움직임 활동을 검사 및 평가하는 장비
+1 04 24 21 청진기 (Stethoscopes)
+인체 내부의 소리를 듣거나 청진하기 위한 장치
+1 04 24 24 체온계 (Body thermometers)
+신체온도를 측정하는 장치
+1 04 24 27 개별 체중계 (Personal scales)
+신체무게를 측정하는 장치
+1 04 24 28 앉아서 측정하는 체중계 (Personal scales for seated person)
+보조시기에 앉아 있는 사람의 체중을 측정하기 위한 장치
+휠체어에 앉은 휠체어 사용자를 위한 개인용 저울이 포함됨
+1 04 24 30 피부 상태 측정용 보조기기 (Assistive products for measuring skin
+condition)
+피부의 두께, 습도, 건조함과 같은 사람의 피부상태를 측정하는 장치
+1 04 24 33 호흡 측정기 (Respiration meters)
+흡기 및 호기의 체적을 측정하는 장치
+폐활량계가 포함됨
+1 04 25 인지검사 및 평가용 도구 (Cognitive test and evaluation materials)
+논리적 사고, 지능, 추론 등과 관련된 모든 기능 및 활동 잠재력을 검사 또는 평가하는 
+장비
+1 04 25 03 언어 검사 및 평가 재료 (Language test and evaluation materials)
+의사소통 수단으로서 언어를 사용하고 이해하는 지를 검사 및 평가하는 장비
+1 04 25 06 심리 검사 및 평가 재료 (Psychological test and evaluation materials)
+행동, 태도 및 감정적 반응을 검사 및 평가하는 장비
+1 04 26 인지기능 향상을 위한 보조기기 (Assistive products to enhance cognitive
+function)
+개인의 자기통합(self-integrity)을 향상시키고, 치료용 로봇과 정서로봇이 포함됨
+1 04 26 03 기억 훈련 보조기기 (Assistive products for memory training)
+기억 훈련을 위한 소프트웨어와 장치
+1 04 26 06 연속성 훈련용 보조기기 (Assistive products for training in sequencing)
+단어, 동작, 숫자 등을 정확한 순서로 입력하도록 훈련하기 위한 보조기기
+1 04 26 09 주의력 훈련용 보조기기 (Assistive products for training in attention)
+집중력 및 기타 집중 기능을 발달시키기 위한 보조기기
+1 04 26 12 개념 발달 훈련용 보조기기 (Assistive products for training in concept
+development)
+색, 크기, 형태와 같은 개념의 이해를 위한 훈련용 보조기기 
+1 04 26 15 분류 훈련용 보조기기 (Assistive products for training in classification)
+관련된 물건을 함께 모으는 훈련을 위한 보조기기
+1 04 26 18 문제해결 훈련용 보조기기 (Assistive products for training in problem
+solving)
+개념적 및 특정 문제 해결을 훈련하기 위한 소프트웨어와 장치
+1 04 26 21 귀납적/추론적 원인 훈련용 보조기기 (Assistive products for training
+inductive/deductive reasoning)
+일련의 사실로부터 결론을 끌어낼 때 논리적 사고와 이들을 일반화하고 해석하는 훈련
+을 위한 보조기기
+1 04 26 24 원인과 효과에 대한 이해를 발달시키기 위한 보조기기 (Assistive products
+for developing understanding of cause and effect)
+1 04 26 27 사회화 훈련용 보조기기 (Assistive products for social training)
+다른 사람과 상호작용하고 조화를 이루며 살도록 가르치는데 사용되는 보조기기
+인형 치료, 소셜 로봇 포함
+1 04 26 30 시간의 이해 훈련용 보조기기 (Assistive products for training in
+understanding of time)
+시간의 개념과 기능에 대한 훈련을 위한 보조기기
+1 04 26 88 기타 인지기능 강화를 위한 보조기기 (Other products to enhance
+cognitive function)
+사람들 사이에 있거나 사람들과 어울리는 것을 지원하는 보조기기.
+1 04 27 세포 및 조직 치료를 위한 자극 장치 (Stimulators for treatment on cellular
+and tissue level)
+근육 또는 근육의 특정 부위를 자극하기 위한 보조기기 그리고 조직, 힘줄 및 관절을 
+자극하기 위한 장치
+1 04 27 09 보조기로 사용되지 않는 근육 자극장치 (Muscle stimulators not used as
+orthoses)
+수축 또는 이완을 위하여 원인 근육 또는 근육의 특정부위를 자극하는 장비
+실금 치료용 자극기가 포함됨
+1 04 27 12 진동기 (Vibrators)
+치료목적을 위한 진동 마사지에 사용되는 빠르게 진동하는 장치
+이완 마사지 장치, 폐의 점액을 느슨하게 해주는 진동기가 포함됨
+1 04 27 21 세포성장 자극용 보조기기 (Assistive products for stimulating cell growth)
+뼈와 신체조직의 성장을 위한 자기장 자극 및 전기 자극이 포함됨 
+1 04 27 24 임플란트에 연계하여 사용되는 자극기 (Stimulators used in connection
+with implants)
+심어진 수신기의 자극을 보조하는 장치
+1 04 28 감각 자극용 보조기기 (Assistive products for stimulating senses)
+감각 자극을 증가, 감소 또는 안정화 시키기 위한 장치
+감각 통합과 지각 훈련을 위한 보조기기 포함
+1 04 28 03 빛으로 감각을 자극하는 보조기기 (Assistive products for stimulating
+senses with light)
+광선치료를 위한 보조기기 포함
+1 04 28 06 소리로 감각을 자극하는 보조기기 (Assistive products for stimulating
+senses with sound)
+음파로 음향 치료 및 감각 자극을 위한 장치
+이명 차폐기(tinnitus masks) 등이 포함
+1 04 28 09 신체접촉으로 감각을 자극하는 보조기기 (Assistive products for
+stimulating senses by physical touch)
+정적 또는 동적인 신체접촉으로 감각을 자극하는 장치
+감각자극을 위한 커버, 쿠션, 옷, 브러쉬, 공이 포함됨
+1 04 28 12 지각 식별 및 정합 훈련용 보조기기 (Assistive products for training in
+perceptual discrimination and matching)
+사람이 외부자극을 통합하고 분류하는 것을 구별할 수 있게 해주는 장비
+청각 장애인 훈련용 진동 의자가 포함됨
+1 04 28 15 지각 협응 훈련용 보조기기 (Assistive products for training in perceptual
+coordination)
+외부 자극(특히 공간, 시간개념, 눈-손 협응)을 올바르게 처리하고 협응 능력을 향상시
+키는 훈련용 장비
+1 04 28 18 감각 통합 훈련용 보조기기 (Assistive products for training in sensory
+integration)
+다른 감각으로부터 뇌로 들어오는 감각 정보의 협응과 통합을 용이하게 하는 장치
+1 04 29 통증완화용 보조기기 (Assistive products for pain relief)
+생리적 조작 또는 심리적 방해에 의한 통증 완화용 장치
+1 04 30 온열 또는 한랭 치료용 보조기기 (Assistive products for heat treatment or
+cold treatment)
+치료 목적으로 열기와 냉기를 만드는 장치
+1 04 30 03 온열 치료용 보조기기 (Assistive products for heat treatment)
+치료목적을 위하여 신체나 신체 부위를 가열하는 장치
+적외선 램프, 예열된 쿠션이 포함됨
+1 04 30 06 한랭 치료용 보조기기 (Assistive products for cold treatment)
+신체에 냉기를 가하는 치료용 장치
+1 04 33 욕창 예방용 보조기기 (피부 손상방지용, Assistive products intended to
+manage tissue integrity)
+욕창 및 욕창궤양을 예방하기 위한 보조기기가 포함됨
+1 04 33 03 욕창예방 방석 (피부 손상방지용 방석 및 깔개, Seat cushions and
+underlays for tissue integrity)
+엉덩이 부위에 과도하게 가해지는 압력을 고르게 분산시켜 피부 보호 및 욕창을 예방
+해주는 제품
+1 04 33 04 욕창예방용 등 쿠션 및 등 패드 (Back cushions and back pads for tissue
+integrity)
+등 부위에 과도하게 가해지는 압력을 재분배하는 장치
+1 04 33 06 욕창예방 매트리스 (와상용 피부 손상방지 보조기기, Assistive products
+for tissue integrity when lying down)
+장시간 누워있는 상태에서 발생 할 수 있는 욕창을 예방하기 위해 압력을 고르게 분산
+시켜 피부 보호 및 욕창을 예방해주는 제품
+1 04 33 09 욕창예방용 특수장비 (피부 손상방지용 특수 장비, Special equipment for
+tissue integrity)
+특정한 신체 부위에 가해지는 과도한 압력을 평가하고 감지하는 장치
+피부 보호용 경보장치가 포함됨
+1 04 45 척추 당김용 보조기기 (Assistive products for spinal traction)
+척추를 스트레칭(stretching)하는데 사용되는 장치
+1 04 48 운동, 근력, 균형 및 심장강화 훈련용 장비 (Equipment for movement,
+strength abalance, and cardio training)
+근육 및 심혈관 시스템, 생리학적 신체 기능의 균형 및 협응을 훈련하기 위한 장치
+1 04 48 03 체력-작업 능력 측정 및 운동용 기구 (Exercise and ergometer cycles)
+신체운동을 위한 고정된 자전거
+팔 에르고미터 자전거, 체중지지 트레드밀 시스템이 포함됨
+1 04 48 07 걸음걸이 훈련용 보조기기 (Assistive products for exercising gait pattern)
+걸음걸이를 개선하기 위하여 훈련하는 것을 지지해주는 고정된 장비
+평행봉, 체중지지 트레드밀이 포함됨 
+1 04 48 12 손가락 및 손 운동장치 (Finger and hand exercise devices)
+손가락 또는 손의 움직임 훈련이나 근력향상을 위한 장비
+1 04 48 15 팔, 몸통, 다리 운동 장치 (Arm exercise devices, trunk exercise devices
+and leg exercise devices)
+움직임 및 균형 훈련 또는 팔다리와 몸통의 근력강화를 위한 장비
+벽 난간, 트램폴린, 체조 매트, 밸런스 보드, 무게조절가능 커프(weighted cuffs), 유산
+소 및 근력 운동을 지원하는 장비 포함
+1 04 48 24 움직임, 근력, 균형 훈련을 위한 생체되먹임 장치 (Biofeedback devices for
+movement, strength and balance training)
+특정 신체적 또는 생리학적 작용에 반응하여 들을 수 있거나, 볼 수 있거나, 촉각의 신
+호를 제공하는 장치
+1 04 48 27 치료 시 자세유지용 보조기기 (Assistive products for body positioning
+during therapy)
+치료 및 처치를 용이하게 할 수 있도록 올바른 자세를 유지시켜주는 보조기기
+1 04 48 30 턱 운동 장치 (Jaw exercise devices)
+턱 견인장치가 포함됨 
+1 04 48 33 골반 훈련용 보조기기 (Assistive products for training the pelvic floor)
+골반 근육의 기능을 향상시키기 위한 장치
+1 04 48 36 개별 가동성 훈련용 보조기기 (Assistive products for training in personal
+mobility)
+걷기와 휠체어 사용하기 훈련을 위한 장비 등이 포함됨 
+1 04 48 39 기립틀 및 기립을 위한 지지대 (기립훈련기, Standing frames and supports
+for standing)
+직립 자세를 유지하기 위하여 지지력을 제공하는 고정된 장비 
+1 04 48 42 경사대 (tilting tables)
+누운 자세에서부터 직립자세까지 점진적으로 움직이는 동안 사람의 자세를 유지하고 
+지지하여 그 자세에서 신체가 적응할 수 있게 해주는 플랫폼
+1 04 49 상처치료 보조기기 (Wound care products)
+상처 치료 드레싱, 상처 치료 흡수, 상처 치료 배출을 위한 보조기기와 상처 치료 보조
+기기를 고정시키는 보조기기가 포함됨 
+1 09 자기관리 활동 및 참여용 보조기기 (ASSISTIVE PRODUCTS FOR SELF-CARE
+ACTIVITIES AND PARTICIPATION IN SELF-CARE)
+자신을 씻고 말리기, 신체와 그 부위 돌보기, 옷입고 벗기, 신체 보호를 포함하여 자신
+의 일상적 돌보기를 지지하기 위한 보조기기
+옷 입기와 벗기용, 신체 보호용, 개인위생용, 기관절개술, 인공항문성형술, 실금관리용,
+성생활용 보조기기가 포함됨 
+1 09 15 기관절개 관리용 보조기기 (Assistive products for tracheostomy care)
+기관절개 후 또는 후두절제 후 기관의 인공 구멍을 통해 호흡과 연결할 때 사용되는 
+장치
+1 09 15 03 기관 절개창 삽입관 (Tracheostoma cannulas)
+호흡을 위하여 기관을 절개한 사람의 기관 개구부에 삽입하는 튜브
+1 09 15 04 후두 절제 튜브 (Laryngectomy tubes)
+후두절제술 후 기관절개창을 유지하기 위하여 기관의 개구부에 위치하는 튜브 
+1 09 15 06 기관절개창 보호기 (Tracheostoma protectors)
+유해한 외부 영향으로부터 사람의 기관 개구부를 보호하는 장치
+1 09 15 12 기관절개창 관리용 액세사리 (Accessories for tracheostomy care)
+램프, 솔, 압력계, 연결장치, 필터, 벨트가 포함됨 
+1 09 18 인공항문 관리용 보조기기 (Assistive products for ostomy care)
+내장이나 요로의 인공 개구부를 통해 또는 누공을 통한 신체 노폐물의 수집과 관련된 
+장치 
+1 09 18 10 일체형 인공항문 관리용 노폐물 시스템 (One-piece effluent systems for
+ostomy care)
+밀폐형 또는 배출형 주머니에 연결된 구멍 또는 누공 주위 피부에 부착하기 위한 구멍 
+판으로 구성된 구멍이나 누공을 통해 신체 노폐물을 수집하는 시스템
+1 09 18 11 이체형 인공항문 관리용 노폐물 시스템을 위한 판 (Plates for two-piece
+effluent systems for ostomy care)
+인공항문이나 누공 주위의 피부에 부착되는 노폐물 수집 시스템의 부분품으로, 이 부
+분품은 고정되고 주머니는 탈부착됨
+1 09 18 16 이체형 인공항문 관리용 노폐물 시스템을 위한 주머니 (Bags for two
+piece effluent systems for ostomy care)
+인공항문이나 누공으로부터 신체 노폐물을 수집하는 밀폐 또는 배출형 주머니로 구성
+된 노폐물 수집 장치
+부분품으로 탈착이 가능하며 대용량 주머니가 포함됨
+1 09 18 17 인공항문 관리용 추가용 주머니 (Additional bags for ostomy care)
+신체 노폐물 수집을 위하여 용량을 추가할 수 있도록 인공항문 장치의 주머니에 연결
+할 수 있는 여분의 주머니 
+1 09 18 19 인공항문 관리용 노폐물 시스템의 위치 지지 및 고정용 보조기기 
+(Assistive products for supporting and holding in place effluent systems for ostomy
+care)
+인공항문 주위 탈장의 경우 인공항문의 판이나 주머니의 정확한 위치를 보장하기 위하
+여 지지해주는 보조기기
+벨트가 포함됨 
+1 09 18 20 인공항문 관리용 충전재 (Filling products for ostomy care)
+인공항문 부위의 불규칙한 피부에 일체형 노폐물 시스템이나 이체형 노폐물 시스템에 
+부착하고 새는 것을 방지할 목적의 보조기기
+1 09 18 22 인공항문 확장용 보조기기 (Assistive product for dilatating stoma)
+내장이나 요로로부터 배출되는 신체 노폐물을 통한 개방부를 유지하거나 확장하기 위
+하여 사용되는 보조기기  
+확장기, 헤가 확장기, 에이스 스토퍼가 포함됨
+1 09 18 24 장(腸) 세척용 보조기기 (Assistive products for bowel irrigation)
+개구부 또는 직장을 통해 장을 세척하는 제품 등이 포함
+1 09 18 28 내부 인공항문 배액 또는 물세척용 보조기기 (Assistive products for
+draining or flushing internal stoma)
+내부 인공항문 배액 또는 물세척을 위한 장비 
+내부 인공항문으로부터 변기나 신체 노폐물 수집 주머니로 신체 노폐물을 배액하는 튜
+브가 포함됨
+1 09 18 31 인공항문 밀봉용 보조기기 (Assistive products for sealing stoma)
+유해한 외부 영향으로부터 인공항문을 보호하기 위하여 인공항문을 보호하거나 막는 
+장치 
+1 09 18 48 수술 후 인공항문 주머니 및 액세서리 (Post-operative ostomy bags and
+accessories)
+인공항문의 생성 및 유지할 때 수술 후 목적으로 사용되는 주머니와 액세서리 
+1 09 18 51 인공항문 관리용 액세서리 (Accessories for ostomy care)
+탈취제, 인공항문 주머니용 호주머니 지지대, 인공항문 주머니 밀폐기, 신체 노폐물 농
+축 보조기기, 윤활제, 솜 덮개가 포함됨 
+1 09 21 피부 보호 및 피부 청결용 기기 (Products for skin protection and skin
+cleaning)
+의지 및 보조기 사용, 인공항문 관리용 접착제 사용을 포함한 다양한 원인으로 인한 
+손상으로부터 피부를 보호하기 위하여 사용되는 보조기기 
+1 09 21 03 접착 용해제 (Adhesive solvents)
+접착 재료를 떼어내는 물질
+1 09 21 06 피부 세정제 (Skin detergents)
+피부를 깨끗이 해주는 물질
+1 09 21 09 소독제 (Disinfectants)
+세균과 박테리아를 없애주는 물질
+1 09 21 15 밀봉용 재료 (Sealing materials)
+피부 일부를 완전히 에워싸는 물질
+1 09 21 18 피부 보호제 (Skin-protective agents)
+피부를 보호하는 물질
+1 09 21 21 굳은살 제거기Callous smoothers)
+1 09 24 소변 처리기기 (Urine diverters)
+소변 배수용 장치
+1 09 24 03 장기간 사용 카테터 (Long-term indwelling catheters)
+장시간 동안 배뇨와 방광 세척을 위하여 요도에 삽입하는 튜브
+1 09 24 06 요도를 통해 삽입된 간헐적 카테터 (Intermittent catheters inserted
+through the urethra)
+배뇨와 방광 세척을 위하여 요도에 삽입하는 일회용 튜브 장치
+1 09 24 09 음경 덮개 (Penile sheaths)
+음경 위에서 착용되고 고정되며, 소변 수집 주머니에 연결된 배출 튜브를 통해 배출되
+는 연성 덮개
+1 09 24 12 소변 활송장치 (Urine chutes)
+신체로부터 직접 소변을 변기 안으로 이동시키는 장치; 서 있을 때 사용이 가능함 
+1 09 24 15 여성용 신체착용형 소변기 (Body-worn urinals for women)
+1 09 24 18 자가 도뇨관 설치용 보조기기  (Assistive products for self-catheterization)
+거울, 음순 펼치개, 무릎 펼침 쿠션, 인체공학적 손잡이, 삽입장치, 카테터 집게, 음경 
+지지대등을 포함
+1 09 24 21 남성용 신체착용형 소변기 (Body-worn urinals for men)
+음경 주위에 착용되고 허리를 감싸는 띠와 끈에 의해 치골에서 견고하게 고정되며 소
+변 배출 주머니와 연결되는 보조기기 
+1 09 27 대소변 수집용 보조기기 (Assistive products for collecting urine and faeces)
+튜브, 밸브 등과 같은 연결 장치가 포함
+1 09 27 04 말단 폐쇄형 소변 주머니 (Closed-ended urine collection bags)
+내용물 배출을 위한 개방부가 없는 소변 수집용 유연성 용기
+1 09 27 05 말단 개방형 소변 주머니 (Open-ended urine collection bags)
+소내용물 배출을 위한 개방부가 있는 소변 수집용 유연성 용기
+1 09 27 09 비신체착용형 소변기 및 병 (Non-body-worn urinals and urine bottles)
+1 09 27 13 소변 수집용 현가 및 조임 장치 (Suspenders and fastening devices for
+urine collectors)
+신체, 이동식 거치대, 의자, 휠체어, 침대 등에 수거 주머니를 고정시키는 장치 
+1 09 27 18 소변 수집 장치 (Urine collection systems)
+소변 수집에 필요한 모든 부분품과 부착물을 포함한 제품
+1 09 27 21 대변 수집 주머니 (Faeces collection bags)
+직장에서 대변을 수집하기 위해 몸에 착용하는 유연성 용기 
+1 09 27 24 대소변 수집용 자동 변기 시스템 (Automatic toileting systems for
+collecting urine and faeces)
+자동 소변 흡수 기기가 포함됨
+1 09 30 대소변 흡수용 보조기기 (Absorbing products to contain urine and faeces)
+방광으로부터 소변과 직장으로부터 대변을 흡수하고 배출하는데 사용되는 장치
+1 09 30 12 소아용 일회용 요실금 보조기기 (Pads insert type for children, single-use)
+밀착형 속옷이나 신축성 있는 망사 팬티에 의해 제자리에 고정되는 아동용 흡수형 패
+드
+라이너 또는 실드라고도 함 
+1 09 30 13 고정기능이 있는 소아용 일회용 요실금 제품 (Products for children with
+fastener system, single-use)
+고정장치 시스템을 추가하지 않고도 신체에 고정할 수 있는 파스너 시스템이 장치된 
+아동용 흡수형 요실금 용품으로, 일반적으로 다리 개구부 또는 자가접착테이프 주위에 
+탄성이 있고 속옷과 비슷한 일회용 패드
+1 09 30 14 소아용 일회용 요실금 속옷 (Products for children resembling underwear,
+single-use)
+일반 속옷과 비슷하게 설계된 아동용 흡수형 요실금 용품
+1 09 30 15 소아용 세탁용 흡수성 요실금 제품 (Absorbent products for children,
+washable)
+세탁 가능한 아동용 흡수형 요실금 용품으로, 삽입형 패드, 파스너 시스템이 있는 패
+드, 속옷형 패드, 등받이 부분이 없는 패드 등 다양한 디자인을 사용할 수 있음
+1 09 30 18 일회용 삽입형 요실금 제품 (Products insert type, single-use)
+신축성 있는 망사 팬티, 기타 밀착형 속옷, 파스너 시스템이 있는 일회용 패드, 또는 
+속옷형 일회용 패드에 의해 제자리에 고정되는 흡수형 요실금 패드
+라이너 또는 실드라고도 함 
+1 09 30 21 성인용 일회용 기저귀 (Products with fastener system, single-use)
+몸에 고정할 수 있는 파스너 시스템이 있는 흡수형 요실금 용품으로, 일반적으로 올인
+원에는 다리 개구부 및 자가접착테이프 주위에 탄성이 있음; 올인원, 기저귀, 팬티라고
+도 함 
+1 09 30 24 일회용 요실금 속옷 (Products resembling underwear, single-use)
+남성이나 여성 사용자용 또는 남녀 공용으로 일반 속옷과 비슷하게 설계된 흡수형 요
+실금 용품
+1 09 30 25 벨트형 고정장치 시스템이 포함된 일회용 요실금 제품 (Products with belt
+as fastener system, single-use)
+제품 본체 내에 흡수중심부가 장착되고 재조정할 수 있는 허리 벨트가 장치된 흡수형 
+요실금 용품으로, 벨트는 특히 서 있는 자세에서 패드 착용에 유용하도록 고안됨
+1 09 30 26 접착띠가 있는 일회용 소변 흡수용 패드 (Pads to contain urine, with
+adhesive strip, single use)
+성별에 따라 특정한 형태로 고안되어 소량의 소변을 흡수하기 위한 속옷형 패드로, 요
+도는 덮지만 항문 부위를 덮지 않고(소변은 흡수하고 대변은 흡수하지 않음), 일반 속
+옷에 배치되어 접착띠로 제자리에 고정됨
+1 09 30 27 남성용 일회용 소변 주머니(Pouches for male to contain urine, single-use)
+음경과 음낭을 포함하도록 주머니형으로 고안된 남성용 흡수형 요실금패드
+실드, 가드, 또는 리브스라고도 함 
+1 09 30 28 성형된 남성용 일회용 소변 흡수용 패드 (Pads for male to contain urine,
+with preformed shape, single use)
+음경과 음낭을 둘러싸지 않고 그 위에 놓도록 고안된 남성용 흡수형 요실금 패드
+1 09 30 30 방수기능이 없는 일회용 요실금 패드 (Pads without waterproof backing,
+single-use)
+뒷판의 방수기능이나 일체형 고정장치 시스템이 없이 방수용 안감이나 다른 흡수용 제
+품을 넣고 별도의 파스너 시스템을 사용하여 제자리에 고정되는 흡수형 요실금 패드
+1 09 30 33 일회용 대변실금 패드 (Pads to contain faeces, single-use)
+대변 수집을 위한 흡수형 실금 패드
+1 09 30 36 세탁용 흡수형 요실금 제품 (Absorbent products, washable)
+세탁 가능한 흡수형 요실금  용품으로, 삽입형 패드, 파스너 시스템이 있는 패드, 또는 
+속옷형 일회용 패드와 같이 제품 유형이 다양한 디자인이 있음
+1 09 30 39 요실금 패드 고정용 재사용 속옷 (Fixation underwear to hold absorbent
+pads in place, reusable)
+일회용 또는 재사용을 위해 세탁할 수 있는 제품
+세탁형 보조기기, 일회용 보조기기가 포함됨 
+1 09 30 42 의자 및 침대 오염방지를 위한 일회용 비착용형 패드 (Underpads for
+non-body-worn use to protect chair or bedding, single use)
+일회용 위생 패드가 포함됨
+1 09 30 45 의자 및 침대 오염방지를 위한 세탁용 비착용형 패드 (Underpads for
+non-body-worn use to protect chair or bedding, washable)
+세탁이 가능한 위생 패드가 포함됨
+1 09 31 불수의적 대소변 누출 예방용 보조기기 (Assistive products to prevent
+involuntary urine or faeces leakage)
+1 09 31 03 불수의적 요실금 방지용 보조기기 (Assistive products to prevent
+involuntary urine leakage)
+불수의적으로 소변이 나오는 것을 예방하는 보조기기 
+요도 플러그, 질 굽힘장치, 음경 조임쇠, 요도를 집는 팽창식 풍선, 질 삽입장치가 포함
+됨
+1 09 31 06 불수의 대변실금 방지용 보조기기 (Assistive products to prevent
+involuntary faeces leakage)
+불수의적으로 대변이 나오는 것을 예방하는 보조기기 
+항문 탐폰, 항문 플러그가 포함됨 
+1 09 31 09 실금 경보기 (Incontinence alarms)
+불수의적인 배변 또는 배뇨시 경보음을 내는 장치
+1 09 32 생리 관리용 보조기기 (Assistive products for management of menstruation)
+생리 흐름을 관리하는 보조기기 
+2. 의지 및 보조기(prostheses and orthoses)
+2 06 신경근골격계 기능 또는 움직임 관련 기능을 지지하기 위하여(보조기) 그리고 해
+부학적 구조를 대체하기 위하여(의지(prostheses)) 신체에 부착되는 보조기기 
+(ASSISTIVE PRODUCTS ATTACHED TO THE BODY FOR SUPPORTING
+NEUROMUSCULOSKELETAL OR MOVEMENT RELATED FUNCTIONS
+(ORTHOSES) AND REPLACING ANATOMICAL STRUCTURES (PROSTHESES))
+보조기는 신경근골격 계통의 구조적 및 기능적 특징을 보완하기 위하여 사용되는 외부 
+적용 기구이며; 의지는 신체분절의 전체 또는 일부가 없거나 결손되었을 때 대체하기 
+위하여 사용되는 외부 적용 기구임
+신체구동식 및 외부동력식인 보조기, 의체, 정형용 신발용품이 포함됨 
+본 분류체계 영역이 아닌 신체 내부 의지(prostheses)는 제외함
+2 06 03 척추 및 머리 보조기 (Spinal and cranial orthoses)
+척추와 머리뼈의 신경근골격 계통의 구조적 및 기능적 특징을 조정하기 위하여 설계된 
+보조기
+이 기구는 사용자 개인의 기능적 요구에 맞게 맞춤형으로 제작되거나 특정 기능적 요
+구들에 맞게 기성품으로 제작될 수 있음
+기성품 기구는 개별 사용자에 맞게 조절이 가능하거나 또는 즉시 사용 가능하도록 만
+들어져 조절되지 않거나 조절할 필요가 없는 것 등임
+2 06 03 03 엉치-엉덩 보조기 (Sacro-iliac orthoses)
+엉치-엉덩 부위의 전체 또는 일부에 두르는 보조기
+2 06 03 04 허리 보조기 (Lumbar orthoses)
+몸통의 허리 부분에 두르는 보조기
+2 06 03 06 허리-엉치 보조기 (Lumbo-sacral orthoses)
+허리와 엉치-엉덩 부위의 전체 또는 일부에 두르는 보조기
+2 06 03 07 등 보조기 (Thoracic orthoses)
+흉부의 전체나 일부에 두르는 보조기
+2 06 03 08 등-허리 보조기 (Thoraco-lumbar orthoses)
+흉부와 허리의 전체나 일부에 두르는 보조기
+2 06 03 09 등-허리-엉치 보조기 (Thoraco-lumbo-sacral orthoses)
+흉부, 허리, 엉치-엉덩 부위의 전체나 일부에 두르는 보조기
+2 06 03 12 목 보조기 (Cervical orthoses)
+환추-후두 관절을 포함한 목 부위 전체 또는 일부에 두르는 보조기
+2 06 03 15 목-등 보조기 (Cervico-thoracic orthoses)
+환추-후두 관절을 포함한 목과 흉부 전체에 두르는 보조기 
+2 06 03 18 목-등-허리-엉치 보조기(Cervico-thoraco-lumbo-sacral orthoses)
+환추-후두 관절을 포함한 목, 흉부, 허리, 엉치-엉덩 부위 전체에 두르는 보조기 
+2 06 03 21 머리 보조기 (Cranial orthoses)
+머리에 두르는 보조기
+2 06 03 27 척추 보조기 관절 부분품 (Articulating components for spinal orthoses)
+해부학적 척추 관절의 움직임을 허용하거나 제한하는 보조기의 관절 부분품 
+2 06 03 30 척추 및 머리 보조기 장착부 부분품 (Interface components for spinal and
+cranial orthoses)
+보조기의 장착부 부분품은 사용자와 직접 접촉하는 것으로 사용자와 보조기 사이에서,
+보조기를 제 위치에 유지하고 그 기능을 구현하기 위한 힘을 전달함
+셸, 덩이(Pad), 끈(Strap)이 포함됨 
+2 06 03 33 척추 및 머리 보조기 구조 부분품 (Structural components for spinal and
+cranial orthoses)
+보조기의 구조 구성품은 관절 부분품과 장착부 부분품을 연결하며, 보조기의 정렬을 
+지탱함
+세움대(Upright), 셸이 포함됨
+2 06 03 36 척추 및 머리 보조기 마감(성형외관) 부분품 (Finishing(cosmetic)
+components for spinal and cranial orthoses)
+성형외관 부분품은 보조기에 모양, 색, 질감을 제공하는 수단임
+필러, 커버, 슬리브 형태가 포함됨 
+2 06 03 39 하악 전진 기구 (Mandibular advancement devices)
+상악에 대해 하악의 위치를 변경하는데 사용되는, 입속에 착용하는 보조기. 하악 전진 
+스플린트가 포함됨
+2 06 04 배 보조기 (Abdominal orthoses)
+배의 전체나 일부에 두르는 보조기
+2 06 04 03 배 근육 지지대 (Abdominal muscle supports)
+배를 지지하는 기구
+2 06 04 06 배 탈장 지지대 (Abdominal hernia supports)
+탈장을 억제하고 지지하는 기구. 탈장 끈(Strap), 거들, 탈장대(Trusses)가 포함됨 
+2 06 04 09 배 보조기 장착부 부분품 (Interface components for abdominal orthoses)
+사용자에 직접 접촉하는 장착부 부분품; 사용자와 보조기 사이에서, 보조기를 제 위치
+에 유지하고 그 기능을 구현하기 위한 힘을 전달함.
+셸, 덩이(Pad), 끈(Strap)이 포함됨 
+2 06 04 12 배 보조기 마감(성형외관) 부분품 (Finishing(cosmetic) components for
+abdominal orthoses)
+성형외관 부분품은 보조기에 모양, 색, 질감을 제공하는 수단임. 필러, 커버, 슬리브 형
+태가 포함됨 
+2 06 06 팔 보조기 (Upper limb orthoses)
+팔의 신경근골격 계통의 구조적 및 기능적 특징을 조정하도록 설계된 보조기
+맞춤형이나 기성품으로 제작되는 기구; 기성품 기구는 조절할 수 있거나 바로 사용이 
+가능함 
+2 06 06 03 손가락 보조기 (Finger orthoses)
+손가락의 전체나 일부에 두르는 보조기
+2 06 06 06 손 보조기 (Hand orthoses)
+손의 전체나 일부에 두르는 보조기
+2 06 06 07 손-손가락 보조기 (Hand-finger orthoses)
+손의 전체나 일부 그리고 하나 이상의 손가락의 전체나 일부에 두르는 보조기
+2 06 06 12 손목-손 보조기 (Wrist-hand orthoses)
+손목관절 및 손의 전체나 일부에 두르는 보조기
+2 06 06 15 팔꿈치 보조기 (Elbow orthoses)
+팔꿈치 관절에 두르는 보조기
+2 06 06 19 팔꿈치-손목-손 보조기 (Elbow-wrist-hand orthoses)
+팔꿈치 및 손목의 관절에, 그리고 손의 전체나 일부에 두르는 보조기
+2 06 06 20 아래팔 보조기 (Fore-arm orthoses)
+팔꿈치 또는 손목의 관절 구성품이 있거나 없으면서 아래팔에 두르는 보조기로 골절 
+치료 보조용
+2 06 06 21 어깨 보조기 (Shoulder orthoses)
+어깨관절에 두르는 보조기
+2 06 06 24 어깨-팔꿈치 보조기 (Shoulder-elbow orthoses)
+어깨 및 팔꿈치의 관절을 두르는 보조기
+2 06 06 25 위팔 보조기 (Upper-arm orthoses)
+어깨 또는 팔꿈치의 관절 구성품이 있거나 없으면서 위팔에 두르는 보조기로, 골절 치
+료용
+2 06 06 30 어깨-팔꿈치-손목-손 보조기 (Shoulder-elbow-wrist-hand orthoses)
+어깨, 팔꿈치, 손목의 관절에, 그리고 손의 전체나 일부에 두르는 보조기
+2 06 06 32 손 및 손가락의 관절 부분품 (Hand joints and finger joints)
+해부학적 손 관절과 손가락 관절의 움직임을 허용하거나 억제하는 팔 보조기의 관절 
+부분품
+2 06 06 33 손목관절 (Wrist joints)
+해부학적 손목관절의 움직임을 허용하거나 제한하는 팔 보조기의 관절 부분품 
+2 06 06 36 팔꿈치관절 (Elbow joints)
+해부학적 팔꿈치관절의 움직임을 허용하거나 제한하는 팔 보조기의 관절 부분품
+2 06 06 39 어깨관절 (Shoulder joints)
+해부학적 어깨관절의 움직임을 허용하거나 제한하는 팔 보조기의 관절 부분품 
+2 06 06 42 팔 보조기 장착부 부분품 (Interface components for upper limb orthoses)
+사용자에 직접 접촉하는 장착부 부분품;
+사용자와 보조기 사이에서, 보조기를 제 위치에 유지시키고 그 기능을 구현하기 위한 
+힘을 전달함,
+셸, 덩이(pad), 끈(Strap)이 포함됨 
+2 06 06 45 팔 보조기 구조 부분품 (Structural components for upper limb orthoses)
+보조기의 구조 부분품은 관절부 부분품과 장착부 부분품 간을 연결하며, 보조기의 정
+렬을 지탱함
+세움대(Upright), 셸이 포함됨
+2 06 06 48 팔 보조기 마감(성형외관) 부분품 (Finishing(cosmetic) components for
+upper limb orthoses)
+성형외관 부분품은 보조기에 모양, 색, 질감을 제공하는 수단임
+필러, 커버, 슬리브 형태가 포함됨 
+2 06 06 90 손-손가락 동력 보조형 보조기 (Hand-finger power-assisted orthoses)
+손의 전체나 일부 그리고 하나 이상의 손가락 전체나 일부에 두르는 보조기로서 외부
+동력이 적용된 것
+2 06 12 다리 보조기 (Lower limb orthoses)
+다리의 신경근골격 계통의 구조적 및 기능적 특징을 조정하도록 설계된 보조기
+맞춤형이나 기성품으로 제작되는 기구; 기성품 기구는 조절할 수 있거나 바로 사용이 
+가능함 
+2 06 12 03 발 보조기 (Foot orthoses)
+발의 전체 또는 일부에 두르는 보조기
+정형화, 안창(Insole), 신발 인서트, 족궁 지지대, 발꿈치 쿠션, 발꿈치 컵, 정형용 인레
+이(Inlay)가 포함됨 
+2 06 12 04 변형 교정 맞춤 신발(Orthopaedic shoes to deformity)
+사람의 다리, 발목, 발의 기능과 구조가 손상된 것을 치료 또는 보완하기 위한 신발류
+로, 다리와 발의 길이를 늘리거나 모양을 개선하기 위한 교정용 신발
+2 06 12 05 기능 교정 맞춤 신발(Orthopaedic shoes to functions)
+사람의 다리, 발목, 발의 기능과 구조가 손상된 것을 치료 또는 보완하기 위한 신발류
+로, 관절운동범위를 제한 또는 증가시키거나, 약해진 근육활동을 보상, 근육 과도활동
+의 효과 조절, 하중 감소 및 분배를 위한 교정용 신발
+2 06 12 06 발목-발 보조기 (Ankle-foot orthoses)
+발목 관절에, 그리고 발의 전체나 일부에 두르는 보조기
+2 06 12 09 무릎 보조기 (Knee orthoses)
+무릎 관절에 두르는 보조기
+2 06 12 12 무릎-발목-발 보조기 (Knee-ankle-foot orthoses)
+무릎 및 발목 관절과 발에 두르는 보조기
+2 06 12 13 아래다리 보조기 (Lower leg orthoses)
+하퇴에 두르는 보조기
+2 06 12 15 골반 보조기 (Pelvic orthoses)
+골반에 두르는 보조기
+2 06 12 16 엉덩-무릎 보조기 (Hip-knee orthoses)
+엉덩관절 및 무릎에 두르는 보조기
+2 06 12 17 넓적다리 보조기 (Thigh orthoses)
+넓적다리에 두르는 보조기
+2 06 12 18 엉덩-무릎-발목-발 보조기 (Hip-knee-ankle-foot orthoses)
+엉덩관절, 무릎, 발목과 발에 두르는 보조기
+2
+06
+12
+19
+(등-)허리-엉치-엉덩-무릎-발목-발 
+(Thoraco-)lumbo-sacral-hip-knee-ankle-foot orthoses)
+보조기 
+허리, 엉덩관절, 무릎, 발목과 발에 두르는 보조기로 흉부까지 두르기도 함
+2 06 12 20 발-발가락 관절 (Foot-toe joints)
+해부학적 발 관절과 발가락 관절의 움직임을 허용하거나 제한하는 다리 보조기의 관절 
+부분품 
+2 06 12 21 발목관절 (Ankle joints)
+해부학적 발목관절의 움직임을 허용하거나 제한하는 다리 보조기의 관절 부분품 
+2 06 12 22 엉덩-무릎-발목-발 동력 보조기 (Hip-knee-ankle-foot power-assisted
+orthoses)
+엉덩관절, 무릎, 발목과 발에 두르는 보조기로서 외부동력이 적용된 것
+2 06 12 24 무릎관절 (Knee joints)
+해부학적 무릎관절의 움직임을 허용하거나 제한하는 다리 보조기의 관절 부분품 
+2 06 12 27 엉덩관절 (Hip joints)
+해부학적 엉덩관절의 움직임을 허용하거나 제한하는 다리 보조기의 관절 부분품
+2 06 12 30 다리 보조기 장착부 부분품 (Interface components for lower limb
+orthoses)
+사용자에 직접 접촉하는 장착부 부분품, 사용자와 보조기 사이에서, 보조기를 제 위치
+에 유지시키고 그 기능을 구현하기 위한 힘을 전달함
+셸, 덩이(Pad), 끈(Strap)이 포함됨
+2 06 12 33 다리 보조기 구조 부분품 (Structural components for lower limb orthoses)
+보조기의 구조 부분품은 관절부 부분품과 장착부 부분품 간을 연결하며, 보조기의 정
+렬을 지탱함.
+세움대(Upright), 셸이 포함됨 
+2 06 12 36 다리 보조기 마감(성형외관) 부분품 (Finishing(cosmetic) components for
+lower limb orthoses)
+성형외관 부분품은 보조기에 모양, 색, 질감을 제공하는 수단임. 필러, 커버, 슬리브 형
+태가 포함됨 
+2 06 15 기능적 전기자극기와 복합형 보조기 (Functional neuromuscular stimulators
+and hybrid orthoses)
+FES를 이용해 운동 기능 손실을 보상하도록 설계된 기구
+기능적 전기자극기, 복합형 보조기 체계에서 기계식 보조기와 조합된 복합형 보조기가 
+포함됨
+2 06 18 팔 의지 (Upper limb prostheses)
+다양한 팔 의지의 제작을 위해 조립 가능한 호환 부분품들의 목록. 성형외관용 팔 의
+지가 포함됨
+2 06 18 03 부분 손 의지 (Partial hand prostheses)
+절단 후 또는 선천성 결손으로 인해 손목 아래의 원위부를 대체하는 기구. 손가락 의
+지가 포함됨
+2 06 18 06 손목관절 의지 (Wrist disarticulation prostheses)
+절단 후 또는 선천성 결손으로 인해 손목관절 원위부를 대체하는 기구
+2 06 18 09 아래팔 의지 (Trans-radial prostheses)
+절단 후 또는 선천성 결손으로 인해 손목과 팔꿈치 사이를 기준으로 원위부를 대체하
+는 기구
+2 06 18 12 팔꿈치관절 의지 (Elbow disarticulation prostheses)
+절단 후 또는 선천성 결손으로 인해 팔꿈치관절 원위부를 대체하는 기구 
+2 06 18 15 위팔 의지 (Trans-humeral prostheses)
+절단 후 또는 선천성 결손으로 인해 어깨와 팔꿈치 사이를 기준으로 원위부를 대체하
+는 기구 
+2 06 18 18 어깨관절 의지 (Shoulder disarticulation prostheses)
+절단 후 또는 선천성 결손으로 인해 어깨관절 원위부를 대체하는 기구 
+2 06 18 21 어깨-가슴 의지 (Scapulo-thoracic disarticulation prostheses)
+절단 후 또는 선천성 결손으로 인해 견갑흉관관절과 흉쇄관절 원위부를 대체하는 기구
+2 06 18 24 의지 손 및 의지 손가락 (Prosthetic hands and prosthetic digits)
+정상 팔의 동적 및 감각적 속성의 일부를 대체하는 팔 의지의 기능성 부분품
+의지 손은 정상 손 기능의 일부를 대체하도록 설계되었으며, 비동작형, 수동형, 능동형 
+또는 수동/능동 
+조합형이 있음
+의지 손은 외부동력식이나 신체구동식이 있음 
+2 06 18 25 분리형 후크 및 집게 기능을 하는 기타 말단기구 (Split hooks and other
+terminal devices to employ a pincer action)
+집게 기능을 하는 분리형 후크의 예처럼 정상 팔의 동적 및 감각적 속성의 일부를 대
+체하는 팔 의지의 기능성 부분품
+2 06 18 26 의지 손용 특정 장치나 도구 (Specialized appliances or tools for
+prosthetic hands)
+정상 팔의 동적 및 감각적 속성의 일부를 대체하면서 다양한 개별 기능을 수행하는 팔 
+의지의 기능성 부분품
+수동형, 조절식 또는 능동형이 있음 
+2 06 18 30 손목 장치 (Wrist units)
+정상 팔의 동적 및 감각적 속성의 일부와 정상 손목 기능의 일부를 대체하는 팔 의지
+의 기능성 부분품 
+2 06 18 33 팔꿈치 장치 (Elbow units)
+정상 팔의 동적 및 감각적 속성의 일부를 대체하고 조절된 동작을 사용하여 정상 팔꿈
+치 기능의 일부를 대체하는 팔 의지의 기능성 부분품
+2 06 18 36 어깨 장치 (Shoulder units)
+정상 팔의 동적 및 감각적 속성의 일부를 대체하고 조절된 동작을 사용하여 정상 어깨 
+기능의 일부를 대체하는 팔 의지의 기능성 부분품
+2 06 18 39 팔 의지 외측 관절 장치 (External(side) joints for upper limb prostheses)
+정상 팔의 동적 및 감각적 속성의 일부를 대체하고 인체 관절의 원치 않는 동작을 제
+한하는 팔 의지의 기능성 부분품.
+손목 관절 장치, 팔꿈치 관절 장치, 어깨 관절 장치가 포함됨 
+2 06 18 40 어깨 회전 장치 (Humeral rotation units)
+소켓으로 인해 어깨의 제한된 내/외 회전 범위를 대체하는 팔 의지의 기능성 부분품 
+2 06 18 41 부가 굴곡 장치 (Additional flexion units)
+팔꿈치의 효과적인 굴곡 범위를 개선시키기 위하여 어깨 의지의 어깨 관절 장치와 팔
+꿈치 관절 장치 
+사이에 적용하는 팔 의지의 기능성 부분품  
+2 06 18 42 팔 의지 소켓 (Sockets for upper limb prostheses)
+지지, 고정, 현가를 위해 착용자와 직접 접촉하는 팔 의지의 장착부 부분품
+기능성 부분품을 작동 및/또는 조절하는 요소가 포함될 수 있음
+부분 손 절단, 손목 이단, 아래팔 절단, 팔꿈치 이단, 위팔 절단, 어깨 이단, 어깨가슴 
+절단용 소켓이 포함됨
+2 06 18 45 팔 의지 라이너 (Liners for upper limb prostheses)
+지지, 고정, 현가를 위해 착용자와 직접 접촉하는 팔 의지의 장착부 부분품
+기능성 부분품을 작동 및/또는  조절하는 요소가 포함될 수 있음
+부분 손 절단, 손목 이단, 아래팔 절단, 팔꿈치 이단, 위팔 절단, 어깨 이단, 어깨가슴 
+절단용 소켓 내에 위치하는 라이너가 포함됨 
+2 06 18 48 현가 부분품 (Suspensory components)
+신체에 의지를 고정하기 위하여 사용되는 현가 부분품
+기본적인 현가 부위, 골반, 몸통, 어깨, 위팔, 상완골과, 요골/척골 경상돌기에 적용하는 
+현가 부분품이 포함됨
+2 06 18 51 팔 의지 정렬 부분품 (Alignment components of upper limb prostheses)
+의지 부분품 간 위치/각도의 조절을 가능하게 하는 정렬 부분품
+의지 구조의 일부이거나, 다른 부분품으로 제거 또는 교체될 수 있는 정렬 부분품이 
+포함됨
+2 06 18 54 팔 의지 구조 부분품 (Structural components of upper limb prostheses)
+장착부와 기능성 부분품 및 정렬 부분품 간을 이어주면서 의지로서의 구조를 지탱하는 
+구조 부분품
+의지 구성을 위한 내골격 및 외골격 부분품이 포함됨
+2 06 18 57 팔 의지 마감(성형외관) 부분품 (Finishing (cosmetic) components of upper
+limb prostheses)
+정상 팔의 외관과 느낌을 모방한 성형외관용 부분품. 셸, 필러, 피부, 스타킹, 장갑 형
+태가 포함됨 
+2 06 24 다리 의지 (Lower limb prostheses)
+다양한 다리 의지의 제작을 위해 조립 가능한 호환 부분품의 목록. 성형외관용 다리 
+의지가 포함됨
+2 06 24 03 발 의지 (Foot prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 발목의 원위에서 다리의 일부를 대체하는 장
+치.
+발가락 의지를 포함함 
+2 06 24 06 발목 의지 (Ankle disarticulation prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 발목관절에서 다리의 일부를 대체하는 장치 
+2 06 24 09 종아리 의지 (Trans-tibial prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 무릎관절과 발목관절 사이에서 다리의 일부
+를 대체하는 장치 
+2 06 24 12 무릎관절 의지 (Knee disarticulation prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 무릎관절에서 다리의 일부를 대체하는 장치 
+2 06 24 15 넓적다리 의지 (Trans-femoral prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 엉덩관절과 무릎관절 사이에서 다리의 일부
+를 대체하는 장치 
+2 06 24 18 엉덩이관절 의지 (Hip disarticulation prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 엉덩관절에서 다리를 대체하는 장치 
+2 06 24 21 골반 의지 (Trans-pelvic prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 편측 골반의 일부 또는 전체와 함께 다리를 
+대체하는 장치 
+2 06 24 24 하반신 의지 (Hemi-corporectomy prostheses)
+절단 후 또는 선천성 다리 결손으로 인해 편측 골반의 일부 또는 전체와 함께 다리를 
+대체하는 장치 
+2 06 24 27 발목-발 장치 (Ankle-foot units)
+정상 다리의 동적 및 감각적 속성의 일부를 대체하고 동작 제어를 통해 정상 발목과 
+발의 기능 일부를 대체하는 다리 의지의 기능성 부분품. 별개의 발목 장치
+발 장치가 포함됨
+2 06 24 30 축회전 장치(토크 감소 장치) (Axial rotators (Torque reducers))
+정상 다리의 동적 및 감각적 속성의 일부를 대체하고 횡단면 회전을 허용하여 토크 부
+하를 줄이는, 다리 의지의 기능성 부분품
+2 06 24 31 부하 감쇠기(완충기) (Load attenuators (Shock absorbers))
+정상 다리의 동적 및 감각적 속성의 일부를 대체하고, 길이 방향 움직임이 가능하여(짧
+아짐) 접지 초기(Initial contact)의 충격을 줄이는, 다리 의지의 기능성 부분품 
+2 06 24 32 의지 회전반(Prosthetic turntables)
+정상 다리의 동적 및 감각적 속성의 일부를 대체하는 다리 의지의 기능성 부분품
+회전판의 원위부가 횡단면회전을 할 수 있는 의지 장치
+걷는 자세일 때 잠금은 자동이고, 풀림은 수동인 잠금장치가 조합될 수 있음
+2 06 24 33 무릎 장치 (Knee units)
+정상 다리의 동적 및 감각적 속성의 일부를 대체하고, 동작 제어를 통해 정상 무릎관
+절 기능의 일부를 대체하는 다리 의지의 기능성 부분품 
+2 06 24 36 엉덩관절 장치 (Hip units)
+정상 다리의 동적 및 감각적 속성의 일부를 대체하고, 동작 제어를 통해 정상 엉덩관
+절 기능의 일부를 대체하는 다리 의지의 기능성 부분품 
+2 06 24 37 다리 의지 외측 관절 장치 (External (side) joints for lower limb
+prostheses)
+정상 다리의 동적 및 감각적 속성의 일부를 대체하고 원치 않는 인체관절 동작을 제한
+하는 다리 의지의 기능성 부분품
+엉덩관절 장치, 무릎관절 장치, 발목관절 장치가 포함됨 
+2 06 24 40 다리 의지 라이너 (Liners for lower limb prostheses)
+지지, 고정, 현가를 위해 착용자와 직접 접촉하는 다리 의지의 장착부 부분품
+기능성 부분품을 작동하거나 조절하는 요소가 포함될 수 있음
+부분 발 절단, 발목 이단, 종아리 절단, 무릎 이단, 넓적다리 절단, 엉덩이 이단, 골반 
+절단용 소켓 내에 위치하는 라이너로 기성품과 맞춤형이 포함됨 
+2 06 24 41 다리 의지 소켓 (Sockets for lower limb prostheses)
+지지, 고정, 현가를 위해 착용자와 직접 접촉하는 다리 의지의 장착부 부분품
+기능성 부분품을 작동하거나 조절하는 요소가 포함될 수 있음
+부분 발 절단, 발목 이단, 종아리 절단, 무릎 이단, 넓적다리 절단, 엉덩이 이단, 골반 
+절단용 기성품과 맞춤형 소켓이 포함됨
+2 06 24 42 다리 의지 현가 부분품 (Suspensory components for lower limb
+prostheses)
+신체에 의지를 고정하기 위하여 사용되는 장착부 부분품
+기본적인 현가 부위, 골반, 넓적다리, 대퇴골과, 복사뼈에 적용하는 현가 부분품이 포함
+됨 
+2 06 24 45 다리 의지 정렬 부분품 (Alignment components for lower limb
+prostheses)
+의지 부분품 간 위치/각도의 조절을 가능하게 하는 정렬 부분품
+의지 구조의 일부이거나 다른 부분품으로 제거 또는 교체될 수 있는 정렬 부분품이 포
+함됨
+2 06 24 46 다리 의지 구조 부분품 (Structural components for lower limb prostheses)
+장착부와 기능성 부분품 및 정렬 부분품 간을 이어주면서 의지로서의 구조를 지탱하는 
+구조 부분품
+의지 구성을 위한 내골격 및 외골격 부분품이 포함됨
+2 06 24 47 다리 의지 마감(성형외관) 부분품 (Finishing(cosmetic) components for
+lower limb prostheses)
+정상 다리의 외관과 느낌을 모방한 성형외관용 부분품
+셸, 필러, 피부, 스타킹, 의지발 커버 형태가 포함됨 
+2 06 24 48 다리 절단인용 임시 의지 (Temporary prostheses for lower limb
+amputees)
+최종 의지를 제공하기 전에 다리 절단인의 조기 기동을 위하여 사용하는 의지
+2 06 30 기타 의지 (Prostheses other than limb prostheses)
+사지 이외에 상실된 신체 부위의 외관과 기능을 전체 또는 부분적으로 대체하기 위하
+여 사용되는 기구
+2 06 30 03 가발 (Wigs)
+사람의 머리 위 모든 머리카락을 대체하는 기구
+2 06 30 06 부분가발 (Hairpieces and toupees)
+사람의 머리 위 머리카락의 일부를 대체하는 기구
+2 06 30 09 속눈썹과 눈썹 (Eyelashes and eyebrows)
+속눈썹과 눈썹을 보상하는 기구
+2 06 30 12 콧수염과 턱수염 (Moustaches and beards)
+콧수염과 턱수염을 보상하는 기구
+2 06 30 15 등 충전물 (Back filler)
+등의 심한 만곡을 채워주는 기구
+2 06 30 18 가슴 보형물 (Mammary prostheses)
+가슴 전체 또는 일부의 외관을 재구현하는 기구
+2 06 30 21 의안 (Ocular prostheses)
+눈의 외관을 재현하는 장치
+2 06 30 24 의이 (Aural prostheses)
+귀의 외관을 재구현하는 기구
+2 06 30 27 의비 (Nasal prostheses)
+코의 외관을 재구현하는 기구
+2 06 30 30 혼합 안면 보형물 (Composite facial prostheses)
+얼굴 전체 또는 일부의 외관을 재생하는 장치. 의안, 의이, 의비, 그리고 이들이 일부 
+또는 모두 복합된 보형물
+2 06 30 33 구개 보형물 (Palate prostheses)
+입천장의 기능을 재구현하는 기구
+2 06 30 36 틀니 (Dentures)
+치아의 외관 및 기능을 재구현하는 기구
+2 06 30 39 피부 가림 물질 (Skin-covering agent)
+피부의 흠을 덮어주기 위해 사용되는 물질
+3. 일상활동 보조기기
+3 09 자기관리 활동 및 참여용 보조기기 (ASSISTIVE PRODUCTS FOR SELF-CARE
+ACTIVITIES AND PARTICIPATION IN SELF-CARE)
+자신을 씻고 말리기, 신체와 그 부위 돌보기, 옷입고 벗기, 신체 보호를 포함하여 자신
+의 일상적 돌보기를 지지하기 위한 보조기기
+옷 입기와 벗기용, 신체 보호용, 개인위생용, 기관절개술, 인공항문성형술, 실금관리용,
+성생활용 보조기기가 포함됨
+3 09 03 의류 및 신발 (Clothes and shoes)
+유아 및 아동을 위한 의복류 및 신발이 포함됨
+3 09 03 05 겉옷 (Outerwear)
+추위, 바람, 그리고 모든 유형의 강수에 대하여 사람을 보호하기 위하여 다른 옷 위에 
+입는 옥외용 옷
+옥외 사용을 위한 코트, 판초, 싸개가 포함됨
+3 09 03 09 모자류 (Headwear)
+3 09 03 12 장갑류 (Gloves and mittens)
+3 09 03 15 블라우스 및 셔츠 (Blouses and shirts)
+3 09 03 18 재킷 및 바지 (Jackets and trousers)
+3 09 03 21 치마와 드레스 (Skirts and dresses)
+3 09 03 24 속옷 (Underwear)
+3 09 03 27 스타킹 및 양말 (Stockings and socks)
+3 09 03 30 잠옷 (Nightwear)
+3 09 03 33 목욕용 의류 (Bathing wear)
+수치료용 옷, 보호용 목욕 바지가 포함됨 
+3 09 03 39 턱받이 및 앞치마 (Bibs and aprons)
+옷이나 몸이 더러워지는 것을 보호하기 위하여 몸 앞에 입는 압박의류
+3 09 03 42 신발 및 장화 (Shoes and boots)
+스포츠 신발 및 인레이 같은 전용 신발이 포함됨 
+3 09 03 45 신발 및 장화용 미끄럼방지 보조기기 (Anti-slip assistive products for
+shoes and boots)
+미끄러지는 것을 방지하기 위하여 신발 및 장화 등에 고정시키는 장치 및 도구
+3 09 03 48 단추장치 및 조임장치 (Buttoning devices and fasteners)
+지퍼, 탄력 신발끈, 앞치마용 홀더, 서로 부착되는 나일론 천 재질의 조각(벨크로 조각),
+기타 단추나 조임을 용이하게 해주는 보조기기가 포함됨 
+3 09 03 51 넥타이 및 나비 넥타이 (Neckties and bow-ties)
+3 09 06 신체 보호용 착용형 보조기기 (Body-worn assistive products for body
+protection)
+신체 부분의 손상을 예방하는 장비
+3 09 06 03 머리 보호용 보조기기 (Assistive products for head protection)
+3 09 06 06 눈 또는 얼굴 보호용 보조기기 (Assistive products for eye protection or
+face protection)
+보안경(물안경, moist chamber), 안경형 보호대(watch-glass dressing)가 포함됨
+3 09 06 09 귀 보호 또는 청력 보호용 보조기기 (Assistive products for ear protection
+or hearing protection)
+3 09 06 12 팔꿈치 또는 팔 보호용 보조기기 (Assistive products for elbow protection
+or arm protection)
+타박상 또는 피부 손상을 예방하기 위한 패드, 쿠션,
+3 09 06 15 손 보호용 보조기기 (Assistive products for hand protection)
+휠체어 장갑 등이 포함
+3 09 06 18 무릎 또는 다리 보호용 보조기기 (Assistive products for knee protection
+or leg protection)
+절단된 다리용 스타킹(절단단 양말) 등이 포함
+3 09 06 21 발꿈치, 발가락 또는 발 보호용 보조기기 (Assistive products for heel
+protection, toe protection or foot protection)
+3 09 06 24 몸통 또는 전신 보호용 보조기기 (Assistive products for trunk protection
+or whole-body protection)
+넘어졌을 때 골절을 예방하기 위해 보호재가 내장된 바지 및 속옷 등이 포함됨
+3 09 06 27 기도 보호용 보조기기 (Assistive products for airway protection)
+해로운 외부 영향으로부터 호흡 기관을 보호하기 위한 장치
+3 09 06 30 목욕용 보호 덮개 (Protective sheaths for bathing)
+피부 또는 붕대용 방수 보호재
+3 09 07 신체 안정용 보조기기 (Assistive products for body stabilization)
+좌석벨트, 벨트, 멜빵형 벨트(하니스)가 포함됨 
+3 09 07 03 신체 안정용 좌석 벨트, 벨트, 하니스 (Seat belts, belts and harnesses for
+body stabilization)
+휠체어용 사용자 고정 시스템이 포함됨 
+3 09 07 06 자세유지용 베게 및 쿠션과 자세유지 시스템 (Positioning pillows,
+positioning cushions and positioning systems)
+호흡 치료용 쿠션은 제외함 
+3 09 09 옷 입고 벗기용 보조기기 (Assistive products for dressing and undressing)
+옷과 신발을 착용하고 벗을 때 보조하기 위한 장비 기기
+3 09 09 03 옷 입기 및 벗기용 보조기기 (Assistive products for putting on or
+removing clothing)
+양말, 스타킹, 타이즈를 착용할 수 있게 해주는 장치
+3 09 09 06 구둣주걱 및 장화벗기 도구 (Shoehorns and bootjacks)
+신발류를 착용하고 벗을 수 있게 해주는 장치
+3 09 09 09 옷 고정용 장치 (Clothes holders)
+옷을 고정시켜 옷을 입을 수 있게 해주는 장치
+3 09 09 12 옷 입고 벗기용 고리 또는 막대 (Dressing and undressing hooks or
+sticks)
+옷을 입고 벗는 동안 옷이 움직이지 않도록 고정시켜주는 장치
+3 09 09 15 지퍼 당김 장치 (Zipper pullers)
+지퍼 사용을 가능하게 해주는 장치
+3 09 09 18 단추 끼우개 (Button hooks)
+옷과 신발의 단추를 채우고 풀 수 있게 해주는 장치
+3 09 12 화장실용 보조기기 (Assistive products for toileting)
+3 09 12 03 이동변기 (변기 겸용 의자, Commode chairs)
+욕실로부터 멀리 있을 때 용변을 위하여 사용되는 수집통이 있으며, 바퀴가 있거나 없
+는 의자
+샤워용으로도 사용할 수 있는 위생의자, 화장실용 휠체어, 변기 겸용 의자가 포함됨 
+3 09 12 06 변기 (Toilets)
+높거나 높이 조절이 가능한 변기, 세척기와 공기 건조기가 내장된 변기가 포함됨
+3 09 12 09 간이변기 (변기 좌석, Toilet seats)
+사람이 앉을 때 안정성과 편안함을 제공해주는 변기통이나 변기 의자에 부착된 장치
+3 09 12 10 분변물 방지 장치 (Toilet splash guards)
+변기통 바깥으로 분변물이 튀어 나오지 않도록 하는 장치
+3 09 12 12 높이가 높은 독립형 변기 좌석 (Raised toilet seats, free-standing)
+좌석을 변기통으로부터 쉽게 떼어낼 수 있으며 바닥에 세워진 높이가 높은(별도의) 변
+기 좌석
+오버 변기틀이 포함됨 
+3 09 12 15 높이가 높은 탈부착형 변기 좌석 (Raised toilet seat, detachable)
+변기통/변기 좌석으로부터 쉽게 떼어낼 수 있는 좌석 삽입장치가 있으며 변기통/변기 
+좌석 바로 위에 위치하여 느슨하게 부착된 높이가 높은 변기 좌석
+3 09 12 18 변기에 고정된 높이가 높은 변기 좌석 (Raised toilet seats fixed to toilet)
+변기에 쉽게 앉고 일어날 수 있고 좌석의 높이를 증가시키기 위하여 변기통에 영구적
+으로 고정시킨 장치
+주춧돌이 포함됨
+3 09 12 21 서기 및 앉기를 보조하기 위하여 거상 장치가 내장된 변기 좌석 (Toilet
+seats with built-in raising mechanism to assist standing up and sitting down)
+변기에 앉고 일어서기를 보조하기 위하여 내장형 거상장치가 있는 변기 좌석 
+3 09 12 24 장착형 변기 팔 지지대 및 등 지지대 (Toilet arm supports and toilet back
+supports)
+변기에 앉고 일어설 때 안전하게 신체를 지지할 수 있도록 변기에 장착(시공)된 장치
+변기에 장착된 신체 지지대가 포함됨
+3 09 12 25 독립형 변기 팔 지지대 및 등 지지대 (Toilet arm supports and toilet back
+supports, free-standing)
+변기에 거치할 수 있는 구조로 되어 있어 팔 지지대를 잡고 지탱하여 안전하게 변기에 
+앉고 일어 설 수 있도록 도와주는 제품
+3 09 12 27 화장지 고정집게 (Toilet paper tongs)
+화장지를 고정시키고 닦기를 돕는 장치
+3 09 12 30 화장지롤 고정장치 (Toilet roll holders)
+접근이 가능한 위치에 화장지를 고정시키는 장치 
+3 09 12 33 환자용 요강 (Bedpans)
+침상에서 소변 및 대변을 볼 수 있게 해주는 신체 노폐물 수집용기
+3 09 12 39 벽에 설치된 소변기 (Wall-mounted urinals)
+기립 자세에서 소변을 볼 수 있도록 벽에 설치된 위생 장비 
+3 09 12 43 운반형 위생실 (Transportable hygiene rooms)
+휴대용 변기 부스가 포함됨 
+3 09 12 45 변기 좌석용 패드 (Padding for toilet seats)
+압력을 분산시켜 더욱 편안하게 앉을 수 있도록 변기 좌석 및 이동변기 좌석용으로 특
+별히 설계한 패드
+3 09 33 씻기, 목욕, 샤워용 보조기기 (Assistive products for washing, bathing and
+showering)
+3 09 33 04 목욕 보드 (Bath boards)
+욕조를 가로질러 욕조 테두리에 걸쳐놓는 등받이 없는 시트
+3 09 33 05 목욕 의자 (Bath seats)
+욕조 테두리에 걸치거나 욕조에 놓는 좌석
+등받이가 있거나 없는 목욕 의자 등이 포함됨
+3 09 33 06 목욕용 미끄럼 방지용품 (Non-slip bath mats, non-slip shower mats and
+non-slip tapes)
+목욕, 목욕탕, 샤워 동안 미끄러짐을 예방하기 위한 재료
+3 09 33 07 바퀴가 있거나 없는 샤워 의자 (Shower chair with and without wheels)
+샤워 동안 앉기를 지지하는 보조기기 
+샤워 의자가 포함됨 
+3 09 33 08 목욕이나 샤워용 등 지지대 (Back supports for bath or shower)
+등 지지대 쿠션이 포함됨 
+3 09 33 09 샤워기 및 샤워장치 (Showers and shower units)
+샤워용 문, 커튼, 샤워기의 위치를 조정하는 장비 및 고정장치가 포함됨 
+3 09 33 12 목욕용 들것, 샤워 테이블, 기저귀 교환 테이블 (목욕보조대, Bathing
+stretchers, shower tables and diaper-changing tables)
+목욕이나 샤워 또는 기저귀를 가는 동안 사람이 누울 수 있는 고정식 또는 이동식 테
+이블
+목욕용 운반대(stretcher), 샤워용 테이블, 기저귀 교체용 테이블 등이 포함
+3 09 33 15 세면기 (Wash basins)
+신체의 일부를 씻을 때 사용하는 고정식 또는 이동식 세면용 보조기기
+3 09 33 18 비데 (Bidets)
+생식기 및 항문 주위의 세척을 주목적으로 하는 고정식 또는 휴대용 대야
+3 09 33 21 욕조 (Bathtubs)
+이동 욕조, 휴대용 및 접이식 욕조가 포함됨
+3 09 33 24 욕조 선반 (Bathtub shelves)
+목욕에 필요한 물건이나 재료를 고정시키기 위하여 욕조에 두는 장치; 욕조 선반이라
+고도 함
+3 09 33 27 욕조의 길이와 깊이 감소용 보조기기 (Assistive products for reducing
+length or depth of a bathtub)
+욕조의 길이와 깊이를 감소시키기 위하여 욕조 내부에 위치하는 장치나 재료
+3 09 33 30 고정 장치 또는 손잡이가 달린 목욕 수건, 스펀지, 솔 (Washcloths,
+sponges and brushes with holder, handle or grip)
+신체를 씻거나 문지르는데 사용되는 장치 
+3 09 33 33 비누 고정장치 및 비누 용기 (Soap holders and soap dispensers)
+비누 또는 세제를 고정시키거나 내주는 장치
+3 09 33 36 건조용 보조기기 (Assistive products for drying oneself)
+신체를 건조할 수 있게 해주는 장치와 재료
+3 09 33 39 부유용 보조기기 (Assistive products for floating)
+목욕이나 수영 동안 물에 뜰 수 있도록 보조하는 장치
+수영용 부유기, 목욕용 목 칼라, 팽창식 샤워 캡이 포함됨
+3 09 33 45 목욕 온도계 (Bath thermometers)
+욕조의 수온을 측정하는 장치
+3 09 36 손발톱 관리용 보조기기 (Assistive products for nail care)
+손톱과 발톱 관리를 보조해주는 장치
+3 09 36 03 손발톱 솔 (Nail brushes)
+손발톱을 문지르고, 청소하며, 광택을 내는 장치
+3 09 36 06 손발톱용 줄 (Nail files and emery boards)
+손발톱 정리를 위해 갈아주는 장치
+네일파일 등이 포함됨
+3 09 36 09 손발톱용 가위 및 손발톱깎기 (Nail scissors and nail clippers)
+손발톱을 자르거나 짧게 하는 장치
+3 09 39 머리카락 관리용 보조기기 (Assistive products for hair care)
+머리카락 감기와 정돈하기를 위한 장치
+3 09 39 03 머리감기용 보조기기 (Assistive products for shampooing)
+머리카락 씻기를 위한 장치 
+3 09 39 06 빗과 머리카락 브러시 (Combs and hairbrushes)
+머리카락 손질을 위한 장치
+3 09 39 09 머리카락 건조기 (Hair dryers)
+머리카락의 건조 및 매만지기를 위한 장치
+3 09 42 치아 관리용 보조기기 (Assistive products for dental care)
+3 09 42 03 무동력 칫솔 (Unpowered toothbrushes)
+3 09 42 06 전동 칫솔 (Powered toothbrushes)
+구강 세척장치가 포함됨
+3 09 45 안면 관리용 보조기기 (Assistive products for facial care)
+얼굴에 화장품이나 피부관리제를 적용을 보조하거나 다른 유형의 안면관리를 수행할 
+때 사용하는 장치
+3 09 45 03 면도용 솔, 면도기, 전기면도기 (Shaving brushes, razors and (electric)
+shavers)
+3 09 45 06 안면 관리 제품 적용을 위한 보조기 (Assistive products for application of
+facial products)
+메이크업, 로션, 얼굴 크림과 같은 제품을 적용할 때 사용하는 장치
+3 09 45 09 안면 관리용 거울 (Mirrors for facial care)
+3 09 54 성(性) 활동용 보조기기 (Assistive products for sexual activity)
+성 활동을 훈련하고 보조하는 장치 
+3 09 54 03 성 활동용 인체모형 (Dummies for sexual activity)
+성 활동을 훈련하고 보조하는 모형
+성기, 질, 전신 인체모형(팽창식 성 활동용 인형)이 포함됨
+3 09 54 06 발기용 보조기기 (Assistive products for erection)
+발기 기능을 향상시키는 남성용 보조기기
+음경 펌프, 음경 고리 등을 포함
+3 09 54 09 성 활동용 진동기 (Vibrators and massage devices for sexual activity)
+성 활동을 위한 진동 기기
+3 09 54 12 성 교육 및 성 재활을 위한 보조기기 (Assistive products for sexual
+habilitation and rehabilitation)
+성욕 영역과 자신의 성취향의 자각을 위한 장치가 포함됨
+3 09 54 15 콘돔(Condoms)
+임신과 성병으로부터 보호하기 위한 음경 덮개
+3 12 개인 가동성 및 수송과 관련된 활동 및 참여용 보조기기 (ASSISTIVE
+PRODUCTS FOR ACTIVITIES AND PARTICIPATION RELATING TO PERSONAL
+MOBILITY AND TRANSPORTATION)
+실내 및 실외로 움직이는 개인 능력을 지지하거나, 한 곳에서 다른 곳으로 이동하거나,
+개별 또는 대중교통을 사용하기 위한 보조기기
+3 12 02 팔로 조작하지 않는 보행용 보조기기(Assistive products for walking, not
+manipulated by the arms)
+워킹체어(walking chair)가 포함됨
+3 12 03 한팔 조작형 보행용 보조기기 (Assistive products for walking, manipulated
+by one arm)
+팔이나 손 중 하나로 각각 조작하는 단독 또는 쌍으로 사용되며 보행 중 사용자를 지
+지하는 장치
+3 12 03 03 지팡이 (Walking sticks and canes)
+보행 중 지지와 균형을 제공하며, 아래 팔 지지대 없는 손잡이, 본체, 하나의 끝부분으
+로 구성된 손으로 잡는 장치 
+3 12 03 06 목발 (Crutches)
+보행 중 지지와 균형을 제공하며, 팔꿈치 지지대, 본체, 손잡이, 끝부분으로 구성된 손
+으로 잡는 장치
+팔꿈치 목발, 아래팔 목발, 겨드랑이 목발 등이 포함됨 
+3 12 03 16 다중 끝부분이 있는 지팡이 (Multi-tip walking sticks)
+손잡이, 본체, 3개 이상의 끝부분이 있으며 지지와 균형을 제공하는 보행 장치
+3 12 03 18 좌석이 있는 지팡이 (Walking sticks with seat)
+아래팔 지지대가 없는 손잡이, 단일 본체, 하나 이상의 끝부분, 그리고 손잡이나 본체
+에 부착되며 대개 접이식좌석이 있으며 보행 중 지지를 제공하는 장치 
+3 12 03 21 측면 지지 틀 (Lateral support frames)
+한 팔로 조작되며 신체의 측면에서 고정되어 안정성을 주는 보행틀
+4개의 다리와 끝부분, 하나 또는 두 개의 손잡이로 구성됨 
+3 12 03 24 바퀴달린 지팡이(Walking sticks with wheels)
+팁 대신 바퀴 또는 캐스터가 달린 지팡이와 목발
+3 12 06 양팔 조작형 보행용 보조기기 (Assistive products for walking, manipulated
+by both arms)
+보행 시 사용자를 지지하는 장치로 양 팔이나 상체로 조종이 가능함
+3 12 06 03 보행틀 (보행차, Walking frames)
+걷거나 서 있는 동안 안정성, 균형, 체중지지가 가능하며 움직이기 위하여 사람이 들어
+올리는 틀
+전완 지지대가 없는 손잡이가 있으며 4개의 끝부분 또는 2개의 끝부분과 2개의 바퀴로 
+구성됨
+경성 또는 관절형 보행틀, 2개의 고무 막대 완충기/끝부분과 2개의 바퀴가 있는 보행 
+보조기기가 포함됨
+3 12 06 06 롤레이터 (보행차, Rollators)
+손잡이와 3개 이상의 바퀴로 구성되어 보행 중 안정상과 균형감을 제공하며 밀거나 당
+김으로써 움직이는 보행 장치
+휴식용 좌석이 있는 보행차, 무릎 보행기, 앞이 개방되어 당겨서 사용하는 후방보행차,
+보행용 카트가 포함됨
+3 12 06 07 보행 보조차(Walking trolleys)
+밀거나 들어올려 움직일 수 있는 프레임으로 걷거나 서 있는 동안 안정감과 균형을 향
+상시킬 수 있으며 아래팔 지지대 없이 손잡이, 네 개 이상의 바퀴가 있음
+3 12 06 09 좌석형 보행차 (Walking chairs)
+바퀴와 보행 중 신체를 지지하는 좌석이나 슬링이 있으며, 아래팔 지지대가 있거나 없
+는 장치
+3 12 06 12 탁자형 보행차 (보행차, Walking tables)
+바퀴, 끝부분, 하나의 지지 테이블이나 아래팔 지지대로 구성되며, 양 팔과 가능한 윗
+몸이 복합되어 전방으로 밀어서 사용하는 장치
+3 12 06 15 동력형 보행차(Powered rollators)
+캐스터가 동력으로 구동되는 보행차
+롤레이터 로봇을 포함함
+3 12 07 보행용 보조기기 액세서리 (Accessories for assistive products for walking)
+특정 목적의 보행 보조기기 사용을 위하여 고안된 장치
+3 12 07 05 보행 보조기기용 끝부분 (Tips for assistive products for walking)
+보행 보조기기의 안정성 향상을 위하여 보행 막대기, 지팡이, 크러치, 보행틀이나 보행
+차 다리의 끝 바닥에 부착하는 보조기기 
+미끄럼 방지 재료가 추가된 끝부분, 빙판 보행용 끝부분, 유연성 끝부분이 포함됨
+3 12 07 12 보행 보조기기용 손잡이 (Products to properly grip assistive products for
+walking)
+보행 막대기, 지팡이, 크러치, 보행틀, 또는 보행차를 견고하게 잡을 수 있게 해주는 장
+치
+개조된 손잡이, 미끄럼 방지 재료가 사용된 손잡이, 폼과 같은 특수 재질의 손잡이가 
+포함됨 
+3 12 07 15 특정 신체 부위를 지지하는 보행 보조기기용 액세서리 (Accessories for
+assistive products for walking to provide support for specific body parts)
+신체의 특정부위를 지지하여 보행 보조기기 사용 동안 적절한 자세를 유지하도록 보행 
+보조기기에 부착하는 장치
+겨드랑 지지대, 등 지지대, 머리 지지대, 안전 벨트가 포함됨 
+3 12 07 18 부상방지를 위한 보행 보조기기용 패드, 쿠션, 기타 액세사리 (Accessories
+for assistive products for walking to protect from injury)
+보행 보조기의 특정 부분에 반복적으로 접촉함으로써 발생하는 타박상이나 피부 손상
+으로부터 사용자를 보호하기 위하여 보행 막대기, 지팡이, 크러치, 보행틀, 보행차, 탁
+자형 보행차에 추가할 수 있는 보조기기
+3 12 07 21 보행 보조기기용 좌석 (Seats for assistive products for walking)
+지팡이, 보행틀, 보행차, 탁자형 보행차에 추가할 수 있는 보행 보조기기 사용자의 체
+중을 지지하는 좌석
+보행차용 접이식 및 비접이식 경성 좌석, 보행차와 탁자형 보행차용 슬링 좌석이 포함
+됨 
+3 12 07 24 물건을 고정 또는 옮기기 위하여 보행 보조기기에 부착되는 액세서리 
+(Accessories attached to assistive products for walking to hold or carry objects)
+바구니, 파우치, 고리, 받침대, 테이블, 가방, 산소장치 걸이, 우산 걸이, 그리고 보행 막
+대기, 지팡이,
+크러치 이동용 보행틀 및 보행차 고리가 포함됨 
+3 12 07 27 보행 보조기기 미사용 시 보관을 위한 고정 장치 (Products to hold
+assistive products for walking in place when not in use)
+보행 막대기, 지팡이, 크러치, 보행틀을 한 자리에 고정시키거나 보행차를 추차하는 장
+치
+테이블에 부착된 보행 막대기 고리 또는 지팡이 고리, 주자용 브레이크가 포함됨 
+3 12 07 30 보행 보조기기 사용을 가능하게 해주는 액세사리 (Accessories to enable a
+person to maneuver assistive products for walking)
+원하는 방향으로 가고 속도를 조절할 수 있도록 보행 보조기기에 추가되는 장치
+밀기용 바, 회전방지 바퀴, 문턱 및 보도턱 넘기 장치, 지속적 브레이크가 포함됨
+3 12 07 33 보행차 및 보행틀의 높이 조절용 액세서리 (Accessories to adjust height
+of rollators and walking frames)
+보행 보조기기의 높이를 증가시키기 위하여 보행차나 보행틀에 추가 또는 부착할 수 
+있는 장치 
+3 12 07 36 보행 보조기기용 라이트 및 안전 신호 장치 (Lights and safety signalling
+devices for assistive products for walking)
+주변을 밝히거나 자신의 위치를 표시하기 위하여 보행 보조기기에 부착할 수 있는 장
+치
+반사기가 포함됨 
+3 12 07 39 보행 보조기기용 타이어 및 바퀴 (Tyres and wheels for assistive products
+for walking)
+기존의 바퀴를 교체하기 위하여 2개의 바퀴가 있는 보행틀이나 보행차에 부착할 수 있
+는 바퀴 또는 원래 바퀴가 없는 보행틀 다리에 부착할 수 있는 바퀴
+보행틀의 다리 부분 또는 보행차의 바퀴가 포함됨
+3 12 07 42 보행 보조기기용 동력보조 장치 (Power assist units for assistive products
+for walking)
+보행 보조기기에 부착할 수 있고 바퀴를 추진하거나 높이, 너비, 접이식 또는 보행 방
+향을 조정할 수 있는 장치
+3 12 08 방향 안내용 흰 지팡이와 심벌 지팡이(Guide canes and symbol canes for
+orientation)
+시각장애인이 사용하는 주변 길찾기 또는 확인을 위한 촉각 지팡이
+3 12 08 03 흰 지팡이 (Guide canes)
+시각장애인이 사용하며 방향을 알려주거나 주변 상황을 감지해주는 보조기기
+3 12 08 06 심벌 지팡이 (Symbol canes)
+사용자의 시각 장애에 대해 다른 사람에게 알려주는 데 주로 사용되는 짧은 지팡이
+3 12 08 09 흰 지팡이와 심벌 지팡이용 액세서리 (Accessories for guide canes and
+symbol canes)
+팁, 손목 스트랩, 손잡이, 반사경 등이 포함됨
+3 12 10 장애인용 특수 자동차 (Cars, vans and pick-up trucks)
+장애인이 운전 또는 탑승할 수 있도록 제작된 자가용 자동차, 자가용 승합차, 자가용 
+트럭, 대중교통용 승합차
+3 12 10 03 높이 조절형 자동차, 승합차 및 트럭 (Cars, vans and pick-up trucks with
+height-adjustable chassis)
+운전자나 승객의 승하차가 쉽도록 자체 바닥이 낮아지는 저상 기능의 자동차, 승합차,
+트럭
+3 12 10 06 저속 자동차 (Low-speed cars)
+공공 도로에서 사용할 수 있는 최대 속도가 제한된 자동차; 일부 국가의 경우 운전면
+허 없이 운전이 가능한 자동차 
+3 12 10 09 지붕 높이 개조형 자동차, 승합차 및 트럭 (Cars, vans and pick-up trucks
+with raised roof)
+차량 내부에 휠체어 탑승자가 편하게 앉을 수 있도록 지붕을 높게 개조한 자동차, 승
+합차, 트럭
+3 12 11 대중교통 차량 (Mass transit vehicles)
+공공 또는 상업용 교통 시스템의 일부로 사람들을 수송하기 위한 차량 
+버스, 철도차량, 비행기, 트램이 포함됨 
+3 12 11 03 높이 조절형 버스 (Buses with height-adjustable chassis)
+차량의 바닥을 바닥까지 내리기 위하여 차량의 섀시를 낮춤으로써 승객이 타고 내릴 
+수 있는 버스 
+3 12 11 06 저층 기차 (Trains with low floors)
+램프를 사용하거나 사용하지 않고 승하차 개선을 위하여 바닥을 낮춘 철도차량. 지하
+철, 트램이 포함됨 
+3 12 12 장애인 차량용 액세서리 및 개조용품 (Vehicle accessories and vehicle
+adaptations)
+장애인 작동하거나 장애인이 안전하게 승하차 또는 탑승이 가능도록 차량에 추가하거
+나 변경할 수 있는 
+보조기기
+3 12 12 05 속도 제어용 차량 액세서리 및 개조용품 (Vehicle accessories and vehicle
+adaptations to control speed)
+차량에 부착하여 속도를 조절하거나 멈추는 것을 보조하는 장치
+주행 브레이크, 주차 브레이크가 포함됨
+3 12 12 07 조향장치 조작용 차량 액세서리 및 개조용품 (Vehicle accessories and
+vehicle adaptations to operate steering system)
+차량 조작을 보조하기 위하여 자동차에 추가할 수 있는 보조기기 및 개조용품
+핸들 손잡이, 조향용 제동 제어장치, 핸들 기둥 연장부가 포함됨 
+3 12 12 08 차량 조작용 부가적 기능의 액세서리 및 개조용품 (Accessories and
+adaptations to complementary functions necessary to operate vehicles)
+조절식 거울, 도어록, 와이퍼, 지시등, 방향등, 전조등 사용과 관련된 보조기기가 포함
+됨 
+3 12 12 09 자동차용 안전벨트 및 조끼식 벨트(harness) (Seat belts and harnesses for
+motor vehicles)
+주행 중 안전 증진을 위하여 탑승자를 제한하는 장치
+좌석에 부착된 3점 및 4점 좌석 벨트 및 벨트 조끼, 휠체어 탑승자를 제한하기 위한 
+차량에 부착된 좌석 벨트가 포함됨 
+3 12 12 12 차량 내 착석을 위한 좌석과 방석, 액세서리, 개조용품 (Seats and cushions
+for motor vehicles and accessories and adaptations relating to seating in vehicles)
+차량 내에서 좌석에 앉고 일어서는 것을 돕거나 주행 동안 앉아 있는 탑승자의 지지를 
+위하여 고안된 장치
+아동용 안전 좌석, 회전 좌석, 거상형 좌석, 미끄러지는 좌석이 포함됨 
+3 12 12 15 휠체어 없이 차량 승하차 이동용 호이스트 (Hoists to transfer person into
+or out of vehicles without wheelchair)
+탑승 또는 하차를 위하여 사람을 들어 올리도록 차량에 설치된 장비
+3 12 12 18 휠체어 사용자 차량 승하차 이동용 보조기기 (Assistive products for
+transferring person seated in wheelchair into or out of vehicles)
+사람과 휠체어를 차량에 승하차하도록 들어 올리거나 휠체어 사용자를 차량 안으로 굴
+러 올 수 있게 하는 장치
+휠체어 및 사용자 승하차 이동용 호이스트, 차량에 설치된 휠체어 및 사용자 승하차용 
+램프, 휠체어 및 
+사용자의 승하차용 리프팅 플랫폼이 포함됨 
+3 12 12 21 차량 내 휠체어 적재용 보조기기 (Assistive products for loading
+unoccupied wheelchairs onto or into vehicles)
+차량 위 또는 내부에 휠체어를 들어 올리고 적재하는 장치
+휠체어용 자동차 호이스트가 포함됨
+3 12 12 24 차량 내 휠체어 고정용 보조기기 (Assistive products for fastening
+wheelchairs in vehicles)
+차량 내에 휠체어를 고정시키는 장치
+휠체어 끈 고정장치가 포함됨  
+3 12 12 27 장애인을 위한 차대 및 차체 개조 (Vehicle chassis and body adaptations)
+장애인 운전자 또는 장애인 승객의 접근성, 사용성, 편안함을 증진시키기 위하여 차량
+의 섀시, 프레임, 기타 시스템을 개조. 높아진 지붕, 확대된 창문, 현가장치가 포함됨 
+3 12 12 30 차량용 휠체어 운반 보조기기 또는 차량 연결형 휠체어 운반차 (Products
+to carry unoccupied wheelchairs on or attached to vehicles)
+휠체어를 운반하기 위한 차량의 지붕이나 뒤에 설치할 수 있는 선반이나 틀 또는 하나 
+이상의 휠체어를 운반하기 위하여 특별히 고안된 차량 후방에 부착하는 트레일러
+스쿠터 운반 장치가 포함됨 
+3 12 16 모페드 및 오토바이 (Mopeds and motorcycles)
+3 12 16 03 이륜 모페드 및 오토바이 (Two-wheeled mopeds and motorcycles)
+3 12 16 06 삼륜 모페드 및 오토바이(Three-wheeled mopeds and motorcycles)
+3 12 17 다양한 전동식 차량 (Diverse motorized vehicles)
+기립 가동 장치, 스노모빌, 스노 스쿠터, 전 지형 만능차량, 고 카트가 포함됨 
+3 12 17 03 전동 계단 이동기 (Powered stair-climbing transporters)
+계단을 오르거나 내려오기 위하여 계단에 부착되거나 연결되지 않은 또는 계단 근처 
+벽이나 천장에 연결되어 탑승자가 작동하는 전동 장치
+전동 응급 대피용 이동장치가 포함됨 
+3 12 17 06 기립형 전동 차량 (Stand-on motorized vehicles)
+2개 이상의 바퀴, 핸들 바, 기립용 기저부, 그리고 휴식용 소형 좌석이 있을 수 있으며,
+기립자세로 탑승하여 운전되는 차량
+3 12 17 09 다양한 4륜 전동 차량 (Diverse four-wheeled motorized vehicles)
+전 지형 만능차량, 4륜 오토바이, 스노모빌, 스노 스쿠터, 고 카트가 포함됨 
+3 12 18 자전거 (Cycles)
+전원 보조 자전거가 포함됨 
+3 12 18 04 발 추진 자전거 (Foot-propelled bicycles)
+한 사람의 발로 추진되는 2륜 자전거
+3 12 18 05 손 추진 자전거 (Hand-propelled bicycles)
+손으로 추진하는 2륜 자전거
+3 12 18 06 발 추진 3륜 자전거 및 4륜 자전거 (Foot-propelled tricycles and
+quadricycles)
+한 사람의 발로 추진되며 3개 이상의 바퀴가 있는 자전거
+운반용 자전거가 포함됨 
+3 12 18 09 손 추진 3륜 및 4륜 자전거 (Hand-propelled tricycles and quadricycles)
+손으로 추진되며 3개 또는 4개의 바퀴가 있는 자전거 
+3 12 18 15 2인 이상용 2륜 자전거, 3륜 자전거, 4륜 자전거 (Tandems, tricycles and
+four-wheeled cycles for two or more persons)
+발로 추진되며, 한 사람 이상이 탑승하도록 2개 이상의 좌석이 있는 자전거 
+3 12 18 21 자전거 개조 (Cycle adaptations)
+조작이 용이하도록 자전거에 부가 장치를 부착 하거나 변경 
+추가용 모터, 보조 바퀴가 포함됨 
+3 12 18 24 자전거용 트레일러(Trailers for cycles)
+짐을 나르기 위해 자전거에 부착하는 트레일러
+3 12 22 수동 휠체어 (Manual wheelchairs)
+가동성에 제한이 있는 사람에게 좌석 지지시스템이 있는 바퀴의 가동성을 제공하는 장
+치로 사용자 또는 
+보조인의 힘으로 작동 
+기립형 수동 휠체어(사용자를 상승시키고 기립자세를 유지할 수 있는 휠체어), 등받이 
+각도 조절식 수동 휠체어, 스노 휠체어, 해변가용 휠체어, 수영장용 휠체어, 휠체어 차
+대가 포함됨 
+3 12 22 03 일반형 수동휠체어 (양 손 추진 휠체어, Bimanual handrim-drive
+wheelchairs)
+사용자의 양손으로 바퀴 또는 바퀴의 핸드림을 밀어서 추진되고 조향되도록 고안된 휠
+체어
+전륜 구동 및 후륜구동 휠체어가 포함됨 
+3 12 22 06 양 손 추진 레버식 휠체어 (Bimanual lever-drive wheelchairs)
+양손으로 작동되는 레버를 사용하여 추진되고 조향되도록 고안된 휠체어 
+3 12 22 09 한 손 추진 휠체어 (Single-side manual drive wheelchairs)
+오직 한 손을 사용하여 추진하도록 고안된 휠체어
+한 손 추진 레버식 휠체어, 하나의 핸드림 휠체어가 포함됨 
+3 12 22 12 핸드림 및 동력보조 혼합형 수동휠체어 (Handrim-activated power-assisted
+wheelchairs)
+사용자가 핸드림에 토크, 변위, 힘을 적용함으로써 전원이 활성화되어 사용자의 힘과 
+전원이 복합적으로 구동되는 휠체어 
+3 12 22 15 발 추진 휠체어 (Foot-propelled wheelchairs)
+사용자의 한 발 또는 양발로 바닥과 접촉하여 추진되고 조향되도록 고안된 휠체어 
+3 12 22 18 미는 휠체어 (Push wheelchairs)
+보조인이 양 손으로 핸들을 밀어서 추진되고 조향되는 수동 휠체어
+3 12 22 21 동력보조형 미는 휠체어 (Power-assisted push wheelchairs)
+한쪽 또는 양쪽 바퀴의 회전을 돕기 위하여 하나 또는 두 개의 전기장치가 적용되어 
+보조인이 양 손으로 핸들을 밀어서 추진하고 조향하도록 고안된 휠체어
+3 12 22 24 계단 오르기용 수동 휠체어(Stair-climbing manual wheelchairs)
+계단을 안전하게 오르내릴 수 있는 수동 휠체어, 휠체어에 사람이 탑승한 채로 보조인
+에 의해 작동할 수 있음
+3 12 23 동력 구동 휠체어(Powered wheelchairs)
+가동성이 제한된 사람에게 좌석지지 시스템이 있는 바퀴 가동성을 제공하기 위하여 전
+기 또는 연소 
+동력원으로부터의 모터 동력원을 공급받아 전동으로 추진되는 장치
+기립형 전동 휠체어(사용자를 상승시키고 기립자세를 유지할 수 있는 휠체어), 등받이 
+각도 조절식 전동 휠체어, 거상 또는 좌석의 공간 경사형 휠체어, 스노 휠체어, 해변가
+용 휠체어, 수영장용 휠체어, 휠체어 차대가 포함됨 
+3 12 23 03 전동 스쿠터 (수동 조향식 전동 휠체어, Electrically powered wheelchairs
+with manual direct steering)
+전동 보조 없이 구동바퀴 축의 방향을 기계식(핸들형, 수동)으로 조절하는 전동 휠체
+어, 전동스쿠터 및 의료용스쿠터 등이 포함됨
+3 12 23 06 전동 휠체어 (전동 조향식 전동 휠체어, Electrically powered wheelchairs
+with electronic steering)
+사용자가 전기 조절장치(조이스틱형, 전동)를 사용하여 조절하는 수동 및 전동 조향식 
+전동휠체어, 엔진 구동 휠체어, 보조인 조종형 전동휠체어 등이 포함됨
+3 12 23 09 엔진구동 휠체어 (Combustion powered wheelchairs)
+연소 엔진에 의해 구동되는 휠체어
+한 손 레버식 휠체어, 하나의 핸드림 구동 휠체어가 포함됨
+3 12 23 12 보조인 조종형 전동휠체어 (Assistant-controlled electrically powered
+wheelchairs)
+전기 조절장치로 보조인이 구동하는 전동 휠체어
+3 12 23 15 계단 오르기 전동 휠체어 (Stair-climbing powered wheelchairs)
+사용자가 탑승하고 작동하여 계단을 안전하게 오르고 내려올 수 있는 전동 휠체어 
+3 12 23 18 자가균형 휠체어 (Self-balancing wheelchairs)
+보조바퀴 없이 균형을 유지하고 탑승자의 신체 움직임이나 조이스틱을 통해 조정되는 
+이륜구동 휠체어
+3 12 24 휠체어 액세서리 (Wheelchair accessories)
+휠체어 사용과 관련된 장치들 
+3 12 24 03 휠체어용 조향 및 제어 시스템 (Steering and control systems for
+wheelchairs)
+휠체어의 움직임과 구동 방향 조절용 장치
+3 12 24 09 수동 휠체어용 추진 장치 (Propulsion units for manual wheelchairs)
+사용자 또는 보조인이 휠체어를 움직일 수 있도록 또는 사람의 도움 없이 휠체어를 추
+진할 수 있도록 수동 휠체어에 부착되는 장치
+3 12 24 11 반 수동 자전거 (Half-handbikes)
+손으로 추진하는 수동 자전거에 수동 휠체어를 변형 추가한 장치 
+3 12 24 12 휠체어용 라이트 및 안전 신호장치 (Lights and safety signalling devices
+for wheelchairs)
+휠체어의 주변을 밝혀주거나 휠체어의 위치를 표시하기 위하여 휠체어에 부착할 수 있
+는 장치
+휠체어 안전 깃발, 반사기가 포함됨 
+3 12 24 18 휠체어용 주행 또는 주차 브레이크 (Running or parking brakes for
+wheelchairs)
+휠체어의 속도를 줄이거나 멈추거나 고정 위치로 유지하는 장치
+3 12 24 21 휠체어용 타이어, 바퀴, 작은 바퀴 (Tyres, wheels and castors for
+wheelchairs)
+스노우 러너, 허브 캡이 포함됨 
+3 12 24 24 휠체어용 배터리 및 충전기 (Batteries and battery chargers for
+wheelchairs)
+전동휠체어 및 전동스쿠터에 동력을 공급하는 장치
+3 12 24 28 휠체어 또는 휠체어 부속품 세척용 장치 (Devices for cleaning wheelchairs
+or any part of wheelchairs)
+휠체어 세척장치, 휠체어 타이어용 솔이 포함됨 
+3 12 24 34 햇빛 또는 강수에 대한 휠체어 및 사용자 보호 장치 (Devices to protect
+wheelchairs and their occupants from sunlight or precipitation)
+휠체어용 우산 및 덮개가 포함됨 
+3 12 24 36 자전거용 휠체어 연결 장치 (Devices to connect a wheelchair to a
+bicycle)
+휠체어에 자전거를 연결하는 커플링 시스템
+3 12 24 39 계단 오르고 내리기를 위하여 휠체어를 고정하는 장치 (Devices to which
+a wheelchair is attached that facilitate movement up and down stairs)
+안전하게 계단을 오르고 내려오기 위하여 휠체어와 사용자 모두를 견고하게 고정시키
+는 수동 및 전동의 카트 및 다른 형태의 차량 
+3 12 24 42 사물의 고정 및 운반용 휠체어 부착 장치 (Devices attached to
+wheelchairs to hold or carry objects)
+하나 이상의 물건을 운반하기 위하여 휠체어에 고정시키는 보조기기
+휠체어에 부착되는 파우치, 바구니, 케이스, 지팡이 및 크러치 고리, 보행기 운반장치가 
+포함됨
+3 12 24 45 휠체어 주변 확인 장치 (Devices to check surroundings of wheelchairs)
+후사경, 카메라가 포함됨 
+3 12 24 48 피벗 구동 장치 (Pivot drive wheels units)
+외부 동력으로 휠체어를 추진하기 위해 수동 휠체어 앞쪽에 부착하는 피벗 방식 기기
+수동 휠체어의 프레임 앞에 고정/조립할 수 있고, 구동력을 전달하고 휠체어 프레임에 
+대한 각도 또는 방향을 변경하여 수동 휠체어를 조종하고, 제거도 할 수 있는 이동식 
+추진 휠 장치
+3 12 25 휠체어 착석용 액세서리(Accessories for wheelchair seating)
+휠체어에 앉은 자세를 지지하기 위한 장치
+휠체어에 부착하기 위한 무릎 트레이가 포함됨
+3 12 25 03 휠체어 등받이 (Back supports for wheelchairs)
+휠체어에 앉은 자세 유지를 위해 부착된 등받이 또는 교체용 장치
+등받이 및 장착용 브랫킷의 구성요소가 포함됨
+3 12 25 06 좌석 쿠션 및 깔개 (Seat cushions and underlays)
+휠체어에 안정적인 앉기 자세로 교정 및 유지하기 위하여 좌석에 두는 쿠션 및 기타 
+장치
+3 12 25 09 휠체어용 팔 지지대 (Arm supports for wheelchairs)
+팔 지지대(arm troughs)가 포함됨
+3 12 25 12 휠체어용 머리 및 목 지지대 (Head supports and neck supports for
+wheelchairs)
+휠체어에 앉아 있는 동안 머리를 고정시키는 지지대
+머리 지지대 및 장착용 브래킷 구성요소가 포함됨
+3 12 25 15 휠체어용 다리 및 발 지지대 (Leg supports and foot supports for
+wheelchairs)
+다리 지지대, 발 지지대, 발판, 휠체어에 부착된 절단지 지지대, 다리 벌림 장치, 모음 
+장치, 무릎 분리기 등이 포함됨
+3 12 25 18 휠체어용 몸통 및 골반 지지대 (Trunk supports and pelvic supports for
+wheelchairs)
+휠체어에 부착하여 앉은 사람의 어깨, 몸통, 엉덩이 또는 골반 부위를 지지하거나 안정
+시키는 장치
+3 12 25 24 휠체어용 무릎받침대 (Lap trays for wheelchairs)
+휠체어에 부착하거나 앉은 사람의 무릎에 올려 놓을 수 있는 제품으로, 앉아 있는 자
+세를 안정화 시키고, 활동을 수행하거나 물건을 배치할 수 있는 평평한 표면을 제공하
+는 장치
+3 12 27 다양한 수동식 차량 (Diverse human powered vehicles)
+3 12 27 04 운반 의자 (Transportation chairs)
+보조인이 추진하고 조절하여 사용자가 앉은 자세로 단거리 이동에 사용되는 장치
+비상대피용 의자, 계단용으로 수정된 이동 의자가 포함됨
+3 12 27 07 유모차형 이동보조기기(Disabled stroller)
+보조인이 추진하고 조향하도록 고안되었으며, 한명 이상의 사람을 눕거나 앉은 자세로 
+이동시키는 바퀴달린 장치
+3 12 27 10 썰매 (Sleds and sledges)
+빙판 및 눈 위에서 사람을 운반하기 위하여 바퀴가 있거나 없는 활주부 위에 설치된 
+장치
+발 구동 썰매가 포함됨
+3 12 27 15 기어가기 및 이동판 (Crawlers and mobility boards)
+앉거나 누운 자세에서 바닥을 손이나 발로 밀어서 이동하는 바퀴달린 장치
+3 12 27 19 발 구동차, 놀이용 카트 (pedal cars and playing carts)
+발 구동차는 페달에 의해 추진되는 자동차 모양의 작은 차량
+놀이용 카트는 가동이 가능하며 위에 또는 안에 앉을 수 있는 바퀴달린 장난감
+3 12 27 20 바퀴달린 들것(Wheeled stretchers)
+바퀴달린 들것은 누운 자세로 사람을 운반하도록 디자인된 가동성 플랫폼으로 수동으
+로 추진됨
+3 12 27 22 주행용 바이크(Running bikes)
+안장과 핸들바가 있는 앉는 차량으로 발로 밀어 추진함
+3 12 27 23 무동력 스쿠터(Unpowered scooters)
+핸들바가 있는 서서 가는 차량으로 한 발로 밀어서 추진함
+3 12 27 24 수동식 기립형 이동 장치 (Manually powered stand-on mobility devices)
+기립 자세에서 상지를 사용하여 추진하는 장치
+3 12 31 자세변환용 보조기기 (Assistive products for changing body position)
+3 12 31 03 미끄럼 및 회전을 위한 보조기기 (Assistive products for sliding and
+turning)
+미끄럼 및 회전 기술을 사용하여 사람의 자세나 방향을 변환하는 장치
+미끄럼 보드, 미끄럼 매트, 회전 시트, 회전 쿠션이 포함됨 
+3 12 31 06 회전판 (Turntables)
+이동 시 발을 회전판에 올려놓으면 회전하여 위치를 변환하는 장치
+3 12 31 09 비고정식 기립용 지지대 (Not mounted rails for self-lifting)
+침대나 의자에서 앉거나 누운 자세로부터 일어날 수 있게 지지하는 장치
+3 12 31 12 사다리식 손잡이 (Grip ladders)
+신체 위치를 조금씩 변환하는 것을 돕는 한쪽이 고정된 장치
+3 12 31 15 리프트용 벨트 및 조끼식 벨트 (Lifting belts and harnesses)
+사람이 다른 사람을 수동으로 이동시키는 것을 보조하는 장치 
+3 12 31 18 운반용 의자, 조끼식 벨트, 바스켓 (Carrying chairs, carrying harnesses
+and carrying baskets)
+1인 이상의 보조인이 한 곳에서 다른 곳으로 사람을 이동시키는 장치
+3 12 31 21 이동 고정판 (Transfer platforms)
+기립한 상태에서 짧은 거리를 수평 방향으로 이동시키는 장치
+3 12 31 24 들어올리기용 좌석 및 매트리스 (Lifting seats and lifting mattresses)
+사람을 바닥에서 침대로 또는 일어서기가 가능한 앉기 자세로 들어올리는 이동용 장비
+3 12 36 들어올리기용 보조기기 (Assistive products for lifting persons)
+일상생활 활동이 가능하도록 사람을 들어 올려서 올바른 자세를 취하게 한 후 이동시
+키는 장치
+슬링 좌석(sling seat)이나 단단한 좌석(solid seat)를 사용하여 앉은 자세나 선 자세 또
+는 누운 자세로 수직ㆍ수평 이동을 할 수 있도록 돕는 제품
+벽ㆍ바닥ㆍ천전 등에 고정하여 사용하는 장치와 목욕용 호이스트, 리프트 등 부착하거
+나 독립적으로 
+세워져서 사용할 수 있는 제품 등이 포함되며 전동 및 수동형이 있음
+3 12 36 03 이동식 리프트(Mobile hoists for transferring a person in sitting position
+with sling seats)
+슬링으로 구성된 신체지지 장치로 앉기, 반앉기, 반눕기, 눕기, 기립 자세로 사람을 들
+어올려 자유롭게 움직이는 이동용 장비
+좌석형(슬링 좌석, 단단한 좌석), 와상형, 기립형 전ㆍ수동 이동식 리프트가 포함됨
+3 12 36 04 기립형 이동식 호이스트(Mobile hoists for transferring a person in
+standing position)
+앉은 자세에서 똑바로 선 자세로 이동시키고 다시 자세를 유지해주는 장치
+장치는 자유롭게 이동할 수 있음
+신체지지장치(body support)는 슬링, 발 지지대, 다리 혹은 무릎 지지대로 구성됨
+3 12 36 06 경성 좌석 착석형 호이스트(Mobile hoists for transferring a person in
+sitting position with solid seats)
+앉은 자세에서 사람을 들어올리고 자유롭게 옮기는 장치
+신체지지장치(body support)는 단단한 좌석, 보조좌석 또는 유사한 좌석으로 구성됨
+3 12 36 09 와상형 이동식 호이스트(Mobile hoists for transferring a person in lying
+position)
+누운 자세로 그대로 사람을 들어올리고 자유롭게 옮기는 장치
+신체지지장치(body support)는 수직 방향으로 조절 가능하나 수평 방향으로 회전할 수 
+없음
+3 12 36 12 벽, 바닥 또는 천장 고정식 호이스트 (Stationary hoists fixed to walls,
+floor or ceiling)
+집안이나 욕실 등 제한된 공간에 있는 사람을 들어 올려서 이동시키는 장치로 벽, 바
+닥 또는 천장에 고정하여 사용 할 수 있음
+수영장용 리프트 등이 포함
+3 12 36 15 목욕용 리프트(부착형 고정식 호이스트, Stationary hoists fixed to, or
+mounted in or on, another product)
+집안이나 욕실 등 제한된 공간에 있는 사람을 들어 올려서 이동시키는 장치로 다른 제
+품에 부착하거나 고정하여 사용할 수 있음
+욕조 호이스트 등이 포함
+3 12 36 18 바닥형 리프트(고정식 독립형 호이스트, Stationary free-standing hoists)
+집안이나 욕실 등 제한된 공간에 있는 사람을 들어 올려서 이동시키는 장치로 바퀴가 
+없고 바닥에 독립적으로 서있는 호이스트
+3 12 36 21 간이 리프트(호이스트용 신체지지 장치, Body support units for hoists)
+호이스트로 들어 올리는 사람을 지지하는 장치
+사람의 이동을 위한 슬링, 좌석, 들것, 가동식 및 고정식 호이스트용 변기 좌석이 포함
+됨 
+3 15 가정 활동 및 참여를 위한 보조기기 (ASSISTIVE PRODUCTS FOR DOMESTIC
+ACTIVITIES AND PARTICIPATION IN DOMESTIC LIFE)
+거주지, 음식, 의복, 기타 필수품의 확보, 집안 청소 및 수리, 개인 및 기타 가정용품 
+관리, 다른 사람 보조와 같은 가정 및 일상의 동작과 과제를 실행하기 위한 사람의 능
+력을 지지 또는 대체하는 보조기기
+식사 및 식음용 보조기기가 포함됨
+3 15 03 취사용 보조기기 (Assistive products for preparing food and drink)
+냉장고 및 냉동고 등이 포함됨
+3 15 03 03 주방 계량용 보조기기 (Assistive products for weighing and measuring to
+prepare food and drink)
+주방용 저울, 식품용 저울, 계량 스푼 및 컵, 조리 및 육류용 온도계, 버터 분리기, 액
+체 높이 표시기가 포함됨 
+3 15 03 06 자르기, 다지기, 나누기용 보조기기 (Assistive products for cutting,
+chopping and dividing to prepare food and drink)
+슬라이스기, 칼, 도마, 치즈 슬라이서, 계란 분리기, 양파 손잡이, 강판이 포함됨 
+3 15 03 09 세척 및 껍질손질용 보조기기 (Assistive products for cleaning and
+peeling)
+감자솔, 감자 껍질 제거기(수동 및 전동), 감자 손잡이 및 파내는 칼 등이 포함됨 
+3 15 03 12 제빵용 보조기기 (Assistive products for baking)
+밀방망이, 제빵 그릇, 제빵 접시가 포함됨 
+3 15 03 15 취사용 기계장치 (Machines for food preparation)
+믹서, 식품 가공기, 수동 및 전동 계란 교반기가 포함됨
+3 15 03 18 조리 및 튀김용 보조기기 (Assistive products for cooking and frying)
+조리용 접시, 프라이팬, 달걀 찜기, 커피 및 차 메이커, 냄비 손잡이, 거르는 체, 프라이
+팬 뚜껑, 야채 바구니, 계란 틀 및 튀김 집게, 팬, 주방용품 등이 포함
+3 15 03 21 조리기구 (Cooking units)
+음식 및 음료 가열용 장치. 레인지, 오븐, 전자 오븐, 전기 조리판이 포함됨 
+3 15 03 24 냉장고 및 냉동고 (Refrigerators and freezers)
+3 15 06 식기 세척용 보조기기 (Assistive products for dishwashing)
+3 15 06 03 싱크대 (Sinks)
+3 15 06 06 접시 및 병 세척용 솔 (Dishwashing brushes and flask brushes)
+3 15 06 09 접시 건조용 선반 (Dish drying racks)
+물이 흘러내릴 수 있도록 씻은 접시를 두는 틀 
+3 15 06 15 행주짜개 (Dishcloth wringers)
+행주에서 물을 짜내는 장치
+3 15 06 18 식기 세척기 (Dishwashers)
+수저류와 그릇류를 세척하는 전동 장치 
+3 15 09 식사용 보조기기 (Assistive products for eating and drinking)
+3 15 09 03 음식 및 음료 차림 및 보관용 보조기기 (Assistive products for serving
+and storing food and drink)
+음식과 음료가 담긴 용기와 덜어 차리는데 사용되는 기구
+차림용 식기류, 쟁반, 음식 용기, 차 트롤리, 가열 접시, 진공 보온병이 포함됨
+3 15 09 06 음식 정량배분용기 (Food dispensers)
+설탕이나 기름 등을 미리 사용할 양으로 담을 수 있는 용기 
+3 15 09 09 마개 및 깔때기 (Stoppers and funnels)
+과다한 양의 액체가 용기에서 넘치는 것을 방지하는 보조기기
+깔때기는 원뿔형 장치로 액체를 용기에 넣을 때 넘치는 것을 방지하기 위해 사용
+13 05 09 24 계란 컵 (Egg cups)
+3 15 09 27 음식섭취 보조기기 (Feeding apparatus)
+접시에 있는 음식물을 섭취할 수 있도록 도와주는 음식 및 음료 섭취용 보조기기(전ㆍ
+수동 포함)
+식사도구(칼-포크), 젓가락 및 빨대, 머그컵, 유리컵, 컵 및 받침접시, 접시 및 공기, 음
+식 보호대, 식사보조 로봇이 포함됨
+3 15 09 30 장관영양 장치 (Feeding systems for enteral feeding)
+액상 음식을 위장관으로 직접 공급하는(장관영양법) 보조기기. 장관영양용 펌프, 튜브,
+액세서리가 포함됨
+3 15 12 청소용 보조기기 (Assistive products for housecleaning)
+3 15 12 03 쓰레받기, 먼지용 솔과 빗자루 (Dustpans, dust brushes and dust brooms)
+3 15 12 06 솔, 스펀지, 섀미가죽, 먼지떨이, 바닥걸레(Brushes, sponges, chamois
+leathers, dusters and floorcloths)
+3 15 12 07 키친타월 디스펜서 (Dispensers for kitchen roll)
+두루말이형 키친타월을 고정하여 사용을 용이하게 해주는 장치
+3 15 12 09 진공청소기 (Vacuum cleaners)
+로봇 진공청소기가 포함됨 
+3 15 12 12 건식 카펫 청소기 (Carpet sweepers for dry use)
+먼지를 들어올려 내부 저장용기로 빨아들이는 기전으로 카펫을 가로질러 미는 기계장
+치
+3 15 12 22 바닥 걸레질 장비 (Floor mopping equipment)
+바닥 걸레, 들통, 스탠드, 바닥용 젖은 걸레가 포함됨 
+3 15 12 24 바닥 광택제 (Floor polishers)
+3 15 12 25 창문 청소용 장비(Window cleaning equipment)
+창문, 자동차 앞유리 청소용 장비 등을 포함
+3 15 12 27 쓰레기 수거 또는 폐기물 처분용 보조기기 (Assistive products for storage
+of waste or disposal of waste)
+쓰레기 수거 또는 처리용 용기 및 장치 
+3 15 15 가정용 직조 및 유지용 보조기기 (Assistive products for making and
+maintaining textiles for domestic use)
+3 15 15 03 재봉틀 (Sewing machines)
+3 15 15 06 바느질용 고리, 핀 쿠션 및 감침기 (Sewing hoops, pin cushions and
+darning devices)
+바느질이나 감침질을 하는 동안 옷감을 잡아 고정하는 장치. 자수틀이 포함됨
+3 15 15 09 편물 기계 (Knitting machines)
+3 15 15 12 뜨개질, 크로셰 뜨개질, 재봉 및 감침용 바늘 (Knitting, crocheting, sewing
+and darning needles)
+3 15 15 15 재봉 및 뜨개질용 패턴 (Patterns for sewing and knitting)
+3 15 15 19 손 바느질용 보조기기 (Assistive products for hand sewing)
+바늘 실 꿰는 용구 및 골무가 포함됨
+3 15 15 21 가위 (Scissors)
+3 15 15 24 다림질 기계 및 다리미 (Ironing machines and irons)
+3 15 15 27 다림질 판 및 탁자 (Ironing boards and ironing tables)
+3 15 15 30 바퀴 달린 세탁용 바구니 (Laundry baskets on castors)
+3 15 15 33 세탁기 (Washing machines)
+3 15 15 36 세탁용 탈수기 (Wringers for laundry)
+세탁물에서 물기를 짜내는 장치
+3 15 15 39 빨래집게 (Clothespins)
+빨랫줄에 세탁물을 걸기 위한 클립 및 걸이로 빨래집게라고 알려져 있음
+3 15 15 43 세탁건조용 보조기기 (Assistive products for drying clothes)
+회전식 건조기, 건조장, 원심 건조기, 빨랫대, 건조 프레임 및 빨랫줄이 포함됨
+3 15 15 48 신발 세척 장치 (Shoe cleaning devices)
+현관용 매트 등이 포함
+3 15 18 가정용 원예 및 정원용 보조기기 (Assistive products for gardening and lawn
+care for domestic use)
+식물이나 정원의 재배 또는 가꾸기 또는 잔디밭 관리에 사용할 수 있는 보조기기
+3 15 18 03 원예용 도구 (Tools for outdoor gardening)
+외부에 있는 잔디밭이나 정원을 재배하거나 가꿀 수 있는 보조기기
+제초기, 긴 손잡이 전정 가위, 잡초 그리퍼가 포함됨
+3 15 18 06 개조된 원예 화단 (Adapted gardening beds)
+원예를 목적으로 실내 또는 실외에 접근할 수 있게 해주는 보조기기
+높은 화단, 접근 가능한 온실, 접근 가능한 정원을 위한 디자인이 포함됨 
+3 15 18 09 신체 보호 및 지지용 원예 보조기기 (Assistive products for protecting
+and supporting the body while gardening)
+식물 관리 또는 경작 동안 부상을 예방하거나 추가적인 지지를 제공하도록 고안된 보
+조기기
+무릎꿇기용 의자가 포함됨 
+3 15 18 12 실내 원예 및 꽃꽂이용 도구 (Tools for indoor gardening and flower
+arrangement)
+실내에서 식물 및 원예의 경작, 관리 또는 배열하거나 전시용으로 꽃을 잘라 배열하도
+록 해주는 보조기기
+3 18 인공적 실내외 활동 지지용 가구, 설비 및 기타 보조기기 (FURNISHINGS,
+FIXTURES AND OTHER ASSISTIVE PRODUCTS FOR SUPPORTING ACTIVITIES
+IN INDOOR AND OUTDOOR HUMAN-MADE ENVIRONMENTS)
+공공 및 개인용으로 건설된 지역내에 출입을 포함하여 움직임과 자세유지를 증진시키
+기 위하여 기존 환경에 있거나, 통합되거나, 그렇지 않으면 추가할 수 있는 가구 및 기
+타 보조기기
+앉기, 서기, 눕기용 보조기기가 포함됨
+3 18 03 탁자 (Tables)
+조절식 탁자가 포함됨  
+3 18 03 06 독서용 탁자, 책상 및 기립형 책상(Reading desks, writing desks and
+standing desks)
+3 18 03 09 설계 및 제도용 탁자 (Drafting tables and drawing tables)
+3 18 03 12 식탁 (Dining tables)
+3 18 03 15 침대용 탁자 (Bed tables)
+침대 위나 옆에서 사용하도록 고안된 탁자
+3 18 06 조명 고정장치 (Light fixtures)
+3 18 06 03 전체 조명(General lights)
+특정 위치에 집중되지 않고 직접 또는 간접적으로 비춰주는 조명 
+3 18 06 06 독서용 및 작업용 조명 (Reading lights and working lights)
+특정 활동을 촉진하기 위하여 한 곳의 특정 영역을 밝게 비추는 조명 
+3 18 06 09 연단 조명 및 칠판 조명 (Podium lights and blackboard lights)
+3 18 09 앉기 자세유지용 장치(Sitting devices)
+특수 앉기 자세유지용 장치, 자세보조용구가 포함됨 
+3 18 09 03 의자 (Chairs)
+사람을 서거나 앉을 수 있도록 보조하는 특별장치가 있거나 없는 의자가 포함됨 
+3 18 09 04 걸상 (Stools)
+등 받침대가 없으며 하나 이상의 다리가 있는 의자로 추가용 등 받침대를 선택사양으
+로 할 수 있음
+사람을 서거나 앉을 수 있도록 보조하는 특별 장치가 있는 걸상이 포함됨 
+3 18 09 07 기립 의자 (Standing chairs)
+기립 또는 기립에 가까운 자세를 유지하도록 하나 이상의 다리를 가진 좌석 
+3 18 09 09 관절고정용 의자 (Coxit chairs)
+앞 가장자리에서 하나 또는 두 개의 경사부분을 가진 좌석이 있는 의자
+사람을 서게 하거나 앉게 하는 것을 보조하는 특수 기능이 있는 관절고정 의자가 포함
+됨
+3 18 09 15 라운지 의자 및 안락 의자 (Lounge chairs and easy chairs)
+일반용 편안한 의자
+사람을 서게 하거나 앉게 하는 것을 보조하는 특수 기능이 있는 라운지 의자가 포함됨
+3 18 09 21 바닥 특수 앉기 자세유지용 장치 (Floor special seating maintain devices)
+피더시트, 코너의자, 바닥용 어린이 높이조절 의자, 등받이 등 특수 완제품 형태의 앉
+기 자세유지용 장치
+3 18 09 24 의자식 리프트 및 운반 장치 (Chair lifts and chair transporters)
+사람을 앉은 채로 운반하는 장치로 바퀴가 장착되어 있거나 또는 없는 형태의 장치
+3 18 09 39 자세보조용구(Seating and positioning systems)
+앉은 자세를 유지하기 위하여 사람의 특수 착석 요구사항에 맞춰 제작되는 몰딩, 모듈
+러 형태의 앉기 자세유지용 장치
+3 18 10 의자용 액세서리 (Accessories for sitting furniture)
+의자에 편안함과 지지력을 제공하는 장치
+3 18 10 03 등 지지대 (Back supports)
+의자에 놓고 사용하는 등 지지대
+앉은 자세와 편안함을 향상시키기 위해 의자에 놓고 사용하는 탈부착형 장치
+허리 지지대, 등 지지대, 등 패드 등이 포함됨
+3 18 10 13 머리 및 목 지지대 (Neck supports and head supports for sitting
+furniture)
+의자에 부착되거나 포함된 머리 지지대( 및 머리 지지대의 부분품), 목 지지대, 목 쿠
+션이 포함됨 
+3 18 10 15 다리 및 발 지지대 (Leg supports and foot supports)
+의자 앞쪽에 놓고 사용하는 다리 및 발 지지대
+다리를 쉬게 하거나 발을 지지하기 위해 의자 앞에 놓고 사용하는 탈부착형 장치
+관리하기 쉬운 자세로 다리를 고정해주는 다리 지지대 등이 포함됨
+3 18 10 21 좌석에 부착되는 서기와 앉기 보조용 쿠션 또는 장치 (Cushions or
+systems added to seats to assist a person to stand or sit)
+앉은 자세에서 기립자세로 전환할 수 있도록 사람을 들어 올릴 수 있는 장치가 있는 
+좌석 쿠션
+이 장치는 앉아 있는 동안 사람의 하강 또한 지원할 수 있음
+3 18 12 침대 및 침대 장비 (Beds and bed equipment)
+자세 조절식 및 비조절식 침대, 탈착식 침대 판/매트리스 지지단이 포함됨 
+3 18 12 04 침대 및 탈착식 침대 판/비조절식 매트리스 지지단 (고정침대, Beds and
+detachable bed boards/mattress support platforms, non-djustable)
+고정 손잡이나 고정 지지대와 같은 특징을 가진 침대. 높은 침대가 포함됨
+3 18 12 07 침대 및 탈착식 침대 판/수동조절식 매트리스 지지단 (수동 침대, Beds
+and detachable bed boards/mattress support platforms with manual adjustment)
+사용자나 보조인이 수동으로 높이나 각도를 조절할 수 있도록 하나 이상의 구획으로 
+구성된 매트리스 지지단이 있는 침대 
+3 18 12 10 침대 및 탈착식 침대 판/전동조절식 매트리스 지지단 (전동 침대, Beds
+and detachable bed boards/mattress support platforms with powered adjustment)
+사용자나 보조인이 전동으로 높이나 각도를 조절할 수 있도록 하나 이상의 구획으로 
+구성된 매트리스 지지단이 있는 침대 
+3 18 12 12 침대 리프트 (Bed lifts)
+일반형 침대에 장착하여 높이 조절형 침대의 역할을 할 수 있도록 해주는 높낮이 조절
+용 하부 구조물
+3 18 12 15 침구 (Bedding)
+침대 리넨 및 원하는 위치에 침대 리넨을 고정시키는 보조기기
+쿠션, 베게, 담요, 담요용 고정 장치가 포함됨 
+3 18 12 18 매트리스 및 매트리스 커버 (Mattresses and mattress coverings)
+편안함을 위한 매트리스 및 커버
+3 18 12 21 담요 지지대 (Blanket supports)
+신체에 어떠한 무게가 가해지지 않도록 시트와 담요를 막기 위하여 침대에 고정하는 
+틀
+3 18 12 24 분리 조절식 침대용 등 지지대 및 다리 지지대 (Separate adjustable back
+supports and leg supports for beds)
+침대에 누워 있는 동안 사용자의 특정 신체 부위를 지지하는 보조기기
+3 18 12 26 침대 고정형 측면 난간 (Side rails to be fixed to beds)
+사용자가 침대 밖으로 떨어지는 것을 예방하기 위한 접이식 또는 탈착식 난간
+3 18 12 28 침대 고정형 자기 들어올리기용 난간 (Rails for self-lifting to be fixed to
+beds)
+사용자가 침대에서 자세를 바꾸거나 독립적으로 앉을 수 있도록 해주는 탈착식 난간
+3 18 12 30 침대 단축용 보조기기 (Assistive products for bed-shortening)
+침대의 길이를 감소시키는 장치 
+3 18 12 33 침대 연장용 보조기기 (Assistive products for bed-lengthening)
+침대의 크기를 증가시키는 장치
+3 18 15 가구 높이 조절용 보조기기 (Assistive products for height adjustment of
+furniture)
+3 18 15 03 다리 연장기 (Leg extenders)
+가구의 다리 길이를 연장하기 위하여 가구 다리의 밑에 두는 장치
+3 18 15 06 높이 조절식 주추 및 버팀대 (Height-adjustable plinths and brackets)
+해당 가구에 장착할 수 있는 높이 조절이 가능한 표면 또는 버팀대
+3 18 15 09 고정된 높이의 주추 및 버팀대 (Pedestals and fixed-height plinths and
+brackets)
+해당 가구에 설치할 수 있는 고정된 높이의 표면 또는 버팀대
+3 18 18 지지대 및 손잡이 (Supporting handrails and grab bars)
+3 18 18 03 핸드레일 및 지지 레일 (Handrails and support rails)
+계단을 오르고 내려오거나 경사로 또는 복도를 따라 움직이며 걷는 동안 사람이 자신
+의 손이나 팔을 사용하여 지지하거나 안정되는 벽, 바닥, 또는 다른 안정적인 구조에 
+부착하는 주로 원통형의 바
+3 18 18 06 고정형 손잡이와 핸드그립 (Fixed grab bars and handgrips)
+서 있거나 자세를 변경하고자 하는 사람에게 지지 면을 제공할 수 있도록 벽, 벽과 바
+닥, 천장과 바닥에 부착하는 장치로써 보통 직선 또는 직각 바로 되어 있음
+3 18 18 10 분리 가능한 손잡이 및 핸드그립 (Removable grab rails and handgrips)
+조임쇠 또는 흡입 패드를 사용하여 벽, 바닥, 천장, 또는 가구에 일시적으로 부착하며 
+공구 없이 떼어낼 수 있으며, 자세 변경 동안 사람을 지지하는 장치로, 주로 직선 또는 
+각도가 있는 바 
+3 18 18 11 경첩식 레일 및 팔 지지대 (Hinged rails and arm supports)
+벽이나 바닥에 고정시킬 수 있으며, 필요 없는 경우에 접을 수 있고 옆으로 또는 아래
+로 내려서 사용할 수 있는 자세 변경 시 지지를 제공하는 장치
+3 18 21 대문, 방문, 창 및 커튼 개폐장치 (Gate, door, window and curtain
+openers/closers)
+3 18 21 03 방문 개폐장치 (Door openers and door closers)
+3 18 21 06 창문 개폐장치 (Window openers and window closers)
+3 18 21 09 커튼 개폐장치 (Curtain openers and curtain closers)
+3 18 21 12 차양막 개폐장치 (Sunblind openers and sunblind closers)
+3 18 21 15 잠금장치 (Locks)
+전기 자물쇠가 포함됨
+3 18 24 가정 및 기타 구내의 건축 요소 (Construction elements in homes and other
+premises)
+사람이 독립적으로 기능하도록 고안된 주택의 구조적 특징
+3 18 24 03 배관 시설 및 잠금 꼭지 (Plumbing fittings and taps)
+액체 또는 가스를 통제하고 분배하는 주택내 시스템
+단일 레버 꼭지, 자동 온도조절 혼합 밸브, 연성 튜브, 사이펀 관, 전자 혼합 밸브 같은 
+수도 및 가스 공급 시설이 포함됨 
+3 18 24 06 창문 (Windows)
+3 18 24 09 방문 (Doors)
+미닫이 문, 들어서 위로 움직이는 문, 접이식 문, 회전형 문이 포함됨 
+3 18 24 12 문턱 (Thresholds)
+문 바닥이나 내부 영역의 입구에 위치한 바닥 높이의 문턱
+샤워문이나 교차다리의 고무 밀폐부가 포함됨
+3 18 24 15 바닥 깔개 (Floor coverings)
+3 18 24 18 계단 (Stairs)
+3 18 24 21 조리대 (Counter tops)
+3 18 30 승강용 보조기기 (Assistive products for vertical accessibility)
+3 18 30 03 승강기 (Elevators)
+둘 이상의 수직 단차(빌딩의 층, 바닥, 선박의 갑판) 사이의 운송수단을 제공하는 수직 
+샤프트 내에서 
+올라가고 내려오는 플랫폼 또는 울
+3 18 30 05 부착형 리프트 플랫폼 (Fixed lifting platforms)
+둘 이상의 수직 단차 간에 사람 또는 화물을 움직이기 위하여 플랫폼을 사용하여 올려
+주는 장치로, 지붕이 없고 샤프트 내에서 올라가지 않으며 구조물이나 지면에 영구적
+으로 부착됨
+휠체어 리프트 테이블과 플랫폼 리프트가 포함됨 
+3 18 30 07 독립 기립형 리프트 플랫폼 (Free-standing lifting platforms)
+둘 이상의 수직 단차 간에 사람 또는 화물을 움직이기 위하여 플랫폼을 사용하여 올려
+주는 장치로, 지붕이 없고 샤프트 내에서 올라가지 않음
+휴대용이 아니며 구조물이나 지면에 부착되지 않고 자체 지지구조가 있음
+독립 기립형 휠체어 리프트 테이블과 플랫폼 리프트가 포함됨 
+3 18 30 08 이동형 리프팅 플랫폼 (Portable lifting platforms)
+둘 이상의 수직 단차 간에 사람 또는 화물을 움직이기 위하여 플랫폼을 사용하여 올려
+주는 장치로, 지붕이 없고 샤프트 내에서 올라가지 않으며 구조물이나 지면에 영구적
+으로 부착되지 않으며 이동식으로 관된 자체 지지구조가 있음
+이동형 휠체어 리프트 테이블과 플랫폼 리프트가 포함됨 
+3 18 30 10 좌석형 계단 리프트 (Stairlifts with seat)
+1개 이상의 난간에 좌석이 부착된 리프트로 계단의 형태와 각도를 따라 이동함
+3 18 30 11 플랫폼형 계단 리프트 (Stairlifts with platform)
+1개 이상의 난간에 고정판이 부착된 리프트로 계단의 형태와 각도를 따라 이동하고는 
+리프트 장치
+휠체어용 계단 리프트 등이 포함
+3 18 30 15 휴대용 경사로 (Portable ramps)
+서로 다른 두 면 사이의 단차를 연결하는 휴대용 경사로
+3 18 30 18 고정형 경사로 (Fixed ramps)
+서로 다른 두 면 사이의 단차를 연결하는 고정형 경사로
+3 18 30 21 사다리 및 발판 사다리 (Ladders and stepladders)
+3 18 30 24 좌석이나 플랫폼이 없는 계단 오르기 지지대 (Stair-climbing supports
+without seat or platform)
+계단을 오르고 내려올 때 지지하기 위하여 하나 이상의 난간에 부착되고 계단의 모양
+과 각도에 따라 
+움직이는 동력 장치
+3 18 33 주택 및 기타 토지용 안전 설비 (Safety equipment for homes and other
+premises)
+3 18 33 03 미끄럼 방지용품 (Non-slip materials for floors and stairs)
+미끄러질 위험을 최소화하는 표면 재료
+미끄럼 방지 매트, 미끄럼 방지 타일, 미끄럼방지액, 미끄럼방지양말 등이 포함됨 
+3 18 33 04 부상 방지용 안전 매트(Safety mats to prevent injuries)
+침대 등에서 낙상 시 부상 위험을 줄이기 위한 연성 또는 충격흡수용 매트
+3 18 33 06 창, 계단, 리프트용 안전 장벽, 울타리, 문 (Safety barriers, fences and
+gates for windows, staircases and lifts)
+3 18 33 09 가스 공급용 안전밸브 (Safety valves for gas supplies)
+비상 사태를 피하기 위하여 자동으로 가스의 흐름을 정지시키는 장치 
+3 18 33 10 우발적 화재와 화상 방지를 위한 실내 환경용 보조기기 (Assistive
+products for the indoor environment to prevent burns and accidental fires)
+3 18 33 12 구조장비 (Rescue equipment)
+위험 상황에서 사람을 대피시키기 위한 장비
+3 18 33 15 바닥 및 계단용 촉각재료 (Tactile materials for floors and stairs)
+시각장애인 등을 위해 방향을 지시하는 실내외에 사용되는 촉각 재료
+타일, 바닥 깔개, 바닥 매트가 포함됨 
+3 18 33 18 내화성 바닥 덮개 (Fire-resistant floor coverings)
+3 18 36 수납용 가구 (Furniture for storage)
+3 18 36 03 선반 (Shelves)
+3 18 36 06 찬장 (Cupboards)
+3 18 36 09 침대옆 캐비닛 (Bedside cabinets)
+침대옆 수납 장치, 침대-테이블과 침대옆 캐비닛의 복합된 가구가 포함됨
+3 18 36 12 의약품 캐비닛 (Medicine cabinets)
+3 18 36 15 선반, 찬장, 캐비닛의 설치 (Fittings for shelves, cupboards and cabinets)
+3 22 의사소통 및 정보관리용 보조기기 (ASSISTIVE PRODUCTS FOR
+COMMUNICATION AND INFORMATION MANAGEMENT)
+언어, 신호 및 기호로 의사소통, 메시지의 수신 및 생성, 대화의 지속, 그리고 의사소통 
+장치 및 기술의 사용을 포함한 다양한 형태로 정보를 수신, 전송, 생산 및 처리할 수 
+있도록 사람의 능력의 지지하거나 대체하기 위한 보조기기
+보기, 듣기, 읽기, 쓰기, 전화하기, 신호하기, 그리고 알람용 장치, 정보 기술이 포함됨
+3 22 03 시각 보조기기 (Assistive products for seeing)
+확대용 장치가 포함됨
+3 22 03 03 광 필터(흡수 필터) (Light filters (absorption filters))
+규정된 파장으로 빛을 흡수하고 원치 않는 빛을 걸러내는 장치
+3 22 03 06 저시력 보조안경 (Spectacles)
+자신의 시야에 초점을 맞출 수 있게 하는 장치
+3 22 03 07 콘택트렌즈(contact lenses)
+콘택트렌즈 및 관리용품 등이 포함됨
+3 22 03 09 확대용 돋보기(Magnifier glasses)
+물체의 이미지를 확대하는 장치. 조명이 있거나 없는 렌즈, 루페 안경이 포함됨
+3 22 03 12 망원경 (telescopes)
+한쪽이나 양쪽 눈으로 원거리에 있는 물체의 상을 확대하는 장치
+3 22 03 15 시야의 범위 및 각도의 확장 및 조절용 보조기기 (Assistive products for
+extending and adjusting range and angle of the field of vision)
+시야 각도의 확장 또는 변경용 장치. 프리즘 안경, 누운 상태에서 사용하는 안경이 포
+함됨
+3 22 03 18 영상 확대 시스템 (Image-enlarging systems)
+비디오 카메라에 포착된 물체의 확대된 영상을 보여주는 장치
+카메라, 제어장치, 비디오 모니터, 비디오 시스템, 디지털로 처리된 비디오 시스템, 모
+바일 카메라-판독 확대 안경, 휴대용ㆍ설치형 독서확대기가 포함됨
+3 22 03 21 화면확대 소프트웨어 (Screen magnification software)
+컴퓨터 화면을 확대하는 소프트웨어
+사용자 인터페이스의 구성요소를 확대시켜주는 소프트웨어로 내장된 기능일 수 있음
+색상 선택, 초점 기술 등이 포함됨
+3 22 06 청각 보조기기 (Assistive products for hearing)
+청각 장애인에게 소리를 집중, 증폭, 변조하는 장치
+이명 차폐 및 유도 코일 장치 내장형 보청기가 포함됨
+3 22 06 03 보청기(Hearing aids)
+소리를 집중, 집성, 확대하는 장치로 소리 집성기, 신체 착용형 보청기, 안경형 보청기,
+귓속형 보청기, 귀걸이형 보청기, 촉각형 보청기, 임플란트 연결용 보청기 등이 포함됨
+3 22 06 06 소리증폭기 (Hearing amplifiers)
+사람의 목소리나 주변 소리를 크게 하기 위해 사람의 몸 또는 그 근처에 배치하는 장
+치
+음성증폭기(의사소통용 증폭기), 통신 증폭기 등이 포함됨
+3 22 06 25 보청기용 음향 중계시스템 (Sound transmission systems for hearing aids)
+원래 소리와 보조기기 사이의 음향을 전송하는 장치
+유도 루프 시스템, 유도 루프 증폭기, 무선 주파수(FM) 전송 시스템, 적외선(IR) 시스
+템, 스트리밍 시스템 등이 포함됨
+3 22 06 27 청각 보조기기용 액세서리 (Accessories for assistive products for hearing)
+오디오 연결 장치, 안경 개조제품, 보청기용 리모컨, 소프트웨어, 배터리, 충전용 배터
+리, 배터리 충전기가 포함됨
+3 22 09 음성 및 말하기용 보조기기 (Assistive products for voice and speech
+functions)
+사람이 말하기로 의사소통할 수 있도록 보조하는 보조기기
+3 22 09 03 발성기 (Voice generators)
+연구개, 혀 및 입의 움직임에 의해 음성으로 전달되는 것을 목 안쪽의 공기 진동으로 
+소리를 내는 장치
+음성 밸브 등이 포함
+3 22 09 06 개인용 음성증폭기 (Voice amplifiers for personal use)
+음성의 크기를 증가시키는 장치
+3 22 09 09 음성 흐름 장치 (Speech flow devices)
+말의 유창함과 리듬을 향상시키기 위한 장치
+3 22 09 12 음성 및 말하기용 기기 (Assistive products for voice training and speech
+training)
+음성 및 말하기 기능 향상을 위한 장치
+특히 조음 및 소리 인지와 관련된 음성과 말하기 훈련 및 개발용 장치
+구어 훈련용 보조기기, S-, F-, Sch-분별기, 음향 스펙트럼 분석기 등이 포함됨
+3 22 13 읽기, 쓰기, 그리기 보조기기 (Assistive products for reading, writing and
+drawing)
+읽기 및 쓰기 도구를 위한 제품 등이 포함됨
+3 22 13 03 책장 넘기는 도구 (Page turners)
+책, 신문 및 잡지 등의 책장을 넘기기 위해 사용하는 장치
+3 22 13 06 쓰기판 및 독서대 (Writing boards, reading stands and book support
+cushions)
+읽기 또는 쓰기 자료를 고정하거나 지지하는 독서대. 종이나 책 등의 읽기 및 쓰기 재
+료를 고정하거나 받쳐주는 독서대
+판, 원고지지대, 쿠션 등이 포함됨
+3 22 13 09 서명용 가이드, 도장, 필기용 프레임 (Signature guides, stamps and
+writing frames)
+정확한 위치에 서명 또는 필기할 수 있도록 또는 도장을 사용하여 인쇄된 서명을 찍을 
+수 있도록 보조하는 장치
+3 22 13 12 읽기 및 독서용 시력 보조기기 (Reading masks and typoscopes)
+한 번에 볼 수 있는 제한된 영역을 제공하는 장치
+3 22 13 15 텍스트 음성 변환(TTS) 장치 및 소프트웨어 (Text-to-speech devices and
+software)
+인쇄물이나 전자 문서를 음성으로 읽어 주는 장치 및 소프트웨어
+독서기, 독서용 펜, 스크린리더 및 전자 음성 등이 포함됨
+3 22 13 18 OCR 장치 및 OCR 소프트웨어 (문자판독기, OCR equipment and OCR
+software)
+인쇄된 텍스트를 인식하여 디지털 형식으로 변환하는 스캐너 및 소프트웨어
+휴대용 스캐너 등이 포함됨
+3 22 13 21 DAISY 플레이어 및 전자책 리더 (DAISY players and e-book readers)
+DAISY 콘텐츠 재생 및 전자책을 읽어 주는 장치 및 소프트웨어
+DASIY 플레이어 및 전자책을 읽어주는 소프트웨어 등이 포함됨
+3 22 13 24 그리기 및 쓰기용 수동 장치 (Manual devices for drawing and
+handwriting)
+펜, 연필, 붓, 컴퍼스, 직선자, 자가 포함됨
+3 22 13 27 수동 점자 기록 장비 (Manual Braille writing equipment)
+특수 돌기 또는 막대를 사용하여 종이 위에 점자 돋을새김을 생성하는 장치
+3 22 13 30 타자기 (Typewriters)
+수동, 전기, 말하기 및 점자 타자기, 저장장치가 있는 타자기가 포함됨
+3 22 13 33 특수 필기용 종이/플라스틱 (Special writing paper/plastic)
+촉각 인식용 특수 효과가 있는 하드 카피용 재료 
+3 22 13 36 휴대용 점자 기록기 (점자정보 단말기, Portable note-taking devices for
+Braille)
+점자를 사용하여 정보를 기록, 저장, 출력하는 휴대용 장치
+점자 정보를 보관하기 위한 휴대용 기기
+3 22 13 39 텍스트와 멀티미디어 처리 소프트웨어 (Text and multimedia processing
+software)
+텍스트와 멀티미디어 자료의 작성, 편집, 구성 및 보관을 위한 소프트웨어
+단어 예측, 점자 및 DAISY용 소프트웨어 등이 포함됨
+3 22 13 42 그리기 및 색칠하기 소프트웨어 (Drawing and painting software)
+컴퓨터로 그리 및 색칠하기 활동을 가능하게 하는 소프트웨어. CAD 소프트웨어, 그림
+색칠하기 소프트웨어가 포함됨
+3 22 13 45 읽기 훈련용 소프트웨어 (Assistive products for training in reading)
+전략, 접근 및 수행 등과 같은 읽기 기술 훈련 및 개발용 소프트웨어
+3 22 13 48 쓰기 훈련용 소프트웨어 (Assistive products for training in writing)
+3 22 13 51 점자 훈련용 보조기기 (Assistive products for Braille training)
+점자 코드를 사용하여 읽고 쓰기 위하여 시각장애인을 훈련시키는 보조기기
+3 22 15 계산용 보조기기 (Assistive products for calculation)
+3 22 15 03 계산용 수동 장치 (Manual devices for calculation)
+주판, 계산자가 포함됨
+3 22 15 06 계산기 (Calculators)
+계산용 기계, 말하는 계산기가 포함됨
+3 22 15 09 계산 소프트웨어 (Calculation software)
+3 22 15 12 기초연산 훈련용 및 지원용 보조기기 (Assistive products for training and
+supporting the basics of arithmetic)
+사물의 수, 수치 및 기초연산 간 개념적 연결 습득을 지원하도록 고안된 보조기기
+3 22 15 15 기본 기하학 기술 훈련용 보조기기 (Assistive products for training in
+basic geometric skills)
+기하학적 모양의 주된 특성을 학습하고 이름과 모양의 비교를 인지하게 해주는 보조기
+기 
+3 22 15 18 돈의 이해 훈련용 보조기기 (Assistive products for training in
+understanding of money)
+돈의 기본적 개념과 기능을 훈련하는 보조기기
+3 22 15 21 수학 및 물리과학 교육용 보조기기 (Assistive products for training in
+mathematics and physical sciences)
+생물학, 물리학, 화학과 같은 자연과학과 수학을 배우는데 도움을 주는 보조기기
+3 22 18 청각 및 시각 정보의 기록, 재생, 표시용 보조기기 (Assistive products that
+record, play and display audio and visual information)
+청각 또는 시각적 형식으로 정보를 기록 또는 전달하는 장치와 이러한 기능을 복합시
+킨 제품
+청각 및 시각 장비, 텔레비전, 소리 전달 시스템, 잡음 여과 또는 아날로그를 디지털 
+정보로 교환과 같이 품질과 유용성을 증진시키기 위하여 청각 또는 시각 정보를 처리
+하는 제품이 포함됨
+3 22 18 03 녹음 및 재생 장치 (Sound recording and playing devices)
+소리를 녹음하고 딕타폰과 음악 재생기처럼 재생하는 장치
+3 22 18 06 비디오 녹화 및 재생 장치 (Video recording and playing devices)
+테이프 또는 다른 전자 매체의 시각 이미지 및 동영상을 저장 및 재생하는 장치
+카메라, 비디오 플레이어, 디지털 비디오 녹화 및 재생장치가 포함됨
+3 22 18 09 라디오 수신기 (Radio receivers)
+라디오 세트가 포함됨
+3 22 18 12 송수신 겸용 무전기 (Two-way radios)
+주로 일대일 원격 무선 통신을 수신 및 전송하는 장치
+개인 무선, 가족용 무전기, 지상용 단파 송수신 무전기, 해상이동 무선이 포함됨
+3 22 18 15 텔레비전 (Televisions)
+디지털 및 고해상 텔레비전이 포함됨
+3 22 18 18 폐쇄회로 텔레비전 시스템 (Closed-circuit television systems)
+카메라로 이미지를 레코더에 전송하거나 원거리에서 직접 나타내기 위한 폐쇄형 시스
+템 
+3 22 18 21 비디오 자막 및 자막 텔레비전 해독기 (Decoders for videotext and text
+television)
+비디오 자막을 인공 음성으로 변환하거나 음성을 비디오 자막으로 보여주는 장치
+음성인식시스템은 제외
+3 22 18 33 마이크 (Microphones)
+헤드셋 마이크가 포함됨
+3 22 18 36 확성기 (Loudspeakers)
+3 22 18 38 헤드폰, 이어폰 및 헤드셋 (Headphones, earphones and headsets)
+귀 근처나 귀 안에 위치시키는 머리 착용형 확성기
+텔레비전, 라디오 및 스테레오의 음량을 증가하는 장치(청취증폭기 등)나 통신 확성기
+와 함께 사용되는 것 등이 포함
+3 22 18 39 시청각 시스템용 액세서리 (Accessories for audio, video and visual
+systems)
+3 22 21 대면 의사소통용 보조기기 (Assistive products for face-to-face
+communication)
+동일 공간에서 두 사람이 서로 의사소통할 수 있게 해주는 장치
+3 22 21 03 문자, 기호 세트, 의사소통 판 (Letter and symbol sets and boards)
+대화가 불가능하거나 어려울 때 사용하는 대면 의사소통용 장치
+편지, 그림, 기호 및 아이콘 세트, 의사소통 판이 포함됨
+3 22 21 09 대화용 장치 (Dialogue units)
+직접적인 의사소통을 가능하게 해주는 전자 장치
+휴대용 및 비휴대용 디지털 전자 디스플레이, 종이, 녹음 및 합성된 음성 출력 장비가 
+포함됨
+3 22 21 12 대면 의사소통 소프트웨어 (Face-to-face communication software)
+직접적인 의사소통용 메시지를 발생시키는 소프트웨어
+대면 의사소통을 촉진시키는 내장형 소프트웨어가 포함됨
+3 22 21 18 지화 훈련용 보조기기 (Assistive products for training in finger spelling)
+지화 즉, 시청각 장애인을 위한 촉각 의사소통의 훈련 및 학습용 보조기기
+3 22 21 21 수화 훈련용 보조기 (Assistive products for training in sign language)
+수화, 즉 청각 장애인을 위한 훈련 및 학습용 보조기기
+3 22 21 24 독화 훈련용 보조기기 (Assistive products for training in lip-reading)
+독화 훈련 및 학습을 위한 보조기기
+전농 및 난청인이 다른 사람의 입술 움직임을 보고 그들의 말을 이해하도록 훈련시키
+기 위한 보조기기 등을 포함
+3 22 21 27 단서 언어 훈련용 보조기기 (Assistive products for training in cued
+speech)
+손신호가 보충된 음성 언어의 훈련 및 학습을 위한 보조기기 
+3 22 21 30 점자 외 촉각 기호 사용 훈련용 보조기기 (Assistive products for training
+in use of tactile symbols other than Braille)
+3 22 21 33 의사소통을 위한 시각적 기호 사용 훈련용 보조기기 (Assistive products
+for training the use of visual symbols for communication)
+블리스, 아이콘, 그림, 사진 및 기타 의사소통용 기호 등의 사용을 훈련하기 위한 보조
+기기
+3 22 21 36 모스 통신 훈련용 보조기기 (Assistive products for training in Morse
+communication)
+모스 알파벳 교육과 사용자 훈련을 위한 보조기기
+3 22 24 원거리 통신용 보조기기 (Assistive products for distant communication)
+통신 및 전자 네트워크 통신용 장치
+주로 원거리 통신에 사용되지만, 대면 의사소통을 위한 선택사양이 있는 장치
+3 22 24 04 다기능 의사소통 시스템 (Multifunctional communication systems)
+음성, 텍스트, 이미지 및 비디오를 결합한 의사소통 장치
+스마트폰, 화상회의 시스템, 영상전화 등을 포함
+3 22 24 05 텔렉스와 텔레팩스 기계 (Telex and telefax machines)
+3 22 24 07 말하기 의사소통용 기기 (Devices mainly for speech communication)
+휴대용 수신기가 있거나 없는 고정형 전화기, 휴대전화기, 인터넷 전화기, 촉각 전화기,
+핸즈프리 모델 등이 포함됨
+3 22 24 12 전화 부스 (Telephone booths)
+3 22 24 18 전화 교환대 (Telephone switchboards)
+전화 시스템의 작동 제어용 패널 및 교환대 
+3 22 24 21 원거리 의사소통을 위한 액세서리 (Accessories for assistive products for
+distant communication)
+착신 메시지의 연결장치 및 신호 변환기, 모바일 전화기의 키보드, 번호 소개 보조기
+기, 번호 누름용 보조기기, 수화기 고정장치, 수화기 증폭기가 포함됨
+3 22 24 24 원거리 의사소통용 소프트웨어 (Software for distant communication)
+컴퓨터 네트워크를 통한 컴퓨터 간의 언어 및 시각적 통신용 소프트웨어
+인터넷 통신규약, 인터넷 전화 통화 규약 전화통신 소프트웨어, 화상회의 소프트웨어,
+인터넷기반 화상 통신시스템, 스마트폰 및 태블릿 사용 촉진용 응용프로그램이 포함됨
+3 22 24 33 구내 통신 및 현관 인터폰 (Intercoms and entry phones)
+다른 위치에 있는 2명 이상의 사람들 간의 제한된 또는 사적인 대화를 촉진하기 위한 
+독립형 전자 통신 시스템
+출입문 개폐 장치와 인터폰 증폭기가 통합된 출입문 시스템이 포함됨
+3 22 28 시간, 기억 및 일정 관리용 보조기기 (Assistive products for managing time,
+memory, and planning)
+시간 표시 및 이해, 활동 계획하고 기억과 집중력을 보조하며, 구조화하기 위한 장치
+3 22 28 03 음성시계 (시계 및 시간 측정 장치, Clocks and timepieces)
+시간을 측정, 표시, 말해주는 장치
+휴대용 및 비휴대용 장치, 알람 기능이 있거나 없는 장치가 포함됨
+3 22 28 04 진동시계 (Vibrating Clocks)
+알람을 진동으로 알려주는 장치
+3 22 28 06 달력 및 시간표 (Calendars and timetables)
+계획된 활동에 관한 자료를 저장 및 조직하는 장치. 특수 달력 소프트웨어가 포함됨
+3 22 28 09 시간, 활동 및 개인 목표의 구조화를 위한 보조기기 (Assistive products
+for structuring periods of time, activities and personal goals)
+특정 시간에 관계없이 사용할 수 있는 시간을 주기 및 순서에 따라 명확하게 함으로써 
+시간, 활동 및 개인의 목표를 구조화할 수 있도록 하는 장치
+3 22 28 12 기억 지원 보조기기 (Memory support products)
+일상생활의 사람들, 중요한 활동이나 일을 알리거나 상기시키거나 촉진하는 장치 및 
+소프트웨어
+투약 알림, 휴대용 메모 패드, 기억 지원 노트, 음성 사진 시스템, 시간 알림 장치가 포
+함됨
+3 22 28 90 촉각시계 (Tactile Clocks)
+시간 표시 및 알람 등을 촉각을 이용해서 알려주는 시계
+3 22 29 신호 전달, 경보, 알람용 보조기기 (Assistive products for signalling, alarming
+and localization)
+신호, 알람, 경보, 개인의 위치 파악 및 추적을 위한 장치
+표시용 제품을 포함
+3 22 29 03 신호 장치 (Signalling devices)
+소리를 불빛, 진동 등으로 변환하여 알려주는 장치
+전화기, 초인종, 베이비 콜부터 시각, 청각, 기계적 출력으로 신호를 변환하는 장치
+3 22 29 06 개인 비상 경보 시스템 (Personal emergency alarm systems)
+개인적인 비상사태 시 사용자가 조작하거나 자동으로 작동되는 장치
+인슐린 알람, 간질 환자용 발작 알람, 낙상 알람이 포함됨
+3 22 29 09 환경 비상 경보 시스템 (Environmental emergency alarm systems)
+화재 경보, 연기 감지기가 포함됨
+3 22 29 12 배회 감지기 (위치 확인 및 추적 시스템, Localization and tracking
+systems)
+특정 상황이나 사람의 상태를 감시하는 장치
+일반 위치 추적 장치(General Positioning System:：GPS) 등이 포함
+3 22 29 15 표시용 재료 및 도구 (Marking materials and marking tools)
+표시 및 식별용 장치. 신호, 기호, 라벨이 포함됨
+3 22 31 언어 학습용 보조기기(Assistive products for learning languages)
+3 22 33 컴퓨터 및 단말기 (Computers and terminals)
+3 22 33 03 비휴대용 데스크톱 컴퓨터 (Desktop(non-portable) computers)
+3 22 33 06 휴대용 컴퓨터 및 개인용 정보 단말기(PDA) (Portable computers and
+personal digital assistants(PDA))
+배터리로 전원을 받아 어디에서 사용할 수 있는 컴퓨터
+스마트폰과 같은 휴대전화와 복합된 컴퓨터가 포함됨
+3 22 33 09 공공 정보/전자거래 단말기 (Public information/transaction terminals)
+현금자동입출금기, 은행, 티켓 자동판매기가 포함됨
+3 22 33 12 운영 소프트웨어 (Operating software)
+3 22 33 15 브라우저 소프트웨어 (Browser software)
+문자 메시지 전송 서비스, 무선 응용 프로토콜, 이-메일이 포함됨
+3 22 33 18 컴퓨터 및 네트워크용 액세서리 (Accessories for computers and networks)
+외부 저장장치, 모뎀, 어댑터 및 케이블, CD 및 DVD 드라이브, 네트워크 장치가 포함
+됨
+3 22 39 출력 장치 (Output devices for computers)
+출력 모니터, 프린터, 플로터, 합성기, 출력용 소프트웨어 등이 포함됨
+3 22 39 04 시각 디스플레이 (Visual displays)
+시각적으로 컴퓨터의 정보를 표시하는 장치 및 컴퓨터 모니터에서 텍스트와 이미지를 
+확대 또는 기타 증진시키는 액세서리
+대형 활자 화면, 화면 확대기, 눈부심 감소 화면, 적응형 소프트웨어가 포함됨
+3 22 39 05 촉각 디스플레이 (Tactile displays)
+촉각적으로 컴퓨터의 정보를 표시하는 장치
+점자 화면, 촉각 그래픽 화면이 포함됨
+3 22 39 06 프린터 및 점자 용지 재단기 (Printers and Braille paper cutter)
+점자 프린터 및 플로터가 포함됨
+3 22 39 07 음성 디스플레이 (Audible displays)
+음성이나 다른 소리를 통해 컴퓨터의 정보를 소리로 표시하는 장치
+음성합성기가 포함됨
+3 22 39 12 출력장치용 소프트웨어 (software for output devices)
+브라우저 등이 포함됨
+3 22 45 방향 안내용 보조기기 (Assistive products for orientation)
+주변 환경을 안내하고 유도하고 확인하고 인지하기 위해 사용되는 보조기기
+3 22 45 03 방향 안내용 전자 보조기기 (Assistive products for electronic orientation)
+특정 구역에서 자신의 위치를 확인할 수 있도록 위치 정보를 제공하는 전자 안내장치
+3 22 45 06 음성 유도장치 (Assistive products for acoustic navigation)
+시각장애인의 방향안내를 위하여 소리나 메시지로 안내하는 장치. 소리 신호장치가 포
+함됨
+3 22 45 09 나침반 (Compasses)
+동, 서, 남, 북 방향에 대한 정보를 제공하는 안내장치
+3 22 45 12 촉각 방향 안내용 도구 (Tactile orientation materials)
+촉각으로 방향 및 위치 등을 알 수 있도록 고안된 보조기기로 표면 구조물 등이 포함
+3 22 45 15 시각 방향 안내용 도구 (Visual orientation materials)
+시각으로 방향 및 위치 정보를 알 수 있도록 고안된 보조기기
+3 24 물건 및 장치의 제어, 운반, 이동 및 조작용 보조기기 (ASSISTIVE PRODUCTS
+FOR CONTROLLING, CARRYING, MOVING AND HANDLING OBJECTS AND
+DEVICES)
+물건의 이동이나 조작이 필요한 과제수행을 용이하게 해주는 보조기기 
+3 24 06 용기 조작용 보조기기 (Assistive products for manipulate containers)
+3 24 06 03 용기 오프너 (ontainer Openers)
+병, 캔 기타 용기를 여는 보조기기. 지지판이 포함됨
+3 24 06 06 튜브 짜는 장치 (Tube-squeezing devices)
+튜브의 내용물을 짜내는 기기로 치약 디스펜서 등이 포함
+3 24 09 작동 및 제어 장치용 보조기기 (Mechanical Assistive products for operating
+and controlling devices)
+전자기기가 아닌 기기를 작동 또는 제어하는 장치
+3 24 09 03 누름버튼 (Push-buttons)
+기계를 시작하고 수행하기 위해 버튼을 눌러야 하는 장치
+3 24 09 06 고정식 핸들 및 회전형 손잡이 (Fixed handles and knobs)
+누르거나 당겨서 물체를 열거나 닫거나 이동하는 장치로, 물체에 장착할 수 있음
+3 24 09 09 회전 손잡이 (Rotating handles and knobs)
+주로 손을 사용하여 회전시킴으로써 작동되는 장치
+3 24 13 작동 및 원격제어용 보조기기 (Electronic Assistive products for operation
+and controlling devices)
+전자기기를 작동시키는 원격제어용 장치 (단, 다른 기기에 부속품인 환경 제어장치는 
+제외)
+3 24 13 03 유선 원격제어장치 (Wired remote controls)
+전자기기를 작동시키는 유선 장치
+24 13 05 무선 원격제어장치 (Wireless remote controls)
+전자기기를 작동시키는 무선 장치
+3 24 13 09 스위치 (켜고 끄기 및 기타 기능) (Switches for electrical devices)
+전기회로를 작동 또는 정지시키는 장치 
+3 24 13 12 타이머 스위치 (Timer switches)
+정해진 시간 간격에서 프로그램된 전기장치를 제어하는 장치 
+3 24 13 15 스위치판 (Switchboards)
+3 24 13 18 키보드 (Keyboards)
+글자 입력을 용이하게 하기 위한 특수키보드
+점자키보드, 화면키보드 등이 포함됨
+3 24 13 21 컴퓨터 포인팅용 장치 (Computer pointing devices)
+컴퓨터 화면에서 포인터를 위치시키고 항목에서 선택하는 보조기기
+컴퓨터 마우스, 터치 패드, 트랙볼, 컴퓨터 조이스틱이 포함됨
+3 24 13 24 전자기기 운영 소프트웨어 (Software for operating electrical devices)
+개인 환경 제어용 소프트웨어, 화면 키보드, 음성인식 소프트웨어, 마우스 기능용 소프
+트웨어 등이 포함됨
+3 24 13 27 전자기기 작동 및 제어를 위한 보조기기용 액세서리 (Accessories for
+assistive products for operating and controlling electrical devices)
+전자기기 작동 및 원격제어를 위한 제품용 액세서리
+광학 스캐너, 음성 인식 장치, 접촉 감지판, 데이터 장갑, 두뇌-컴퓨터 인터페이스, 동작 
+센서, 다중포트, 케이블, 보드, 독립형 어휘은행 및 어휘목록이 포함됨
+3 24 13 90 환경 제어 장치(Environmental control systems)
+원격으로 환경을 제어하는 장치
+3 24 18 팔, 손, 손가락 및 혼합된 기능 대체용 보조기기 (Assistive products to assist
+or replace arm function, hand function, finger function or combination of these
+functions)
+3 24 18 03 움켜 잡기용 장치 (Devices for grasping)
+손의 잡는 기능을 대체하는 물건 잡기용 보조기기로, 신체에 착용하지 않음
+족집게가 포함됨 
+3 24 18 06 쥐기용 보조기기 및 부착품 (Grip adapters and attachments)
+해당 물건을 쥘 수 있도록 보조기기에 추가되는 장치
+펜 홀더, 연필 홀더, 솔 홀더가 포함됨
+3 24 18 09 신체 착용식 잡기장치 (Body-worn holders)
+물건을 고정시키기 위하여 신체에 착용하는 장치
+3 24 18 12 스탠드 (Stands)
+안정된 위치에서 물건을 고정시키는 독립형 장치
+3 24 18 15 작동용 막대기 (Operating sticks)
+기타 장치 및 컴퓨터용 입력장치를 제어하는 장치
+3 24 18 18 지시등 (Pointing lamps)
+시각 매체를 강조하기 위하여 사용된 집중 조명 광선 방출하는 장치
+3 24 18 27 수동 조작용 팔 지지대 (Arm supports to permit manual activities)
+컴퓨터 또는 타자기 사용과 같은 수동 활동 동안 아래팔을 지지하는 장치
+3 24 18 30 로봇 조종기 (Robotic manipulators)
+팔, 손, 손가락 기능을 대체하고, 팔 뻗기와 공간 내에서 물건을 잡거나 움직이기 위하
+여 조이스틱 등을 사용하여 조절되는 전동 보조기기
+3 24 21 뻗기 연장용 보조기기 (Assistive products for extended reach)
+먼 거리에 있는 물건을 잡기 위한 보조기기
+3 24 21 03 수동 쥐기 집게 (Manual gripping tongs)
+먼 거리에 있는 물체를 잡거나, 짜거나, 집기 위한 보조기기
+3 24 21 06 전기 쥐기 집게 (Electric gripping tongs)
+먼 거리에 있는 물건을 잡거나, 짜거나 집기 위한 전동 보조기기
+3 24 21 09 쥐기 기능이 없는 물체 이동 장치 (Extenders without gripping function)
+물체에 길게 닿게 하여 집지 않고 이동시키는 기기
+3 24 24 위치 조정용 보조기기 (Assistive products for positioning)
+쉽게 닿을 수 있도록 물체를 사람 가까이에 두는 보조기기
+경사 조절형 책상, 회전 책상, 스위치 및 기구의 고정 장치 등이 포함
+3 24 24 03 위치 고정 시스템 (Fixed-position systems)
+부분품 세트로 구성되어 닿을 수 있는 위치에 물건을 고정시키는 장치
+3 24 24 09 승강 및 경사 시스템 (Lifting and tilting systems)
+물체가 들리고 기울어질 수 있게 하여 위치시키는 장치로서 서로 결합되는 부분품의 
+세트로 구성되어 있음
+3 24 27 고정용 보조기기 (Assistive products for fixation)
+물건의 위치를 견고하게 고정시키는 장치
+3 24 27 03 흡착 컵 (Suction cups)
+눌러주면 부분 진공을 발생시켜 표면에 붙는 장치
+3 24 27 06 미끄럼방지 패드 (Non-slip pads)
+물체 아래에 두어 미끄러질 위험을 감소시키는 장치
+3 24 27 12 클립 및 스프링 클립 (Clips and spring-clips)
+고정점에서 또는 스프링으로 연결된 두 개의 턱 사이에 물건을 고정시키는 장치
+3 24 27 18 자석, 자석 스트립 및 클램프 (Magnets, magnetic strips and clamps)
+자기력으로 물건을 견고하게 고정시키는 장치
+3 24 36 운반 및 운송용 보조기기 (Assistive products for carrying and transporting)
+개인 용도로 물건을 운반하거나 이동시키는 장치
+3 24 36 03 운반용 보조기기 (Assistive products for carrying)
+운반을 위해 물체를 지지하거나 고정시키는 장치 쟁반
+걸고리, 독립형 드립 스탠드 등이 포함됨
+3 24 36 06 작은 바퀴 세트 (Sets of castors)
+회선 롤러/바퀴가 있는 장치 
+3 24 36 09 물건 운반 및 쇼핑용 손수레 (Baggage and shopping trolleys)
+바퀴, 손잡이, 지지를 위한 하나 이상의 측면이 있는 물품 운송용 장치
+3 24 36 12 트롤리(Trolleys)
+평지에서 물품을 운반하는 바퀴달린 수동 장치로 손잡이가 있거나 없음
+3 27 물리적 환경요소의 제어, 적응, 측정 보조기기 (ASSISTIVE PRODUCTS FOR
+CONTROLLING, ADAPTING OR MEASURING ELEMENTS OF PHYSICAL
+ENVIRONMENTS)
+물리적 환경의 특정 요소를 제어 또는 변경하거나 자연적/물리적 환경의 조건 및 구성
+요소를 측정하는 제품
+3 27 03 환경 개선용 보조기기 (Assistive products for environmental improvement)
+불리한 요소를 제거하거나 제어함으로써 유해한 환경 영향으로부터 사람을 보호하는 
+장치
+3 27 03 03 실내 기후 조절용 보조기기 (Assistive products for controlling the
+internal climate
+제한된 공간의 내부 기후특성(온도, 습도, 환기)을 조절하는 장치
+가습기가 포함됨 
+3 27 03 06 공기 청정기 (Assistive products for improving indoor air quality)
+실기 대기에서 대기 오염물질을 제거하는 장치
+3 27 03 09 소음 감소용 보조기기 (Assistive products for reducing noise)
+소음을 감소 또는 흡수하는 장치 또는 재료
+3 27 03 12 진동 감소용 보조기기 (Assistive products for reducing vibrations)
+진동을 감쇠시키는 장치 또는 재료 
+3 27 03 15 조명 제어용 보조기기 (Assistive products for controlling illumination)
+빛의 상태를 조절하는 장치
+3 27 03 18 정수기 및 연수기 (Water purifiers and water softeners)
+물을 정화 또는 연화하는 장치 및 재료
+3 27 06 측정용 보조기기 (Measuring instruments)
+물리적 특성을 측정하는 장치
+3 27 06 03 길이 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring length)
+3 27 06 06 각도 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring angles)
+물체의 각도를 측정하는 장치
+수위계가 포함됨
+3 27 06 09 체적 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring volume)
+물체의 체적을 측정하는 장치
+3 27 06 12 사람을 제외한, 질량 측정용 보조기기 및 도구 (Assistive products and
+tools for measuring mass(not of person))
+편지 저울이 포함됨
+3 27 06 15 전기 특성 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring electrical properties)
+3 27 06 18 압력 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring pressure)
+기압계가 포함됨 
+3 27 06 21 기후 상태 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring climatic conditions)
+제한된 공간에서 기후조건(온도, 습도, 환기)을 측정/관찰 및 확인하는 장치 
+3 27 06 24 색상 측정 보조기기 및 도구 (Assistive products and tools for measuring
+colours)
+색상 요소를 식별하는 계측기
+3 27 06 27 소음 수준 측정용 보조기기 및 도구 (Assistive products and tools for
+measuring sound levels)
+소음 수준을 측정하고 표시하는 장치
+3 27 06 30 유체의 밀도를 측정하는 보조기기 및 도구 (Assistive products and tools
+for measuring density of fluids)
+3 27 06 33 단위 계산용 보조기기 및 도구 (Assistive products and tools for counting
+units)
+개체를 같은 양의 그룹으로 나누어 계산하는 장치
+3 28 작업 활동 및 취업 참여용 보조기기 (ASSISTIVE PRODUCTS FOR WORK
+ACTIVITIES AND PARTICIPATION IN EMPLOYMENT)
+직업훈련을 포함한 일자리, 무역, 작업, 직업의 모든 측면에 종사하는 사람을 돕기 위
+한 보조기기
+기계류, 장치, 차량, 도구, 컴퓨터 소프트웨어, 생산 및 사무용 장비, 가구, 시설, 직업 
+평가 및 훈련용 재료가 포함됨
+작업 환경 외부에서 주로 사용되는 보조기기는 제외 
+3 28 03 작업장 내 가구 및 비품요소 (Workplace furniture and furnishing elements)
+3 28 03 03 작업 책상 (Workdesks)
+작업장에서 주로 사용되는 쓰기, 읽기, 그리기, 제도용 책상
+사무용 책상, 컴퓨터 책상이 포함됨 
+3 28 03 06 작업대 (Workbenches)
+산업 및 기능 상 수공 작업용 특수 장비 및 액세서리가 있는 작업대
+용접 테이블, 조립 테이블, 목수 벤치, 설치 테이블이 포함됨 
+3 28 03 09 작업 및 사무용 의자 (Work chairs and office chairs)
+작업장용 조절식 또는 고정식 의자. 조립식 의자가 포함됨 
+3 28 03 12 작업장용 걸상 및 기립형 의자 (Stools and standing chairs for
+workplaces)
+사람을 일반적으로 지지하거나 기립 또는 기립에 가까운 자세를 유지하기 위하여, 등 
+지지대 또는 팔 지지대가 있거나 없으며 하나 이상의 다리가 있는 의자
+3 28 03 15 작업장 내 보관 및 공급 시스템 (Storage and supply systems in
+workplaces)
+작업장에서 물건 보관을 용이하게 해주는 기구, 부분품 상자, 파일 캐비닛, 컨테이너가 
+포함됨 
+3 28 03 18 작업장 매트 (Workplace mats)
+3 28 03 21 칸막이 벽 (Partition walls)
+3 28 06 작업장 내 사물 운반용 보조기기 (Assistive products for transporting objects
+in workplaces)
+작업장에서 더 먼 거리로 화물 또는 기타 물건을 운반 및 이동시키는 장치
+3 28 06 04 수동식 산업 운송 장비 (Hand operated industrial transport equipment)
+물품 운반을 위하여 둘 이상의 바퀴가 있으며, 근접한 바닥에 서 있는 사람이 조작하
+는 장치
+산업용 작은 바퀴 세트, 카트, 손수레가 포함됨 
+3 28 06 05 전동식 산업 운송 장비 (Powered pedestrian-operated industrial transport
+equipment)
+물품 운반을 위하여 둘 이상의 바퀴가 있으며, 근접한 바닥에 서있는 사람이 조작하는 
+전동 장치
+3 28 06 06 수동식 리프팅 운반차 (Hand operated lifting truck s)
+근접한 바닥에 서 있는 사람이 작동하며, 짐을 들어 올리고 움직이기 위한 수동 또는 
+전동 리프팅 트럭
+깔판 올림식 운반차, 깔판을 높게 올릴 수 있는 운반차가 포함됨 
+3 28 06 07 탑승자 구동식 산업용 전동 운송 장비 (Powered rider-operated industrial
+transport vehicles)
+물건을 운반하기 위하여 사람이 차량에 앉거나 서서 작동하며 둘 이상의 바퀴가 있는 
+전동 장치
+전기 트랙터가 포함됨
+3 28 06 09 자재를 들어 올리고 운반하는 산업용 전동 차량 (Powered industrial
+vehicles used to lift and transport materials)
+짐을 들어 올리고 운반하기 위하여 사람이 차량에 앉거나 서서 작동하는 운반 차량
+지게차, 적재 장치가 포함됨 
+3 28 06 12 운반장치 (Conveyors)
+움직이는 벨트나 체인, 롤러 세트, 진동 또는 각진 활송장치를 사용하여 제한된 짧은 
+거리의 경로 내에서 자재, 포장물, 또는 기타 유형의 물품을 운반하는 고정식 또는 이
+동식 장비
+컨베이어 활송장치, 롤러 컨베이어, 벨트 컨베이어, 고리와 끄는줄 방식의 컨베이어, 진
+동 컨베이어가 포함됨 
+3 28 09 작업장 내 사물 이송 및 재배치용 보조기기 (Assistive products for hoisting
+and repositioning objects in workplaces)
+작업 환경에서 자재, 화물, 사람을 올리거나 재배치하는 장치
+도르래 장치, 균형장치, 조작기, 승강 테이블, 승강 및 재배치 로봇, 산업용 로봇, 기중
+기가 포함됨 
+3 28 09 03 기중기, 도르래 장치, 하역 장비 (Cranes, tackles and load handling
+attachments)
+화물 및 기타 물건을 수평 및 수직으로 운반하는 와인더 또는 도르래 및 부착물이 있
+는 수동 작동 또는 전동 들어 올림 장비
+지상 수평이동 집게, 회전식 기중기, 지상형 기중기, 체인, 케이블, 로프, 고리, 도르래,
+갈퀴 그리퍼가 포함됨
+3 28 09 06 조작장치 및 무게 중심장치 (Manipulators and weight balancers)
+수평, 수직, 회전 움직임을 이용하여 화물 및 기타 물건을 들어 올리고, 재배치 및 적
+재하거나 균형을 잡는 지상 또는 지면 장비
+원거리 조작장치가 포함됨
+3 28 09 09 작업장용 리프팅 및 배치 시스템 (Lifting and positioning systems for
+workplaces)
+사용자의 편안한 작업반경 내로 화물을 배치 또는 들어올리기 위한 고정식, 회전-슬라
+이딩, 경사가 가능한 장비
+거상용 테이블이 포함됨 
+3 28 09 12 작업장용 리프팅 플랫폼 (Lifting platforms for workplaces)
+다양한 높이에서 작업 활동이 가능하도록 사람을 올리고 위치시키는 플랫폼 
+3 28 12 작업장 내 사물고정, 뻗기, 움켜 쥐기용 보조기기 (Assistive products for
+fixing, reaching and grasping objects in workplaces)
+확보, 잡기, 고정, 운반, 조작 및 배치 작업을 쉽게 해주는 장치
+3 28 12 03 공정품 및 도구의 운반 및 잡기용 보조기기 (Assistive products for
+carrying and gripping workpieces and tools)
+사람이 물건을 고정, 잡기, 운반, 조작할 수 있게 해주는 장치
+손자석이 포함됨 
+3 28 12 06 공정품 및 도구의 고정 및 배치용 보조기기(Assistive products for fixing
+and positioning workpieces and tools)
+사람이 쉽게 접근하거나 사용할 수 있도록 작업장에서 사용되는 고정 또는 배치용 도
+구와 기타 물건을 위한 장치
+나사 죔쇠, 바이스, 조임 장치,버팀대, 자석, 스프링 클립, 미끄럼방지용 깔개, 구획이 
+있는 회전 테이블, 측면 테이블이 포함됨 
+3 28 15 작업장 내 기계 및 공구류 (Machines and tools for use in workplaces)
+작업장에서 사람이 사용하도록 수정되거나 고안된 도구, 중장비, 기타 기계류 
+3 28 15 03 수동 손 공구 (Manually operated hand tools)
+재료와 물체로 작업할 때 근력을 사용하여 작동되는 손 장치
+드라이버, 플라이어, 커터, 집게, 진공 선별 공구가 포함됨 
+3 28 15 06 전동 손 공구 (Powered hand tools)
+재료와 물체로 작업할 때 손에 쥐는 전동 장치
+드릴 기계, 압축공기 줄, 연마기가 포함됨 
+3 28 15 09 상품 생산 및 가공 기계류 (Machines for production and processing of
+commercial goods)
+제품 생산 또는 가공 과정에서 재료를 가공하거나, 부분품이나 재료를 조립하거나, 가
+공물이나 혼합물을 분리하거나, 또는 가공물에 덧붙이거나 하는 비휴대용 장비
+3 28 15 12 조경, 농업 및 건설용 기계 및 장비 (Landscaping, agricultural and
+construction machines and equipment)
+녹지, 시립 및 농경지의 경작 및 관리용 수동 또는 좌석에 앉아 작동하는 장비 및 차
+량, 또는 건설용 장비 및 차량
+3 28 15 15 작업장 청소용 기계 및 장비 (Cleaning machines and equipment for
+workplaces)
+실내외 영역 또는 작업 재료의 습식 및 건식 청소용 수동 또는 좌석에서 작동하는 기
+계류 및 장비 
+3 28 15 18 기계 및 도구용 액세서리 (Accessories for machines and tools)
+신체 보호를 위한 기계 또는 공구의 설비
+파편 보호장치가 포함됨 
+3 28 15 21 작업용 로봇 (Workplace robots)
+화물 및 기타 물건을 올리고, 배치하며 조작하기 위하여 그리고 공장에서 기계작업의 
+수행을 위하여 사용하는 프로그램되고 고정되거나 가동성이 있는 장비
+3 28 18 작업장 내 검사 및 관찰용 장치 (Devices for testing and monitoring in
+workplaces)
+생산 또는 작업 공정에서 정량 및 정성적 분석을 위한 장비 및 소프트웨어
+레이저, 센서 장치, 청력 증폭기가 있는 청진기가 포함됨
+3 28 18 03 작업장용 측정 기구 및 장비 (Measuring instruments and equipment for
+workplaces)
+작업의 신체적, 생물학적, 화학적 특성을 측정, 관찰, 분석하는 장치
+충전 장치, 자동 뷰렛, 투여 장치, 피펫, 용적 플라스크, 현미경이 포함됨 
+3 28 18 06 작업장용 품질보증 장치 (Quality assurance devices for workplaces)
+사전에 정의된 품질요구사항을 충족하기 위하여 제품 제조나 활동 수행 시 계획, 관찰,
+교정을 위한 장비
+조립 과정용 추적 시스템과 소프트웨어 
+3 28 21 사무행정, 정보 저장 및 관리용 보조기기 (Assistive products for office
+administration, information storage and management at work)
+행정업무 영역에서 작업의 체계화, 정리, 분류, 처리를 보조하는 장치
+3 28 21 03 종이 서류의 체계화, 분류, 정리용 보조기기 (Assistive products for
+organizing, sorting and filing paper documents)
+천공기, 스테이플러, 소모품이 포함됨
+3 28 21 06 우편물 처리용 보조기기 (Assistive products for processing mail)
+편지, 소포 및 기타 우편물용 재료를 준비하고 우편물의 발송 및 수신을 촉진하는 장
+치
+요금별납 소인기(우편요금 계산기), 우편물 분류장치, 우편물 개봉장치가 포함됨 
+3 28 21 09 사무용 기기 및 장비 (Office machines and office equipment)
+문서 세단기, 복사기가 포함됨 
+3 28 21 12 사무용 및 산업용 소프트웨어 (Office software and industrial software)
+특정 작업과제를 촉진시키는 소프트웨어
+사업관리 소프트웨어, 회계 소프트웨어, 특정 회사 소프트웨어, 사무조직 소프트웨어가 
+포함됨 
+3 28 24 작업장 내 건강보호 및 안전용 보조기기 (Assistive products for health
+protection and safety in workplaces)
+작업장에서의 건강 및 안전을 보장하고 환경을 조절 및 업그레이드 하는 데 도움이 되
+는 장치
+3 28 24 03 작업장용 개인 보호 장비 (Personal protective equipment for workplaces)
+건강 및 안전 위험으로부터 보호하기 위하여 개인적으로 착용하거나 휴대하도록 고안
+된 장치
+머리 보호, 눈 보호, 청각 보호, 손 보호, 발 보호, 기도 보호, 그리고 전신 보호용 보조
+기기. 안전 부츠, 보호용 작업복, 작업 벨트가 포함됨 
+3 28 24 06 작업장 내 조명 제어용 보조기기 (Assistive products for controlling
+illumination in workplaces)
+작업장의 조명 상태를 조절하는 장치
+3 28 24 09 작업장 내 진동 감소용 보조기기 (Assistive products for reducing
+vibration in workplaces)
+작업장의 진동 감쇠용 장치 또는 재료
+3 28 24 12 작업장용 공기 청정기 (Air cleaners for workplaces)
+작업 장 대기 중에서 오염물질을 제거하는 장치
+3 28 24 15 작업장 내 소음 감소용 보조기기 (Assistive products for noise reduction
+in workplaces)
+작업장에서 소음을 감소 또는 흡수하는 장치 또는 재료
+흡음재가 포함됨 
+3 28 24 18 작업장 및 작업장 주변용 안전장치 (Safety devices for workplaces and
+surrounding areas at work)
+위험을 최소화하기 위해 작업장 내부에 설치하여 사용하는 장치
+통행 표시, 미끄럼 방지 바닥, 방화 재질의 바닥 등이 포함
+3 28 24 21 육체적 또는 정신적 스트레스의 예방 및 감소용 특수 소프트웨어 (Special
+software for preventing and reducing physical or mental stress)
+직장에서 주관적으로 느끼는 스트레스의 회피 및 감소용 소프트웨어
+안내된 스트레스 감소 및 이완 프로그램, 신체 인지 프로그램, 시간 관리 프로그램이 
+포함됨 
+3 28 24 24 작업 과정 중 회복용 보조기기 (Assistive products for recuperation
+during work processes)
+작업장에서 정신적 및 육체적 피로로부터 회복시키는 장치
+3 28 27 직업 평가 및 직업 훈련용 보조기기 (Assistive products for vocational
+assessment and vocational training)
+직업에 대한 적합성 및 적성을 평가하거나 기본적 및 복합적 직업기술의 습득 또는 발
+달을 보조하는 장비, 재료, 소프트웨어
+3 28 27 03 직업 평가 및 지도용 보조기기 (Assistive products for vocational
+assessment and vocational guidance)
+작업, 사업, 직업에 대한 능력 및 흥미를 검사 및 평가하는 보조기기 
+3 28 27 07 직업훈련용 보조기기 (Assistive products for vocational training)
+컴퓨터, 컴퓨터통신 사용, 프로그래밍 훈련, 경제과목의 훈련과 같은 기본적인 직업 기
+술을 가르치는 
+보조기기
+3 30 레크리에이션 및 레저용 보조기기 (ASSISTIVE PRODUCTS FOR RECREATION
+AND LEISURE)
+어떤 형태의 놀이, 스포츠 또는 취미, 기타 레크리에이션 및 레저에 참여를 촉진시키는 
+보조기기
+3 30 03 놀이용 보조기기 (Assistive products for play)
+규칙이 있는 게임, 구조적이지 않거나 체계화되지 않은 게임, 자발적 레크리에이션에 
+참여할 수 있게 
+해주는 보조기기
+3 30 03 03 장난감 (Toys)
+고정된 규칙 없이 놀 수 있도록 고안된 어린이용 장치
+3 30 03 06 놀이터 장비 (Playground equipment)
+고정된 규칙 없이 어린이들이 항상 놀 수 있도록 설치된 실내외 구조물
+장난감 집, 그네가 포함됨 
+3 30 03 09 게임 (Games)
+고정된 규칙에 따라 레크리에이션 활동에 참여하도록 고안된 보조기기
+보드 게임, 카드 게임, 퍼즐, 비디오/컴퓨터 게임이 포함됨 
+3 30 09 스포츠용 보조기기 (Assistive products for sports)
+경쟁적이며 공식 또는 비공식적으로 조직된 게임 또는 운동 경기에 단독 또는 단체로 
+참여할 수 있도록 해주는 장치
+3 30 09 03 팀 구기 스포츠용 보조기기 (Assistive products for team ball sports)
+실내외에서 공을 움직여 점수를 획득할 팀이 필요한 스포츠에 참여하도록 해주는 보조
+기기
+미식축구, 야구, 농구, 축구, 럭비가 포함됨
+3 30 09 06 양궁용 보조기기 (Assistive products for archery)
+양궁에 참여하도록 해주는 보조기기
+3 30 09 09 배타기용 보조기기 (Assistive products for boating)
+인력, 기계식, 풍력 선박을 포함한 배타기 경기에 참여하도록 해주는 보조기기
+3 30 09 12 타겟(목표) 스포츠용 보조기기 (Assistive products for target sports)
+대상물인 타겟을 쳐서 주요 목표를 달성하는 스포츠를 위한 장치
+보치아, 볼링, 페탕크, 다트, 크로겟, 골프 등이 포함됨
+3 30 09 15 승마용 보조기기 (Assistive products for equestrianism)
+말을 탈 수 있게 해주는 보조기기
+3 30 09 18 펜싱용 보조기기 (Assistive products for fencing)
+펜싱에 참여할 수 있게 해주는 보조기기
+3 30 09 21 항공용 보조기기 (Assistive products for aviation)
+항공기를 비행할 수 있도록 해주는 보조기기
+3 30 09 27 라켓 스포츠용 보조기기 (Assistive products for racquet and paddle
+sports)
+테니스, 탁구, 라켓볼, 스쿼시, 배드민턴, 기타 라켓류 사용 스포츠에 참여할 수 있게 
+해주는 보조기기
+3 30 09 30 사격용 보조기기 (Assistive products for shooting)
+사냥이나 표적사격 동안 총기를 발사할 수 있게 해주는 보조기기
+3 30 09 33 수영 및 수상 스포츠용 보조기기 (Assistive products for swimming and
+water sports)
+수영과 수구 및 수상 스키를 포함한 기타 수상 스포츠에 참여할 수 있게 해주는 보조
+기기
+3 30 09 36 겨울 스포츠용 보조기기 (Assistive products for winter sports)
+아이스하키, 스키, 아이스 스케이팅을 포함한 모든 겨울 스포츠에 참여하도록 해주는 
+보조기기
+3 30 09 37 육상 스포츠용 보조기기 (Equipment for track and field)
+트랙 및 필드 분야 스포츠용 장치
+트랙 훈련, 던지기 훈련, 점프 훈련이 포함됨
+3 30 09 39 기타 스포츠용 보조기기 (Assistive products for other sports)
+3 30 12 연주 및 작곡 보조기기 (Assistive products for playing and composing
+music)
+음악을 연주하고, 악보를 읽고 작성할 수 있게 해주는 보조기기
+3 30 15 사진, 영화, 비디오 제작용 보조기기 (Assistive products for producing
+photos, films and videos)
+사진을 찍고 현상하거나 필름 또는 비디오를 제작할 수 있게 해주는 보조기기
+3 30 18 수공예 공구, 재료, 장비 (Handicraft tools, materials and equipment)
+수공예 제작에 참여할 수 있게 해주는 보조기기
+3 30 18 03 섬유 수공예용 도구, 재료, 장비 (Tools, materials and equipment for
+textile handicraft)
+실, 직물 또는 다른 섬유기반 재료로 공예품을 만들 때 사용되는 보조기기
+자수, 매듭공예, 뜨개질, 코바늘 뜨개질이 포함됨
+3 30 18 06 도예용 도구, 재료, 장비 (Tools, materials and equipment for pottery)
+도자기 및 기타 요업 공예품 제작에 사용되는 보조기기
+3 30 18 09 목공용 도구, 재료, 장비 (Tools, materials and equipment for
+woodworking)
+나무를 사용하여 공예품을 만들 때 사용되는 보조기기
+3 30 18 12 금속공예용 도구, 재료, 장비 (Tools, materials and equipment for
+metalworking)
+금속을 사용하여 공예품을 만들 때 사용되는 보조기기
+3 30 18 15 창의적 그림 디자인용 도구, 재료, 장비 (Tools, materials and equipment
+for creative pictorial design)
+컴퓨터 또는 기타 전자 수단을 사용하지 않고 그림을 그리는데 사용되는 보조기기
+색칠하기, 그리기, 스케치, 그래픽 아트가 포함됨
+3 30 18 18 기타 재료로 만든 수공예품용 도구, 재료, 장비 (Tools, materials and
+equipment for handicrafts with other materials)
+여러 매체에서 예술과 공예품을 만드는데 사용되는 보조기기
+유리 공예, 종이접기, 바구니 제작이 포함됨
+3 30 24 사냥 및 낚시용 보조기기 (Assistive products for hunting and fishing)
+3 30 24 03 사냥용 보조기기 (Assistive products for hunting)
+야생 동물을 추적하거나 잡거나 찾도록 도와주는 보조기기
+3 30 24 06 낚시용 보조기기 (Assistive products for fishing)
+조개류를 포함한 모든 종의 물고기를 잡도록 도와주는 보조기기
+3 30 27 캠핑 및 이동주택 야영용 보조기기 (Assistive products for camping and
+caravanning)
+실외에서 캠핑을 하거나 이동주택 또는 기타 여가용 차량으로 여행할 수 있도록 해주
+는 보조기기
+텐트, 여가용 차량이 포함됨
+3 30 30 흡연용 보조기기 (Assistive products for smoking)
+담배, 시가, 파이프 담배를 피울 수 있도록 해주는 보조기기
+수정된 재떨이, 라이터, 담배고리가 포함됨
+3 30 34 동물 관리용 보조기기 (Assistive products for care of animals)
+애완동물 및 가축의 수유, 목욕, 기타 관리를 가능하게 해주는 보조기기
+
+다른 법령에 의한 보조기기로서 보건복지부장관이 정한 품목
+1. 고령친화제품 : 「고령친화산업 진흥법」 제2조제1항 "노인이 주로 사용
+하거나 착용하는 용구ㆍ용품 또는 의료기기"로서 「고령친화산업 진흥
+법 시행령」 제7조에서 규정한 고령친화우수제품 지정 대상
+2. 보조기기 : 「국민건강보험법 시행규칙」 별표 7. 장애인보조기기에 대
+한 보험급여기준에서 규정하는 보조기기
+3. 보조공학기기 : 「장애인고용촉진 및 직업재활법」 제43조제1항에 따라 
+설립된 한국장애인고용공단에서 규정하는 보조기기
+4. 보철구 : 「국가유공자 등 예우 및 지원에 관한 법률」 제43조2에 따라 
+지급되는 보조기기
+5. 복지용구 : 「노인장기요양보험법 시행규칙」 제19조제1항 및 「복지용
+구 품목별 제품목록 및 급여비용 등에 관한 고시」에서 규정하는 보조
+기기
+6. 재활보조기구 : 「산업재해보상보험 요양급여 산정기준」제2조 제3항 
+및 「국민건강보험법 시행규칙」 별표 7. 장애인보조기기에 대한 보험
+급여기준에서 규정하는 보조기기 
+7. 정보통신보조기기 : 「국가정보화 기본법」에서 "정보격차의 해소를 위
+한 지원"을 하도록 규정하여 ‘과학기술정보통신부’ 산하로 설립된 ‘한국
+정보화진흥원’에서 규정하는 보조기기

@@ -227,13 +227,25 @@ const saveIppaActivityScore = async (
     return;
   }
 
-  const existingActivities =
-    (consultation?.ippa_activities as any)?.activities || [];
+  type IppaActivity = {
+    icfCode: string;
+    importance?: number;
+    preDifficulty?: number;
+    collectedAt?: string;
+  };
+
+  type IppaActivitiesData = {
+    activities: IppaActivity[];
+    collectedAt?: string;
+  };
+
+  const ippaActivitiesData = consultation?.ippa_activities as IppaActivitiesData | null;
+  const existingActivities: IppaActivity[] = ippaActivitiesData?.activities || [];
   const existingActivityIndex = existingActivities.findIndex(
-    (a: any) => a.icfCode === icfCode
+    (a) => a.icfCode === icfCode
   );
 
-  let updatedActivity: any;
+  let updatedActivity: IppaActivity;
   if (existingActivityIndex >= 0) {
     // 기존 활동 업데이트
     updatedActivity = {
@@ -254,7 +266,7 @@ const saveIppaActivityScore = async (
     existingActivities.push(updatedActivity);
   }
 
-  const ippaActivitiesData = {
+  const updatedIppaActivitiesData: IppaActivitiesData = {
     activities: existingActivities,
     collectedAt: new Date().toISOString(),
   };
@@ -262,7 +274,7 @@ const saveIppaActivityScore = async (
   const { error: updateError } = await supabaseClient
     .from("consultations")
     .update({
-      ippa_activities: ippaActivitiesData,
+      ippa_activities: updatedIppaActivitiesData,
     })
     .eq("id", consultationId);
 
@@ -412,7 +424,28 @@ export async function POST(request: Request) {
     const history = (body.history ?? []).slice(-6);
     
     // 기존 평가 데이터 조회 (평가 컨텍스트 구성용)
-    let evaluationContext: any = undefined;
+    type IppaActivity = {
+      icfCode: string;
+      importance?: number;
+      preDifficulty?: number;
+      collectedAt?: string;
+    };
+
+    type IppaActivitiesData = {
+      activities: IppaActivity[];
+      collectedAt?: string;
+    };
+
+    let evaluationContext: {
+      extractedIcfCodes?: string[];
+      evaluatedActivities: Array<{
+        icfCode: string;
+        importance?: number;
+        preDifficulty?: number;
+      }>;
+      currentActivityIndex?: number;
+    } | undefined = undefined;
+    
     if (body.consultationId) {
       const { data: consultation } = await supabaseUser
         .from("consultations")
@@ -421,8 +454,8 @@ export async function POST(request: Request) {
         .single();
       
       if (consultation?.ippa_activities) {
-        const ippaActivities = consultation.ippa_activities as any;
-        const evaluatedActivities = (ippaActivities.activities || []).map((a: any) => ({
+        const ippaActivities = consultation.ippa_activities as IppaActivitiesData;
+        const evaluatedActivities = (ippaActivities.activities || []).map((a) => ({
           icfCode: a.icfCode,
           importance: a.importance,
           preDifficulty: a.preDifficulty,
@@ -461,7 +494,7 @@ export async function POST(request: Request) {
 
         try {
           let streamedAssistantReply = "";
-          let parsedAnalysis: any = null;
+          let parsedAnalysis: ReturnType<typeof parseAnalysis> | null = null;
 
           const result = await streamText({
             model: google("gemini-flash-lite-latest"),
@@ -565,7 +598,7 @@ export async function POST(request: Request) {
           if (evaluationContext && parsedAnalysis?.icf_analysis?.d) {
             evaluationContext.extractedIcfCodes = parsedAnalysis.icf_analysis.d;
             const evaluatedCodes = new Set(
-              evaluationContext.evaluatedActivities.map((a: any) => a.icfCode)
+              evaluationContext.evaluatedActivities.map((a) => a.icfCode)
             );
             const pendingCodes = evaluationContext.extractedIcfCodes.filter(
               (code: string) => !evaluatedCodes.has(code)
@@ -618,15 +651,34 @@ export async function POST(request: Request) {
           sendEvent("done", { consultationId });
           controller.close();
         } catch (error) {
+          console.error("[Chat API] Stream error:", error);
+          
+          // 에러 메시지를 안전하게 직렬화
+          let errorMessage = "Failed to process request. 잠시 후 다시 시도해 주세요.";
+          if (error instanceof Error) {
+            errorMessage = error.message;
+          } else if (typeof error === "object" && error !== null) {
+            try {
+              errorMessage = JSON.stringify(error);
+            } catch {
+              errorMessage = String(error);
+            }
+          } else {
+            errorMessage = String(error);
+          }
+          
           logEvent({
             category: "consultation",
-            action: "chat_api_error",
-            payload: { error },
+            action: "chat_stream_error",
+            payload: { 
+              error: errorMessage,
+              errorType: error instanceof Error ? error.constructor.name : typeof error,
+            },
             level: "error",
           });
 
           sendEvent("error", {
-            message: "Failed to process request. 잠시 후 다시 시도해 주세요.",
+            message: errorMessage,
           });
           controller.close();
         }
@@ -642,15 +694,45 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("[Chat API] Error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    // 에러 메시지를 안전하게 직렬화
+    let errorMessage: string;
+    let errorDetails: {
+      name?: string;
+      message?: string;
+      stack?: string;
+      code?: string;
+      details?: string;
+      hint?: string;
+      raw?: string;
+    } | null = null;
+    
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      };
+    } else if (typeof error === "object" && error !== null) {
+      // 객체인 경우 JSON으로 직렬화 시도
+      try {
+        errorMessage = JSON.stringify(error);
+        errorDetails = error;
+      } catch {
+        errorMessage = String(error);
+        errorDetails = { raw: String(error) };
+      }
+    } else {
+      errorMessage = String(error);
+    }
     
     logEvent({
       category: "consultation",
       action: "chat_api_error",
       payload: { 
         error: errorMessage,
-        stack: errorStack,
+        details: errorDetails,
         errorType: error instanceof Error ? error.constructor.name : typeof error,
       },
       level: "error",
@@ -662,7 +744,7 @@ export async function POST(request: Request) {
         { 
           error: "Failed to process request. 잠시 후 다시 시도해 주세요.",
           details: errorMessage,
-          stack: errorStack,
+          errorDetails: errorDetails,
         },
         { status: 500 }
       );

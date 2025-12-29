@@ -60,10 +60,16 @@ export function createSupabaseJWT(
     role?: string
     expiresIn?: number
     name?: string | undefined
+    userRole?: string // 실제 사용자 역할 (app_metadata에 저장)
   }
 ): string {
   const now = Math.floor(Date.now() / 1000)
   const expiresIn = options?.expiresIn || 3600 // 기본 1시간
+
+  // Supabase JWT의 role 필드는 PostgreSQL role과 매핑되므로 항상 "authenticated"로 설정
+  // 실제 사용자 역할 정보는 app_metadata.role에 저장
+  const jwtRole = "authenticated"
+  const userRole = options?.userRole || options?.role || "user" // 실제 사용자 역할
 
   const payload: SupabaseJWTPayload = {
     aud: "authenticated",
@@ -72,11 +78,11 @@ export function createSupabaseJWT(
     iss: supabaseUrl as string,
     sub: clerkUserId, // Supabase user ID 대신 clerk_id 사용
     email: options?.email,
-    role: options?.role || "authenticated",
+    role: jwtRole, // 항상 "authenticated"로 설정 (PostgreSQL role)
     clerk_id: clerkUserId, // 커스텀 클레임 - RLS 정책에서 사용
     app_metadata: {
       clerk_id: clerkUserId,
-      role: options?.role || "authenticated",
+      role: userRole, // 실제 사용자 역할 정보 저장
     },
     user_metadata: {
       email: options?.email,

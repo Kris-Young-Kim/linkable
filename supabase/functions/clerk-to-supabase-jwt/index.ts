@@ -26,13 +26,18 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // 환경 변수
+// Supabase는 자동으로 SUPABASE_URL과 SUPABASE_ANON_KEY를 제공합니다
+// 하지만 명시적으로 설정할 수도 있습니다
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
-const SUPABASE_JWT_SECRET = Deno.env.get("SUPABASE_JWT_SECRET") || "";
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || "";
+const SUPABASE_JWT_SECRET = Deno.env.get("SUPABASE_JWT_SECRET") || Deno.env.get("JWT_SECRET") || "";
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("ANON_KEY") || "";
 
 // 환경 변수 검증
 if (!SUPABASE_URL || !SUPABASE_JWT_SECRET || !SUPABASE_ANON_KEY) {
   console.error("[Edge Function] Missing required environment variables");
+  console.error(`SUPABASE_URL: ${SUPABASE_URL ? "✓" : "✗"}`);
+  console.error(`SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET ? "✓" : "✗"}`);
+  console.error(`SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY ? "✓" : "✗"}`);
   Deno.exit(1);
 }
 
@@ -77,6 +82,11 @@ async function createSupabaseJWT(
   const now = Math.floor(Date.now() / 1000);
   const expiresIn = options?.expiresIn || 3600; // 기본 1시간
 
+  // Supabase JWT의 role 필드는 PostgreSQL role과 매핑되므로 항상 "authenticated"로 설정
+  // 실제 사용자 역할 정보는 app_metadata.role에 저장
+  const jwtRole = "authenticated";
+  const userRole = options?.role || "user"; // 실제 사용자 역할
+
   const payload: SupabaseJWTPayload = {
     aud: "authenticated",
     exp: now + expiresIn,
@@ -84,11 +94,11 @@ async function createSupabaseJWT(
     iss: SUPABASE_URL,
     sub: clerkUserId,
     email: options?.email,
-    role: options?.role || "authenticated",
+    role: jwtRole, // 항상 "authenticated"로 설정 (PostgreSQL role)
     clerk_id: clerkUserId,
     app_metadata: {
       clerk_id: clerkUserId,
-      role: options?.role || "authenticated",
+      role: userRole, // 실제 사용자 역할 정보 저장
     },
     user_metadata: {
       email: options?.email,
@@ -176,10 +186,13 @@ Deno.serve(async (req: Request) => {
     }
 
     // JWT 생성
+    // Supabase JWT의 role은 항상 "authenticated"로 설정되며,
+    // 실제 사용자 역할 정보는 app_metadata.role에 저장됩니다.
     const expiresIn = 3600; // 1시간
+    const userRole = body.role || "user"; // 실제 사용자 역할 정보
     const token = await createSupabaseJWT(body.clerkUserId, {
       email: body.email,
-      role: body.role || "user",
+      role: userRole, // 이 값은 app_metadata.role에 저장됨 (JWT payload의 role은 항상 "authenticated")
       name: body.name,
       expiresIn,
     });
