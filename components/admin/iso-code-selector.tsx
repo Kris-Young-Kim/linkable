@@ -30,6 +30,7 @@ type IsoCodeSelectorProps = {
   onValueChange: (value: string) => void
   suggestions?: Array<{ iso: string; label: string; description: string }>
   className?: string
+  placeholder?: string
 }
 
 export function IsoCodeSelector({
@@ -37,6 +38,7 @@ export function IsoCodeSelector({
   onValueChange,
   suggestions = [],
   className,
+  placeholder = "ISO 코드 선택...",
 }: IsoCodeSelectorProps) {
   const [open, setOpen] = useState(false)
   const [isoCodes, setIsoCodes] = useState<IsoCode[]>([])
@@ -82,7 +84,7 @@ export function IsoCodeSelector({
               <span className="text-muted-foreground text-sm">- {selectedIso.label}</span>
             </div>
           ) : (
-            "ISO 코드 선택..."
+            placeholder
           )}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
