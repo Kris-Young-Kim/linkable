@@ -256,7 +256,7 @@ async function main() {
                 allProducts.push(
                   ...result.products.map((p) => ({
                     ...p,
-                    iso_code: options.isoCode || "00 00",
+                    iso_code: options.isoCode || "N999999",
                   }))
                 )
               } else if (result.products.length === 0) {

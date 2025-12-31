@@ -103,9 +103,11 @@ type RecommendationRow = {
     name: string;
     description: string | null;
     image_url: string | null;
-    purchase_link: string | null;
-    price: number | null;
     iso_code: string | null;
+    price: number | null;
+    purchase_link: string | null;
+    rating: number | null;
+    review_count: number | null;
   } | null;
 };
 
@@ -259,7 +261,9 @@ export default async function ConsultationDetailPage({
           image_url,
           purchase_link,
           price,
-          iso_code
+          iso_code,
+          rating,
+          review_count
         )
       `
       )
@@ -513,6 +517,8 @@ export default async function ConsultationDetailPage({
                           isoCode={rec.product.iso_code ?? undefined}
                           price={rec.product.price}
                           purchaseLink={rec.product.purchase_link}
+                          rating={rec.product.rating ?? undefined}
+                          reviewCount={rec.product.review_count ?? undefined}
                         />
                       ) : null
                     )}

@@ -15,6 +15,10 @@ import { applyContextWeights, type UserContext } from "./context-weights";
 import type { IsoMatch } from "./iso-mapping";
 import { logEvent } from "@/lib/logging";
 import {
+  getPrecomputedMapping,
+  savePrecomputedMapping,
+} from "@/lib/matching/precomputed-mappings";
+import {
   loadActiveWeightConfig,
   selectABTestVariant,
   convertToHybridMatchConfig,
@@ -114,6 +118,40 @@ export async function hybridMatch(
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
   try {
+    // 0단계: 사전 계산된 매핑 조회 (캐시 우선 전략)
+    const precomputedMatches = await getPrecomputedMapping(context.icfCodes);
+    if (precomputedMatches && precomputedMatches.length > 0) {
+      const elapsedTime = Date.now() - startTime;
+      logEvent({
+        category: "matching",
+        action: "hybrid_match_cache_hit",
+        payload: {
+          icfCodes: context.icfCodes,
+          matchCount: precomputedMatches.length,
+          elapsedTime,
+          weightConfig: weightConfigName,
+        },
+      });
+
+      // 피드백 보정 적용 (학습 기반 점수 조정)
+      const correctedMatches = await applyFeedbackCorrectionFromScorer(
+        precomputedMatches,
+        context.icfCodes
+      );
+
+      return correctedMatches;
+    }
+
+    // 사전 계산된 매핑이 없으면 실시간 계산 진행
+    logEvent({
+      category: "matching",
+      action: "hybrid_match_cache_miss",
+      payload: {
+        icfCodes: context.icfCodes,
+        weightConfig: weightConfigName,
+      },
+    });
+
     // 1단계: 규칙 기반 매칭 (빠른 필터링)
     const ruleMatches = getIsoMatches(context.icfCodes);
     logEvent({
@@ -254,6 +292,31 @@ export async function hybridMatch(
       // 로깅 실패는 조용히 무시 (메인 플로우에 영향 없음)
       console.error("[hybrid-matcher] Failed to log performance:", err);
     });
+
+    // 사전 계산된 매핑 저장 (점진적 구축)
+    // 조건: 결과가 있고, 신뢰도가 높으며, 실행 시간이 충분히 걸린 경우
+    if (
+      tagged.length > 0 &&
+      tagged[0].score >= 0.7 && // 상위 매칭 점수가 0.7 이상
+      duration >= 50 // 50ms 이상 걸린 경우 (캐싱 가치가 있는 경우)
+    ) {
+      // 비동기로 저장 (메인 플로우에 영향 없음)
+      savePrecomputedMapping(
+        context.icfCodes,
+        tagged.slice(0, 10), // 상위 10개만 저장
+        finalConfig.useSemantic && finalConfig.useKnowledgeGraph
+          ? "hybrid"
+          : finalConfig.useSemantic
+          ? "semantic"
+          : finalConfig.useKnowledgeGraph
+          ? "knowledge_graph"
+          : "rule",
+        tagged[0].score // 신뢰도는 최고 점수 사용
+      ).catch((err) => {
+        // 저장 실패는 조용히 무시
+        console.error("[hybrid-matcher] Failed to save precomputed mapping:", err);
+      });
+    }
     
     logEvent({
       category: "matching",

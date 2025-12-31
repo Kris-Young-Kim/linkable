@@ -90,13 +90,59 @@ export function AdminProductManager({
       const response = await fetch("/api/admin/products");
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("[Admin Products] API error:", {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
+        let errorData: any = {};
+        const contentType = response.headers.get("content-type");
+        const status = response.status;
+        const statusText = response.statusText;
+        
+        console.error("[Admin Products] API error - Response details:", {
+          status,
+          statusText,
+          contentType,
+          headers: Object.fromEntries(response.headers.entries()),
         });
-        setErrorMessage(`상품 목록을 불러오지 못했습니다 (${response.status})`);
+        
+        try {
+          // 응답 본문을 텍스트로 먼저 읽기
+          const responseText = await response.text();
+          console.error("[Admin Products] API error - Response body:", responseText);
+          
+          if (contentType && contentType.includes("application/json")) {
+            try {
+              errorData = JSON.parse(responseText);
+            } catch (jsonError) {
+              console.error("[Admin Products] Failed to parse JSON:", jsonError);
+              errorData = { message: responseText || statusText };
+            }
+          } else {
+            errorData = { message: responseText || statusText };
+          }
+        } catch (parseError) {
+          console.error("[Admin Products] Failed to read error response:", parseError);
+          errorData = { 
+            message: `HTTP ${status}: ${statusText}` 
+          };
+        }
+        
+        console.error("[Admin Products] API error - Final error data:", {
+          status,
+          statusText,
+          errorData,
+        });
+        
+        // 상태 코드별 에러 메시지
+        let errorMessage = `상품 목록을 불러오지 못했습니다 (${status})`;
+        if (status === 401) {
+          errorMessage = "인증이 필요합니다. 로그인해주세요.";
+        } else if (status === 403) {
+          errorMessage = "관리자 권한이 필요합니다.";
+        } else if (errorData.error) {
+          errorMessage = errorData.error;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+        
+        setErrorMessage(errorMessage);
         return;
       }
       
@@ -109,7 +155,8 @@ export function AdminProductManager({
       }
     } catch (error) {
       console.error("[Admin Products] 제품 목록 새로고침 실패:", error);
-      setErrorMessage("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+      const errorMsg = error instanceof Error ? error.message : "네트워크 오류가 발생했습니다.";
+      setErrorMessage(`네트워크 오류: ${errorMsg}`);
     }
   }, []);
 
@@ -160,12 +207,14 @@ export function AdminProductManager({
       price: number | null;
       purchase_link: string | null;
       image_url: string | null;
-      iso_code: string;
+      iso_code: string | null;
+      inferredIsoCode?: string | null; // 추론된 ISO 코드
       description?: string | null;
       manufacturer?: string | null;
       category?: string | null;
     }>
   >([]);
+  const [isInferringIso, setIsInferringIso] = useState(false);
   const [selectedPreviewProducts, setSelectedPreviewProducts] = useState<
     Set<string>
   >(new Set());
@@ -181,6 +230,71 @@ export function AdminProductManager({
   const [sortBy, setSortBy] = useState<SortOption>("updated-desc");
   const [pageSize, setPageSize] = useState<number>(20);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
+  // 크롤링 로그 추가 함수 (먼저 정의)
+  const addCrawlLog = useCallback((message: string, isError = false) => {
+    const timestamp = new Date().toLocaleTimeString("ko-KR");
+    setCrawlLogs((prev) => [
+      ...prev,
+      `[${timestamp}] ${isError ? "❌" : "✓"} ${message}`,
+    ]);
+  }, []);
+
+  // 크롤링된 상품들의 ISO 코드 일괄 추론
+  const inferIsoCodesForCrawledProducts = useCallback(
+    async (products: typeof crawlPreview) => {
+      setIsInferringIso(true);
+      addCrawlLog(`ISO 코드 추론 시작 (${products.length}개 상품)...`);
+
+      try {
+        const updatedProducts = await Promise.all(
+          products.map(async (product) => {
+            if (!product.name || product.name.length < 2) {
+              return { ...product, inferredIsoCode: null };
+            }
+
+            try {
+              const response = await fetch("/api/admin/iso-suggest", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ productName: product.name }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                const topSuggestion = data.suggestions?.[0];
+                const inferredIso = topSuggestion?.iso || null;
+                
+                if (inferredIso) {
+                  console.log(`[ISO Inference] ${product.name} -> ${inferredIso}`);
+                }
+                
+                return {
+                  ...product,
+                  inferredIsoCode: inferredIso,
+                  iso_code: inferredIso || product.iso_code || null,
+                };
+              }
+            } catch (error) {
+              console.error(`[ISO Inference] Error for ${product.name}:`, error);
+            }
+
+            return { ...product, inferredIsoCode: null };
+          })
+        );
+
+        setCrawlPreview(updatedProducts);
+        const inferredCount = updatedProducts.filter((p) => p.inferredIsoCode).length;
+        addCrawlLog(`ISO 코드 추론 완료: ${inferredCount}/${products.length}개 상품에 ISO 코드 추론됨`);
+      } catch (error) {
+        console.error("[ISO Inference] Batch inference error:", error);
+        addCrawlLog("ISO 코드 추론 중 오류 발생", true);
+      } finally {
+        setIsInferringIso(false);
+      }
+    },
+    [addCrawlLog]
+  );
 
   // ISO 코드 자동 추천 (상품명 입력 시)
   const fetchIsoSuggestions = useCallback(
@@ -320,12 +434,19 @@ export function AdminProductManager({
       const controller = new AbortController();
       crawlAbortRef.current = controller;
 
+      // max 값 검증 및 변환
+      const maxValue = crawlValues.max 
+        ? Math.max(1, Math.min(200, parseInt(crawlValues.max) || 30))
+        : 30;
+      
+      console.log(`[Admin Products] 크롤링 요청: URL=${normalizedUrl}, max=${maxValue}`);
+      
       const response = await fetch("/api/admin/products/crawl-playwright", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           url: normalizedUrl,
-          max: crawlValues.max ? parseInt(crawlValues.max) : 30,
+          max: maxValue,
         }),
         signal: controller.signal,
       });
@@ -337,15 +458,33 @@ export function AdminProductManager({
 
       const result = await response.json();
 
+      console.log(`[Admin Products] 크롤링 응답: ${result.products?.length || 0}개 제품 발견 (요청한 max: ${maxValue})`);
+
       if (result.products && result.products.length > 0) {
-        addCrawlLog(`${result.products.length}개 제품 발견`);
-        setCrawlPreview(result.products);
+        addCrawlLog(`${result.products.length}개 제품 발견 (요청: ${maxValue}개)`);
+        
+        // 크롤링된 상품들을 미리보기에 설정 (iso_code는 null로 초기화)
+        const productsWithNullIso = result.products.map((p: any) => ({
+          ...p,
+          iso_code: null,
+          inferredIsoCode: null,
+        }));
+        setCrawlPreview(productsWithNullIso);
+        
         setCrawlResult(
-          `${result.products.length}개 제품을 찾았습니다. 아래에서 선택하여 등록하세요.`
+          `${result.products.length}개 제품을 찾았습니다. ISO 코드를 추론 중...`
         );
+        
         // 모든 상품 자동 선택
         setSelectedPreviewProducts(
           new Set(result.products.map((p: { id: string }) => p.id))
+        );
+        
+        // ISO 코드 추론 시작
+        await inferIsoCodesForCrawledProducts(productsWithNullIso);
+        
+        setCrawlResult(
+          `${result.products.length}개 제품을 찾았습니다. 아래에서 선택하여 등록하세요. (요청한 최대 개수: ${maxValue}개)`
         );
       } else {
         // 디버깅 정보가 있으면 표시
@@ -380,15 +519,6 @@ export function AdminProductManager({
     }
   };
 
-  // 크롤링 로그 추가
-  const addCrawlLog = (message: string, isError = false) => {
-    const timestamp = new Date().toLocaleTimeString("ko-KR");
-    setCrawlLogs((prev) => [
-      ...prev,
-      `[${timestamp}] ${isError ? "❌" : "✓"} ${message}`,
-    ]);
-  };
-
   // 선택한 상품 등록
   const handleRegisterSelected = async () => {
     if (selectedPreviewProducts.size === 0) {
@@ -405,10 +535,10 @@ export function AdminProductManager({
         selectedPreviewProducts.has(p.id)
       );
 
-      // ISO 코드는 등록 시 포함하지 않음 (추후 자동 매칭 로직에서 처리)
+      // 추론/수정된 ISO 코드 포함
       const productsToRegister = selectedProducts.map((p) => ({
         name: p.name,
-        iso_code: null, // ISO 코드는 추후 자동 매칭 로직에서 처리
+        iso_code: p.iso_code || null, // 추론/수정된 ISO 코드 사용
         price: p.price,
         purchase_link: p.purchase_link,
         image_url: p.image_url,
@@ -635,6 +765,7 @@ export function AdminProductManager({
     console.log(`[Admin Products] Product deleted successfully: ${id}`);
   };
 
+
   const productCountByIso = useMemo(() => {
     return products.reduce<Record<string, number>>((acc, item) => {
       acc[item.iso_code] = (acc[item.iso_code] ?? 0) + 1;
@@ -676,7 +807,11 @@ export function AdminProductManager({
     }
 
     // ISO 코드 필터
-    if (selectedIsoCode !== "all") {
+    if (selectedIsoCode === "no-iso") {
+      filtered = filtered.filter(
+        (product) => !product.iso_code || product.iso_code === "N999999" || product.iso_code.trim() === ""
+      );
+    } else if (selectedIsoCode !== "all") {
       filtered = filtered.filter(
         (product) => product.iso_code === selectedIsoCode
       );
@@ -735,6 +870,133 @@ export function AdminProductManager({
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, selectedIsoCode, selectedCategory, selectedStatus, sortBy]);
+
+  // ISO 코드가 없는 상품들에 대해 일괄 ISO 코드 추론
+  const handleBatchInferIsoCodes = useCallback(async () => {
+    const productsWithoutIso = filteredAndSortedProducts.filter(
+      (p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === ""
+    );
+
+    if (productsWithoutIso.length === 0) {
+      setErrorMessage("ISO 코드가 없는 상품이 없습니다.");
+      setTimeout(() => setErrorMessage(null), 3000);
+      return;
+    }
+
+    setIsInferringIso(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const product of productsWithoutIso) {
+        try {
+          const response = await fetch("/api/admin/iso-suggest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productName: product.name }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const topSuggestion = data.suggestions?.[0];
+            const inferredIso = topSuggestion?.iso || null;
+
+            if (inferredIso) {
+              await handleUpdate(product.id, { iso_code: inferredIso });
+              successCount++;
+            } else {
+              failCount++;
+            }
+          } else {
+            failCount++;
+          }
+        } catch (error) {
+          console.error(`[ISO Inference] Error for ${product.name}:`, error);
+          failCount++;
+        }
+      }
+
+      setSuccessMessage(
+        `ISO 코드 추론 완료: ${successCount}개 성공, ${failCount}개 실패`
+      );
+      setTimeout(() => setSuccessMessage(null), 5000);
+
+      // 상품 목록 새로고침
+      await fetchProducts();
+    } catch (error) {
+      console.error("[ISO Inference] Batch inference error:", error);
+      setErrorMessage("일괄 ISO 코드 추론 중 오류가 발생했습니다.");
+    } finally {
+      setIsInferringIso(false);
+    }
+  }, [filteredAndSortedProducts, handleUpdate, fetchProducts]);
+
+  // 선택한 상품들에 대해 ISO 코드 추론
+  const handleInferIsoForSelected = useCallback(async () => {
+    if (selectedProducts.size === 0) {
+      setErrorMessage("ISO 코드를 추론할 상품을 선택해주세요.");
+      setTimeout(() => setErrorMessage(null), 3000);
+      return;
+    }
+
+    const selectedProductsList = products.filter((p) =>
+      selectedProducts.has(p.id)
+    );
+
+    setIsInferringIso(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const product of selectedProductsList) {
+        try {
+          const response = await fetch("/api/admin/iso-suggest", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productName: product.name }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            const topSuggestion = data.suggestions?.[0];
+            const inferredIso = topSuggestion?.iso || null;
+
+            if (inferredIso) {
+              await handleUpdate(product.id, { iso_code: inferredIso });
+              successCount++;
+            } else {
+              failCount++;
+            }
+          } else {
+            failCount++;
+          }
+        } catch (error) {
+          console.error(`[ISO Inference] Error for ${product.name}:`, error);
+          failCount++;
+        }
+      }
+
+      setSuccessMessage(
+        `ISO 코드 추론 완료: ${successCount}개 성공, ${failCount}개 실패`
+      );
+      setTimeout(() => setSuccessMessage(null), 5000);
+
+      // 상품 목록 새로고침
+      await fetchProducts();
+      setSelectedProducts(new Set());
+    } catch (error) {
+      console.error("[ISO Inference] Batch inference error:", error);
+      setErrorMessage("일괄 ISO 코드 추론 중 오류가 발생했습니다.");
+    } finally {
+      setIsInferringIso(false);
+    }
+  }, [selectedProducts, products, handleUpdate, fetchProducts]);
 
   // 전체 페이지 수 계산
   const totalPages = useMemo(() => {
@@ -1080,15 +1342,23 @@ export function AdminProductManager({
                       id="crawl-max"
                       type="number"
                       min="1"
-                      max="50"
+                      max="200"
                       value={crawlValues.max}
-                      onChange={(e) =>
-                        setCrawlValues((prev) => ({
-                          ...prev,
-                          max: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // 숫자만 허용하고, 1 이상의 값만 허용
+                        if (value === "" || (parseInt(value) >= 1 && parseInt(value) <= 200)) {
+                          setCrawlValues((prev) => ({
+                            ...prev,
+                            max: value,
+                          }));
+                        }
+                      }}
+                      placeholder="30"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      입력된 값: {crawlValues.max || "30"}개
+                    </p>
                   </div>
               </div>
               <Button
@@ -1165,6 +1435,11 @@ export function AdminProductManager({
                       <div>
                         <CardTitle className="text-lg">
                           크롤링 결과 미리보기
+                          {isInferringIso && (
+                            <span className="ml-2 text-sm text-muted-foreground">
+                              (ISO 코드 추론 중...)
+                            </span>
+                          )}
                         </CardTitle>
                         <CardDescription>
                           {selectedPreviewProducts.size}개 선택됨 / 전체{" "}
@@ -1270,9 +1545,30 @@ export function AdminProductManager({
                                 {product.name}
                               </TableCell>
                               <TableCell>
-                                <Badge variant="secondary">
-                                  {product.iso_code}
-                                </Badge>
+                                <div className="flex items-center gap-2">
+                                  <IsoCodeSelector
+                                    value={product.iso_code || ""}
+                                    onValueChange={(newIsoCode) => {
+                                      setCrawlPreview((prev) =>
+                                        prev.map((p) =>
+                                          p.id === product.id
+                                            ? { ...p, iso_code: newIsoCode || null }
+                                            : p
+                                        )
+                                      );
+                                    }}
+                                    placeholder="ISO 코드 선택"
+                                  />
+                                  {product.inferredIsoCode && (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                      title="자동 추론된 ISO 코드"
+                                    >
+                                      추론됨
+                                    </Badge>
+                                  )}
+                                </div>
                               </TableCell>
                               <TableCell>
                                 {product.price
@@ -1366,6 +1662,9 @@ export function AdminProductManager({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">전체 ISO 코드</SelectItem>
+                    <SelectItem value="no-iso">
+                      ISO 코드 없음 ({products.filter((p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === "").length}개)
+                    </SelectItem>
                     {uniqueIsoCodes.map((iso) => (
                       <SelectItem key={iso} value={iso}>
                         ISO {iso} ({productCountByIso[iso]}개)
@@ -1464,12 +1763,36 @@ export function AdminProductManager({
                 </div>
               </div>
 
-              {/* 필터 초기화 버튼 */}
-              {(searchQuery ||
-                selectedIsoCode !== "all" ||
-                selectedCategory !== "all" ||
-                selectedStatus !== "all") && (
-                <div className="flex justify-end">
+              {/* 필터 초기화 버튼 및 ISO 코드 일괄 추론 버튼 */}
+              <div className="flex justify-between items-center">
+                {filteredAndSortedProducts.some(
+                  (p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === ""
+                ) && (
+                  <Button
+                    onClick={handleBatchInferIsoCodes}
+                    disabled={isInferringIso}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {isInferringIso ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        추론 중...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        ISO 코드 없음 일괄 추론 ({filteredAndSortedProducts.filter(
+                          (p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === ""
+                        ).length}개)
+                      </>
+                    )}
+                  </Button>
+                )}
+                {(searchQuery ||
+                  selectedIsoCode !== "all" ||
+                  selectedCategory !== "all" ||
+                  selectedStatus !== "all") && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -1483,8 +1806,8 @@ export function AdminProductManager({
                     <X className="mr-2 size-4" />
                     필터 초기화
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
             </CardContent>
           </Card>
 
@@ -1497,6 +1820,24 @@ export function AdminProductManager({
                     {selectedProducts.size}개 선택됨
                   </span>
                   <div className="flex gap-2 ml-auto">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleInferIsoForSelected}
+                      disabled={isInferringIso}
+                    >
+                      {isInferringIso ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          추론 중...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          선택한 상품 ISO 코드 추론 ({selectedProducts.size}개)
+                        </>
+                      )}
+                    </Button>
                     <Button
                       variant="destructive"
                       size="sm"

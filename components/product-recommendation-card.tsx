@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, ShoppingCart, Package, Sparkles } from "lucide-react";
+import { ExternalLink, ShoppingCart, Package, Sparkles, Star } from "lucide-react";
 import { useLanguage } from "@/components/language-provider";
 import { useAuth } from "@clerk/nextjs";
 import { trackEvent } from "@/lib/analytics";
@@ -20,6 +20,7 @@ import type { CtaVariant } from "@/lib/cta-ab-testing";
 import { useToast } from "@/hooks/use-toast";
 import { showIncentiveToast } from "@/components/incentive-notification";
 import { InlineSpinner } from "@/components/ui/loading-states";
+import { RecommendationFeedbackButton } from "@/components/recommendation-feedback-button";
 
 type ClickSource = "primary" | "secondary";
 
@@ -38,6 +39,8 @@ interface ProductRecommendationCardProps {
   recommendationId?: string | null;
   consultationId?: string | null;
   adminActions?: ReactNode;
+  rating?: number | null;
+  reviewCount?: number | null;
 }
 
 export function ProductRecommendationCard({
@@ -55,6 +58,8 @@ export function ProductRecommendationCard({
   recommendationId,
   consultationId,
   adminActions,
+  rating,
+  reviewCount,
 }: ProductRecommendationCardProps) {
   const { t } = useLanguage();
   const { userId } = useAuth();
@@ -502,6 +507,35 @@ export function ProductRecommendationCard({
       )}
 
       <CardContent className="pt-6 space-y-4">
+        {/* 가격 및 리뷰 정보 */}
+        <div className="flex items-center justify-between gap-4 pb-2 border-b">
+          {price && (
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-bold text-foreground">
+                {typeof price === "number" 
+                  ? price.toLocaleString("ko-KR") 
+                  : price}
+              </span>
+              <span className="text-sm text-muted-foreground">원</span>
+            </div>
+          )}
+          {(rating !== null && rating !== undefined) || (reviewCount !== null && reviewCount !== undefined) ? (
+            <div className="flex items-center gap-2">
+              {rating !== null && rating !== undefined && (
+                <div className="flex items-center gap-1">
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-semibold">{rating.toFixed(1)}</span>
+                </div>
+              )}
+              {reviewCount !== null && reviewCount !== undefined && reviewCount > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  ({reviewCount.toLocaleString("ko-KR")})
+                </span>
+              )}
+            </div>
+          ) : null}
+        </div>
+
         <div className="flex items-center justify-between gap-2">
           {matchPercentage && (
             <Badge variant="outline" className="text-sm">
@@ -565,6 +599,14 @@ export function ProductRecommendationCard({
           }
         >
           {renderCtaButtons(ctaVariant)}
+          {recommendationId && (
+            <div className="flex justify-end mt-2">
+              <RecommendationFeedbackButton
+                recommendationId={recommendationId}
+                productName={productName}
+              />
+            </div>
+          )}
         </CardFooter>
       )}
     </Card>

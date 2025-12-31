@@ -57,9 +57,9 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 추론 실패
+    // 추론 실패 (ISO 9999 표준에 없는 비표준 코드 대신 N999999 사용)
     return NextResponse.json({
-      isoCode: "00 00",
+      isoCode: "N999999",
       method: "none",
       confidence: 0,
       message: "ISO 코드를 추론할 수 없습니다.",

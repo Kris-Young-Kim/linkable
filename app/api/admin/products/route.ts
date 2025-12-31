@@ -33,6 +33,8 @@ export async function GET() {
       image_url,
       manufacturer,
       category,
+      rating,
+      review_count,
       is_active,
       updated_at
     `,
@@ -88,6 +90,8 @@ export async function POST(request: Request) {
       manufacturer?: string | null
       description?: string | null
       category?: string | null
+      rating?: number | null
+      review_count?: number | null
     }>
   }
 
@@ -140,6 +144,8 @@ export async function POST(request: Request) {
               image_url: product.image_url ?? null,
               manufacturer: product.manufacturer ?? null,
               category: product.category ?? null,
+              rating: product.rating ?? null,
+              review_count: product.review_count ?? null,
               is_active: true,
             })
             .eq("id", existing.id)
@@ -163,6 +169,8 @@ export async function POST(request: Request) {
               image_url: product.image_url ?? null,
               manufacturer: product.manufacturer ?? null,
               category: product.category ?? null,
+              rating: product.rating ?? null,
+              review_count: product.review_count ?? null,
               is_active: true,
             })
 
@@ -238,6 +246,8 @@ export async function POST(request: Request) {
       image_url,
       manufacturer,
       category,
+      rating,
+      review_count,
       is_active,
       updated_at
     `,

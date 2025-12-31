@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
         }
         products = data.map((item) => ({
           name: item.name || "",
-          iso_code: item.iso_code || item.isoCode || "00 00",
+          iso_code: item.iso_code || item.isoCode || "N999999",
           price: typeof item.price === "number" ? item.price : item.price ? parseFloat(String(item.price)) : null,
           purchase_link: item.purchase_link || item.purchaseLink || null,
           image_url: item.image_url || item.imageUrl || null,
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
 
         products.push({
           name: values[nameIndex] || "",
-          iso_code: isoIndex !== -1 && values[isoIndex] ? values[isoIndex] : "00 00",
+          iso_code: isoIndex !== -1 && values[isoIndex] ? values[isoIndex] : "N999999",
           price: priceIndex !== -1 && values[priceIndex] ? parseFloat(values[priceIndex].replace(/[^0-9]/g, "")) : null,
           purchase_link: linkIndex !== -1 ? values[linkIndex] || null : null,
           image_url: imageIndex !== -1 ? values[imageIndex] || null : null,
@@ -393,7 +393,7 @@ async function parsePdfCatalogImproved(text: string): Promise<ProductInput[]> {
   
   for (const block of productBlocks) {
     // ISO 코드 자동 추천 (동의어 사전 + 키워드 매칭)
-    let isoCode = "00 00"
+    let isoCode = "N999999" // ISO 9999 표준에 없는 비표준 코드 대신 N999999 사용
     const nameLower = block.name.toLowerCase()
     const fullText = `${block.name} ${block.description || ""}`
     
@@ -404,7 +404,7 @@ async function parsePdfCatalogImproved(text: string): Promise<ProductInput[]> {
     }
     
     // 2단계: 폴백 키워드 매칭 (동의어 사전에서 찾지 못한 경우)
-    if (isoCode === "00 00") {
+    if (isoCode === "N999999") {
       if (nameLower.includes("식기") || nameLower.includes("식사") || nameLower.includes("숟가락") || nameLower.includes("포크") || nameLower.includes("컵")) {
         isoCode = "15 09"
       } else if (nameLower.includes("전동") && nameLower.includes("휠체어")) {
