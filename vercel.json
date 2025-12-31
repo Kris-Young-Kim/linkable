@@ -1,36 +1,14 @@
 {
   "crons": [
     {
-      "path": "/api/cron/reminder-ippa-7days",
-      "schedule": "0 10 * * *"
-    },
-    {
       "path": "/api/cron/reminder-ippa",
-      "schedule": "0 10 * * *"
+      "schedule": "0 10 * * *",
+      "comment": "7일 및 14일 IPPA 평가 리마인더 통합"
     },
     {
       "path": "/api/cron/backup-database",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/performance-alert",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/precompute-popular-mappings",
-      "schedule": "0 3 * * 1"
-    },
-    {
-      "path": "/api/cron/optimize-matching-weights",
-      "schedule": "0 4 * * 1"
-    },
-    {
-      "path": "/api/cron/adjust-vector-thresholds",
-      "schedule": "0 5 * * 2"
-    },
-    {
-      "path": "/api/cron/icf-auto-expand",
-      "schedule": "0 3 * * 3"
+      "schedule": "0 2 * * *",
+      "comment": "데이터베이스 백업 검증"
     }
   ]
 }
