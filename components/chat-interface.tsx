@@ -163,11 +163,42 @@ export function ChatInterface() {
     3
   );
 
+  // 채팅이 완전히 종료되고 추천이 준비되었을 때만 모달 표시
   useEffect(() => {
-    if (previewRecommendations.length > 0) {
-      setShowFlowGuide(true);
+    // 조건:
+    // 1. showRecommendationCTA가 true (상담 완료)
+    // 2. 추천이 준비되었고 (previewRecommendations.length > 0)
+    // 3. 타이핑이 끝났고 (!isTyping)
+    // 4. 추천 로딩이 완료되었고 (!isLoadingRecommendations)
+    // 5. consultationId가 존재하고 (consultationId)
+    // 6. ICF 분석이 완료되었고 (icfAnalysis)
+    const shouldShow = 
+      showRecommendationCTA &&
+      previewRecommendations.length > 0 &&
+      !isTyping &&
+      !isLoadingRecommendations &&
+      Boolean(consultationId) &&
+      Boolean(icfAnalysis);
+    
+    if (shouldShow) {
+      // 약간의 지연을 추가하여 사용자가 메시지를 읽을 시간을 줌
+      const timer = setTimeout(() => {
+        setShowFlowGuide(true);
+      }, 1000); // 1초 지연
+      
+      return () => clearTimeout(timer);
+    } else {
+      // 조건이 맞지 않으면 즉시 모달 닫기
+      setShowFlowGuide(false);
     }
-  }, [previewRecommendations.length]);
+  }, [
+    previewRecommendations.length, 
+    showRecommendationCTA, 
+    isTyping, 
+    isLoadingRecommendations,
+    consultationId,
+    icfAnalysis
+  ]);
 
   const isAuthResolved = isLoaded;
   const requiresLogin = isAuthResolved && !isSignedIn;

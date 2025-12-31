@@ -137,10 +137,7 @@ export function ConsultationFlowGuide({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent
-        className="sm:max-w-md"
-        aria-describedby="flow-guide-description"
-      >
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -150,7 +147,7 @@ export function ConsultationFlowGuide({
               <DialogTitle className="text-xl">
                 {t("flowGuide.modalTitle") || "맞춤 추천이 준비되었습니다"}
               </DialogTitle>
-              <DialogDescription id="flow-guide-description" className="mt-1">
+              <DialogDescription className="mt-1">
                 {t("flowGuide.modalSubtitle") || "ICF 분석을 완료했습니다"}
               </DialogDescription>
             </div>

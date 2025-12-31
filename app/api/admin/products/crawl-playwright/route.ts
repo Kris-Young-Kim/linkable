@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/auth/verify-admin";
 import * as cheerio from "cheerio";
+import iconv from "iconv-lite";
 
 const mapReasonToStatus = (
   reason: "not_authenticated" | "insufficient_permissions" | "error"
@@ -128,6 +129,102 @@ interface CrawlResult {
 }
 
 /**
+ * 바이너리 데이터를 올바른 인코딩으로 디코딩하는 헬퍼 함수
+ */
+function decodeHtml(buffer: Buffer, contentType: string, htmlPreview?: string): string {
+  // Content-Type 헤더에서 charset 추출
+  const charsetMatch = contentType.match(/charset=([^;]+)/i);
+  let detectedCharset = charsetMatch?.[1]?.toLowerCase() || null;
+  
+  // HTML meta charset 태그 확인 (Content-Type보다 우선)
+  if (htmlPreview) {
+    const metaCharsetMatch = htmlPreview.match(/<meta[^>]*charset\s*=\s*["']?([^"'\s>]+)/i);
+    if (metaCharsetMatch) {
+      const metaCharset = metaCharsetMatch[1].toLowerCase();
+      if (metaCharset) {
+        detectedCharset = metaCharset;
+      }
+    }
+  }
+  
+  // 인코딩에 따라 디코딩
+  if (detectedCharset) {
+    // EUC-KR 또는 CP949인 경우 iconv-lite 사용
+    if (detectedCharset.includes("euc-kr") || detectedCharset.includes("cp949")) {
+      try {
+        const decoded = iconv.decode(buffer, "euc-kr");
+        console.log(`[Crawler] EUC-KR/CP949 디코딩 성공 (${detectedCharset})`);
+        return decoded;
+      } catch (error) {
+        console.warn(`[Crawler] EUC-KR/CP949 디코딩 실패, UTF-8로 시도:`, error);
+        return buffer.toString("utf-8");
+      }
+    }
+    // UTF-8 또는 기타 인코딩
+    else if (detectedCharset.includes("utf-8") || detectedCharset.includes("utf8")) {
+      return buffer.toString("utf-8");
+    }
+    // 기타 인코딩 시도
+    else {
+      try {
+        const decoded = iconv.decode(buffer, detectedCharset);
+        console.log(`[Crawler] ${detectedCharset} 디코딩 성공`);
+        return decoded;
+      } catch (error) {
+        console.warn(`[Crawler] ${detectedCharset} 디코딩 실패, UTF-8로 시도:`, error);
+        return buffer.toString("utf-8");
+      }
+    }
+  }
+  
+  // charset이 없는 경우 UTF-8로 시도
+  return buffer.toString("utf-8");
+}
+
+/**
+ * 텍스트 추출 시 인코딩 문제 해결 헬퍼 함수
+ * cheerio의 decodeEntities 옵션이 이미 HTML 엔티티를 디코딩하므로,
+ * 여기서는 깨진 문자만 감지하고 처리합니다.
+ */
+function extractText($el: cheerio.Cheerio<any>, fallback?: string): string {
+  try {
+    // cheerio의 text() 메서드로 추출 (이미 HTML 엔티티가 디코딩됨)
+    let text = $el.text().trim();
+    
+    // 깨진 문자(replacement character)가 있는지 확인
+    if (/[\uFFFD]/.test(text)) {
+      // 깨진 문자가 있으면 HTML에서 직접 추출 시도
+      const html = $el.html() || "";
+      if (html) {
+        // HTML 태그 제거
+        let decoded = html.replace(/<[^>]*>/g, "");
+        // HTML 엔티티가 남아있으면 디코딩 (cheerio가 놓친 경우)
+        decoded = decoded
+          .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(parseInt(dec, 10)))
+          .replace(/&#x([0-9A-Fa-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+          .replace(/&nbsp;/g, " ")
+          .replace(/&amp;/g, "&")
+          .replace(/&lt;/g, "<")
+          .replace(/&gt;/g, ">")
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;|&apos;/g, "'");
+        // 연속된 공백 정리
+        decoded = decoded.replace(/\s+/g, " ").trim();
+        if (decoded && decoded.length > 0 && !/[\uFFFD]/.test(decoded)) {
+          return decoded;
+        }
+      }
+    }
+    
+    // 깨진 문자가 없으면 그대로 반환
+    return text || fallback || "";
+  } catch (error) {
+    console.warn("[Crawler] Text extraction error:", error);
+    return fallback || "";
+  }
+}
+
+/**
  * 단일 페이지에서 상품 추출
  */
 function extractProductsFromPage(
@@ -138,7 +235,7 @@ function extractProductsFromPage(
   globalSeenProducts: Set<string>,
   existingProducts: CrawledProduct[]
 ): { products: CrawledProduct[]; foundSelector: string | null } {
-  const products: CrawledProduct[] = [];
+    const products: CrawledProduct[] = [];
   let foundSelector: string | null = null;
 
   // 다양한 셀렉터 패턴 시도 (우선순위 순)
@@ -155,10 +252,10 @@ function extractProductsFromPage(
     "table td",
     
     // 리스트 구조
-    "ul.product_list > li",
-    ".product_list > li",
-    ".prd-list > li",
-    "ul.prd-list > li",
+      "ul.product_list > li",
+      ".product_list > li",
+      ".prd-list > li",
+      "ul.prd-list > li",
     "ul[class*='list'] > li",
     ".list > li",
     
@@ -167,15 +264,15 @@ function extractProductsFromPage(
     "table tr",
     
     // 일반적인 상품 구조
-    "li[class*='product']",
+      "li[class*='product']",
     "li[class*='item']",
     "li[class*='goods']",
-    ".board_list > li",
-    "[class*='product']",
-    "article",
-    ".item",
-    "div[class*='item']",
-    "div[class*='product']",
+      ".board_list > li",
+      "[class*='product']",
+      "article",
+      ".item",
+      "div[class*='item']",
+      "div[class*='product']",
     "div[class*='goods']",
     "div[class*='prd']",
     "div[class*='list'] > div",
@@ -193,11 +290,11 @@ function extractProductsFromPage(
   ];
 
   // 셀렉터로 상품 요소 찾기
-  for (const selector of productSelectors) {
-    const elements = $(selector);
-    if (elements.length > 0) {
+    for (const selector of productSelectors) {
+      const elements = $(selector);
+      if (elements.length > 0) {
       console.log(`[Crawler] 상품 목록 발견: ${selector} (${elements.length}개)`);
-      foundSelector = selector;
+        foundSelector = selector;
       
       // dl.item-list 구조 특별 처리 (willbe.kr)
       if (selector === "dl.item-list" || selector.includes("dl.item-list")) {
@@ -217,24 +314,24 @@ function extractProductsFromPage(
           if (!productLink || globalSeenLinks.has(productLink)) return;
           globalSeenLinks.add(productLink);
           
-          // 상품명 추출
+          // 상품명 추출 (인코딩 문제 해결)
           const nameEl = $el.find("li.prd-name").first();
-          let productName = nameEl.text().trim();
+          let productName = extractText(nameEl);
           
           // 상품명이 없으면 링크의 이미지 alt에서 찾기
           if (!productName || productName.length < 2) {
             const img = linkEl.find("img").first();
-            productName = img.attr("alt") || img.attr("title") || "";
+            productName = img.attr("alt")?.trim() || img.attr("title")?.trim() || "";
           }
           
           // 상품명이 여전히 없으면 링크 텍스트에서 찾기
           if (!productName || productName.length < 2) {
-            productName = linkEl.text().trim();
+            productName = extractText(linkEl);
           }
           
-          // 가격 추출
+          // 가격 추출 (인코딩 문제 해결)
           const priceEl = $el.find("li.prd-price").first();
-          const priceText = priceEl.text().trim();
+          const priceText = extractText(priceEl);
           const price = parsePrice(priceText);
           
           // 이미지 추출
@@ -295,29 +392,29 @@ function extractProductsFromPage(
           // 1. .dsc 클래스 (에이블라이프)
           const dscEl = $el.find(".dsc").first();
           if (dscEl.length > 0) {
-            productName = dscEl.clone().children().remove().end().text().trim();
+            const dscTextEl = dscEl.clone().children().remove().end();
+            productName = extractText(dscTextEl);
             productName = productName.replace(/^==\s*\$0\s*/, "").trim();
           }
           
           // 2. 이미지 alt 속성
           if (!productName || productName.length < 2) {
             const img = $el.find("img").first();
-            productName = img.attr("alt") || img.attr("title") || "";
+            productName = img.attr("alt")?.trim() || img.attr("title")?.trim() || "";
           }
           
           // 3. 링크 텍스트
           if (!productName || productName.length < 2) {
-            productName = linkEl.text().trim();
+            productName = extractText(linkEl);
           }
           
           // 4. 요소의 직접 텍스트
           if (!productName || productName.length < 2) {
-            const directText = $el.clone()
+            const directTextEl = $el.clone()
               .find("a, img, script, style, .price, [class*='price'], strong")
               .remove()
-              .end()
-              .text()
-              .trim();
+              .end();
+            const directText = extractText(directTextEl);
             
             const lines = directText.split(/[\n\r]+/)
               .map(line => line.trim())
@@ -331,20 +428,21 @@ function extractProductsFromPage(
             }
           }
           
-          // 가격 추출
+          // 가격 추출 (인코딩 문제 해결)
           let price: number | null = null;
           const priceSelectors = [".price", ".prd-price", "[class*='price']", "strong", "em", ".cost"];
           for (const priceSel of priceSelectors) {
             const priceEl = $el.find(priceSel).first();
             if (priceEl.length > 0) {
-              price = parsePrice(priceEl.text());
+              const priceText = extractText(priceEl);
+              price = parsePrice(priceText);
               if (price) break;
             }
           }
           
           // 가격을 찾지 못한 경우 전체 텍스트에서 찾기
           if (!price) {
-            const allText = $el.text();
+            const allText = extractText($el);
             const priceMatch = allText.match(/(\d{1,3}(?:,\d{3})*)\s*원?/);
             if (priceMatch) {
               price = parsePrice(priceMatch[1]);
@@ -425,28 +523,29 @@ function extractProductsFromPage(
       // 부모 요소에서 찾기
       if (!productName || productName.length < 2) {
         const $parent = $link.closest("tr, li, div, dl, article");
-        const parentText = $parent.clone()
+        const parentTextEl = $parent.clone()
           .find("a, img, script, style")
           .remove()
-          .end()
-          .text()
-          .trim();
-        
+          .end();
+        const parentText = extractText(parentTextEl);
+
         const lines = parentText.split(/[\n\r]+/)
           .map(line => line.trim())
           .filter(line => line.length >= 3 && 
             !/^[\d\s,원]+$/.test(line) &&
             !line.match(/^\d{1,3}(?:,\d{3})*\s*원?$/));
         
-        if (lines.length > 0) {
-          productName = lines[0];
+                  if (lines.length > 0) {
+                    productName = lines[0];
+          }
         }
-      }
-      
-      // 가격 추출
+
+        // 가격 추출 (인코딩 문제 해결)
       const $parent = $link.closest("tr, li, div, dl, article");
-      const priceText = $parent.find(".price, .prd-price, [class*='price'], strong").first().text();
-      const price = parsePrice(priceText) || parsePrice($parent.text());
+      const priceEl = $parent.find(".price, .prd-price, [class*='price'], strong").first();
+      const priceText = extractText(priceEl);
+      const parentText = extractText($parent);
+      const price = parsePrice(priceText) || parsePrice(parentText);
       
       // 이미지 추출
       const imgEl = $link.find("img").first();
@@ -518,8 +617,19 @@ async function crawlProducts(
         throw new Error(`HTTP ${firstResponse.status}: ${firstResponse.statusText}`);
       }
 
-      const firstHtml = await firstResponse.text();
-      const $first = cheerio.load(firstHtml);
+      // 바이너리로 받아서 인코딩 처리
+      const arrayBuffer = await firstResponse.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      // 임시로 UTF-8로 디코딩하여 meta charset 확인
+      const tempHtml = buffer.toString("utf-8");
+      const contentType = firstResponse.headers.get("content-type") || "";
+      
+      // 올바른 인코딩으로 디코딩
+      const html = decodeHtml(buffer, contentType, tempHtml);
+      
+      // cheerio로 HTML 파싱 (기본적으로 HTML 엔티티 자동 디코딩)
+      const $first = cheerio.load(html);
       
       // 페이지네이션 링크 추출
       const paginationLinks = extractPaginationLinks($first, baseUrl);
@@ -570,7 +680,18 @@ async function crawlProducts(
           continue;
         }
 
-        const html = await response.text();
+        // 바이너리로 받아서 인코딩 처리
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        
+        // 임시로 UTF-8로 디코딩하여 meta charset 확인
+        const tempHtml = buffer.toString("utf-8");
+        const contentType = response.headers.get("content-type") || "";
+        
+        // 올바른 인코딩으로 디코딩
+        const html = decodeHtml(buffer, contentType, tempHtml);
+        
+        // cheerio로 HTML 파싱 (기본적으로 HTML 엔티티 자동 디코딩)
         const $ = cheerio.load(html);
         
         console.log(`[Crawler] 페이지 ${pageNum} HTML 길이: ${html.length} bytes`);

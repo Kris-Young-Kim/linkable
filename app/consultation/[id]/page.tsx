@@ -80,6 +80,13 @@ const ChatHistoryCollapsible = dynamic(
   }
 );
 
+const AutoGenerateRecommendations = dynamic(
+  () =>
+    import("@/components/consultation/auto-generate-recommendations").then(
+      (mod) => ({ default: mod.AutoGenerateRecommendations })
+    )
+);
+
 // 플로팅 액션 메뉴 (클라이언트 컴포넌트)
 const FloatingActionMenu = dynamic(() =>
   import("@/components/floating-action-menu").then((mod) => ({
@@ -524,12 +531,15 @@ export default async function ConsultationDetailPage({
                     )}
                   </div>
                 ) : (
-                  <div className="py-12 text-center text-muted-foreground border border-dashed rounded-lg">
-                    <p className="text-sm">추천된 보조기기가 없습니다.</p>
-                    <p className="text-xs mt-1">
-                      상담을 더 진행하면 추천이 제공됩니다.
-                    </p>
-                  </div>
+                  <AutoGenerateRecommendations
+                    consultationId={id}
+                    hasRecommendations={recommendations.length > 0}
+                    hasIcfCodes={!!icfBuckets && (
+                      (icfBuckets.b?.length ?? 0) +
+                      (icfBuckets.d?.length ?? 0) +
+                      (icfBuckets.e?.length ?? 0)
+                    ) > 0}
+                  />
                 )}
               </CardContent>
             </Card>

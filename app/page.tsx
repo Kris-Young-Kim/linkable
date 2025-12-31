@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
+import { ImagePreloader } from "@/components/image-preloader"
 
 // Header는 서버 컴포넌트이지만 GlobalNav를 동적 import로 분리
 const Header = dynamic(() => import("@/components/header").then((mod) => ({ default: mod.Header })), {
@@ -119,6 +120,8 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col">
+      {/* 메인 페이지에서만 이미지 프리로드 */}
+      <ImagePreloader />
       <Suspense fallback={<div className="h-16 bg-muted/50 animate-pulse" />}>
         <Header />
       </Suspense>

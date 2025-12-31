@@ -124,6 +124,7 @@ const parseIcfCodes = (raw: string | null) =>
     .filter(Boolean) ?? [];
 
 // 간단한 장애 유형 추론 (휴리스틱)
+// 보조공학사 기본 지식: 장애 유형별 분류
 const detectDisabilityType = (
   icfCodes: string[],
   summary?: string | null
@@ -134,28 +135,43 @@ const detectDisabilityType = (
   const includesAny = (keywords: string[]) =>
     keywords.some((k) => text.includes(k));
 
-  if (
-    has("d46") ||
-    has("d450") ||
-    includesAny(["휠체어", "보행", "이동", "wheelchair"])
-  ) {
-    return "mobility_impairment";
-  }
-  if (has("b210") || includesAny(["시각", "저시력", "시력", "vision"])) {
+  // 1. 시각 장애
+  if (has("b210") || has("b215") || 
+      includesAny(["시각", "저시력", "시력", "vision", "눈", "시야", "맹인", "실명"])) {
     return "visual_impairment";
   }
-  if (
-    has("d3") ||
-    includesAny(["의사소통", "말하기", "소통", "communication"])
-  ) {
+
+  // 2. 청각 장애
+  if (has("b230") || has("b235") || 
+      includesAny(["청각", "청력", "난청", "보청기", "hearing", "귀", "듣기", "평형", "어지럼"])) {
+    return "hearing_impairment";
+  }
+
+  // 3. 언어/의사소통 장애
+  if (has("b240") || has("b320") || has("b330") || has("d3") ||
+      includesAny(["언어", "음성", "구어", "말하기", "발음", "발성", "의사소통", "소통", "communication", "aac"])) {
     return "communication_impairment";
   }
-  if (has("d55") || includesAny(["식사", "먹기", "feeding", "음식"])) {
+
+  // 4. 지체 장애 / 뇌병변 (휠체어)
+  if (has("d46") || has("d450") || has("d465") ||
+      includesAny(["지체", "절단", "관절", "지체기능", "변형", "신체", "physical",
+                   "뇌병변", "뇌손상", "뇌졸중", "뇌성마비", "cerebral palsy", 
+                   "뇌전증", "epilepsy", "척수", "spinal", "마비", "paralysis",
+                   "휠체어", "보행", "이동", "wheelchair"])) {
+    return "mobility_impairment";
+  }
+
+  // 5. 식사/자가관리
+  if (has("d55") || has("d550") || includesAny(["식사", "먹기", "feeding", "음식"])) {
     return "self_care_impairment";
   }
+
+  // 6. 인지 장애
   if (has("b1") || includesAny(["인지", "기억", "주의", "cognitive"])) {
     return "cognitive_impairment";
   }
+
   return undefined;
 };
 
@@ -498,32 +514,86 @@ export async function GET(request: Request) {
     });
   }
 
-  const rankingInput = allProducts.map((product) => {
-    const isoMatch = isoMatches.find(
-      (match) => match.isoCode === product.iso_code
-    );
-    let matchScore = isoMatch?.score ?? (icfCodes.length > 0 ? 0.35 : 0.5);
+  // 제품-ICF 직접 매칭 (ISO 코드를 우회한 매칭)
+  const { matchProductToIcf, combineProductIcfScore } = await import(
+    "@/core/matching/product-icf-matcher"
+  );
 
-    // K-IPPA 중요도 기반 가중치 적용
-    if (ippaData?.importance) {
-      // 중요도가 높을수록 매칭 점수에 가중치 적용
-      // 중요도 1-5를 0.8-1.2 범위로 변환
-      const importanceMultiplier = 0.8 + (ippaData.importance - 1) * 0.1; // 1->0.8, 5->1.2
-      matchScore = Math.min(matchScore * importanceMultiplier, 1.0);
-    }
+  const rankingInput = await Promise.all(
+    allProducts.map(async (product) => {
+      const isoMatch = isoMatches.find(
+        (match) => match.isoCode === product.iso_code
+      );
+      let icfToIsoScore = isoMatch?.score ?? (icfCodes.length > 0 ? 0.35 : 0.5);
 
-    return {
-      product,
-      matchScore,
-      availabilityScore: computeAvailabilityScore(
-        product.price as number | null
-      ),
-      freshnessScore: computeFreshnessScore(
-        product.updated_at as string | null
-      ),
-      isoMatch,
-    };
-  });
+      // 제품-ICF 직접 매칭 점수 계산
+      let productIcfScore = 0;
+      if (icfCodes.length > 0) {
+        try {
+          const productIcfMatches = await matchProductToIcf(
+            {
+              id: product.id,
+              name: product.name,
+              description: product.description,
+              category: product.category,
+              iso_code: product.iso_code,
+            },
+            icfCodes
+          );
+
+          // 가장 높은 제품-ICF 매칭 점수 사용
+          if (productIcfMatches.length > 0) {
+            productIcfScore = Math.max(
+              ...productIcfMatches.map((m) => m.score)
+            );
+          }
+        } catch (error) {
+          console.warn(
+            `[Products API] Product-ICF matching failed for ${product.id}:`,
+            error
+          );
+          // 실패해도 계속 진행
+        }
+      }
+
+      // 다층 매칭 점수 통합 (ICF→ISO + 제품→ICF)
+      let matchScore = combineProductIcfScore(productIcfScore, icfToIsoScore);
+
+      // ISO 코드가 일치하는 경우 보너스 (신뢰도 향상)
+      if (isoMatch && productIcfScore > 0.5) {
+        // ISO 코드와 제품-ICF 매칭이 모두 일치하면 보너스
+        matchScore = Math.min(matchScore * 1.1, 1.0);
+      }
+
+      // ISO 코드가 없지만 제품-ICF 매칭이 강한 경우
+      if (!isoMatch && productIcfScore > 0.6) {
+        // ISO 코드가 없어도 제품-ICF 매칭이 강하면 점수 보정
+        matchScore = Math.max(matchScore, productIcfScore * 0.8);
+      }
+
+      // K-IPPA 중요도 기반 가중치 적용
+      if (ippaData?.importance) {
+        // 중요도가 높을수록 매칭 점수에 가중치 적용
+        // 중요도 1-5를 0.8-1.2 범위로 변환
+        const importanceMultiplier =
+          0.8 + (ippaData.importance - 1) * 0.1; // 1->0.8, 5->1.2
+        matchScore = Math.min(matchScore * importanceMultiplier, 1.0);
+      }
+
+      return {
+        product,
+        matchScore,
+        availabilityScore: computeAvailabilityScore(
+          product.price as number | null
+        ),
+        freshnessScore: computeFreshnessScore(
+          product.updated_at as string | null
+        ),
+        isoMatch,
+        productIcfScore, // 디버깅용
+      };
+    })
+  );
 
   const ranked = rankProducts(rankingInput).map((item) => {
     const isoMatch = item.isoMatch;
@@ -538,12 +608,99 @@ export async function GET(request: Request) {
     };
   });
 
+  // 중복 제품 제거 (강화된 정규화 및 다중 기준 체크)
+  // 보조공학사 기본 지식: 같은 제품은 한 번만 추천
+  
+  // 제품명 정규화 함수
+  const normalizeName = (name: string | null | undefined): string => {
+    if (!name) return "";
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ") // 여러 공백을 하나로
+      .replace(/[^\w가-힣\s]/g, "") // 특수문자 제거 (한글, 영문, 숫자, 공백만 유지)
+      .trim();
+  };
+  
+  // URL 정규화 함수 (도메인과 경로만 추출, 쿼리 파라미터 제거)
+  const normalizeUrl = (url: string | null | undefined): string => {
+    if (!url) return "";
+    try {
+      const urlObj = new URL(url);
+      // 도메인 + 경로만 사용 (쿼리 파라미터, 해시 제거)
+      return `${urlObj.hostname}${urlObj.pathname}`.toLowerCase();
+    } catch {
+      // URL 파싱 실패 시 원본 반환 (정규화)
+      return url.toLowerCase().split("?")[0].split("#")[0].trim();
+    }
+  };
+  
+  const seenProducts = new Map<string, typeof ranked[0]>();
+  const deduplicated: typeof ranked = [];
+  
+  for (const product of ranked) {
+    const normalizedName = normalizeName(product.name);
+    const normalizedLink = normalizeUrl(product.purchase_link);
+    
+    // 중복 체크 키 생성 (여러 기준 조합)
+    const keys: string[] = [];
+    
+    // 1. purchase_link가 있으면 link 기준으로 체크
+    if (normalizedLink) {
+      keys.push(`link:${normalizedLink}`);
+    }
+    
+    // 2. name 기준으로 체크
+    if (normalizedName) {
+      keys.push(`name:${normalizedName}`);
+    }
+    
+    // 3. name + link 조합으로 체크 (더 정확한 중복 감지)
+    if (normalizedName && normalizedLink) {
+      keys.push(`combo:${normalizedName}|${normalizedLink}`);
+    }
+    
+    // 모든 키에 대해 중복 체크
+    let isDuplicate = false;
+    let existingProduct: typeof ranked[0] | undefined;
+    
+    for (const key of keys) {
+      const existing = seenProducts.get(key);
+      if (existing) {
+        isDuplicate = true;
+        existingProduct = existing;
+        break;
+      }
+    }
+    
+    if (!isDuplicate) {
+      // 중복이 아니면 모든 키에 추가
+      for (const key of keys) {
+        seenProducts.set(key, product);
+      }
+      deduplicated.push(product);
+    } else if (existingProduct && product.match_score > existingProduct.match_score) {
+      // 중복이지만 더 높은 점수면 교체
+      const index = deduplicated.indexOf(existingProduct);
+      if (index !== -1) {
+        deduplicated[index] = product;
+        // 모든 키 업데이트
+        for (const key of keys) {
+          seenProducts.set(key, product);
+        }
+      }
+    }
+    // 중복이고 점수가 같거나 낮으면 무시
+  }
+  
+  const finalRanked = deduplicated;
+
   let recommendationMap: Map<string, string> | null = null;
 
   if (consultationId) {
     // 환경 변수 제품은 recommendations에 저장하지 않음 (가상 ID이므로)
     // 대신 purchase_link를 직접 저장하는 방식으로 변경 가능하지만, 현재 구조에서는 제외
-    const persistenceItems = ranked
+    const persistenceItems = finalRanked
       .filter(
         (product) =>
           typeof product.id === "string" && !product.id.startsWith("env_")
@@ -560,32 +717,32 @@ export async function GET(request: Request) {
       supabase
     );
 
-    // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
-    if (icfCodes.length > 0 && recommendationMap) {
-      const mapForLearning = recommendationMap; // 타입 가드를 위한 로컬 변수
-      import("@/lib/realtime-learning").then(({ updateRealtimeLearningStats }) => {
-        // 각 추천된 제품에 대해 impression 이벤트 기록
-        for (const [productId, recommendationId] of mapForLearning.entries()) {
-          const product = ranked.find((p) => p.id === productId);
-          if (product?.iso_code) {
-            updateRealtimeLearningStats(
-              icfCodes,
-              product.iso_code as string,
-              "impression"
-            ).catch((err) => {
-              console.error("[Products API] Realtime learning impression failed:", err);
-            });
+      // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
+      if (icfCodes.length > 0 && recommendationMap) {
+        const mapForLearning = recommendationMap; // 타입 가드를 위한 로컬 변수
+        import("@/lib/realtime-learning").then(({ updateRealtimeLearningStats }) => {
+          // 각 추천된 제품에 대해 impression 이벤트 기록
+          for (const [productId, recommendationId] of mapForLearning.entries()) {
+            const product = finalRanked.find((p) => p.id === productId);
+            if (product?.iso_code) {
+              updateRealtimeLearningStats(
+                icfCodes,
+                product.iso_code as string,
+                "impression"
+              ).catch((err) => {
+                console.error("[Products API] Realtime learning impression failed:", err);
+              });
+            }
           }
-        }
-      });
+        });
+      }
     }
-  }
 
-  logEvent({
-    category: "matching",
-    action: "products_retrieved",
-    payload: { count: ranked.length, hasIcfContext: icfCodes.length > 0 },
-  });
+    logEvent({
+      category: "matching",
+      action: "products_retrieved",
+      payload: { count: finalRanked.length, hasIcfContext: icfCodes.length > 0 },
+    });
 
   // 디버깅 정보 (개발 환경에서만)
   const debugInfo = process.env.NODE_ENV === "development" ? {
@@ -598,7 +755,7 @@ export async function GET(request: Request) {
   } : undefined;
 
   // 응답 최적화: 불필요한 필드 제거 및 필수 필드만 반환
-  const optimizedProducts = ranked.map((product) => {
+  const optimizedProducts = finalRanked.map((product) => {
     const { created_at, updated_at, ...rest } = product;
     return {
       ...rest,

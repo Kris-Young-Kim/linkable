@@ -85,13 +85,23 @@ export async function logWebVitals(metric: WebVitalsMetric): Promise<void> {
     };
 
     // API 엔드포인트로 전송
-    await fetch("/api/performance/web-vitals", {
+    const response = await fetch("/api/performance/web-vitals", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(logData),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("[Web Vitals] Logging failed:", {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData.error || "Unknown error",
+        details: errorData.details,
+      });
+    }
   } catch (error) {
     // 로깅 실패는 조용히 무시 (메인 플로우에 영향 없음)
     console.error("[Web Vitals] Logging failed:", error);

@@ -90,56 +90,59 @@ export function AdminProductManager({
       const response = await fetch("/api/admin/products");
       
       if (!response.ok) {
-        let errorData: any = {};
-        const contentType = response.headers.get("content-type");
         const status = response.status;
         const statusText = response.statusText;
+        const contentType = response.headers.get("content-type");
         
-        console.error("[Admin Products] API error - Response details:", {
-          status,
-          statusText,
-          contentType,
-          headers: Object.fromEntries(response.headers.entries()),
-        });
+        let errorData: any = {};
+        let responseText = "";
+        let errorMessage = `상품 목록을 불러오지 못했습니다 (${status})`;
         
         try {
-          // 응답 본문을 텍스트로 먼저 읽기
-          const responseText = await response.text();
-          console.error("[Admin Products] API error - Response body:", responseText);
+          // 응답 본문을 텍스트로 읽기
+          responseText = await response.text();
           
-          if (contentType && contentType.includes("application/json")) {
+          // JSON 파싱 시도
+          if (contentType && contentType.includes("application/json") && responseText) {
             try {
               errorData = JSON.parse(responseText);
             } catch (jsonError) {
-              console.error("[Admin Products] Failed to parse JSON:", jsonError);
+              console.warn("[Admin Products] Failed to parse error response as JSON:", jsonError);
               errorData = { message: responseText || statusText };
             }
+          } else if (responseText) {
+            errorData = { message: responseText };
           } else {
-            errorData = { message: responseText || statusText };
+            errorData = { message: statusText };
           }
-        } catch (parseError) {
-          console.error("[Admin Products] Failed to read error response:", parseError);
-          errorData = { 
-            message: `HTTP ${status}: ${statusText}` 
-          };
+        } catch (readError) {
+          console.error("[Admin Products] Failed to read error response:", readError);
+          errorData = { message: `HTTP ${status}: ${statusText}` };
         }
         
-        console.error("[Admin Products] API error - Final error data:", {
-          status,
-          statusText,
-          errorData,
-        });
-        
-        // 상태 코드별 에러 메시지
-        let errorMessage = `상품 목록을 불러오지 못했습니다 (${status})`;
+        // 상태 코드별 에러 메시지 설정
         if (status === 401) {
           errorMessage = "인증이 필요합니다. 로그인해주세요.";
         } else if (status === 403) {
-          errorMessage = "관리자 권한이 필요합니다.";
+          errorMessage = errorData.error || errorData.message || "관리자 권한이 필요합니다. Clerk에서 사용자 역할(role)을 'admin' 또는 'expert'로 설정해주세요.";
         } else if (errorData.error) {
           errorMessage = errorData.error;
         } else if (errorData.message) {
           errorMessage = errorData.message;
+        }
+        
+        // 에러 로깅 (개발 환경에서만 상세 로그)
+        if (process.env.NODE_ENV === "development") {
+          console.error("[Admin Products] API error:", {
+            status,
+            statusText,
+            contentType,
+            responseText: responseText || "(empty)",
+            parsedErrorData: Object.keys(errorData).length > 0 ? errorData : "(empty)",
+            finalMessage: errorMessage,
+          });
+        } else {
+          console.error(`[Admin Products] API error (${status}): ${errorMessage}`);
         }
         
         setErrorMessage(errorMessage);
@@ -568,12 +571,40 @@ export function AdminProductManager({
         }),
       });
 
+      let result: any;
+      
       if (!response.ok) {
-        const errorPayload = await response.json().catch(() => ({}));
-        throw new Error(errorPayload?.error ?? "상품 등록 실패");
+        let errorPayload: any = {};
+        const contentType = response.headers.get("content-type");
+        
+        try {
+          const responseText = await response.text();
+          if (contentType && contentType.includes("application/json") && responseText) {
+            try {
+              errorPayload = JSON.parse(responseText);
+            } catch {
+              errorPayload = { message: responseText || response.statusText };
+            }
+          } else {
+            errorPayload = { message: responseText || response.statusText };
+          }
+        } catch (parseError) {
+          console.error("[Admin Products] Failed to parse error response:", parseError);
+          errorPayload = { message: `HTTP ${response.status}: ${response.statusText}` };
+        }
+        
+        const errorMessage = 
+          errorPayload?.error || 
+          errorPayload?.message || 
+          (response.status === 403 
+            ? "관리자 권한이 필요합니다. Clerk에서 사용자 역할(role)을 'admin' 또는 'expert'로 설정해주세요."
+            : `상품 등록 실패 (${response.status})`);
+        
+        throw new Error(errorMessage);
       }
 
-      const result = await response.json();
+      // 성공 응답 파싱
+      result = await response.json();
       const created = result.created ?? 0;
       const updated = result.updated ?? 0;
       const failed = result.failed ?? 0;

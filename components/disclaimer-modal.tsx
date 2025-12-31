@@ -22,7 +22,7 @@ export function DisclaimerModal({ open, onAccept }: DisclaimerModalProps) {
 
   return (
     <Dialog open={open}>
-      <DialogContent className="max-w-2xl" aria-describedby="disclaimer-description">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex size-12 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
@@ -30,7 +30,7 @@ export function DisclaimerModal({ open, onAccept }: DisclaimerModalProps) {
             </div>
             <DialogTitle className="text-2xl">{t("modal.disclaimer.title")}</DialogTitle>
           </div>
-          <DialogDescription id="disclaimer-description" className="text-base leading-relaxed pt-4">
+          <DialogDescription className="text-base leading-relaxed pt-4">
             {t("modal.disclaimer.description")}
           </DialogDescription>
         </DialogHeader>

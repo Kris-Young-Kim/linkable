@@ -262,7 +262,7 @@ export async function hybridMatch(
     const intentWeighted = applyIntentWeights(contextWeighted, intent);
 
     // 10단계: 의도 기반 하드 필터 (전혀 다른 카테고리 제거)
-    const intentFiltered = filterByIntent(intentWeighted, intent);
+    const intentFiltered = filterByIntent(intentWeighted, intent, context);
 
     // 11단계: 핵심/보조 분리 태깅
     // 핵심: 점수 상위 3개 + 점수 0.1 이상
@@ -403,6 +403,7 @@ type PrimaryIntent =
   | "mobility_wheelchair"
   | "mobility_walking_aid"
   | "vision"
+  | "hearing"
   | "communication"
   | "self_care_feeding"
   | "unknown";
@@ -418,32 +419,74 @@ function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
   const hasIcf = (prefix: string) => Array.from(icfSet).some((c) => c.startsWith(prefix));
   const includesAny = (keywords: string[]) => keywords.some((k) => text.includes(k));
 
-  // 휠체어/이동
-  if (
-    includesAny(["휠체어", "wheelchair", "전동 휠체어", "수동 휠체어"]) ||
-    hasIcf("d46") ||
-    hasIcf("d450")
-  ) {
-    return "mobility_wheelchair";
-  }
-
-  // 보행 보조
-  if (includesAny(["보행기", "워커", "지팡이", "walking aid"]) || hasIcf("d410")) {
-    return "mobility_walking_aid";
-  }
-
-  // 시각
-  if (hasIcf("b210") || includesAny(["시각", "저시력", "vision"])) {
+  // 1. 시각 장애 감지 (최우선 처리)
+  // 시각 중증/실명 키워드
+  const severeVisualKeywords = [
+    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이", 
+    "시각 중증", "맹인", "실명", "blind", "앞이 안 보임", "앞이 안보임",
+    "전혀 안 보", "전혀 안보", "하나도 안 보", "하나도 안보"
+  ];
+  const isSevereVisualImpairment = includesAny(severeVisualKeywords) || 
+    (hasIcf("b210") && includesAny(["중증", "심각", "심각한", "심하게", "전혀", "하나도"]));
+  
+  // 시각 장애 키워드
+  const visualKeywords = [
+    "시각", "저시력", "시력", "vision", "눈", "시야", "시야각", 
+    "확대경", "돋보기", "점자", "스크린리더", "음성변환"
+  ];
+  
+  if (hasIcf("b210") || hasIcf("b215") || includesAny(visualKeywords) || isSevereVisualImpairment) {
     return "vision";
   }
 
-  // 의사소통
-  if (hasIcf("d3") || includesAny(["의사소통", "말하기", "communication"])) {
+  // 2. 청각 장애 감지
+  const hearingKeywords = [
+    "청각", "청력", "난청", "보청기", "hearing", "귀", "듣기", 
+    "소리", "알림", "진동", "평형", "어지럼", "전정"
+  ];
+  
+  if (hasIcf("b230") || hasIcf("b235") || includesAny(hearingKeywords)) {
+    return "hearing";
+  }
+
+  // 3. 언어/의사소통 장애 감지
+  const languageKeywords = [
+    "언어", "음성", "구어", "말하기", "발음", "발성", "의사소통", 
+    "소통", "communication", "aac", "대화", "말하기 보조", 
+    "음성 생성", "음성 인식", "프록스토커"
+  ];
+  
+  if (hasIcf("b240") || hasIcf("b320") || hasIcf("b330") || 
+      hasIcf("d3") || includesAny(languageKeywords)) {
     return "communication";
   }
 
-  // 식사/자가관리
-  if (hasIcf("d55") || includesAny(["식사", "먹기", "feeding", "음식"])) {
+  // 4. 지체 장애 / 뇌병변 감지 (휠체어)
+  const physicalKeywords = [
+    "지체", "절단", "관절", "지체기능", "변형", "신체", "physical",
+    "뇌병변", "뇌손상", "뇌졸중", "뇌성마비", "cerebral palsy", 
+    "뇌전증", "epilepsy", "척수", "spinal", "마비", "paralysis"
+  ];
+  
+  const mobilityKeywords = [
+    "휠체어", "wheelchair", "전동 휠체어", "수동 휠체어", 
+    "이동", "보행", "걷기"
+  ];
+  
+  if (includesAny(physicalKeywords) || 
+      includesAny(mobilityKeywords) ||
+      hasIcf("d46") || hasIcf("d450") || hasIcf("d465")) {
+    return "mobility_wheelchair";
+  }
+
+  // 5. 보행 보조 (지체 장애이지만 휠체어가 아닌 경우)
+  if (includesAny(["보행기", "워커", "지팡이", "walking aid", "보행 보조"]) || 
+      hasIcf("d410") || hasIcf("d450")) {
+    return "mobility_walking_aid";
+  }
+
+  // 6. 식사/자가관리
+  if (hasIcf("d55") || hasIcf("d550") || includesAny(["식사", "먹기", "feeding", "음식"])) {
     return "self_care_feeding";
   }
 
@@ -454,21 +497,24 @@ function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatc
   if (intent === "unknown") return matches;
 
   // 의도별 우선/페널티 ISO 코드 (공백 제거 기준)
+  // 보조공학사 기본 지식: 장애 유형별 적절한 보조기기 매핑
   const boost: Record<PrimaryIntent, string[]> = {
-    mobility_wheelchair: ["1222", "1223", "1806", "1830", "1206"],
-    mobility_walking_aid: ["1206", "1806", "1830"],
-    vision: ["2203", "2206", "1806"],
-    communication: ["2230", "2109"],
-    self_care_feeding: ["0903", "0904", "0909"],
+    mobility_wheelchair: ["1222", "1223", "1231", "1806", "1830"], // 휠체어, 체위 변경, 접근성
+    mobility_walking_aid: ["1206", "1203", "1806", "1830"], // 보행 보조기기, 접근성
+    vision: ["2203", "2206", "1208", "1806"], // 시각 보조기기, 안내 지팡이, 조명
+    hearing: ["2106", "2127"], // 청각 보조기기, 평형 보조기기
+    communication: ["2230", "2109"], // 의사소통 보조기기, 음성 보조기기
+    self_care_feeding: ["1509", "0933", "0918"], // 식사 보조기기, 자가관리 보조기기
     unknown: [],
   };
 
   const penalty: Record<PrimaryIntent, string[]> = {
-    mobility_wheelchair: ["090", "150", "2203"],
-    mobility_walking_aid: ["090", "150"],
-    vision: ["090", "1206", "1222", "1223"],
-    communication: ["090", "1206", "1222", "1223"],
-    self_care_feeding: ["1222", "1223", "1206"],
+    mobility_wheelchair: ["090", "150", "2203", "2206", "2106", "2230"], // 시각, 청각, 의사소통 제거
+    mobility_walking_aid: ["090", "150", "2203", "2206", "2106", "2230"], // 시각, 청각, 의사소통 제거
+    vision: ["1206", "1222", "1223", "1203", "2106", "2230", "2109"], // 이동 보조, 청각, 의사소통 제거
+    hearing: ["1206", "1222", "1223", "2203", "2206", "2230"], // 이동 보조, 시각, 의사소통 제거
+    communication: ["1206", "1222", "1223", "2203", "2206", "2106"], // 이동 보조, 시각, 청각 제거
+    self_care_feeding: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
     unknown: [],
   };
 
@@ -495,16 +541,31 @@ function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatc
     .sort((a, b) => b.score - a.score);
 }
 
-function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent): IsoMatch[] {
+function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent, context?: MatchContext): IsoMatch[] {
   if (intent === "unknown") return matches;
 
+  // 시각 중증/실명 감지 (컨텍스트에서)
+  const text = `${context?.userMessage ?? ""} ${context?.analysisSummary ?? ""}`.toLowerCase();
+  const severeVisualKeywords = [
+    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이", 
+    "시각 중증", "맹인", "실명", "blind", "앞이 안 보임", "앞이 안보임",
+    "전혀 안 보", "전혀 안보", "하나도 안 보", "하나도 안보"
+  ];
+  const isSevereVisualImpairment = severeVisualKeywords.some((k) => text.includes(k)) ||
+    (context?.icfCodes.some((c) => c.toLowerCase().startsWith("b210")) && 
+     (text.includes("중증") || text.includes("심각") || text.includes("전혀") || text.includes("하나도")));
+
   // 의도별 하드 제외 리스트 (공백 제거된 ISO prefix)
+  // 보조공학사 기본 지식: 장애 유형별 부적절한 보조기기 제외
   const exclude: Record<PrimaryIntent, string[]> = {
-    mobility_wheelchair: ["220", "0903", "0904", "0909"], // 시각, 식사 카테고리 제거
-    mobility_walking_aid: ["220", "0903", "0904", "0909"],
-    vision: ["1206", "1222", "1223"], // 이동 보조 제거
-    communication: ["1206", "1222", "1223"],
-    self_care_feeding: ["1222", "1223", "1206"], // 이동 보조 제거
+    mobility_wheelchair: ["220", "2106", "2230", "2109"], // 시각, 청각, 의사소통 제거
+    mobility_walking_aid: ["220", "2106", "2230", "2109"], // 시각, 청각, 의사소통 제거
+    vision: isSevereVisualImpairment 
+      ? ["1206", "1222", "1223", "1203", "2230", "2109", "2106"] // 시각 중증: 이동 보조 + 의사소통 + 청각 제거
+      : ["1206", "1222", "1223", "2106", "2230", "2109"], // 일반 시각: 이동 보조 + 청각 + 의사소통 제거
+    hearing: ["1206", "1222", "1223", "2203", "2206", "2230", "2109"], // 이동 보조, 시각, 의사소통 제거
+    communication: ["1206", "1222", "1223", "2203", "2206", "2106"], // 이동 보조, 시각, 청각 제거
+    self_care_feeding: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
     unknown: [],
   };
 
