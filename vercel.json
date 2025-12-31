@@ -2,13 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/reminder-ippa",
-      "schedule": "0 10 * * *",
-      "comment": "7일 및 14일 IPPA 평가 리마인더 통합"
+      "schedule": "0 10 * * *"
     },
     {
       "path": "/api/cron/backup-database",
-      "schedule": "0 2 * * *",
-      "comment": "데이터베이스 백업 검증"
+      "schedule": "0 2 * * *"
     }
   ]
 }
