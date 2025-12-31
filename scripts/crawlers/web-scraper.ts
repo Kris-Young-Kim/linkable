@@ -295,7 +295,7 @@ async function main() {
             allProducts.push(
               ...result.products.map((p) => ({
                 ...p,
-                iso_code: options.isoCode || "00 00", // 기본값
+                iso_code: options.isoCode || "N999999", // 기본값 (비표준 코드)
               }))
             )
           } else if (result.products.length === 0) {

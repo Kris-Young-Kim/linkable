@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
               .map((r) => (r.product as any)?.iso_code)
               .filter(Boolean);
 
-            const matchedIsoCodes = matches.map((m) => m.iso);
+            const matchedIsoCodes = matches.map((m) => m.isoCode);
             const top1Match = matchedIsoCodes[0];
             const top3Matches = matchedIsoCodes.slice(0, 3);
             const top5Matches = matchedIsoCodes.slice(0, 5);

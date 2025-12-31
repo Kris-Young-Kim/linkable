@@ -90,7 +90,7 @@ pnpm crawl:products --keyword "휠체어" --iso-code "12 22" --platform ablelife
 | 옵션 | 설명 | 필수 | 기본값 |
 |------|------|------|--------|
 | `--keyword <검색어>` | 검색할 키워드 | ✅ | - |
-| `--iso-code <코드>` | ISO 9999 코드 (예: "12 22") | ❌ | "00 00" |
+| `--iso-code <코드>` | ISO 9999 코드 (예: "12 22") | ❌ | "N999999" |
 | `--platform <사이트>` | 크롤링할 사이트 (`ablelife`, `11st`, `all` 등) | ❌ | `all` |
 | `--max <숫자>` | 최대 수집 개수 | ❌ | 10 |
 | `--dry-run` | 실제 등록 없이 결과만 확인 | ❌ | false |
