@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
             });
             return {
               icfCode,
-              matches: matches.filter(m => m.iso === isoCode || m.iso === isoCode.replace(/\s/g, "")),
+              matches: matches.filter(m => m.isoCode === isoCode || m.isoCode === isoCode.replace(/\s/g, "")),
             };
           })
         );
