@@ -1,56 +1,56 @@
-# 전환율 측정 시스템 가이드
+﻿# ?꾪솚??痢≪젙 ?쒖뒪??媛?대뱶
 
-## 개요
+## 媛쒖슂
 
-전환율 측정 시스템은 추천 CTA 클릭률, 문의 연결율, 구매 전환율을 측정하고 관리자 대시보드에 표시합니다.
+?꾪솚??痢≪젙 ?쒖뒪?쒖? 異붿쿇 CTA ?대┃瑜? 臾몄쓽 ?곌껐?? 援щℓ ?꾪솚?⑥쓣 痢≪젙?섍퀬 愿由ъ옄 ??쒕낫?쒖뿉 ?쒖떆?⑸땲??
 
-## 측정 항목
+## 痢≪젙 ??ぉ
 
-### 1. 추천 CTA 클릭률 (목표: 25%)
+### 1. 異붿쿇 CTA ?대┃瑜?(紐⑺몴: 25%)
 
-**정의**: 전체 추천 중 사용자가 클릭한 추천의 비율
+**?뺤쓽**: ?꾩껜 異붿쿇 以??ъ슜?먭? ?대┃??異붿쿇??鍮꾩쑉
 
-**계산식**: `(클릭된 추천 수 / 전체 추천 수) × 100`
+**怨꾩궛??*: `(?대┃??異붿쿇 ??/ ?꾩껜 異붿쿇 ?? 횞 100`
 
-**추적 방법**:
-- 사용자가 추천 카드의 "구매하기" 또는 "더 알아보기" 버튼 클릭
-- `/api/recommendations/[id]/click` API 호출
-- `recommendations.is_clicked` 플래그 업데이트
-- `conversion_events` 테이블에 `recommendation_click` 이벤트 저장
+**異붿쟻 諛⑸쾿**:
+- ?ъ슜?먭? 異붿쿇 移대뱶??"援щℓ?섍린" ?먮뒗 "???뚯븘蹂닿린" 踰꾪듉 ?대┃
+- `/api/recommendations/[id]/click` API ?몄텧
+- `recommendations.is_clicked` ?뚮옒洹??낅뜲?댄듃
+- `conversion_events` ?뚯씠釉붿뿉 `recommendation_click` ?대깽?????
 
-### 2. 문의 연결율 (목표: 10%)
+### 2. 臾몄쓽 ?곌껐??(紐⑺몴: 10%)
 
-**정의**: 클릭한 추천 중 전문가 문의를 클릭한 비율
+**?뺤쓽**: ?대┃??異붿쿇 以??꾨Ц媛 臾몄쓽瑜??대┃??鍮꾩쑉
 
-**계산식**: `(전문가 문의 클릭 수 / 클릭된 추천 수) × 100`
+**怨꾩궛??*: `(?꾨Ц媛 臾몄쓽 ?대┃ ??/ ?대┃??異붿쿇 ?? 횞 100`
 
-**추적 방법**:
-- 추천 카드의 "전문가 문의" 버튼 클릭
-- `/api/recommendations/[id]/action` API 호출 (action: "expert_inquiry_click")
-- `conversion_events` 테이블에 `expert_inquiry_click` 이벤트 저장
+**異붿쟻 諛⑸쾿**:
+- 異붿쿇 移대뱶??"?꾨Ц媛 臾몄쓽" 踰꾪듉 ?대┃
+- `/api/recommendations/[id]/action` API ?몄텧 (action: "expert_inquiry_click")
+- `conversion_events` ?뚯씠釉붿뿉 `expert_inquiry_click` ?대깽?????
 
-### 3. 구매 전환율
+### 3. 援щℓ ?꾪솚??
 
-**정의**: 클릭한 추천 중 실제 구매로 이어진 비율
+**?뺤쓽**: ?대┃??異붿쿇 以??ㅼ젣 援щℓ濡??댁뼱吏?鍮꾩쑉
 
-**계산식**: `(구매 완료 수 / 클릭된 추천 수) × 100`
+**怨꾩궛??*: `(援щℓ ?꾨즺 ??/ ?대┃??異붿쿇 ?? 횞 100`
 
-**추적 방법**:
-- 쿠팡 파트너스 Postback: `/api/webhooks/coupang/purchase`
+**異붿쟻 諛⑸쾿**:
+- 荑좏뙜 ?뚰듃?덉뒪 Postback: `/api/webhooks/naver/purchase`
 - Meta Pixel: `/api/webhooks/meta/purchase`
-- `conversion_events` 테이블에 `purchase_completed` 이벤트 저장
-- `recommendations.purchase_completed` 플래그 업데이트
+- `conversion_events` ?뚯씠釉붿뿉 `purchase_completed` ?대깽?????
+- `recommendations.purchase_completed` ?뚮옒洹??낅뜲?댄듃
 
-## API 엔드포인트
+## API ?붾뱶?ъ씤??
 
 ### GET /api/admin/analytics/conversion-rates
 
-전환율 측정 데이터를 조회합니다.
+?꾪솚??痢≪젙 ?곗씠?곕? 議고쉶?⑸땲??
 
-**쿼리 파라미터**:
-- `dateRange`: 측정 기간 (7days, 30days, 90days) - 기본값: 30days
+**荑쇰━ ?뚮씪誘명꽣**:
+- `dateRange`: 痢≪젙 湲곌컙 (7days, 30days, 90days) - 湲곕낯媛? 30days
 
-**응답 예시**:
+**?묐떟 ?덉떆**:
 ```json
 {
   "summary": {
@@ -90,106 +90,106 @@
 }
 ```
 
-## 관리자 대시보드
+## 愿由ъ옄 ??쒕낫??
 
-관리자 대시보드(`/admin/dashboard`)에서 "전환율 측정" 섹션을 통해 다음 정보를 확인할 수 있습니다:
+愿由ъ옄 ??쒕낫??`/admin/dashboard`)?먯꽌 "?꾪솚??痢≪젙" ?뱀뀡???듯빐 ?ㅼ쓬 ?뺣낫瑜??뺤씤?????덉뒿?덈떎:
 
-1. **목표 달성 현황**: 각 전환율의 목표 대비 현재 상태
-2. **전환 퍼널**: 상담 → 추천 → 클릭 → 문의/구매 단계별 전환율
-3. **일별 추이**: 최근 30일간의 클릭률 및 구매 전환율 추이
-4. **구매 통계**: 총 구매 건수, 금액, 평균 구매 금액, 수수료
+1. **紐⑺몴 ?ъ꽦 ?꾪솴**: 媛??꾪솚?⑥쓽 紐⑺몴 ?鍮??꾩옱 ?곹깭
+2. **?꾪솚 ?쇰꼸**: ?곷떞 ??異붿쿇 ???대┃ ??臾몄쓽/援щℓ ?④퀎蹂??꾪솚??
+3. **?쇰퀎 異붿씠**: 理쒓렐 30?쇨컙???대┃瑜?諛?援щℓ ?꾪솚??異붿씠
+4. **援щℓ ?듦퀎**: 珥?援щℓ 嫄댁닔, 湲덉븸, ?됯퇏 援щℓ 湲덉븸, ?섏닔猷?
 
-## 측정 스크립트
+## 痢≪젙 ?ㅽ겕由쏀듃
 
-### 사용법
+### ?ъ슜踰?
 
 ```bash
-# 최근 30일 전환율 측정
+# 理쒓렐 30???꾪솚??痢≪젙
 tsx scripts/tests/measure-conversion-rates.ts
 
-# 최근 7일 전환율 측정
+# 理쒓렐 7???꾪솚??痢≪젙
 tsx scripts/tests/measure-conversion-rates.ts 7days
 ```
 
-### 결과 저장
+### 寃곌낵 ???
 
-- `scripts/tests/results/conversion-rates-{timestamp}.json`: 타임스탬프가 포함된 결과 파일
-- `scripts/tests/results/conversion-rates-latest.json`: 최신 결과 파일
+- `scripts/tests/results/conversion-rates-{timestamp}.json`: ??꾩뒪?ы봽媛 ?ы븿??寃곌낵 ?뚯씪
+- `scripts/tests/results/conversion-rates-latest.json`: 理쒖떊 寃곌낵 ?뚯씪
 
-## 구매 전환율 추적
+## 援щℓ ?꾪솚??異붿쟻
 
-### 쿠팡 파트너스 Postback 연동
+### 荑좏뙜 ?뚰듃?덉뒪 Postback ?곕룞
 
-1. **Postback URL 설정**
-   - 쿠팡 파트너스 대시보드에서 Postback URL을 설정
-   - URL: `https://your-domain.com/api/webhooks/coupang/purchase`
+1. **Postback URL ?ㅼ젙**
+   - 荑좏뙜 ?뚰듃?덉뒪 ??쒕낫?쒖뿉??Postback URL???ㅼ젙
+   - URL: `https://your-domain.com/api/webhooks/naver/purchase`
 
-2. **구매 완료 시 자동 호출**
-   - 쿠팡에서 구매 완료 시 POST 요청 전송
-   - `orderId`, `productId`, `purchaseAmount` 등 포함
+2. **援щℓ ?꾨즺 ???먮룞 ?몄텧**
+   - 荑좏뙜?먯꽌 援щℓ ?꾨즺 ??POST ?붿껌 ?꾩넚
+   - `orderId`, `productId`, `purchaseAmount` ???ы븿
 
-3. **매칭 로직**
-   - `linkId` 또는 `productId`로 `recommendations` 테이블에서 추천 찾기
-   - `is_clicked = true`인 추천만 대상
-   - 매칭 성공 시 `conversion_events`에 `purchase_completed` 이벤트 저장
+3. **留ㅼ묶 濡쒖쭅**
+   - `linkId` ?먮뒗 `productId`濡?`recommendations` ?뚯씠釉붿뿉??異붿쿇 李얘린
+   - `is_clicked = true`??異붿쿇留????
+   - 留ㅼ묶 ?깃났 ??`conversion_events`??`purchase_completed` ?대깽?????
 
-### Meta Pixel 연동
+### Meta Pixel ?곕룞
 
-1. **Purchase 이벤트 추적**
-   - Meta Pixel에서 Purchase 이벤트 발생 시 `/api/webhooks/meta/purchase` 호출
-   - `orderId`, `productIds`, `value` 등 포함
+1. **Purchase ?대깽??異붿쟻**
+   - Meta Pixel?먯꽌 Purchase ?대깽??諛쒖깮 ??`/api/webhooks/meta/purchase` ?몄텧
+   - `orderId`, `productIds`, `value` ???ы븿
 
-2. **매칭 로직**
-   - `productIds`로 `recommendations` 테이블에서 추천 찾기
-   - `is_clicked = true`인 추천만 대상
+2. **留ㅼ묶 濡쒖쭅**
+   - `productIds`濡?`recommendations` ?뚯씠釉붿뿉??異붿쿇 李얘린
+   - `is_clicked = true`??異붿쿇留????
 
-## 개선 방법
+## 媛쒖꽑 諛⑸쾿
 
-### 추천 CTA 클릭률 향상
+### 異붿쿇 CTA ?대┃瑜??μ긽
 
-1. **CTA 버튼 최적화**
-   - 버튼 위치: 상단, 중간, 하단 A/B 테스트
-   - 버튼 텍스트: "구매하기", "지원제도 확인", "전문가 상담" 등 테스트
-   - 버튼 색상/크기: 시각적 강조
+1. **CTA 踰꾪듉 理쒖쟻??*
+   - 踰꾪듉 ?꾩튂: ?곷떒, 以묎컙, ?섎떒 A/B ?뚯뒪??
+   - 踰꾪듉 ?띿뒪?? "援щℓ?섍린", "吏?먯젣???뺤씤", "?꾨Ц媛 ?곷떞" ???뚯뒪??
+   - 踰꾪듉 ?됱긽/?ш린: ?쒓컖??媛뺤“
 
-2. **추천 카드 개선**
-   - 상품 이미지 품질 향상
-   - 가격 정보 명확히 표시
-   - 리뷰/평점 표시 (있는 경우)
+2. **異붿쿇 移대뱶 媛쒖꽑**
+   - ?곹뭹 ?대?吏 ?덉쭏 ?μ긽
+   - 媛寃??뺣낫 紐낇솗???쒖떆
+   - 由щ럭/?됱젏 ?쒖떆 (?덈뒗 寃쎌슦)
 
-### 문의 연결율 향상
+### 臾몄쓽 ?곌껐???μ긽
 
-1. **전문가 문의 버튼 강조**
-   - 버튼 위치 및 디자인 개선
-   - "무료 상담" 등 인센티브 표시
+1. **?꾨Ц媛 臾몄쓽 踰꾪듉 媛뺤“**
+   - 踰꾪듉 ?꾩튂 諛??붿옄??媛쒖꽑
+   - "臾대즺 ?곷떞" ???몄꽱?곕툕 ?쒖떆
 
-2. **전문가 상담 프로세스 간소화**
-   - 신청 폼 단순화
-   - 즉시 연결 가능 여부 표시
+2. **?꾨Ц媛 ?곷떞 ?꾨줈?몄뒪 媛꾩냼??*
+   - ?좎껌 ???⑥닚??
+   - 利됱떆 ?곌껐 媛???щ? ?쒖떆
 
-### 구매 전환율 향상
+### 援щℓ ?꾪솚???μ긽
 
-1. **리마인더 시스템**
-   - 7일 후 리마인더 (추천 재확인)
-   - 14일 후 리마인더 (K-IPPA 평가)
+1. **由щ쭏?몃뜑 ?쒖뒪??*
+   - 7????由щ쭏?몃뜑 (異붿쿇 ?ы솗??
+   - 14????由щ쭏?몃뜑 (K-IPPA ?됯?)
 
-2. **인센티브 시스템**
-   - 포인트 적립 안내 강화
-   - 쿠폰 발급 프로세스 간소화
+2. **?몄꽱?곕툕 ?쒖뒪??*
+   - ?ъ씤???곷┰ ?덈궡 媛뺥솕
+   - 荑좏룿 諛쒓툒 ?꾨줈?몄뒪 媛꾩냼??
 
-## 관련 파일
+## 愿???뚯씪
 
-- `app/api/admin/analytics/conversion-rates/route.ts`: 전환율 측정 API
-- `components/admin/conversion-rates-dashboard.tsx`: 전환율 대시보드 컴포넌트
-- `scripts/tests/measure-conversion-rates.ts`: 전환율 측정 스크립트
-- `app/api/webhooks/coupang/purchase/route.ts`: 쿠팡 Postback 엔드포인트
-- `app/api/webhooks/meta/purchase/route.ts`: Meta Pixel 엔드포인트
-- `app/api/recommendations/[id]/click/route.ts`: 추천 클릭 추적
-- `app/api/recommendations/[id]/action/route.ts`: 추가 액션 추적
+- `app/api/admin/analytics/conversion-rates/route.ts`: ?꾪솚??痢≪젙 API
+- `components/admin/conversion-rates-dashboard.tsx`: ?꾪솚????쒕낫??而댄룷?뚰듃
+- `scripts/tests/measure-conversion-rates.ts`: ?꾪솚??痢≪젙 ?ㅽ겕由쏀듃
+- `app/api/webhooks/naver/purchase/route.ts`: 荑좏뙜 Postback ?붾뱶?ъ씤??
+- `app/api/webhooks/meta/purchase/route.ts`: Meta Pixel ?붾뱶?ъ씤??
+- `app/api/recommendations/[id]/click/route.ts`: 異붿쿇 ?대┃ 異붿쟻
+- `app/api/recommendations/[id]/action/route.ts`: 異붽? ?≪뀡 異붿쟻
 
-## 데이터베이스 스키마
+## ?곗씠?곕쿋?댁뒪 ?ㅽ궎留?
 
-### conversion_events 테이블
+### conversion_events ?뚯씠釉?
 
 ```sql
 CREATE TABLE conversion_events (
@@ -202,17 +202,17 @@ CREATE TABLE conversion_events (
   purchase_amount NUMERIC,
   commission_amount NUMERIC,
   purchase_date TIMESTAMPTZ,
-  tracking_source TEXT, -- 'postback', 'meta_pixel', 'coupang_api'
+  tracking_source TEXT, -- 'postback', 'meta_pixel', 'naver_api'
   source TEXT,
   metadata JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
-### recommendations 테이블 (관련 필드)
+### recommendations ?뚯씠釉?(愿???꾨뱶)
 
-- `is_clicked`: 클릭 여부
-- `purchase_completed`: 구매 완료 여부
-- `purchase_completed_at`: 구매 완료 일시
-- `purchase_amount`: 구매 금액
+- `is_clicked`: ?대┃ ?щ?
+- `purchase_completed`: 援щℓ ?꾨즺 ?щ?
+- `purchase_completed_at`: 援щℓ ?꾨즺 ?쇱떆
+- `purchase_amount`: 援щℓ 湲덉븸
 

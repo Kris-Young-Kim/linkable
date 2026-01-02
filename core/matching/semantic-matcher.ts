@@ -77,9 +77,9 @@ export async function semanticMatch(
         const finalScore = vm.adjustedScore !== undefined
           ? Math.min(vm.adjustedScore, 1.0)
           : Math.min(
-              (vm.baseScore * 0.3 + vm.similarity * 0.5 + vm.successRate * 0.2) * 1.0,
-              1.0
-            );
+            (vm.baseScore * 0.3 + vm.similarity * 0.5 + vm.successRate * 0.2) * 1.0,
+            1.0
+          );
 
         return {
           isoCode: vm.isoCode,
@@ -106,7 +106,7 @@ export async function semanticMatch(
           avgSimilarity:
             vectorMatches.length > 0
               ? vectorMatches.reduce((sum, vm) => sum + vm.similarity, 0) /
-                vectorMatches.length
+              vectorMatches.length
               : 0,
         },
       });
@@ -118,7 +118,7 @@ export async function semanticMatch(
           // 통계 업데이트 실패는 무시
         });
       }
-      
+
       // 벡터 검색 로깅 (비동기, 에러 무시)
       // consultation_id는 context에서 가져와야 하지만 여기서는 없으므로 나중에 업데이트
 
@@ -157,11 +157,13 @@ function buildQueryText(icfCodes: string[], userContext: string): string {
   const icfDescriptions = icfCodes
     .map((code) => {
       const meta = findIcfCode(code);
-      return meta ? `${code}: ${meta.description}` : code;
+      return `[${code}] ${meta?.description || "(설명 없음)"}`;
     })
-    .join("; ");
+    .join(", ");
 
-  return `${icfDescriptions}. 사용자 상황: ${userContext || "정보 없음"}`;
+  return `발견된 주요 증상 및 활동 제약: ${icfDescriptions}. 
+추가 컨텍스트: ${userContext || "특이사항 없음"}. 
+위 내용을 바탕으로 가장 적합한 보조기기 ISO 분류를 추천해 주세요.`;
 }
 
 // createEmbedding은 lib/embeddings/gemini-embedding.ts에서 import

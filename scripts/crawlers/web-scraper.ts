@@ -31,7 +31,7 @@ if (
 }
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { CoupangScraper } from "./coupang-scraper";
+
 import { NaverScraper } from "./naver-scraper";
 import { GenericScraper } from "./generic-scraper";
 import { getEnabledSites, getSiteConfig, type SiteConfig } from "./site-config";
@@ -44,7 +44,7 @@ interface CliOptions {
   category?: string; // 카테고리 (예: "휠체어", "워커")
   categories?: string; // 여러 카테고리 (쉼표로 구분, 예: "휠체어,워커,목발")
   isoCode?: string;
-  platform?: "coupang" | "naver" | "all" | string; // 사이트 이름도 가능
+  platform?: "naver" | "all" | string; // 사이트 이름도 가능
   max?: number;
   dryRun?: boolean;
   listSites?: boolean; // 지원 사이트 목록 보기
@@ -74,7 +74,7 @@ function parseArgs(): CliOptions {
       options.isoCode = args[i + 1];
       i++;
     } else if (args[i] === "--platform" && args[i + 1]) {
-      options.platform = args[i + 1] as "coupang" | "naver" | "all";
+      options.platform = args[i + 1] as "naver" | "all";
       i++;
     } else if (args[i] === "--max" && args[i + 1]) {
       options.max = parseInt(args[i + 1], 10);
@@ -234,8 +234,8 @@ async function main() {
     const categories = options.categories
       ? options.categories.split(",").map((c) => c.trim())
       : options.category
-      ? [options.category]
-      : [];
+        ? [options.category]
+        : [];
 
     const allProducts: ProductInput[] = [];
 
@@ -254,16 +254,16 @@ async function main() {
         // 보조기기 전문 쇼핑몰 크롤링
         if (
           options.platform === "all" ||
-          (options.platform !== "coupang" && options.platform !== "naver")
+          options.platform !== "naver"
         ) {
           const sites =
             options.platform === "all"
               ? getEnabledSites()
               : (() => {
-                  if (!options.platform) return [];
-                  const config = getSiteConfig(options.platform);
-                  return config ? [config] : [];
-                })();
+                if (!options.platform) return [];
+                const config = getSiteConfig(options.platform);
+                return config ? [config] : [];
+              })();
 
           for (const site of sites) {
             console.log(`\n🛒 ${site.name} (${category}) 크롤링 시작...`);
@@ -314,32 +314,7 @@ async function main() {
         delay: 1000, // 1초 간격
       };
 
-      // 쿠팡 크롤링
-      if (options.platform === "coupang" || options.platform === "all") {
-        console.log("\n🛒 쿠팡 크롤링 시작...");
-        const coupangScraper = new CoupangScraper();
-        try {
-          const result = await coupangScraper.scrape(scraperOptions);
-          if (result.success && result.products.length > 0) {
-            console.log(`✅ 쿠팡: ${result.products.length}개 상품 수집`);
-            allProducts.push(
-              ...result.products.map((p) => ({
-                ...p,
-                iso_code: options.isoCode || "N999999", // 기본값 (비표준 코드)
-              }))
-            );
-          } else if (result.products.length === 0) {
-            console.warn("⚠️  쿠팡: 수집된 상품이 없습니다.");
-          }
-          if (result.errors && result.errors.length > 0) {
-            console.warn(`⚠️  쿠팡 에러: ${result.errors.join(", ")}`);
-          }
-        } catch (error) {
-          console.error("❌ 쿠팡 크롤링 중 오류:", error);
-        } finally {
-          await coupangScraper.close();
-        }
-      }
+
 
       // 네이버 쇼핑 크롤링
       if (options.platform === "naver" || options.platform === "all") {
@@ -373,7 +348,7 @@ async function main() {
     if (
       options.keyword &&
       (options.platform === "all" ||
-        (options.platform !== "coupang" && options.platform !== "naver"))
+        options.platform !== "naver")
     ) {
       const scraperOptions: ScraperOptions = {
         keyword: options.keyword,
@@ -386,10 +361,10 @@ async function main() {
         options.platform === "all"
           ? getEnabledSites()
           : (() => {
-              if (!options.platform) return [];
-              const config = getSiteConfig(options.platform);
-              return config ? [config] : [];
-            })();
+            if (!options.platform) return [];
+            const config = getSiteConfig(options.platform);
+            return config ? [config] : [];
+          })();
 
       for (const site of sites) {
         console.log(`\n🛒 ${site.name} 크롤링 시작...`);
@@ -431,8 +406,7 @@ async function main() {
       console.log("\n🔍 Dry-run 모드: 실제로 등록하지 않습니다.\n");
       allProducts.forEach((p, i) => {
         console.log(
-          `${i + 1}. ${p.name} (${
-            p.price?.toLocaleString() || "가격 없음"
+          `${i + 1}. ${p.name} (${p.price?.toLocaleString() || "가격 없음"
           }원) - ${p.purchase_link}`
         );
       });

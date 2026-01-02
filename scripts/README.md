@@ -1,245 +1,245 @@
-# 상품 크롤링 스크립트 가이드
+﻿# ?곹뭹 ?щ·留??ㅽ겕由쏀듃 媛?대뱶
 
-## 개요
+## 媛쒖슂
 
-수동으로 수집한 상품 데이터를 CSV 또는 JSON 파일로 일괄 등록할 수 있는 스크립트입니다.
+?섎룞?쇰줈 ?섏쭛???곹뭹 ?곗씠?곕? CSV ?먮뒗 JSON ?뚯씪濡??쇨큵 ?깅줉?????덈뒗 ?ㅽ겕由쏀듃?낅땲??
 
-## 사전 준비
+## ?ъ쟾 以鍮?
 
-### 1. 환경 변수 설정
+### 1. ?섍꼍 蹂???ㅼ젙
 
-`.env.local` 파일에 다음 환경 변수가 설정되어 있어야 합니다:
+`.env.local` ?뚯씪???ㅼ쓬 ?섍꼍 蹂?섍? ?ㅼ젙?섏뼱 ?덉뼱???⑸땲??
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 ```
 
-### 2. tsx 설치 (선택사항)
+### 2. tsx ?ㅼ튂 (?좏깮?ы빆)
 
-TypeScript 파일을 직접 실행하려면 `tsx`를 설치하세요:
+TypeScript ?뚯씪??吏곸젒 ?ㅽ뻾?섎젮硫?`tsx`瑜??ㅼ튂?섏꽭??
 
 ```bash
 pnpm add -D tsx
 ```
 
-또는 `npx tsx`를 사용할 수 있습니다.
+?먮뒗 `npx tsx`瑜??ъ슜?????덉뒿?덈떎.
 
-## 사용법
+## ?ъ슜踰?
 
-### 기본 사용법
+### 湲곕낯 ?ъ슜踰?
 
 ```bash
-# CSV 파일로 상품 등록
+# CSV ?뚯씪濡??곹뭹 ?깅줉
 npx tsx scripts/manual-product-import.ts --file scripts/example-products.csv
 
-# JSON 파일로 상품 등록
+# JSON ?뚯씪濡??곹뭹 ?깅줉
 npx tsx scripts/manual-product-import.ts --file scripts/example-products.json
 
-# 링크 검증 포함
+# 留곹겕 寃利??ы븿
 npx tsx scripts/manual-product-import.ts --file products.csv --validate-links
 
-# Dry-run 모드 (실제 등록 없이 확인만)
+# Dry-run 紐⑤뱶 (?ㅼ젣 ?깅줉 ?놁씠 ?뺤씤留?
 npx tsx scripts/manual-product-import.ts --file products.csv --dry-run
 ```
 
-### 옵션
+### ?듭뀡
 
-- `--file <경로>`: 등록할 CSV 또는 JSON 파일 경로 (필수)
-- `--validate-links`: 구매 링크 유효성 검증 (선택)
-- `--dry-run`: 실제 등록 없이 파싱 결과만 확인 (선택)
+- `--file <寃쎈줈>`: ?깅줉??CSV ?먮뒗 JSON ?뚯씪 寃쎈줈 (?꾩닔)
+- `--validate-links`: 援щℓ 留곹겕 ?좏슚??寃利?(?좏깮)
+- `--dry-run`: ?ㅼ젣 ?깅줉 ?놁씠 ?뚯떛 寃곌낵留??뺤씤 (?좏깮)
 
-## 파일 형식
+## ?뚯씪 ?뺤떇
 
-### CSV 형식
+### CSV ?뺤떇
 
 ```csv
 name,iso_code,price,purchase_link,image_url,manufacturer,category,description
-무게조절 식기 세트,15 09,25000,https://coupang.link/1,https://image.com/1.jpg,보조기기코리아,coupang,손 떨림 보조 식기
-적응형 숟가락,15 09,15000,https://naver.link/1,https://image.com/2.jpg,보조기기코리아,naver,손 기능 보조 숟가락
+臾닿쾶議곗젅 ?앷린 ?명듃,15 09,25000,https://naver.link/1,https://image.com/1.jpg,蹂댁“湲곌린肄붾━??naver,???⑤┝ 蹂댁“ ?앷린
+?곸쓳???잕???15 09,15000,https://naver.link/1,https://image.com/2.jpg,蹂댁“湲곌린肄붾━??naver,??湲곕뒫 蹂댁“ ?잕???
 ```
 
-**필수 필드:**
-- `name`: 상품 이름
-- `iso_code`: ISO 9999 코드 (예: "15 09")
+**?꾩닔 ?꾨뱶:**
+- `name`: ?곹뭹 ?대쫫
+- `iso_code`: ISO 9999 肄붾뱶 (?? "15 09")
 
-**선택 필드:**
-- `price`: 가격 (숫자)
-- `purchase_link`: 구매 링크 (URL)
-- `image_url`: 이미지 URL
-- `manufacturer`: 제조사명
-- `category`: 카테고리/플랫폼 (예: "coupang", "naver")
-- `description`: 상품 설명
-- `is_active`: 활성 상태 (true/false, 기본값: true)
+**?좏깮 ?꾨뱶:**
+- `price`: 媛寃?(?レ옄)
+- `purchase_link`: 援щℓ 留곹겕 (URL)
+- `image_url`: ?대?吏 URL
+- `manufacturer`: ?쒖“?щ챸
+- `category`: 移댄뀒怨좊━/?뚮옯??(?? "naver", "naver")
+- `description`: ?곹뭹 ?ㅻ챸
+- `is_active`: ?쒖꽦 ?곹깭 (true/false, 湲곕낯媛? true)
 
-### JSON 형식
+### JSON ?뺤떇
 
 ```json
 [
   {
-    "name": "무게조절 식기 세트",
+    "name": "臾닿쾶議곗젅 ?앷린 ?명듃",
     "iso_code": "15 09",
     "price": 25000,
-    "purchase_link": "https://coupang.link/1",
+    "purchase_link": "https://naver.link/1",
     "image_url": "https://image.com/1.jpg",
-    "manufacturer": "보조기기코리아",
-    "category": "coupang",
-    "description": "손 떨림 보조 식기"
+    "manufacturer": "蹂댁“湲곌린肄붾━??,
+    "category": "naver",
+    "description": "???⑤┝ 蹂댁“ ?앷린"
   }
 ]
 ```
 
-## ISO 코드 형식
+## ISO 肄붾뱶 ?뺤떇
 
-ISO 9999:2022 표준에 따라 다음 형식을 사용하세요:
+ISO 9999:2022 ?쒖????곕씪 ?ㅼ쓬 ?뺤떇???ъ슜?섏꽭??
 
-- 올바른 형식: `15 09`, `18 30`, `12 22` (공백 포함)
-- 잘못된 형식: `1509`, `15-09`, `15.09`
+- ?щ컮瑜??뺤떇: `15 09`, `18 30`, `12 22` (怨듬갚 ?ы븿)
+- ?섎せ???뺤떇: `1509`, `15-09`, `15.09`
 
-### 주요 ISO 코드 예시
+### 二쇱슂 ISO 肄붾뱶 ?덉떆
 
-- `15 09`: 식사 및 음주 보조기기
-- `18 30`: 수직 접근성 보조기기
-- `12 22`: 수동 휠체어
-- `12 31`: 체위 변경 보조기기
-- `21 06`: 청각 보조기기
-- `22 30`: 의사소통 보조기기
+- `15 09`: ?앹궗 諛??뚯＜ 蹂댁“湲곌린
+- `18 30`: ?섏쭅 ?묎렐??蹂댁“湲곌린
+- `12 22`: ?섎룞 ?좎껜??
+- `12 31`: 泥댁쐞 蹂寃?蹂댁“湲곌린
+- `21 06`: 泥?컖 蹂댁“湲곌린
+- `22 30`: ?섏궗?뚰넻 蹂댁“湲곌린
 
-전체 ISO 코드 목록은 `core/matching/iso-mapping.ts`를 참고하세요.
+?꾩껜 ISO 肄붾뱶 紐⑸줉? `core/matching/iso-mapping.ts`瑜?李멸퀬?섏꽭??
 
-## 예제 파일
+## ?덉젣 ?뚯씪
 
-- `scripts/example-products.csv`: CSV 형식 예제
-- `scripts/example-products.json`: JSON 형식 예제
+- `scripts/example-products.csv`: CSV ?뺤떇 ?덉젣
+- `scripts/example-products.json`: JSON ?뺤떇 ?덉젣
 
-## 동작 방식
+## ?숈옉 諛⑹떇
 
-1. **파일 파싱**: CSV 또는 JSON 파일을 읽어 상품 데이터 추출
-2. **검증**: ISO 코드 형식 및 필수 필드 검증
-3. **중복 확인**: 이름과 ISO 코드로 기존 상품 확인
-4. **등록/업데이트**: 신규 상품은 생성, 기존 상품은 업데이트
-5. **결과 출력**: 생성/업데이트/실패 통계 표시
+1. **?뚯씪 ?뚯떛**: CSV ?먮뒗 JSON ?뚯씪???쎌뼱 ?곹뭹 ?곗씠??異붿텧
+2. **寃利?*: ISO 肄붾뱶 ?뺤떇 諛??꾩닔 ?꾨뱶 寃利?
+3. **以묐났 ?뺤씤**: ?대쫫怨?ISO 肄붾뱶濡?湲곗〈 ?곹뭹 ?뺤씤
+4. **?깅줉/?낅뜲?댄듃**: ?좉퇋 ?곹뭹? ?앹꽦, 湲곗〈 ?곹뭹? ?낅뜲?댄듃
+5. **寃곌낵 異쒕젰**: ?앹꽦/?낅뜲?댄듃/?ㅽ뙣 ?듦퀎 ?쒖떆
 
-## 주의사항
+## 二쇱쓽?ы빆
 
-1. **ISO 코드 형식**: 반드시 공백 포함 형식 (`15 09`)을 사용하세요
-2. **중복 처리**: 같은 이름과 ISO 코드를 가진 상품은 자동으로 업데이트됩니다
-3. **링크 검증**: `--validate-links` 옵션 사용 시 시간이 오래 걸릴 수 있습니다
-4. **대량 등록**: 100개 이상의 상품을 등록할 때는 시간이 걸릴 수 있습니다
+1. **ISO 肄붾뱶 ?뺤떇**: 諛섎뱶??怨듬갚 ?ы븿 ?뺤떇 (`15 09`)???ъ슜?섏꽭??
+2. **以묐났 泥섎━**: 媛숈? ?대쫫怨?ISO 肄붾뱶瑜?媛吏??곹뭹? ?먮룞?쇰줈 ?낅뜲?댄듃?⑸땲??
+3. **留곹겕 寃利?*: `--validate-links` ?듭뀡 ?ъ슜 ???쒓컙???ㅻ옒 嫄몃┫ ???덉뒿?덈떎
+4. **????깅줉**: 100媛??댁긽???곹뭹???깅줉???뚮뒗 ?쒓컙??嫄몃┫ ???덉뒿?덈떎
 
-## 문제 해결
+## 臾몄젣 ?닿껐
 
-### "데이터베이스 연결 실패" 에러
+### "?곗씠?곕쿋?댁뒪 ?곌껐 ?ㅽ뙣" ?먮윭
 
-- `.env.local` 파일에 Supabase 환경 변수가 올바르게 설정되어 있는지 확인
-- `SUPABASE_SERVICE_ROLE_KEY`가 올바른지 확인
+- `.env.local` ?뚯씪??Supabase ?섍꼍 蹂?섍? ?щ컮瑜닿쾶 ?ㅼ젙?섏뼱 ?덈뒗吏 ?뺤씤
+- `SUPABASE_SERVICE_ROLE_KEY`媛 ?щ컮瑜몄? ?뺤씤
 
-### "유효하지 않은 ISO 코드" 경고
+### "?좏슚?섏? ?딆? ISO 肄붾뱶" 寃쎄퀬
 
-- ISO 코드 형식이 `XX XX` (공백 포함)인지 확인
-- `core/matching/iso-mapping.ts`에서 사용 가능한 ISO 코드 확인
+- ISO 肄붾뱶 ?뺤떇??`XX XX` (怨듬갚 ?ы븿)?몄? ?뺤씤
+- `core/matching/iso-mapping.ts`?먯꽌 ?ъ슜 媛?ν븳 ISO 肄붾뱶 ?뺤씤
 
-### "컬럼 수가 맞지 않습니다" 경고
+### "而щ읆 ?섍? 留욎? ?딆뒿?덈떎" 寃쎄퀬
 
-- CSV 파일의 헤더와 데이터 행의 컬럼 수가 일치하는지 확인
-- 쉼표가 포함된 필드는 따옴표로 감싸야 합니다
+- CSV ?뚯씪???ㅻ뜑? ?곗씠???됱쓽 而щ읆 ?섍? ?쇱튂?섎뒗吏 ?뺤씤
+- ?쇳몴媛 ?ы븿???꾨뱶???곗샂?쒕줈 媛먯떥???⑸땲??
 
-## 웹 스크래핑 크롤러
+## ???ㅽ겕?섑븨 ?щ·??
 
-### 개요
+### 媛쒖슂
 
-Playwright 기반 웹 스크래핑 크롤러로 쿠팡, 네이버 쇼핑 등에서 상품 정보를 자동으로 수집하고 데이터베이스에 등록할 수 있습니다.
+Playwright 湲곕컲 ???ㅽ겕?섑븨 ?щ·?щ줈 荑좏뙜, ?ㅼ씠踰??쇳븨 ?깆뿉???곹뭹 ?뺣낫瑜??먮룞?쇰줈 ?섏쭛?섍퀬 ?곗씠?곕쿋?댁뒪???깅줉?????덉뒿?덈떎.
 
-### 사전 준비
+### ?ъ쟾 以鍮?
 
-1. **Playwright 브라우저 설치** (최초 1회)
+1. **Playwright 釉뚮씪?곗? ?ㅼ튂** (理쒖큹 1??
    ```bash
    npx playwright install chromium
    ```
 
-2. **환경 변수 설정** (수동 크롤링과 동일)
-   - `.env.local` 파일에 Supabase 환경 변수 설정
+2. **?섍꼍 蹂???ㅼ젙** (?섎룞 ?щ·留곴낵 ?숈씪)
+   - `.env.local` ?뚯씪??Supabase ?섍꼍 蹂???ㅼ젙
 
-### 사용법
+### ?ъ슜踰?
 
-#### 기본 사용법
-
-```bash
-# 쿠팡만 크롤링 (5개 상품)
-pnpm crawl:products --keyword "무게조절 식기" --iso-code "15 09" --platform coupang --max 5
-
-# 네이버 쇼핑만 크롤링 (10개 상품)
-pnpm crawl:products --keyword "보행기" --iso-code "12 03" --platform naver --max 10
-
-# 모든 플랫폼 크롤링 (10개 상품)
-pnpm crawl:products --keyword "식기" --iso-code "15 09" --max 10
-
-# Dry-run 모드 (실제 등록 안 함)
-pnpm crawl:products --keyword "식기" --iso-code "15 09" --dry-run
-```
-
-#### 옵션
-
-- `--keyword <검색어>`: 검색할 키워드 (필수)
-- `--iso-code <코드>`: ISO 9999 코드 (예: "15 09") (선택, 추천)
-- `--platform <플랫폼>`: 크롤링할 플랫폼 (`coupang`, `naver`, `all`) (기본값: `all`)
-- `--max <숫자>`: 최대 수집 개수 (기본값: 10)
-- `--dry-run`: 실제 등록 없이 결과만 확인
-
-### 예시
+#### 湲곕낯 ?ъ슜踰?
 
 ```bash
-# 쿠팡에서 "보행기" 검색하여 ISO "12 03"으로 등록 (5개)
-pnpm crawl:products --keyword "보행기" --iso-code "12 03" --platform coupang --max 5
+# 荑좏뙜留??щ·留?(5媛??곹뭹)
+pnpm crawl:products --keyword "臾닿쾶議곗젅 ?앷린" --iso-code "15 09" --platform naver --max 5
 
-# 네이버 쇼핑에서 "청각 보조기기" 검색 (10개)
-pnpm crawl:products --keyword "청각 보조기기" --iso-code "21 06" --platform naver --max 10
+# ?ㅼ씠踰??쇳븨留??щ·留?(10媛??곹뭹)
+pnpm crawl:products --keyword "蹂댄뻾湲? --iso-code "12 03" --platform naver --max 10
 
-# 모든 플랫폼에서 "식기" 검색 (ISO 코드 없이)
-pnpm crawl:products --keyword "식기" --max 10
+# 紐⑤뱺 ?뚮옯???щ·留?(10媛??곹뭹)
+pnpm crawl:products --keyword "?앷린" --iso-code "15 09" --max 10
+
+# Dry-run 紐⑤뱶 (?ㅼ젣 ?깅줉 ????
+pnpm crawl:products --keyword "?앷린" --iso-code "15 09" --dry-run
 ```
 
-### 동작 방식
+#### ?듭뀡
 
-1. **브라우저 실행**: Playwright로 헤드리스 브라우저 실행
-2. **검색 페이지 접속**: 쿠팡/네이버 쇼핑 검색 페이지로 이동
-3. **상품 정보 추출**: 상품명, 가격, 이미지, 링크 추출
-4. **Rate Limit 방지**: 요청 간 1초 대기
-5. **데이터베이스 등록**: 수집한 상품을 Supabase에 자동 등록
+- `--keyword <寃?됱뼱>`: 寃?됲븷 ?ㅼ썙??(?꾩닔)
+- `--iso-code <肄붾뱶>`: ISO 9999 肄붾뱶 (?? "15 09") (?좏깮, 異붿쿇)
+- `--platform <?뚮옯??`: ?щ·留곹븷 ?뚮옯??(`naver`, `naver`, `all`) (湲곕낯媛? `all`)
+- `--max <?レ옄>`: 理쒕? ?섏쭛 媛쒖닔 (湲곕낯媛? 10)
+- `--dry-run`: ?ㅼ젣 ?깅줉 ?놁씠 寃곌낵留??뺤씤
 
-### 주의사항
+### ?덉떆
 
-1. **셀렉터 변경**: 쇼핑몰 사이트 구조 변경 시 셀렉터 수정 필요
-2. **Rate Limit**: 요청 간격을 1초 이상 유지하여 차단 방지
-3. **에러 처리**: 일부 상품 추출 실패해도 계속 진행
-4. **ISO 코드**: ISO 코드 없이 등록하면 추천에 사용되지 않을 수 있음
+```bash
+# 荑좏뙜?먯꽌 "蹂댄뻾湲? 寃?됲븯??ISO "12 03"?쇰줈 ?깅줉 (5媛?
+pnpm crawl:products --keyword "蹂댄뻾湲? --iso-code "12 03" --platform naver --max 5
 
-### 문제 해결
+# ?ㅼ씠踰??쇳븨?먯꽌 "泥?컖 蹂댁“湲곌린" 寃??(10媛?
+pnpm crawl:products --keyword "泥?컖 蹂댁“湲곌린" --iso-code "21 06" --platform naver --max 10
 
-#### "상품이 수집되지 않습니다"
+# 紐⑤뱺 ?뚮옯?쇱뿉??"?앷린" 寃??(ISO 肄붾뱶 ?놁씠)
+pnpm crawl:products --keyword "?앷린" --max 10
+```
 
-- 셀렉터가 사이트 구조 변경으로 인해 작동하지 않을 수 있음
-- `scripts/crawlers/coupang-scraper.ts` 또는 `naver-scraper.ts`의 셀렉터 확인
-- 브라우저 개발자 도구로 실제 HTML 구조 확인 후 셀렉터 수정
+### ?숈옉 諛⑹떇
 
-#### "크롤링이 너무 느립니다"
+1. **釉뚮씪?곗? ?ㅽ뻾**: Playwright濡??ㅻ뱶由ъ뒪 釉뚮씪?곗? ?ㅽ뻾
+2. **寃???섏씠吏 ?묒냽**: 荑좏뙜/?ㅼ씠踰??쇳븨 寃???섏씠吏濡??대룞
+3. **?곹뭹 ?뺣낫 異붿텧**: ?곹뭹紐? 媛寃? ?대?吏, 留곹겕 異붿텧
+4. **Rate Limit 諛⑹?**: ?붿껌 媛?1珥??湲?
+5. **?곗씠?곕쿋?댁뒪 ?깅줉**: ?섏쭛???곹뭹??Supabase???먮룞 ?깅줉
 
-- `--max` 옵션으로 수집 개수 제한
-- Rate Limit 방지를 위해 요청 간격이 1초로 설정되어 있음
+### 二쇱쓽?ы빆
 
-#### "브라우저 실행 오류"
+1. **??됲꽣 蹂寃?*: ?쇳븨紐??ъ씠??援ъ“ 蹂寃?????됲꽣 ?섏젙 ?꾩슂
+2. **Rate Limit**: ?붿껌 媛꾧꺽??1珥??댁긽 ?좎??섏뿬 李⑤떒 諛⑹?
+3. **?먮윭 泥섎━**: ?쇰? ?곹뭹 異붿텧 ?ㅽ뙣?대룄 怨꾩냽 吏꾪뻾
+4. **ISO 肄붾뱶**: ISO 肄붾뱶 ?놁씠 ?깅줉?섎㈃ 異붿쿇???ъ슜?섏? ?딆쓣 ???덉쓬
 
-- Playwright 브라우저가 설치되어 있는지 확인: `npx playwright install chromium`
+### 臾몄젣 ?닿껐
 
-## 다음 단계
+#### "?곹뭹???섏쭛?섏? ?딆뒿?덈떎"
 
-1. **셀렉터 테스트 및 조정**: 각 사이트별 실제 HTML 구조 확인 및 셀렉터 최적화 (`docs/selector-testing-guide.md`)
-2. **관리자 UI 연동**: `/admin/products`에서 크롤링 기능 추가
-3. **자동 크롤링**: 쿠팡 파트너스 API 연동 (`lib/integrations/coupang.ts`) (API 확보 후)
-4. **n8n 워크플로우**: Schedule Trigger 기반 자동 크롤링 (API 확보 후)
+- ??됲꽣媛 ?ъ씠??援ъ“ 蹂寃쎌쑝濡??명빐 ?묐룞?섏? ?딆쓣 ???덉쓬
+- `scripts/crawlers/naver-scraper.ts` ?먮뒗 `naver-scraper.ts`????됲꽣 ?뺤씤
+- 釉뚮씪?곗? 媛쒕컻???꾧뎄濡??ㅼ젣 HTML 援ъ“ ?뺤씤 ????됲꽣 ?섏젙
 
-## 참고 문서
+#### "?щ·留곸씠 ?덈Т ?먮┰?덈떎"
 
-- **웹 스크래핑 전체 가이드**: `docs/web-scraping-guide.md`
-- **셀렉터 테스트 가이드**: `docs/selector-testing-guide.md`
+- `--max` ?듭뀡?쇰줈 ?섏쭛 媛쒖닔 ?쒗븳
+- Rate Limit 諛⑹?瑜??꾪빐 ?붿껌 媛꾧꺽??1珥덈줈 ?ㅼ젙?섏뼱 ?덉쓬
+
+#### "釉뚮씪?곗? ?ㅽ뻾 ?ㅻ쪟"
+
+- Playwright 釉뚮씪?곗?媛 ?ㅼ튂?섏뼱 ?덈뒗吏 ?뺤씤: `npx playwright install chromium`
+
+## ?ㅼ쓬 ?④퀎
+
+1. **??됲꽣 ?뚯뒪??諛?議곗젙**: 媛??ъ씠?몃퀎 ?ㅼ젣 HTML 援ъ“ ?뺤씤 諛???됲꽣 理쒖쟻??(`docs/selector-testing-guide.md`)
+2. **愿由ъ옄 UI ?곕룞**: `/admin/products`?먯꽌 ?щ·留?湲곕뒫 異붽?
+3. **?먮룞 ?щ·留?*: 荑좏뙜 ?뚰듃?덉뒪 API ?곕룞 (`lib/integrations/naver.ts`) (API ?뺣낫 ??
+4. **n8n ?뚰겕?뚮줈??*: Schedule Trigger 湲곕컲 ?먮룞 ?щ·留?(API ?뺣낫 ??
+
+## 李멸퀬 臾몄꽌
+
+- **???ㅽ겕?섑븨 ?꾩껜 媛?대뱶**: `docs/web-scraping-guide.md`
+- **??됲꽣 ?뚯뒪??媛?대뱶**: `docs/selector-testing-guide.md`
 

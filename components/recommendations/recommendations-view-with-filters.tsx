@@ -348,7 +348,7 @@ export function RecommendationsViewWithFilters({
         </div>
       )}
 
-      {/* 쿠팡 파트너스 활동 시 주의사항 */}
+      {/* 제휴 마케팅 안내 */}
       <PartnershipNotice />
     </div>
   )

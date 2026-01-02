@@ -299,7 +299,7 @@ export class SimpleScraper {
 
               // 제품명
               let name = ""
-              
+
               // 먼저 링크 텍스트를 제품명으로 시도
               if (link) {
                 const linkEl = $el.find(`a[href*='goods_view.php']`).first()
@@ -307,7 +307,7 @@ export class SimpleScraper {
                   name = linkEl.text().trim()
                 }
               }
-              
+
               // product_box 내부에서 제품명 찾기 (휠로피아 특화)
               if (!name) {
                 const productBox = $el.find(".product_box").first()
@@ -322,7 +322,7 @@ export class SimpleScraper {
                   }
                 }
               }
-              
+
               // 제품명 셀렉터로 찾기
               if (!name) {
                 for (const nameSelector of this.siteConfig.selectors.productName) {
@@ -340,7 +340,7 @@ export class SimpleScraper {
                   }
                 }
               }
-              
+
               // td 내부의 모든 텍스트에서 제품명 찾기 (마지막 시도)
               if (!name) {
                 const allText = $el.text().trim()
@@ -435,6 +435,14 @@ export class SimpleScraper {
    */
   private buildSearchUrl(options: { keyword?: string; category?: string }): string {
     const baseUrl = this.siteConfig.baseUrl
+
+    if (options.category && this.siteConfig.categoryUrls?.[options.category]) {
+      return this.siteConfig.categoryUrls[options.category]
+    }
+
+    if (options.keyword && this.siteConfig.searchUrl) {
+      return this.siteConfig.searchUrl.replace("{keyword}", encodeURIComponent(options.keyword))
+    }
 
     if (options.category) {
       // 카테고리 기반 검색 (사이트별로 다를 수 있음)

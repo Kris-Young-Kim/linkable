@@ -40,7 +40,7 @@ PRD (Product Requirements Document)
    User Story: "사용자는 가장 저렴하고 빠르게 배송되는 곳에서 구매하고 싶어 한다."
    Step 1: ICF 분석 완료 후 채팅 인터페이스에 "추천 보기" CTA 버튼 표시.
    Step 2: 사용자가 CTA 클릭 시 추천 페이지(`/recommendations?consultationId={id}`)로 이동.
-   Step 3: 추천 카드를 클릭하면 쿠팡/네이버 최저가 페이지로 이동.
+   Step 3: 추천 카드를 클릭하면 네이버 최저가 페이지로 이동.
    Requirement: 
    - 아웃링크(Out-link) 방식의 커머스 브릿지 구현. ✅ 구현 완료
    - 상담 완료 후 추천 페이지로 자동 연동 플로우. ⚠️ 구현 필요

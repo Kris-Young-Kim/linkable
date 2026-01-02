@@ -34,7 +34,7 @@ CREATE TABLE products (
 **구현 방법:**
 1. `products` 테이블에 ISO 코드별로 여러 상품 등록
 2. 예: ISO "15 09" (식사 보조기기)에 대해 여러 상품 등록
-   - 상품 A: 무게조절 식기 (쿠팡 링크)
+   - 상품 A: 무게조절 식기 (네이버 링크)
    - 상품 B: 적응형 숟가락 (네이버 링크)
    - 상품 C: 특수 식기 세트 (11번가 링크)
 
@@ -62,9 +62,9 @@ CREATE TABLE iso_code_recommendations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     iso_code VARCHAR(50) NOT NULL,
     purchase_link TEXT NOT NULL,
-    platform VARCHAR(50), -- 'coupang', 'naver', '11st', 'gmarket', 'manual'
+    platform VARCHAR(50), -- 'naver', '11st', 'gmarket', 'manual'
     priority INTEGER DEFAULT 0, -- 우선순위 (높을수록 먼저 추천)
-    title VARCHAR(255), -- 링크 설명 (예: "쿠팡 최저가", "네이버 쇼핑")
+    title VARCHAR(255), -- 링크 설명 (예: "네이버 쇼핑", "11번가")
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -166,9 +166,9 @@ const { data } = await supabase
 
 ```typescript
 // .env 파일
-ISO_15_09_LINKS=https://coupang.link/1,https://naver.link/1,https://11st.link/1
-ISO_18_30_LINKS=https://coupang.link/2,https://naver.link/2
-ISO_22_30_LINKS=https://coupang.link/3
+ISO_15_09_LINKS=https://naver.link/1,https://11st.link/1
+ISO_18_30_LINKS=https://naver.link/2
+ISO_22_30_LINKS=https://naver.link/3
 
 // lib/config/iso-links.ts
 export function getIsoCodeLinks(isoCode: string): string[] {
@@ -184,7 +184,7 @@ export function getIsoCodeLinks(isoCode: string): string[] {
 
 // 사용 예시
 const links = getIsoCodeLinks("15 09")
-// 결과: ["https://coupang.link/1", "https://naver.link/1", "https://11st.link/1"]
+// 결과: ["https://naver.link/1", "https://11st.link/1"]
 ```
 
 ### .env 방식의 단점
@@ -201,7 +201,7 @@ const links = getIsoCodeLinks("15 09")
 
 1. **Phase 1: 상품 데이터 수집**
    - [ ] ISO 코드별 대표 상품 링크 수집 (최소 20-30개)
-   - [ ] 쿠팡/네이버/11번가 제휴 링크 생성
+   - [ ] 네이버/11번가 제휴 링크 생성
    - [ ] `products` 테이블에 초기 데이터 입력
 
 2. **Phase 2: 상품 동기화 API**
@@ -226,25 +226,7 @@ const links = getIsoCodeLinks("15 09")
 
 ### 구현된 기능
 
-#### 1. 쿠팡 파트너스 API 구매 리포트 조회
-- **엔드포인트**: `GET /api/webhooks/coupang/purchase-report`
-- **기능**: 쿠팡 파트너스 API를 통해 구매 리포트를 조회하고 DB에 저장
-- **사용 방법**:
-  ```bash
-  # 최근 7일 구매 리포트 조회
-  GET /api/webhooks/coupang/purchase-report?startDate=2025-02-01&endDate=2025-02-10
-  ```
-- **자동화**: Vercel Cron 또는 스케줄러로 주기적 실행 (예: 매일 오전 2시)
-
-#### 2. 쿠팡 파트너스 Postback URL
-- **엔드포인트**: `POST /api/webhooks/coupang/purchase`
-- **기능**: 쿠팡 파트너스에서 구매 완료 시 자동으로 호출
-- **설정 방법**:
-  1. 쿠팡 파트너스 대시보드 접속
-  2. Postback URL 설정: `https://your-domain.com/api/webhooks/coupang/purchase`
-  3. 구매 완료 시 자동으로 이벤트 저장
-
-#### 3. Meta Pixel 연동
+#### 1. Meta Pixel 연동
 - **클라이언트 사이드**: `lib/integrations/meta-pixel.ts`
 - **Webhook 엔드포인트**: `POST /api/webhooks/meta/purchase`
 - **기능**:
@@ -267,7 +249,7 @@ event_type: 'purchase_completed'
 purchase_amount DECIMAL(10, 2)      -- 구매 금액
 commission_amount DECIMAL(10, 2)    -- 수수료 금액
 purchase_date TIMESTAMP             -- 구매 완료 일시
-tracking_source VARCHAR(50)         -- 추적 소스 ('coupang_api', 'postback', 'meta_pixel')
+tracking_source VARCHAR(50)         -- 추적 소스 ('postback', 'meta_pixel')
 ```
 
 #### recommendations 테이블
@@ -287,9 +269,8 @@ purchase_amount DECIMAL(10, 2)      -- 구매 금액
    └─ DB: recommendation.is_clicked = true
 
 2. 외부 판매 사이트에서 구매 완료
-   ├─ 쿠팡: Postback URL로 자동 알림
    ├─ Meta Pixel: Purchase 이벤트 전송
-   └─ 쿠팡 API: 주기적으로 구매 리포트 조회
+   └─ Postback URL로 자동 알림
 
 3. 구매 완료 이벤트 저장
    ├─ conversion_events: purchase_completed 이벤트 저장
@@ -300,19 +281,13 @@ purchase_amount DECIMAL(10, 2)      -- 구매 금액
 ### 환경 변수 설정
 
 ```env
-# 쿠팡 파트너스 API
-COUPANG_ACCESS_KEY=your_access_key
-COUPANG_SECRET_KEY=your_secret_key
-COUPANG_LINK_ID=your_link_id
-
 # Meta Pixel
 NEXT_PUBLIC_META_PIXEL_ID=your_pixel_id
 ```
 
 ### 수익화 전략
 
-1. **제휴 수수료 추적**: 쿠팡 파트너스를 통한 구매 시 수수료 자동 계산
-2. **전환율 분석**: 클릭 대비 구매 완료 비율 추적
+1. **전환율 분석**: 클릭 대비 구매 완료 비율 추적
 3. **ROI 분석**: 광고 비용 대비 수익 분석 (Meta Pixel 연동)
 4. **리타겟팅**: 구매하지 않은 사용자에게 재타겟팅 광고 (Meta Pixel)
 

@@ -14,7 +14,6 @@ scripts/crawlers/
 ├── utils.ts              # 유틸리티 함수 (재시도, 가격 파싱 등)
 ├── site-config.ts        # 사이트별 설정 관리
 ├── generic-scraper.ts    # 범용 크롤러 (설정 기반)
-├── coupang-scraper.ts    # 쿠팡 전용 크롤러 (선택적)
 ├── naver-scraper.ts      # 네이버 쇼핑 전용 크롤러 (선택적)
 ├── web-scraper.ts        # 통합 웹 스크래퍼 (메인 스크립트)
 └── test-steps.ts         # 단계별 테스트 스크립트

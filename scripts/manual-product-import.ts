@@ -9,7 +9,7 @@
  * 
  * CSV 형식:
  *   name,iso_code,price,purchase_link,image_url,manufacturer,category,description
- *   무게조절 식기 세트,15 09,25000,https://coupang.link/1,https://image.com/1.jpg,보조기기코리아,coupang,손 떨림 보조 식기
+ *   무게조절 식기 세트,15 09,25000,https://naver.link/1,https://image.com/1.jpg,보조기기코리아,naver,손 떨림 보조 식기
  * 
  * JSON 형식:
  *   [
@@ -17,10 +17,10 @@
  *       "name": "무게조절 식기 세트",
  *       "iso_code": "15 09",
  *       "price": 25000,
- *       "purchase_link": "https://coupang.link/1",
+ *       "purchase_link": "https://naver.link/1",
  *       "image_url": "https://image.com/1.jpg",
  *       "manufacturer": "보조기기코리아",
- *       "category": "coupang",
+ *       "category": "naver",
  *       "description": "손 떨림 보조 식기"
  *     }
  *   ]
@@ -80,7 +80,7 @@ interface ImportOptions {
 function parseCSV(filePath: string): ProductInput[] {
   const content = readFileSync(filePath, "utf-8")
   const lines = content.split("\n").filter((line) => line.trim())
-  
+
   if (lines.length < 2) {
     throw new Error("CSV 파일에 헤더와 최소 1개의 데이터 행이 필요합니다.")
   }
@@ -90,7 +90,7 @@ function parseCSV(filePath: string): ProductInput[] {
 
   for (let i = 1; i < lines.length; i++) {
     const values = parseCSVLine(lines[i])
-    
+
     if (values.length !== headers.length) {
       console.warn(`⚠️  행 ${i + 1}: 컬럼 수가 맞지 않습니다. 건너뜁니다.`)
       continue
@@ -139,7 +139,7 @@ function parseCSVLine(line: string): string[] {
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i]
-    
+
     if (char === '"') {
       inQuotes = !inQuotes
     } else if (char === "," && !inQuotes) {
@@ -149,7 +149,7 @@ function parseCSVLine(line: string): string[] {
       current += char
     }
   }
-  
+
   values.push(current)
   return values
 }
@@ -346,7 +346,7 @@ async function main() {
 
     // 데이터베이스 연결 확인
     const { error: testError } = await supabase.from("products").select("id").limit(1)
-    
+
     if (testError) {
       throw new Error(`데이터베이스 연결 실패: ${testError.message}`)
     }

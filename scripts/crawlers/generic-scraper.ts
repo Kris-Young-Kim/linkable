@@ -1,24 +1,54 @@
-// Playwright 제거: 제너릭 스크레이퍼는 비활성화되어 항상 빈 결과를 반환합니다.
 import type { ScraperOptions, ScraperResult } from "./types";
+import { SimpleScraper } from "./simple-scraper";
+import { SITE_CONFIGS } from "./site-config";
 
 export class GenericScraper {
-  // siteConfig 인자는 호환성을 위해 받지만 사용하지 않음
-  constructor(_siteConfig?: any) {}
+  private scraper: SimpleScraper | null = null;
+  private siteConfig: any;
+
+  constructor(siteConfig?: any) {
+    this.siteConfig = siteConfig;
+    if (siteConfig) {
+      this.scraper = new SimpleScraper(siteConfig);
+    }
+  }
 
   async initialize(): Promise<void> {
-    // no-op
+    // no-op (SimpleScraper doesn't need initialization)
   }
 
   async close(): Promise<void> {
     // no-op
   }
 
-  async scrape(_options: ScraperOptions): Promise<ScraperResult> {
-    return {
-      success: false,
-      products: [],
-      errors: ["GenericScraper disabled (playwright removed)"],
-    };
+  async scrape(options: ScraperOptions): Promise<ScraperResult> {
+    if (!this.scraper) {
+      return {
+        success: false,
+        products: [],
+        errors: ["Scraper not initialized with site config"],
+      };
+    }
+
+    try {
+      const products = await this.scraper.scrapeProductList({
+        keyword: options.keyword,
+        category: options.category,
+        max: options.maxResults,
+        url: options.productUrl || options.categoryUrl,
+      });
+
+      return {
+        success: true,
+        products: products,
+      };
+    } catch (error: any) {
+      return {
+        success: false,
+        products: [],
+        errors: [error.message],
+      };
+    }
   }
 }
 

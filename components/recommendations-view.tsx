@@ -51,29 +51,36 @@ export function RecommendationsView({ products, errorMessage }: RecommendationsV
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="sticky top-0 z-50 border-b border-white/20 bg-white/70 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 md:px-6 py-4">
           <div className="flex items-center gap-4">
             <Link
               href="/chat"
-              className="inline-flex size-11 items-center justify-center rounded-lg hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="group inline-flex size-11 items-center justify-center rounded-xl bg-background border border-border shadow-sm transition-all hover:bg-muted hover:scale-105 active:scale-95"
               aria-label={t("chat.backToHome")}
             >
-              <ArrowLeft className="size-6" />
+              <ArrowLeft className="size-6 transition-transform group-hover:-translate-x-1" />
             </Link>
-            <div>
-              <p className="text-sm text-muted-foreground">{t("recommendations.tagline")}</p>
-              <h1 className="text-2xl font-bold text-foreground">{t("recommendations.title")}</h1>
+            <div className="flex flex-col">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-primary/70">{t("recommendations.tagline")}</p>
+              <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{t("recommendations.title")}</h1>
             </div>
           </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 md:px-6 py-12">
-        <div className="max-w-4xl mx-auto space-y-10">
-          <div className="text-center space-y-3">
-            <h2 className="text-3xl font-bold text-foreground text-balance">{t("recommendations.subtitle")}</h2>
-            <p className="text-lg text-muted-foreground text-pretty">{t("recommendations.description")}</p>
+        <div className="max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-4 animate-fadeIn">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-semibold mb-2">
+              AI-Powered Analysis Finished
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight text-foreground text-balance">
+              {t("recommendations.subtitle")}
+            </h2>
+            <p className="text-xl text-muted-foreground text-pretty max-w-2xl mx-auto">
+              {t("recommendations.description")}
+            </p>
           </div>
 
           {errorMessage ? (
@@ -108,7 +115,7 @@ export function RecommendationsView({ products, errorMessage }: RecommendationsV
                 ))}
               </div>
 
-              {/* 쿠팡 파트너스 활동 시 주의사항 */}
+              {/* 제휴 마케팅 안내 */}
               <PartnershipNotice />
             </>
           )}

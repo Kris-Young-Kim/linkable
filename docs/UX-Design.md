@@ -53,7 +53,7 @@ flowchart TD
     Preview --> |더 보기 클릭| Recommend
 
     Recommend --> |상품 클릭| ClickLog[클릭 로그 기록]
-    ClickLog --> External[외부 구매 링크<br/>쿠팡/네이버]
+    ClickLog --> External[외부 구매 링크<br/>네이버]
 
     Recommend --> |선택적| Baseline[기초선 평가<br/>/dashboard/ippa/baseline/[id]]
     Baseline --> |평가 완료| Recommend

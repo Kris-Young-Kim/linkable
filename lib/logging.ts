@@ -3,7 +3,7 @@ import { sendErrorAlert } from "./notion-webhook"
 type LogLevel = "info" | "warn" | "error"
 
 export type LogEvent = {
-  category: "consultation" | "matching" | "validation" | "system" | "product" | "recommendation" | "cta_ab_test" | "incentives" | "analytics"
+  category: "consultation" | "matching" | "validation" | "system" | "product" | "recommendation" | "cta_ab_test" | "incentives" | "analytics" | "crawler"
   action: string
   payload?: Record<string, unknown>
   level?: LogLevel
@@ -18,7 +18,7 @@ const logMethodMap: Record<LogLevel, (...args: unknown[]) => void> = {
 
 export const logEvent = ({ category, action, payload, level = "info", userId }: LogEvent) => {
   const message = `[${category}] ${action}`
-  
+
   // 기본 콘솔 로깅
   if (payload) {
     logMethodMap[level](message, payload)
@@ -37,7 +37,7 @@ export const logEvent = ({ category, action, payload, level = "info", userId }: 
       payload: payload,
       stack: payload?.error instanceof Error ? payload.error.stack : undefined
     });
-    
+
     // 핵심 기능 로그 남기기
     console.log(`[Critical] 에러 알림 자동 발송됨: ${action}`);
   }

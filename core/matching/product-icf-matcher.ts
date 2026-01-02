@@ -6,7 +6,7 @@
  */
 
 import { findIcfCode } from "@/core/assessment/icf-codes";
-import { generateEmbedding } from "@/lib/ai/gemini";
+import { createEmbedding as generateEmbedding } from "@/lib/embeddings/gemini-embedding";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { IsoMatch } from "./iso-mapping";
 
@@ -34,7 +34,7 @@ export async function matchProductToIcf(
   targetIcfCodes: string[]
 ): Promise<ProductIcfMatch[]> {
   const matches: ProductIcfMatch[] = [];
-  
+
   // 제품 텍스트 준비
   const productText = [
     product.name,
@@ -66,7 +66,7 @@ export async function matchProductToIcf(
 
   // 중복 제거 및 점수 통합
   const mergedMatches = mergeMatches(matches);
-  
+
   // 점수 정규화 (0.0-1.0)
   return mergedMatches.map((match) => ({
     ...match,
@@ -88,26 +88,26 @@ function matchByKeywords(
     // 시각 장애 (b210, b215)
     b210: ["시각", "시력", "눈", "시야", "저시력", "맹인", "실명", "blind", "vision", "visual"],
     b215: ["시각", "시력", "눈", "시야", "visual"],
-    
+
     // 청각 장애 (b230, b235)
     b230: ["청각", "청력", "귀", "난청", "보청기", "hearing", "auditory"],
     b235: ["청각", "청력", "귀", "hearing"],
-    
+
     // 언어/의사소통 (b240, b320, b330, d3)
     b240: ["언어", "말하기", "발음", "음성", "language", "speech"],
     b320: ["의사소통", "소통", "communication"],
     b330: ["말하기", "발성", "speech"],
     d3: ["의사소통", "소통", "communication", "aac"],
-    
+
     // 지체 장애 / 이동 (d46, d450, d465)
     d46: ["휠체어", "wheelchair", "이동", "mobility"],
     d450: ["보행", "걷기", "walking", "보행기", "워커"],
     d465: ["이동", "mobility", "이동성"],
-    
+
     // 식사/자가관리 (d55, d550)
     d55: ["식사", "먹기", "feeding", "식기"],
     d550: ["식사", "먹기", "feeding"],
-    
+
     // 인지 기능 (b117, b140, b144, b160, b164)
     b117: ["인지", "기억", "memory", "cognitive"],
     b140: ["주의", "attention", "집중"],
@@ -206,12 +206,12 @@ async function matchBySemantic(
 
       const icfDescription = icfInfo.description || "";
       const icfEmbedding = await generateEmbedding(icfDescription);
-      
+
       if (!icfEmbedding) continue;
 
       // 코사인 유사도 계산
       const similarity = cosineSimilarity(productEmbedding, icfEmbedding);
-      
+
       if (similarity > 0.5) {
         matches.push({
           icfCode: icfCode.toUpperCase(),
@@ -259,7 +259,7 @@ function mergeMatches(matches: ProductIcfMatch[]): ProductIcfMatch[] {
 
   for (const match of matches) {
     const existing = merged.get(match.icfCode);
-    
+
     if (!existing) {
       merged.set(match.icfCode, match);
     } else {
@@ -267,7 +267,7 @@ function mergeMatches(matches: ProductIcfMatch[]): ProductIcfMatch[] {
       const methods = [existing.method, match.method];
       const scores = [existing.score, match.score];
       const confidences = [existing.confidence, match.confidence];
-      
+
       // 방법별 가중치
       const methodWeights: Record<string, number> = {
         semantic: 0.4,

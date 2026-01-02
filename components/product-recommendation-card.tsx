@@ -110,8 +110,8 @@ export function ProductRecommendationCard({
                 window.innerWidth < 768
                   ? "mobile"
                   : window.innerWidth < 1024
-                  ? "tablet"
-                  : "desktop",
+                    ? "tablet"
+                    : "desktop",
               userAgent: navigator.userAgent,
             });
 
@@ -175,8 +175,8 @@ export function ProductRecommendationCard({
             buttonType === "primary"
               ? "primary_click"
               : buttonType === "secondary"
-              ? "secondary_click"
-              : "tertiary_click";
+                ? "secondary_click"
+                : "tertiary_click";
 
           const { logCtaPerformance } = await import("@/lib/cta-ab-testing-client");
           await logCtaPerformance(ctaVariant.id, eventType, {
@@ -189,14 +189,14 @@ export function ProductRecommendationCard({
               scrollPosition < 33
                 ? "top"
                 : scrollPosition < 66
-                ? "middle"
-                : "bottom",
+                  ? "middle"
+                  : "bottom",
             screenSize:
               window.innerWidth < 768
                 ? "mobile"
                 : window.innerWidth < 1024
-                ? "tablet"
-                : "desktop",
+                  ? "tablet"
+                  : "desktop",
             userAgent: navigator.userAgent,
           });
         }
@@ -456,14 +456,22 @@ export function ProductRecommendationCard({
   };
 
   return (
-    <Card className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg">
-      <CardHeader>
+    <Card className="group border-2 border-border/50 hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5 bg-gradient-to-br from-card to-card/95 relative overflow-hidden">
+      {matchScore && matchScore >= 0.85 && (
+        <div className="absolute top-0 right-0 z-20">
+          <div className="bg-primary text-primary-foreground text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-md flex items-center gap-1.5 animate-pulse">
+            <Sparkles className="size-3" />
+            AI RECOMMENDED
+          </div>
+        </div>
+      )}
+      <CardHeader className="pb-4">
         <div className="flex items-start justify-between gap-4 mb-2">
           <div className="flex-1">
-            <CardTitle className="text-xl font-bold text-foreground">
+            <CardTitle className="text-xl md:text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors">
               {productName}
             </CardTitle>
-            <CardDescription className="text-base text-muted-foreground">
+            <CardDescription className="text-base font-medium text-muted-foreground/80 mt-1">
               {isoLabel || functionalSupport}
             </CardDescription>
           </div>
@@ -471,7 +479,7 @@ export function ProductRecommendationCard({
             {isoCode && (
               <Badge
                 variant="secondary"
-                className="shrink-0 bg-primary/10 text-primary border border-primary/20"
+                className="shrink-0 bg-primary/10 text-primary border border-primary/20 font-bold px-2.5"
               >
                 ISO {isoCode}
               </Badge>
@@ -512,8 +520,8 @@ export function ProductRecommendationCard({
           {price && (
             <div className="flex items-baseline gap-1">
               <span className="text-2xl font-bold text-foreground">
-                {typeof price === "number" 
-                  ? price.toLocaleString("ko-KR") 
+                {typeof price === "number"
+                  ? price.toLocaleString("ko-KR")
                   : price}
               </span>
               <span className="text-sm text-muted-foreground">원</span>

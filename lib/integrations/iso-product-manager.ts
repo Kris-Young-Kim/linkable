@@ -11,7 +11,7 @@ import { upsertProduct } from "./product-sync"
 export interface IsoProductInput {
   name: string
   purchase_link: string
-  platform?: "coupang" | "naver" | "11st" | "gmarket" | "manual"
+  platform?: "naver" | "11st" | "gmarket" | "manual"
   price?: number
   image_url?: string
   description?: string
@@ -25,8 +25,8 @@ export interface IsoProductInput {
  * await syncIsoCodeProducts("15 09", [
  *   {
  *     name: "무게조절 식기 세트",
- *     purchase_link: "https://coupang.link/1",
- *     platform: "coupang",
+ *     purchase_link: "https://naver.com/products/1",
+ *     platform: "naver",
  *     price: 25000
  *   },
  *   {

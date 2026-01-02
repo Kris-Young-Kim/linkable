@@ -45,13 +45,13 @@ const DEFAULT_CONFIG: HybridMatchConfig = {
   useKnowledgeGraph: true,
   useKeywordInference: true,
   weights: {
-    ruleBased: 0.3,
-    semantic: 0.4,
+    ruleBased: 0.4, // 규칙 기반 가중치 상향 (안정성 확보)
+    semantic: 0.3,
     knowledgeGraph: 0.2,
     keyword: 0.1,
   },
-  minScore: 0.5,
-  topK: 10,
+  minScore: 0.45, // 더 넓은 범심의 매칭을 위해 임계값 소폭 하향
+  topK: 12,
 };
 
 interface MatchContext {
@@ -77,11 +77,11 @@ export async function hybridMatch(
   config: Partial<HybridMatchConfig> = {}
 ): Promise<IsoMatch[]> {
   const startTime = Date.now();
-  
+
   // 데이터베이스에서 가중치 설정 로드 (A/B 테스트 지원)
   let dbConfig: MatchingWeightConfig | null = null;
   let weightConfigName = "default";
-  
+
   try {
     // A/B 테스트가 활성화되어 있으면 변형 선택
     const abTestName = process.env.AB_TEST_MATCHING_WEIGHTS;
@@ -94,7 +94,7 @@ export async function hybridMatch(
       // 기본적으로 활성화된 설정 로드
       dbConfig = await loadActiveWeightConfig();
     }
-    
+
     if (dbConfig) {
       weightConfigName = dbConfig.name;
       const dbConfigConverted = convertToHybridMatchConfig(dbConfig);
@@ -105,7 +105,7 @@ export async function hybridMatch(
         minScore: dbConfigConverted.minScore,
         topK: dbConfigConverted.topK,
       };
-      
+
       // 시맨틱 매칭 임계값도 설정에 포함 (semanticMatch 함수에 전달)
       if (config.similarityThreshold === undefined) {
         (config as any).similarityThreshold = dbConfigConverted.similarityThreshold;
@@ -114,7 +114,7 @@ export async function hybridMatch(
   } catch (error) {
     console.error("[hybrid-matcher] Failed to load weight config, using default:", error);
   }
-  
+
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
 
   try {
@@ -272,7 +272,7 @@ export async function hybridMatch(
     }));
 
     const duration = Date.now() - startTime;
-    
+
     // 성능 로깅 (데이터베이스에 저장)
     logMatchingPerformance({
       consultationId: context.userProfile?.consultationId,
@@ -282,8 +282,8 @@ export async function hybridMatch(
       icfCodes: context.icfCodes,
       matchedIsoCodes: tagged.map((m) => m.isoCode),
       topMatchScore: tagged[0]?.score,
-      averageMatchScore: tagged.length > 0 
-        ? tagged.reduce((sum, m) => sum + m.score, 0) / tagged.length 
+      averageMatchScore: tagged.length > 0
+        ? tagged.reduce((sum, m) => sum + m.score, 0) / tagged.length
         : 0,
       executionTimeMs: duration,
       semanticMatchUsed: finalConfig.useSemantic,
@@ -307,17 +307,17 @@ export async function hybridMatch(
         finalConfig.useSemantic && finalConfig.useKnowledgeGraph
           ? "hybrid"
           : finalConfig.useSemantic
-          ? "semantic"
-          : finalConfig.useKnowledgeGraph
-          ? "knowledge_graph"
-          : "rule",
+            ? "semantic"
+            : finalConfig.useKnowledgeGraph
+              ? "knowledge_graph"
+              : "rule",
         tagged[0].score // 신뢰도는 최고 점수 사용
       ).catch((err) => {
         // 저장 실패는 조용히 무시
         console.error("[hybrid-matcher] Failed to save precomputed mapping:", err);
       });
     }
-    
+
     logEvent({
       category: "matching",
       action: "hybrid_match_completed",
@@ -422,66 +422,66 @@ function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
   // 1. 시각 장애 감지 (최우선 처리)
   // 시각 중증/실명 키워드
   const severeVisualKeywords = [
-    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이", 
+    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이",
     "시각 중증", "맹인", "실명", "blind", "앞이 안 보임", "앞이 안보임",
     "전혀 안 보", "전혀 안보", "하나도 안 보", "하나도 안보"
   ];
-  const isSevereVisualImpairment = includesAny(severeVisualKeywords) || 
+  const isSevereVisualImpairment = includesAny(severeVisualKeywords) ||
     (hasIcf("b210") && includesAny(["중증", "심각", "심각한", "심하게", "전혀", "하나도"]));
-  
+
   // 시각 장애 키워드
   const visualKeywords = [
-    "시각", "저시력", "시력", "vision", "눈", "시야", "시야각", 
+    "시각", "저시력", "시력", "vision", "눈", "시야", "시야각",
     "확대경", "돋보기", "점자", "스크린리더", "음성변환"
   ];
-  
+
   if (hasIcf("b210") || hasIcf("b215") || includesAny(visualKeywords) || isSevereVisualImpairment) {
     return "vision";
   }
 
   // 2. 청각 장애 감지
   const hearingKeywords = [
-    "청각", "청력", "난청", "보청기", "hearing", "귀", "듣기", 
+    "청각", "청력", "난청", "보청기", "hearing", "귀", "듣기",
     "소리", "알림", "진동", "평형", "어지럼", "전정"
   ];
-  
+
   if (hasIcf("b230") || hasIcf("b235") || includesAny(hearingKeywords)) {
     return "hearing";
   }
 
   // 3. 언어/의사소통 장애 감지
   const languageKeywords = [
-    "언어", "음성", "구어", "말하기", "발음", "발성", "의사소통", 
-    "소통", "communication", "aac", "대화", "말하기 보조", 
+    "언어", "음성", "구어", "말하기", "발음", "발성", "의사소통",
+    "소통", "communication", "aac", "대화", "말하기 보조",
     "음성 생성", "음성 인식", "프록스토커"
   ];
-  
-  if (hasIcf("b240") || hasIcf("b320") || hasIcf("b330") || 
-      hasIcf("d3") || includesAny(languageKeywords)) {
+
+  if (hasIcf("b240") || hasIcf("b320") || hasIcf("b330") ||
+    hasIcf("d3") || includesAny(languageKeywords)) {
     return "communication";
   }
 
   // 4. 지체 장애 / 뇌병변 감지 (휠체어)
   const physicalKeywords = [
     "지체", "절단", "관절", "지체기능", "변형", "신체", "physical",
-    "뇌병변", "뇌손상", "뇌졸중", "뇌성마비", "cerebral palsy", 
+    "뇌병변", "뇌손상", "뇌졸중", "뇌성마비", "cerebral palsy",
     "뇌전증", "epilepsy", "척수", "spinal", "마비", "paralysis"
   ];
-  
+
   const mobilityKeywords = [
-    "휠체어", "wheelchair", "전동 휠체어", "수동 휠체어", 
+    "휠체어", "wheelchair", "전동 휠체어", "수동 휠체어",
     "이동", "보행", "걷기"
   ];
-  
-  if (includesAny(physicalKeywords) || 
-      includesAny(mobilityKeywords) ||
-      hasIcf("d46") || hasIcf("d450") || hasIcf("d465")) {
+
+  if (includesAny(physicalKeywords) ||
+    includesAny(mobilityKeywords) ||
+    hasIcf("d46") || hasIcf("d450") || hasIcf("d465")) {
     return "mobility_wheelchair";
   }
 
   // 5. 보행 보조 (지체 장애이지만 휠체어가 아닌 경우)
-  if (includesAny(["보행기", "워커", "지팡이", "walking aid", "보행 보조"]) || 
-      hasIcf("d410") || hasIcf("d450")) {
+  if (includesAny(["보행기", "워커", "지팡이", "walking aid", "보행 보조"]) ||
+    hasIcf("d410") || hasIcf("d450")) {
     return "mobility_walking_aid";
   }
 
@@ -547,20 +547,20 @@ function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent, context?: Ma
   // 시각 중증/실명 감지 (컨텍스트에서)
   const text = `${context?.userMessage ?? ""} ${context?.analysisSummary ?? ""}`.toLowerCase();
   const severeVisualKeywords = [
-    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이", 
+    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이",
     "시각 중증", "맹인", "실명", "blind", "앞이 안 보임", "앞이 안보임",
     "전혀 안 보", "전혀 안보", "하나도 안 보", "하나도 안보"
   ];
   const isSevereVisualImpairment = severeVisualKeywords.some((k) => text.includes(k)) ||
-    (context?.icfCodes.some((c) => c.toLowerCase().startsWith("b210")) && 
-     (text.includes("중증") || text.includes("심각") || text.includes("전혀") || text.includes("하나도")));
+    (context?.icfCodes.some((c) => c.toLowerCase().startsWith("b210")) &&
+      (text.includes("중증") || text.includes("심각") || text.includes("전혀") || text.includes("하나도")));
 
   // 의도별 하드 제외 리스트 (공백 제거된 ISO prefix)
   // 보조공학사 기본 지식: 장애 유형별 부적절한 보조기기 제외
   const exclude: Record<PrimaryIntent, string[]> = {
     mobility_wheelchair: ["220", "2106", "2230", "2109"], // 시각, 청각, 의사소통 제거
     mobility_walking_aid: ["220", "2106", "2230", "2109"], // 시각, 청각, 의사소통 제거
-    vision: isSevereVisualImpairment 
+    vision: isSevereVisualImpairment
       ? ["1206", "1222", "1223", "1203", "2230", "2109", "2106"] // 시각 중증: 이동 보조 + 의사소통 + 청각 제거
       : ["1206", "1222", "1223", "2106", "2230", "2109"], // 일반 시각: 이동 보조 + 청각 + 의사소통 제거
     hearing: ["1206", "1222", "1223", "2203", "2206", "2230", "2109"], // 이동 보조, 시각, 의사소통 제거
@@ -629,7 +629,7 @@ async function logMatchingPerformance(data: {
   try {
     const { getSupabaseServerClient } = await import("@/lib/supabase/server");
     const supabase = getSupabaseServerClient();
-    
+
     const { error } = await supabase.from("matching_performance_logs").insert({
       consultation_id: data.consultationId || null,
       user_id: data.userId || null,
@@ -645,7 +645,7 @@ async function logMatchingPerformance(data: {
       semantic_match_used: data.semanticMatchUsed,
       knowledge_graph_used: data.knowledgeGraphUsed,
     });
-    
+
     if (error) {
       console.error("[hybrid-matcher] Performance logging error:", error);
     }

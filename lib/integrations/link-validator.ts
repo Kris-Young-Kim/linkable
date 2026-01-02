@@ -24,9 +24,6 @@ export async function validatePurchaseLink(url: string | null | undefined): Prom
 
     // 허용된 도메인 목록
     const allowedDomains = [
-      "coupang.com",
-      "www.coupang.com",
-      "link.coupang.com",
       "shopping.naver.com",
       "www.11st.co.kr",
       "www.gmarket.co.kr",

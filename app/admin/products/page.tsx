@@ -110,7 +110,7 @@ export default async function AdminProductsPage() {
         <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm uppercase tracking-wide text-muted-foreground">상품 관리</p>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">쿠팡/유통업체 상품 등록</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">상품 등록</h1>
             <p className="text-muted-foreground mt-2 text-base">
               ISO 9999 코드에 해당하는 보조기기 상품을 등록하고 관리할 수 있습니다.
             </p>

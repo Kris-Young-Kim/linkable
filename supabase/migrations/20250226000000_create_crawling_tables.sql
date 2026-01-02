@@ -23,7 +23,7 @@
 
 CREATE TABLE IF NOT EXISTS crawl_sources (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    source_code TEXT NOT NULL UNIQUE, -- 'coupang', 'smartstore', 'selfmall' 등
+    source_code TEXT NOT NULL UNIQUE, -- 'smartstore', 'selfmall' 등
     display_name TEXT NOT NULL, -- 표시명
     base_url TEXT, -- 기본 URL
     rate_limit_per_minute INTEGER DEFAULT 60, -- 분당 요청 제한
@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS crawl_sources (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-COMMENT ON TABLE crawl_sources IS '크롤링 소스/채널 정의 (쿠팡, 스마트스토어 등)';
-COMMENT ON COLUMN crawl_sources.source_code IS '소스 코드 (유니크, 예: coupang)';
+COMMENT ON TABLE crawl_sources IS '크롤링 소스/채널 정의 (스마트스토어 등)';
+COMMENT ON COLUMN crawl_sources.source_code IS '소스 코드 (유니크, 예: smartstore)';
 COMMENT ON COLUMN crawl_sources.rate_limit_per_minute IS '분당 요청 제한 수';
 COMMENT ON COLUMN crawl_sources.parser_config IS '파서 설정 (JSON 형식)';
 
@@ -351,7 +351,6 @@ CREATE TRIGGER update_product_listings_modtime
 
 INSERT INTO crawl_sources (source_code, display_name, base_url, is_active)
 VALUES 
-    ('coupang', '쿠팡', 'https://www.coupang.com', true),
     ('smartstore', '스마트스토어', 'https://smartstore.naver.com', true),
     ('selfmall', '자사몰', NULL, false) -- 향후 추가 예정
 ON CONFLICT (source_code) DO UPDATE SET

@@ -9,8 +9,8 @@
  * .env 파일에서 ISO 코드별 링크를 조회
  * 
  * .env 파일 형식:
- * ISO_15_09_LINKS=https://coupang.link/1,https://naver.link/1,https://11st.link/1
- * ISO_18_30_LINKS=https://coupang.link/2,https://naver.link/2
+ * ISO_15_09_LINKS=https://naver.link/1,https://11st.link/1,https://gmarket.link/1
+ * ISO_18_30_LINKS=https://naver.link/2,https://careline.co.kr/2
  * 
  * @param isoCode ISO 9999 코드 (예: "15 09", "18 30")
  * @returns 링크 배열 (없으면 빈 배열)

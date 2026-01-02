@@ -88,26 +88,33 @@ export function AdminProductManager({
     try {
       console.log("[Admin Products] Fetching products from API...");
       const response = await fetch("/api/admin/products");
-      
+
       if (!response.ok) {
         const status = response.status;
         const statusText = response.statusText;
         const contentType = response.headers.get("content-type");
-        
+
         let errorData: any = {};
         let responseText = "";
         let errorMessage = `상품 목록을 불러오지 못했습니다 (${status})`;
-        
+
         try {
           // 응답 본문을 텍스트로 읽기
           responseText = await response.text();
-          
+
           // JSON 파싱 시도
-          if (contentType && contentType.includes("application/json") && responseText) {
+          if (
+            contentType &&
+            contentType.includes("application/json") &&
+            responseText
+          ) {
             try {
               errorData = JSON.parse(responseText);
             } catch (jsonError) {
-              console.warn("[Admin Products] Failed to parse error response as JSON:", jsonError);
+              console.warn(
+                "[Admin Products] Failed to parse error response as JSON:",
+                jsonError
+              );
               errorData = { message: responseText || statusText };
             }
           } else if (responseText) {
@@ -116,21 +123,27 @@ export function AdminProductManager({
             errorData = { message: statusText };
           }
         } catch (readError) {
-          console.error("[Admin Products] Failed to read error response:", readError);
+          console.error(
+            "[Admin Products] Failed to read error response:",
+            readError
+          );
           errorData = { message: `HTTP ${status}: ${statusText}` };
         }
-        
+
         // 상태 코드별 에러 메시지 설정
         if (status === 401) {
           errorMessage = "인증이 필요합니다. 로그인해주세요.";
         } else if (status === 403) {
-          errorMessage = errorData.error || errorData.message || "관리자 권한이 필요합니다. Clerk에서 사용자 역할(role)을 'admin' 또는 'expert'로 설정해주세요.";
+          errorMessage =
+            errorData.error ||
+            errorData.message ||
+            "관리자 권한이 필요합니다. Clerk에서 사용자 역할(role)을 'admin' 또는 'expert'로 설정해주세요.";
         } else if (errorData.error) {
           errorMessage = errorData.error;
         } else if (errorData.message) {
           errorMessage = errorData.message;
         }
-        
+
         // 에러 로깅 (개발 환경에서만 상세 로그)
         if (process.env.NODE_ENV === "development") {
           console.error("[Admin Products] API error:", {
@@ -138,27 +151,35 @@ export function AdminProductManager({
             statusText,
             contentType,
             responseText: responseText || "(empty)",
-            parsedErrorData: Object.keys(errorData).length > 0 ? errorData : "(empty)",
+            parsedErrorData:
+              Object.keys(errorData).length > 0 ? errorData : "(empty)",
             finalMessage: errorMessage,
           });
         } else {
-          console.error(`[Admin Products] API error (${status}): ${errorMessage}`);
+          console.error(
+            `[Admin Products] API error (${status}): ${errorMessage}`
+          );
         }
-        
+
         setErrorMessage(errorMessage);
         return;
       }
-      
+
       const data = await response.json();
-      console.log(`[Admin Products] Received ${data.products?.length ?? 0} products`);
+      console.log(
+        `[Admin Products] Received ${data.products?.length ?? 0} products`
+      );
       setProducts(data.products || []);
-      
+
       if (!data.products || data.products.length === 0) {
         console.warn("[Admin Products] No products found in database");
       }
     } catch (error) {
       console.error("[Admin Products] 제품 목록 새로고침 실패:", error);
-      const errorMsg = error instanceof Error ? error.message : "네트워크 오류가 발생했습니다.";
+      const errorMsg =
+        error instanceof Error
+          ? error.message
+          : "네트워크 오류가 발생했습니다.";
       setErrorMessage(`네트워크 오류: ${errorMsg}`);
     }
   }, []);
@@ -267,11 +288,13 @@ export function AdminProductManager({
                 const data = await response.json();
                 const topSuggestion = data.suggestions?.[0];
                 const inferredIso = topSuggestion?.iso || null;
-                
+
                 if (inferredIso) {
-                  console.log(`[ISO Inference] ${product.name} -> ${inferredIso}`);
+                  console.log(
+                    `[ISO Inference] ${product.name} -> ${inferredIso}`
+                  );
                 }
-                
+
                 return {
                   ...product,
                   inferredIsoCode: inferredIso,
@@ -279,7 +302,10 @@ export function AdminProductManager({
                 };
               }
             } catch (error) {
-              console.error(`[ISO Inference] Error for ${product.name}:`, error);
+              console.error(
+                `[ISO Inference] Error for ${product.name}:`,
+                error
+              );
             }
 
             return { ...product, inferredIsoCode: null };
@@ -287,8 +313,12 @@ export function AdminProductManager({
         );
 
         setCrawlPreview(updatedProducts);
-        const inferredCount = updatedProducts.filter((p) => p.inferredIsoCode).length;
-        addCrawlLog(`ISO 코드 추론 완료: ${inferredCount}/${products.length}개 상품에 ISO 코드 추론됨`);
+        const inferredCount = updatedProducts.filter(
+          (p) => p.inferredIsoCode
+        ).length;
+        addCrawlLog(
+          `ISO 코드 추론 완료: ${inferredCount}/${products.length}개 상품에 ISO 코드 추론됨`
+        );
       } catch (error) {
         console.error("[ISO Inference] Batch inference error:", error);
         addCrawlLog("ISO 코드 추론 중 오류 발생", true);
@@ -438,12 +468,14 @@ export function AdminProductManager({
       crawlAbortRef.current = controller;
 
       // max 값 검증 및 변환
-      const maxValue = crawlValues.max 
+      const maxValue = crawlValues.max
         ? Math.max(1, Math.min(200, parseInt(crawlValues.max) || 30))
         : 30;
-      
-      console.log(`[Admin Products] 크롤링 요청: URL=${normalizedUrl}, max=${maxValue}`);
-      
+
+      console.log(
+        `[Admin Products] 크롤링 요청: URL=${normalizedUrl}, max=${maxValue}`
+      );
+
       const response = await fetch("/api/admin/products/crawl-playwright", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -461,11 +493,17 @@ export function AdminProductManager({
 
       const result = await response.json();
 
-      console.log(`[Admin Products] 크롤링 응답: ${result.products?.length || 0}개 제품 발견 (요청한 max: ${maxValue})`);
+      console.log(
+        `[Admin Products] 크롤링 응답: ${
+          result.products?.length || 0
+        }개 제품 발견 (요청한 max: ${maxValue})`
+      );
 
       if (result.products && result.products.length > 0) {
-        addCrawlLog(`${result.products.length}개 제품 발견 (요청: ${maxValue}개)`);
-        
+        addCrawlLog(
+          `${result.products.length}개 제품 발견 (요청: ${maxValue}개)`
+        );
+
         // 크롤링된 상품들을 미리보기에 설정 (iso_code는 null로 초기화)
         const productsWithNullIso = result.products.map((p: any) => ({
           ...p,
@@ -473,28 +511,37 @@ export function AdminProductManager({
           inferredIsoCode: null,
         }));
         setCrawlPreview(productsWithNullIso);
-        
+
         setCrawlResult(
           `${result.products.length}개 제품을 찾았습니다. ISO 코드를 추론 중...`
         );
-        
+
         // 모든 상품 자동 선택
         setSelectedPreviewProducts(
           new Set(result.products.map((p: { id: string }) => p.id))
         );
-        
+
         // ISO 코드 추론 시작
         await inferIsoCodesForCrawledProducts(productsWithNullIso);
-        
+
         setCrawlResult(
           `${result.products.length}개 제품을 찾았습니다. 아래에서 선택하여 등록하세요. (요청한 최대 개수: ${maxValue}개)`
         );
       } else {
         // 디버깅 정보가 있으면 표시
         if (result.debug) {
-          const debugMsg = `제품을 찾을 수 없습니다.\n\n디버깅 정보:\n- HTML 길이: ${result.debug.htmlLength} bytes\n- 링크 개수: ${result.debug.linkCount}개\n- 테이블 개수: ${result.debug.tableCount}개\n- 발견된 셀렉터: ${result.debug.foundSelector || "없음"}\n\n페이지 구조를 확인하거나 다른 URL을 시도해보세요.`;
+          const debugMsg = `제품을 찾을 수 없습니다.\n\n디버깅 정보:\n- HTML 길이: ${
+            result.debug.htmlLength
+          } bytes\n- 링크 개수: ${result.debug.linkCount}개\n- 테이블 개수: ${
+            result.debug.tableCount
+          }개\n- 발견된 셀렉터: ${
+            result.debug.foundSelector || "없음"
+          }\n\n페이지 구조를 확인하거나 다른 URL을 시도해보세요.`;
           setCrawlResult(debugMsg);
-          addCrawlLog(`디버깅: 링크 ${result.debug.linkCount}개, 테이블 ${result.debug.tableCount}개 발견`, true);
+          addCrawlLog(
+            `디버깅: 링크 ${result.debug.linkCount}개, 테이블 ${result.debug.tableCount}개 발견`,
+            true
+          );
         } else {
           setCrawlResult(result.message || "제품을 찾을 수 없습니다.");
         }
@@ -572,14 +619,18 @@ export function AdminProductManager({
       });
 
       let result: any;
-      
+
       if (!response.ok) {
         let errorPayload: any = {};
         const contentType = response.headers.get("content-type");
-        
+
         try {
           const responseText = await response.text();
-          if (contentType && contentType.includes("application/json") && responseText) {
+          if (
+            contentType &&
+            contentType.includes("application/json") &&
+            responseText
+          ) {
             try {
               errorPayload = JSON.parse(responseText);
             } catch {
@@ -589,17 +640,22 @@ export function AdminProductManager({
             errorPayload = { message: responseText || response.statusText };
           }
         } catch (parseError) {
-          console.error("[Admin Products] Failed to parse error response:", parseError);
-          errorPayload = { message: `HTTP ${response.status}: ${response.statusText}` };
+          console.error(
+            "[Admin Products] Failed to parse error response:",
+            parseError
+          );
+          errorPayload = {
+            message: `HTTP ${response.status}: ${response.statusText}`,
+          };
         }
-        
-        const errorMessage = 
-          errorPayload?.error || 
-          errorPayload?.message || 
-          (response.status === 403 
+
+        const errorMessage =
+          errorPayload?.error ||
+          errorPayload?.message ||
+          (response.status === 403
             ? "관리자 권한이 필요합니다. Clerk에서 사용자 역할(role)을 'admin' 또는 'expert'로 설정해주세요."
             : `상품 등록 실패 (${response.status})`);
-        
+
         throw new Error(errorMessage);
       }
 
@@ -796,7 +852,6 @@ export function AdminProductManager({
     console.log(`[Admin Products] Product deleted successfully: ${id}`);
   };
 
-
   const productCountByIso = useMemo(() => {
     return products.reduce<Record<string, number>>((acc, item) => {
       acc[item.iso_code] = (acc[item.iso_code] ?? 0) + 1;
@@ -840,7 +895,10 @@ export function AdminProductManager({
     // ISO 코드 필터
     if (selectedIsoCode === "no-iso") {
       filtered = filtered.filter(
-        (product) => !product.iso_code || product.iso_code === "N999999" || product.iso_code.trim() === ""
+        (product) =>
+          !product.iso_code ||
+          product.iso_code === "N999999" ||
+          product.iso_code.trim() === ""
       );
     } else if (selectedIsoCode !== "all") {
       filtered = filtered.filter(
@@ -1163,7 +1221,7 @@ export function AdminProductManager({
                   }
                 />
                 <Input
-                  placeholder="카테고리 (예: coupang, naver)"
+                  placeholder="카테고리 (예: naver, 11st)"
                   value={formValues.category}
                   onChange={(event) =>
                     setFormValues((prev) => ({
@@ -1369,28 +1427,31 @@ export function AdminProductManager({
                   <Label htmlFor="crawl-max" className="mb-2 block">
                     최대 수집 개수
                   </Label>
-                    <Input
-                      id="crawl-max"
-                      type="number"
-                      min="1"
-                      max="200"
-                      value={crawlValues.max}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        // 숫자만 허용하고, 1 이상의 값만 허용
-                        if (value === "" || (parseInt(value) >= 1 && parseInt(value) <= 200)) {
-                          setCrawlValues((prev) => ({
-                            ...prev,
-                            max: value,
-                          }));
-                        }
-                      }}
-                      placeholder="30"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      입력된 값: {crawlValues.max || "30"}개
-                    </p>
-                  </div>
+                  <Input
+                    id="crawl-max"
+                    type="number"
+                    min="1"
+                    max="200"
+                    value={crawlValues.max}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      // 숫자만 허용하고, 1 이상의 값만 허용
+                      if (
+                        value === "" ||
+                        (parseInt(value) >= 1 && parseInt(value) <= 200)
+                      ) {
+                        setCrawlValues((prev) => ({
+                          ...prev,
+                          max: value,
+                        }));
+                      }
+                    }}
+                    placeholder="30"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    입력된 값: {crawlValues.max || "30"}개
+                  </p>
+                </div>
               </div>
               <Button
                 onClick={isCrawling ? handleCrawlStop : handleCrawl}
@@ -1583,7 +1644,10 @@ export function AdminProductManager({
                                       setCrawlPreview((prev) =>
                                         prev.map((p) =>
                                           p.id === product.id
-                                            ? { ...p, iso_code: newIsoCode || null }
+                                            ? {
+                                                ...p,
+                                                iso_code: newIsoCode || null,
+                                              }
                                             : p
                                         )
                                       );
@@ -1694,7 +1758,16 @@ export function AdminProductManager({
                   <SelectContent>
                     <SelectItem value="all">전체 ISO 코드</SelectItem>
                     <SelectItem value="no-iso">
-                      ISO 코드 없음 ({products.filter((p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === "").length}개)
+                      ISO 코드 없음 (
+                      {
+                        products.filter(
+                          (p) =>
+                            !p.iso_code ||
+                            p.iso_code === "N999999" ||
+                            p.iso_code.trim() === ""
+                        ).length
+                      }
+                      개)
                     </SelectItem>
                     {uniqueIsoCodes.map((iso) => (
                       <SelectItem key={iso} value={iso}>
@@ -1797,7 +1870,10 @@ export function AdminProductManager({
               {/* 필터 초기화 버튼 및 ISO 코드 일괄 추론 버튼 */}
               <div className="flex justify-between items-center">
                 {filteredAndSortedProducts.some(
-                  (p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === ""
+                  (p) =>
+                    !p.iso_code ||
+                    p.iso_code === "N999999" ||
+                    p.iso_code.trim() === ""
                 ) && (
                   <Button
                     onClick={handleBatchInferIsoCodes}
@@ -1813,9 +1889,16 @@ export function AdminProductManager({
                     ) : (
                       <>
                         <Sparkles className="mr-2 h-4 w-4" />
-                        ISO 코드 없음 일괄 추론 ({filteredAndSortedProducts.filter(
-                          (p) => !p.iso_code || p.iso_code === "N999999" || p.iso_code.trim() === ""
-                        ).length}개)
+                        ISO 코드 없음 일괄 추론 (
+                        {
+                          filteredAndSortedProducts.filter(
+                            (p) =>
+                              !p.iso_code ||
+                              p.iso_code === "N999999" ||
+                              p.iso_code.trim() === ""
+                          ).length
+                        }
+                        개)
                       </>
                     )}
                   </Button>
@@ -2223,14 +2306,17 @@ function ProductCard({
                     size="sm"
                     onClick={async () => {
                       try {
-                        const response = await fetch("/api/admin/products/infer-iso", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            name: localValues.name,
-                            description: localValues.description,
-                          }),
-                        });
+                        const response = await fetch(
+                          "/api/admin/products/infer-iso",
+                          {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              name: localValues.name,
+                              description: localValues.description,
+                            }),
+                          }
+                        );
                         if (response.ok) {
                           const data = await response.json();
                           if (data.isoCode) {
@@ -2321,7 +2407,7 @@ function ProductCard({
                       category: event.target.value,
                     }))
                   }
-                  placeholder="예: coupang, naver"
+                  placeholder="예: naver, 11st"
                 />
               </div>
               <div className="flex items-center gap-2">

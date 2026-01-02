@@ -22,12 +22,12 @@ ALTER TABLE conversion_events
 ADD COLUMN IF NOT EXISTS purchase_amount DECIMAL(10, 2),
 ADD COLUMN IF NOT EXISTS commission_amount DECIMAL(10, 2),
 ADD COLUMN IF NOT EXISTS purchase_date TIMESTAMP WITH TIME ZONE,
-ADD COLUMN IF NOT EXISTS tracking_source VARCHAR(50); -- 'coupang_api', 'postback', 'meta_pixel'
+ADD COLUMN IF NOT EXISTS tracking_source VARCHAR(50); -- 'postback', 'meta_pixel'
 
 COMMENT ON COLUMN conversion_events.purchase_amount IS '구매 금액';
 COMMENT ON COLUMN conversion_events.commission_amount IS '수수료 금액';
 COMMENT ON COLUMN conversion_events.purchase_date IS '구매 완료 일시';
-COMMENT ON COLUMN conversion_events.tracking_source IS '추적 소스 (coupang_api, postback, meta_pixel)';
+COMMENT ON COLUMN conversion_events.tracking_source IS '추적 소스 (postback, meta_pixel)';
 
 -- 3. 인덱스 추가 (구매 완료 이벤트 조회 성능 향상)
 CREATE INDEX IF NOT EXISTS idx_conversion_events_purchase_completed 

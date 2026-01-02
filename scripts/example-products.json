@@ -1,53 +1,53 @@
-[
+﻿[
   {
-    "name": "무게조절 식기 세트",
+    "name": "臾닿쾶議곗젅 ?앷린 ?명듃",
     "iso_code": "15 09",
     "price": 25000,
-    "purchase_link": "https://www.coupang.com/vp/products/example1",
+    "purchase_link": "https://example.com/products/example1",
     "image_url": "https://thumbnail.image.com/weighted-utensils.jpg",
-    "manufacturer": "보조기기코리아",
-    "category": "coupang",
-    "description": "손 떨림이 있는 분들을 위한 무게조절 식기 세트입니다. 무게 중심을 조절하여 식사 시 떨림을 최소화합니다."
+    "manufacturer": "蹂댁“湲곌린肄붾━??,
+    "category": "naver",
+    "description": "???⑤┝???덈뒗 遺꾨뱾???꾪븳 臾닿쾶議곗젅 ?앷린 ?명듃?낅땲?? 臾닿쾶 以묒떖??議곗젅?섏뿬 ?앹궗 ???⑤┝??理쒖냼?뷀빀?덈떎."
   },
   {
-    "name": "적응형 숟가락",
+    "name": "?곸쓳???잕???,
     "iso_code": "15 09",
     "price": 15000,
     "purchase_link": "https://shopping.naver.com/catalog/example2",
     "image_url": "https://thumbnail.image.com/adaptive-spoon.jpg",
-    "manufacturer": "보조기기코리아",
+    "manufacturer": "蹂댁“湲곌린肄붾━??,
     "category": "naver",
-    "description": "손 기능이 제한된 분들을 위한 적응형 숟가락입니다."
+    "description": "??湲곕뒫???쒗븳??遺꾨뱾???꾪븳 ?곸쓳???잕??쎌엯?덈떎."
   },
   {
-    "name": "접이식 휠체어 경사로",
+    "name": "?묒씠???좎껜??寃쎌궗濡?,
     "iso_code": "18 30",
     "price": 150000,
     "purchase_link": "https://shopping.naver.com/catalog/example3",
     "image_url": "https://cdn.example.com/ramp.jpg",
-    "manufacturer": "접근성솔루션",
+    "manufacturer": "?묎렐?깆넄猷⑥뀡",
     "category": "naver",
-    "description": "휠체어 사용자가 문턱이나 낮은 계단을 쉽게 넘을 수 있도록 돕는 접이식 경사로입니다."
+    "description": "?좎껜???ъ슜?먭? 臾명꽦?대굹 ??? 怨꾨떒???쎄쾶 ?섏쓣 ???덈룄濡??뺣뒗 ?묒씠??寃쎌궗濡쒖엯?덈떎."
   },
   {
-    "name": "LED 손전등 지팡이",
+    "name": "LED ?먯쟾??吏?≪씠",
     "iso_code": "12 22",
     "price": 35000,
-    "purchase_link": "https://www.coupang.com/vp/products/example4",
+    "purchase_link": "https://example.com/products/example4",
     "image_url": "https://thumbnail.image.com/led-cane.jpg",
-    "manufacturer": "안전보조기기",
-    "category": "coupang",
-    "description": "야간 보행을 위한 LED 조명이 내장된 지팡이입니다."
+    "manufacturer": "?덉쟾蹂댁“湲곌린",
+    "category": "naver",
+    "description": "?쇨컙 蹂댄뻾???꾪븳 LED 議곕챸???댁옣??吏?≪씠?낅땲??"
   },
   {
-    "name": "전동 리프트 체어",
+    "name": "?꾨룞 由ы봽??泥댁뼱",
     "iso_code": "12 31",
     "price": 2500000,
-    "purchase_link": "https://www.coupang.com/vp/products/example5",
+    "purchase_link": "https://example.com/products/example5",
     "image_url": "https://thumbnail.image.com/lift-chair.jpg",
-    "manufacturer": "전동보조기기",
-    "category": "coupang",
-    "description": "앉기와 서기를 돕는 전동 리프트 체어입니다."
+    "manufacturer": "?꾨룞蹂댁“湲곌린",
+    "category": "naver",
+    "description": "?됯린? ?쒓린瑜??뺣뒗 ?꾨룞 由ы봽??泥댁뼱?낅땲??"
   }
 ]
 

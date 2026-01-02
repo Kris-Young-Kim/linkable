@@ -132,23 +132,7 @@ const nextConfig = {
         protocol: "https",
         hostname: "**.plusezer.com",
       },
-      // 쿠팡 이미지 도메인
-      {
-        protocol: "https",
-        hostname: "thumbnail.coupang.com",
-      },
-      {
-        protocol: "https",
-        hostname: "thumbnail.coupangcdn.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.coupang.com",
-      },
-      {
-        protocol: "https",
-        hostname: "**.coupangcdn.com",
-      },
+
       // 네이버 쇼핑 이미지 도메인
       {
         protocol: "https",
@@ -231,11 +215,11 @@ const nextConfig = {
       // 기존 ignored가 RegExp인 경우 문자열로 변환 불가하므로 새 배열 생성
       const ignoredList = Array.isArray(ignored)
         ? ignored.filter(
-            (pattern) => typeof pattern === "string" && pattern.length > 0
-          )
+          (pattern) => typeof pattern === "string" && pattern.length > 0
+        )
         : typeof ignored === "string" && ignored.length > 0
-        ? [ignored]
-        : [];
+          ? [ignored]
+          : [];
 
       config.watchOptions = {
         ...currentWatchOptions,

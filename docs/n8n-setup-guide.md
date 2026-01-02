@@ -7,7 +7,7 @@
 1. [n8n 설치 및 기본 설정](#1-n8n-설치-및-기본-설정)
 2. [Webhook 기반 수동 등록 워크플로우](#2-webhook-기반-수동-등록-워크플로우)
 3. [Schedule Trigger 기반 자동 크롤링 워크플로우](#3-schedule-trigger-기반-자동-크롤링-워크플로우)
-4. [웹 스크래핑 설정 (쿠팡 API 키 없이)](#4-웹-스크래핑-설정-쿠팡-api-키-없이)
+4. [웹 스크래핑 설정](#4-웹-스크래핑-설정)
 5. [테스트 및 검증](#5-테스트-및-검증)
 6. [문제 해결](#6-문제-해결)
 
@@ -151,7 +151,7 @@ return items.map(item => {
       image_url: data.image_url || data.imageUrl || data.image || null,
       price: getPrice(data.price || data.productPrice),
       manufacturer: data.manufacturer || data.brand || null,
-      category: data.category || data.platform || "coupang",
+      category: data.category || data.platform || "shopping",
       description: data.description || null,
       is_active: data.is_active !== undefined ? data.is_active : true
     }
@@ -277,7 +277,7 @@ return items.map(item => {
 #### PowerShell에서 테스트
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -ContentType "application/json" -Body '{"name": "무게조절 식기 세트", "purchase_link": "https://coupang.link/test", "price": 25000, "category": "coupang"}'
+Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -ContentType "application/json" -Body '{"name": "무게조절 식기 세트", "purchase_link": "https://naver.link/test", "price": 25000, "category": "naver"}'
 ```
 
 #### Postman/Thunder Client에서 테스트
@@ -289,9 +289,9 @@ Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -Co
   ```json
   {
     "name": "무게조절 식기 세트",
-    "purchase_link": "https://coupang.link/test",
+    "purchase_link": "https://naver.link/test",
     "price": 25000,
-    "category": "coupang"
+    "category": "naver"
   }
   ```
 
@@ -331,11 +331,11 @@ Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -Co
 
 ---
 
-## 4. 웹 스크래핑 설정 (쿠팡 API 키 없이)
+## 4. 웹 스크래핑 설정
 
-쿠팡 API 키 없이 웹 스크래핑으로 상품 데이터를 수집하는 방법입니다.
+웹 스크래핑으로 상품 데이터를 수집하는 방법입니다.
 
-### 4-1. HTTP Request 노드 설정 (쿠팡 검색 페이지)
+### 4-1. HTTP Request 노드 설정 (검색 페이지)
 
 1. **HTTP Request 노드 추가**
    - Schedule Trigger 노드 옆 "+" 버튼 클릭
@@ -344,13 +344,13 @@ Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -Co
 
 2. **HTTP Request 노드 설정** (실제 화면 기준)
 
-   - 노드 이름: `쿠팡검색페이지` (또는 원하는 이름)
+   - 노드 이름: `검색페이지` (또는 원하는 이름)
    
    - **Method**: 드롭다운에서 `GET` 선택
    
    - **URL**: 상단 URL 필드에 입력
      ```
-     https://www.coupang.com/np/search?q=보조기기&channel=user
+     https://search.shopping.naver.com/search/all?query=보조기기
      ```
    
    - **Send Query Parameters**: 
@@ -392,7 +392,7 @@ Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -Co
 ### 4-2. HTML Extract 노드 설정
 
 1. **HTML Extract 노드 추가**
-   - "쿠팡검색페이지" 노드 옆 "+" 버튼 클릭
+   - "검색페이지" 노드 옆 "+" 버튼 클릭
    - 검색창에 "HTML Extract" 입력
    - "HTML Extract" 노드 선택
 
@@ -435,7 +435,7 @@ Invoke-RestMethod -Uri "http://localhost:5678/webhook/products" -Method POST -Co
      - **Return Value**: `Attribute` 선택
      - **Attribute**: `href` 입력
 
-   **주의**: 쿠팡의 실제 셀렉터는 사이트 구조에 따라 다를 수 있습니다. 브라우저 개발자 도구로 확인 필요.
+   **주의**: 실제 셀렉터는 사이트 구조에 따라 다를 수 있습니다. 브라우저 개발자 도구로 확인 필요.
 
 3. **테스트 실행**
    - "Execute step" 버튼 클릭
@@ -489,8 +489,8 @@ for (const item of items) {
     function normalizeLink(link) {
       if (!link) return null;
       if (link.startsWith('http')) return link;
-      if (link.startsWith('/')) return `https://www.coupang.com${link}`;
-      return `https://www.coupang.com/${link}`;
+      if (link.startsWith('/')) return `https://www.example.com${link}`;
+      return `https://www.example.com/${link}`;
     }
     
     // 이미지 URL 정규화
@@ -498,7 +498,7 @@ for (const item of items) {
       if (!image) return null;
       if (image.startsWith('http')) return image;
       if (image.startsWith('//')) return `https:${image}`;
-      if (image.startsWith('/')) return `https://www.coupang.com${image}`;
+      if (image.startsWith('/')) return `https://www.example.com${image}`;
       return image;
     }
     
@@ -511,7 +511,7 @@ for (const item of items) {
           image_url: normalizeImage(product.image),
           price: getPrice(product.price),
           manufacturer: null, // HTML에서 추출 불가
-          category: "coupang",
+          category: "shopping",
           description: null,
           is_active: true
         }
@@ -532,12 +532,12 @@ Webhook 워크플로우와 동일하게:
 - Update/Create 노드
 - Wait 노드 (1초)
 
-### 4-5. 쿠팡 셀렉터 확인 방법
+### 4-5. 셀렉터 확인 방법
 
 #### 브라우저 개발자 도구 사용
 
-1. **쿠팡 검색 페이지 접속**
-   - https://www.coupang.com/np/search?q=보조기기 접속
+1. **검색 페이지 접속**
+   - 대상 쇼핑몰 검색 페이지 접속
 
 2. **개발자 도구 열기**
    - F12 키 누르기
@@ -562,7 +562,7 @@ Webhook 워크플로우와 동일하게:
 
 ### 4-6. 대안: Playwright 노드 사용
 
-쿠팡이 JavaScript로 동적 로딩을 사용하는 경우 Playwright가 더 안정적입니다.
+JavaScript로 동적 로딩을 사용하는 경우 Playwright가 더 안정적입니다.
 
 1. **Playwright 노드 추가**
    - Schedule Trigger 노드 옆 "+" 버튼 클릭
@@ -570,10 +570,10 @@ Webhook 워크플로우와 동일하게:
    - "Playwright" 노드 선택
 
 2. **Playwright 설정**
-   - 노드 이름: `쿠팡 웹 스크래핑`
+   - 노드 이름: `웹 스크래핑`
    - 설정:
      - **Operation**: `Extract Data from Website` 선택
-     - **URL**: `https://www.coupang.com/np/search?q=보조기기&channel=user`
+     - **URL**: 대상 쇼핑몰 검색 페이지 URL
      - **Wait for Selector**: `.search-product` (페이지 로딩 대기)
      - **Wait Time**: `3000` (3초)
      - **Extraction Values**: HTML Extract와 동일한 값들 추가
@@ -696,7 +696,7 @@ Webhook 워크플로우와 동일하게:
 **해결 방법**:
 1. URL이 정확한지 확인
 2. Headers 설정 확인 (User-Agent 등)
-3. 쿠팡이 봇을 차단했을 수 있음
+3. 사이트가 봇을 차단했을 수 있음
    - User-Agent 헤더 추가
    - 요청 간격 조절 (Wait 노드 사용)
 4. OUTPUT 패널에서 응답 확인
@@ -709,7 +709,7 @@ Webhook 워크플로우와 동일하게:
 1. Source Data가 올바른지 확인 (`={{ $json.body }}`)
 2. CSS Selector가 정확한지 확인
    - 브라우저 개발자 도구로 실제 셀렉터 확인
-3. 쿠팡이 JavaScript로 동적 로딩을 사용하는 경우
+3. 사이트가 JavaScript로 동적 로딩을 사용하는 경우
    - Playwright 노드 사용 권장
 4. OUTPUT 패널에서 HTML 확인
 
@@ -815,7 +815,7 @@ N8N_BASIC_AUTH_PASSWORD=password
    - 크롤링이 허용되는지 확인
 
 2. **이용약관 확인**
-   - 쿠팡, 네이버 등 쇼핑몰의 이용약관 확인
+   - 네이버 등 쇼핑몰의 이용약관 확인
    - 자동화 도구 사용 제한 여부 확인
 
 3. **요청 간격 조절**
@@ -824,8 +824,8 @@ N8N_BASIC_AUTH_PASSWORD=password
 
 ### 기술적 제약사항
 
-1. **쿠팡의 동적 로딩**
-   - 쿠팡은 JavaScript로 동적 로딩을 사용
+1. **동적 로딩**
+   - 많은 쇼핑몰이 JavaScript로 동적 로딩을 사용
    - HTML Extract만으로는 제한적
    - Playwright 노드 사용 권장
 
@@ -841,9 +841,9 @@ N8N_BASIC_AUTH_PASSWORD=password
 
 ## 12. 구매 완료 추적 자동화 워크플로우
 
-### 12-1. 쿠팡 파트너스 구매 리포트 자동 조회
+### 12-1. 구매 리포트 자동 조회
 
-쿠팡 파트너스 API를 통해 구매 리포트를 주기적으로 조회하고 DB에 저장하는 워크플로우입니다.
+구매 리포트를 주기적으로 조회하고 DB에 저장하는 워크플로우입니다.
 
 #### 워크플로우 구조
 
@@ -860,9 +860,9 @@ Split In Batches → Supabase (구매 이벤트 저장) → Wait → 다음 배�
    - Cron Expression: `0 2 * * *`
 
 2. **HTTP Request 노드 추가**
-   - 노드 이름: `쿠팡 구매 리포트 조회`
+   - 노드 이름: `구매 리포트 조회`
    - **Method**: GET
-   - **URL**: `https://your-domain.com/api/webhooks/coupang/purchase-report`
+   - **URL**: `https://your-domain.com/api/webhooks/purchase-report`
    - **Query Parameters**:
      - `startDate`: `={{ $now.minus({days: 7}).toFormat('yyyy-MM-dd') }}` (7일 전)
      - `endDate`: `={{ $now.minus({days: 1}).toFormat('yyyy-MM-dd') }}` (어제)
@@ -880,26 +880,7 @@ Split In Batches → Supabase (구매 이벤트 저장) → Wait → 다음 배�
 - **권장**: 매일 오전 2시 (하루 전 구매 내역 조회)
 - **대안**: 6시간마다 (`0 */6 * * *`)
 
-### 12-2. 쿠팡 Postback URL 설정
-
-쿠팡 파트너스에서 구매 완료 시 자동으로 호출하는 Postback URL을 설정합니다.
-
-#### 설정 방법
-
-1. **쿠팡 파트너스 대시보드 접속**
-   - https://partners.coupang.com/ 접속
-   - 로그인
-
-2. **Postback URL 설정**
-   - 설정 메뉴 → Postback URL
-   - URL 입력: `https://your-domain.com/api/webhooks/coupang/purchase`
-   - 저장
-
-3. **테스트**
-   - 구매 완료 시 자동으로 호출되는지 확인
-   - n8n Executions에서 호출 내역 확인
-
-### 12-3. Meta Pixel 구매 이벤트 수신
+### 12-2. Meta Pixel 구매 이벤트 수신
 
 Meta Pixel에서 구매 완료 이벤트를 받아서 DB에 저장하는 워크플로우입니다.
 
@@ -941,7 +922,7 @@ fbq('track', 'Purchase', {
 });
 ```
 
-### 12-4. 구매 추적 통계 대시보드
+### 12-3. 구매 추적 통계 대시보드
 
 구매 완료 추적 데이터를 분석하는 워크플로우입니다.
 
@@ -972,21 +953,16 @@ Supabase (통계 저장) 또는 Email (알림)
 4. **Email 노드 추가** (선택적)
    - 일일 구매 통계 리포트 전송
 
-### 12-5. 환경 변수 설정
+### 12-4. 환경 변수 설정
 
 n8n에서 사용할 환경 변수를 설정합니다.
 
 ```env
-# 쿠팡 파트너스 API
-COUPANG_ACCESS_KEY=your_access_key
-COUPANG_SECRET_KEY=your_secret_key
-COUPANG_LINK_ID=your_link_id
-
 # Meta Pixel
 NEXT_PUBLIC_META_PIXEL_ID=your_pixel_id
 ```
 
-### 12-6. 구매 추적 흐름도
+### 12-5. 구매 추적 흐름도
 
 ```
 사용자 구매 링크 클릭
@@ -994,9 +970,8 @@ NEXT_PUBLIC_META_PIXEL_ID=your_pixel_id
 GA4 + Meta Pixel 이벤트 전송
     ↓
 외부 판매 사이트에서 구매 완료
-    ├─ 쿠팡: Postback URL 자동 호출
-    ├─ Meta Pixel: Purchase 이벤트 전송
-    └─ 쿠팡 API: 주기적으로 구매 리포트 조회
+    ├─ Postback URL 자동 호출
+    └─ Meta Pixel: Purchase 이벤트 전송
     ↓
 구매 완료 이벤트 저장
     ├─ conversion_events: purchase_completed 이벤트

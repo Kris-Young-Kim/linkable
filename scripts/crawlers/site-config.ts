@@ -25,6 +25,7 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
   ablelife: {
     name: "에이블라이프",
     baseUrl: "https://www.ablelife.co.kr",
+    searchUrl: "https://www.ablelife.co.kr/shop/shopbrand.html?search={keyword}&refer=https:",
     // 카테고리별 URL 매핑
     categoryUrls: {
       // 휠체어 카테고리 (xcode=003)
@@ -72,6 +73,8 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
         ".product_list > li",
         ".prd-list > li", // 추가 시도
         "ul.prd-list > li",
+        ".item-list > li",
+        ".item-wrap > li",
         "li[class*='product']",
         ".board_list > li",
         "[class*='product']",
@@ -114,6 +117,7 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
   carelifemall: {
     name: "케어라이프몰",
     baseUrl: "https://www.carelifemall.co.kr",
+    searchUrl: "https://www.carelifemall.co.kr/shop/search.php?q={keyword}",
     selectors: {
       productList: [
         ".prd-list > li",
@@ -134,6 +138,7 @@ export const SITE_CONFIGS: Record<string, SiteConfig> = {
   willbe: {
     name: "윌비",
     baseUrl: "https://www.willbe.kr",
+    searchUrl: "https://www.willbe.kr/shop/shopbrand.html?search={keyword}",
     selectors: {
       productList: [
         "[class*='item']",

@@ -15,8 +15,8 @@ import { syncIsoCodeProducts } from "@/lib/integrations/iso-product-manager"
 await syncIsoCodeProducts("15 09", [
   {
     name: "무게조절 식기 세트",
-    purchase_link: "https://coupang.link/product1",
-    platform: "coupang",
+    purchase_link: "https://naver.link/product1",
+    platform: "naver",
     price: 25000,
     description: "손 떨림을 보정하는 무게조절 식기",
     image_url: "https://example.com/image1.jpg",
@@ -111,9 +111,9 @@ const stats = await getIsoCodeStats("15 09")
 
 ```bash
 # .env 파일
-ISO_15_09_LINKS=https://coupang.link/1,https://naver.link/1,https://11st.link/1
-ISO_18_30_LINKS=https://coupang.link/2,https://naver.link/2
-ISO_22_30_LINKS=https://coupang.link/3
+ISO_15_09_LINKS=https://naver.link/1,https://11st.link/1
+ISO_18_30_LINKS=https://naver.link/2
+ISO_22_30_LINKS=https://naver.link/3
 ```
 
 ### 2. 코드에서 사용
@@ -123,7 +123,7 @@ import { getIsoCodeLinksFromEnv } from "@/lib/config/iso-links-env"
 
 // ISO 코드별 링크 조회
 const links = getIsoCodeLinksFromEnv("15 09")
-// 결과: ["https://coupang.link/1", "https://naver.link/1", "https://11st.link/1"]
+// 결과: ["https://naver.link/1", "https://11st.link/1"]
 
 // 여러 ISO 코드 조회
 import { getMultipleIsoCodeLinksFromEnv } from "@/lib/config/iso-links-env"
@@ -172,7 +172,7 @@ await syncIsoCodeProducts("15 09", [
   {
     name: "새로운 식사 보조기기",
     purchase_link: "https://new-link.com",
-    platform: "coupang",
+    platform: "naver",
     price: 20000,
   },
 ])
