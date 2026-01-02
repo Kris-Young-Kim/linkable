@@ -87,7 +87,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
-import { cn } from "@/lib/utils";
+import { cn, generateUUID } from "@/lib/utils";
 import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
 
 interface Message {
@@ -327,25 +327,29 @@ export function ChatInterface() {
   }, []);
 
   const handleSend = async () => {
-    // #region agent log
-    fetch("http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        location: "components/chat-interface.tsx:handleSend",
-        message: "handleSend invoked",
-        data: {
-          isSignedIn,
-          hasInput: !!input.trim(),
-          hasImage: !!selectedImage,
-          consultationId,
-        },
-        timestamp: Date.now(),
-        sessionId: "debug-session",
-        runId: "run2",
-        hypothesisId: "C",
-      }),
-    }).catch(() => {});
+    // #region agent log (개발 환경에서만 실행, 에러 무시)
+    if (process.env.NODE_ENV === "development") {
+      fetch("http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          location: "components/chat-interface.tsx:handleSend",
+          message: "handleSend invoked",
+          data: {
+            isSignedIn,
+            hasInput: !!input.trim(),
+            hasImage: !!selectedImage,
+            consultationId,
+          },
+          timestamp: Date.now(),
+          sessionId: "debug-session",
+          runId: "run2",
+          hypothesisId: "C",
+        }),
+      }).catch(() => {
+        // 디버깅 서버가 실행되지 않아도 에러를 표시하지 않음
+      });
+    }
     // #endregion
     if (!isSignedIn) {
       return;
@@ -357,13 +361,13 @@ export function ChatInterface() {
     }
 
     const userMessage: Message = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       role: "user",
       content: trimmed || "이미지를 첨부했습니다.",
       timestamp: new Date(),
     };
 
-    const assistantMessageId = crypto.randomUUID();
+    const assistantMessageId = generateUUID();
 
     setMessages((prev) => [
       ...prev,
@@ -522,28 +526,32 @@ export function ChatInterface() {
                 isoMatches?: IsoMatch[];
                 isGreeting?: boolean;
               };
-              // #region agent log
-              fetch(
-                "http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34",
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    location: "components/chat-interface.tsx:analysisEvent",
-                    message: "Analysis event received",
-                    data: {
-                      hasConsultationId: !!payload.consultationId,
-                      hasIcfAnalysis: !!payload.icfAnalysis,
-                      isGreeting: payload.isGreeting,
-                      isoMatchesCount: payload.isoMatches?.length || 0,
-                    },
-                    timestamp: Date.now(),
-                    sessionId: "debug-session",
-                    runId: "run2",
-                    hypothesisId: "D",
-                  }),
-                }
-              ).catch(() => {});
+              // #region agent log (개발 환경에서만 실행, 에러 무시)
+              if (process.env.NODE_ENV === "development") {
+                fetch(
+                  "http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      location: "components/chat-interface.tsx:analysisEvent",
+                      message: "Analysis event received",
+                      data: {
+                        hasConsultationId: !!payload.consultationId,
+                        hasIcfAnalysis: !!payload.icfAnalysis,
+                        isGreeting: payload.isGreeting,
+                        isoMatchesCount: payload.isoMatches?.length || 0,
+                      },
+                      timestamp: Date.now(),
+                      sessionId: "debug-session",
+                      runId: "run2",
+                      hypothesisId: "D",
+                    }),
+                  }
+                ).catch(() => {
+                  // 디버깅 서버가 실행되지 않아도 에러를 표시하지 않음
+                });
+              }
               // #endregion
 
               if (!consultationId && payload.consultationId) {

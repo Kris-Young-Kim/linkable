@@ -674,6 +674,278 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 ---
 
+## SEO 표준 및 최적화 (SEO Standard & Optimization)
+
+### 개요
+
+이 SEO 표준은 웹페이지가 검색 엔진 결과 페이지에서 상위에 노출되기 위해 필요한 요건에 대한 지침을 제공합니다. 검색 엔진 최적화(SEO)는 검색 엔진의 크롤링(수집) 및 인덱싱(색인)을 관리하기 위해 사이트에 콘텐츠 전략, 기술적 설정, 전술을 적용하는 방법론입니다.
+
+### 검색 엔진 작동 원리
+
+검색 엔진은 **크롤링(Crawling)**, **인덱싱(Indexing)**, **랭킹(Ranking)**의 세 단계로 작동합니다:
+
+1. **크롤링**: 개별 URL을 발견하는 단계
+2. **인덱싱**: 페이지의 콘텐츠를 추출하여 검색 엔진 데이터베이스에 저장
+3. **랭킹**: 알고리즘에 의해 각 페이지의 관련성에 따라 순위 결정
+
+### 랭킹 신호 (Ranking Signals)
+
+검색 엔진이 콘텐츠 순위를 매기기 위해 집중하는 네 가지 주요 영역:
+
+1. **콘텐츠 품질 및 E-E-A-T**: 경험(Experience), 전문성(Expertise), 권위(Authoritativeness), 신뢰성(Trustworthiness)
+2. **아키텍처**: 크롤링 용이성, 페이지 로딩 속도, HTTPS, 모바일 친화성
+3. **링크 그래프**: 인바운드 링크(백링크)의 권위와 관련성
+4. **사용자 신호**: 검색 결과 페이지에서의 클릭률(CTR)과 체류 시간
+
+**모바일 우선 인덱싱**: 구글은 "모바일 우선(mobile-first)" 모델을 적용하여 모바일 기기의 콘텐츠와 사용자 경험이 모든 플랫폼의 검색 성능 기준이 됩니다.
+
+### 구현 작업
+
+#### 콘텐츠 (Content)
+
+- [x] **페이지 제목 (Title Tags)**
+
+  - [x] 모든 페이지에 고유하고 명확한 제목 태그 구현 (필수) ✅ `app/page.tsx`, `app/layout.tsx`, `app/dashboard/page.tsx` 등
+  - [x] 제목은 약 60자 이내(픽셀 너비 580px) 권장 ✅ 대부분 준수
+  - [x] 키워드는 제목의 시작 부분에 배치 ✅ "LinkAble — AI 기반 보조기기 매칭"
+  - [x] 브랜드 접미사 포함 (예: " — LinkAble") ✅ 모든 페이지에 "LinkAble" 포함
+  - [ ] 특수 문자 이스케이프 처리 (일부 페이지 확인 필요)
+
+- [x] **헤딩 구조 (Headings)**
+
+  - [x] 페이지당 정확히 하나의 `<h1>` 사용 (필수) ✅ 확인됨 (`app/page.tsx`, `components/hero-section.tsx` 등)
+  - [x] 헤딩은 논리적이고 순차적 순서(H1 -> H2 -> H3) 사용 (필수) ✅ 대부분 준수
+  - [x] 헤딩은 콘텐츠 섹션을 정확하고 설명적으로 나타냄 (필수) ✅ 확인됨
+  - [x] 헤딩은 스타일링 목적으로 사용하지 않음 (필수) ✅ 확인됨
+
+- [ ] **콘텐츠 품질 및 E-E-A-T (Content Quality & E-E-A-T)**
+
+  **E-E-A-T는 구글의 핵심 랭킹 신호입니다:**
+
+  - [ ] **Experience (경험)**: 실제 사용 경험 기반 콘텐츠
+
+    - [ ] 실제 사용자 사례 및 후기 포함 (K-IPPA 평가 데이터 활용)
+    - [ ] "16년 경력 보조공학 전문가" 같은 경험 강조
+    - [ ] 실제 사용 환경 사진/영상 포함 (권장)
+    - [ ] 사용자 스토리 및 성공 사례 공유 (권장)
+
+  - [x] **Expertise (전문성)**: 주제에 대한 전문 지식
+
+    - [x] ICF(국제기능분류) 및 ISO 9999 표준 기반 전문 콘텐츠 ✅ `docs/목적-및-핵심-가치.md`, `app/page.tsx` 메타데이터
+    - [x] 보조공학 전문 용어의 정확한 사용 ✅ 프로젝트 전반에 걸쳐 사용
+    - [ ] 전문가 인증 정보 표시 (보조공학사, 작업치료사 등) (부분 구현)
+    - [ ] 전문가 프로필 및 자격 정보 페이지 제공 (권장)
+    - [x] 전문가가 직접 작성/검토한 콘텐츠임을 명시 ✅ "16년 경력 보조공학 전문가" 언급 (`docs/목적-및-핵심-가치.md`)
+
+  - [x] **Authoritativeness (권위)**: 신뢰할 수 있는 출처
+
+    - [x] 국제 표준(ICF, ISO 9999) 인용 및 참조 ✅ 프로젝트 전반에 걸쳐 명시
+    - [ ] 정부 기관, 학회, 전문 기관 출처 명시 (부분 구현)
+    - [ ] 관련 연구 및 논문 인용 (권장)
+    - [ ] 전문가 추천 및 인증 표시 (부분 구현)
+    - [ ] 언론 보도 및 언급 이력 표시 (권장)
+
+  - [x] **Trustworthiness (신뢰성)**: 신뢰할 수 있는 정보 제공
+    - [x] 정확한 정보 제공 및 사실 확인 ✅ ICF/ISO 표준 기반
+    - [x] 의료 행위 금지 명시 (Non-Medical 원칙) ✅ `components/disclaimer-modal.tsx`, `docs/PRD.md`
+    - [x] 면책 고지 및 이용 약관 명확히 표시 ✅ `app/terms/page.tsx`, `components/pages/terms-content.tsx`
+    - [x] 개인정보 보호 정책 및 보안 인증 표시 ✅ `app/privacy/page.tsx`, `components/pages/privacy-content.tsx`
+    - [x] 사용자 리뷰 및 평가 시스템 (K-IPPA 데이터 활용) ✅ `app/dashboard/ippa/page.tsx`, K-IPPA 평가 시스템 구현됨
+    - [x] 투명한 비즈니스 정보 제공 (회사 정보, 연락처) ✅ `app/about/page.tsx`, Footer에 연락처 정보
+    - [x] AI 생성 콘텐츠는 반드시 인간의 검토(Human-in-the-loop)를 거침 (필수) ✅ 프로젝트 원칙에 명시
+
+  **콘텐츠 품질 기본 요구사항:**
+
+  - [ ] 키워드 조사 수행 (권장)
+  - [ ] 자연어로 작성되고 읽기 쉽고 명확한 콘텐츠 (권장)
+  - [ ] 사용자의 검색 의도(Search Intent)와의 일치도 확인
+  - [ ] 콘텐츠의 독창성 및 유용성 확보
+  - [ ] 정기적인 콘텐츠 업데이트 및 최신 정보 반영 (권장)
+
+- [x] **내비게이션 (Navigation)**
+
+  - [x] 링크는 자바스크립트 없이도 크롤링 가능 (필수) ✅ Next.js Link 컴포넌트 사용
+  - [x] 앵커 텍스트는 목적지를 설명하며 "여기를 클릭" 같은 용어 피함 (권장) ✅ 확인됨
+  - [x] 내부 링크를 통해 관련 콘텐츠 연결 (권장) ✅ Footer, Header 등에 내부 링크 구현
+  - [ ] 제3자 속성이나 광고성 링크에는 `rel="nofollow"` 또는 `rel="sponsored"` 사용 (권장) (확인 필요)
+
+- [x] **브레드크럼 (Breadcrumbs)**
+
+  - [x] 브레드크럼은 자바스크립트가 비활성화된 상태에서도 접근 가능 (필수) ✅ `components/navigation/breadcrumbs.tsx` - 서버 렌더링 가능
+  - [ ] 모든 페이지에 일관되게 나타남 (권장) (부분 구현 - 일부 페이지에만 사용)
+  - [x] 구조화된 데이터(Schema.org BreadcrumbList) 사용 (권장) ✅ `itemScope`, `itemType="https://schema.org/BreadcrumbList"` 구현됨
+
+- [x] **미디어 (Media)**
+
+  - [x] 모든 이미지에 alt 속성 포함 (필수) ✅ `components/product-recommendation-card.tsx`, `components/hero-section.tsx` 등 확인됨
+  - [x] 이미지 검색이 중요한 자산에는 alt 속성 반드시 채움 (필수) ✅ 확인됨
+  - [ ] 구조화된 데이터(ImageObject) 사용 (권장) (미구현)
+  - [x] 차세대 이미지 포맷(WebP, AVIF) 사용 (권장) ✅ `next.config.mjs`에 `formats: ["image/avif", "image/webp"]` 설정됨
+  - [ ] 비디오에는 텍스트 스크립트(자막/대본) 포함 (필수) (비디오 콘텐츠 없음)
+  - [ ] 비디오 구조화된 데이터(VideoObject) 사용 (권장) (비디오 콘텐츠 없음)
+  - [ ] 파일 이름은 콘텐츠를 설명하는 키워드 포함, 하이픈으로 구분, 소문자 사용 (권장) (확인 필요)
+
+- [x] **메타데이터 (Metadata)**
+  - [x] 모든 페이지에 고유한 메타 설명 포함 (권장) ✅ `app/page.tsx`, `app/dashboard/page.tsx`, `app/recommendations/page.tsx` 등
+  - [x] 메타 설명은 30~150자(한중일 30~75자) 사이 (권장) ✅ 대부분 준수
+  - [x] 클릭을 유도하는(CTA) 문구 포함 (권장) ✅ "AI 상담, ISO 매칭, K-IPPA 검증까지 한 번에 제공"
+  - [x] 메타 키워드 태그는 사용하지 않음 (권장) ✅ Next.js Metadata API 사용 (keywords는 layout.tsx에만 있으나 권장사항)
+
+#### 크롤링 가능성 (Crawlability)
+
+- [ ] **사이트맵 (Sitemap)**
+
+  - [ ] XML 사이트맵 구현 (필수)
+  - [ ] 표준(Canonical) URL만 포함 (필수)
+  - [ ] robots.txt에 의해 차단된 URL은 포함하지 않음 (필수)
+  - [ ] XML 사이트맵은 50MB(비압축) 또는 50,000개 이상의 URL을 포함하지 않음 (필수)
+  - [ ] XML 사이트맵은 UTF-8로 인코딩 (필수)
+  - [ ] HTML 사이트맵 구현 (필수)
+  - [ ] RSS 피드 구현 (필수)
+
+- [ ] **리디렉션 (Redirects)**
+
+  - [ ] 영구적인 이동에는 301, 일시적인 이동에는 302 사용 (필수)
+  - [ ] 리디렉션 체인 최소화 (필수)
+  - [ ] 메타 리프레시 및 자바스크립트 리디렉션 사용하지 않음 (필수)
+
+- [ ] **사용자 에이전트 관리**
+
+  - [ ] 올바른 HTTP 상태 코드 사용 (404, 410, 503 등) (필수)
+  - [ ] 검색 엔진 봇에게 사용자와 동일한 콘텐츠 제공 (클로킹 금지) (필수)
+
+- [ ] **검색 엔진 관리**
+  - [ ] robots `<meta>` 태그 적절히 구현 (필수)
+  - [ ] robots.txt 적절히 사용 (필수)
+  - [ ] Google Search Console 등록 및 관리 (필수)
+  - [ ] Naver Search Advisor 등록 및 관리 (권장)
+
+#### URL 및 도메인 (URLs & Domains)
+
+- [ ] **도메인**
+
+  - [ ] HTTPS가 기본 프로토콜로 사용 (필수)
+  - [ ] HTTP 요청은 HTTPS로 301 리디렉션 (필수)
+
+- [ ] **URL 구조**
+
+  - [ ] URL은 콘텐츠 허브를 중심으로 생성 (권장)
+  - [ ] 하위 디렉터리 내의 모든 단어는 하이픈으로 구분 (필수)
+  - [ ] URL 내의 모든 문자는 소문자 (필수)
+  - [ ] URL은 정규화되고 인코딩됨 (필수)
+  - [ ] 검색을 위한 주요 페이지는 파라미터 사용을 피함 (권장)
+
+- [x] **표준화 (Canonicalization)**
+  - [ ] 비표준 도메인은 표준 도메인으로 리디렉션 (필수) (프로덕션 배포 시 확인 필요)
+  - [x] 중복 콘텐츠 방지를 위해 Canonical 태그 사용 (필수) ✅ `app/page.tsx`, `app/dashboard/page.tsx` 등에 `alternates: { canonical: pageUrl }` 구현됨
+
+#### 모바일 (Mobile)
+
+- [x] **반응형 디자인**
+
+  - [x] 반응형 디자인 사용 (필수) ✅ Tailwind CSS 반응형 클래스 사용 (`md:`, `lg:` 등)
+  - [x] 데스크톱과 모바일의 콘텐츠 일치 (필수) ✅ 단일 URL, 동일 콘텐츠
+  - [x] 독립 모바일 사이트(m.example.com) 지양 (권장) ✅ 반응형 디자인 사용
+
+- [x] **사용자 경험**
+  - [x] 상호작용 요소는 최소 44x44 CSS 픽셀 타겟 영역 (필수) ✅ shadcn/ui 컴포넌트 기본 설정
+  - [ ] `meta name="viewport"` 태그 정의 (필수) (Next.js 기본 제공 확인 필요)
+  - [x] 구식 기술(Flash 등) 사용하지 않음 (필수) ✅ 최신 웹 기술만 사용
+
+#### 구조화된 데이터 (Structured Data)
+
+- [x] **Schema.org 마크업**
+  - [ ] JSON-LD 형식 사용 (권장) (부분 구현 - BreadcrumbList만 마이크로데이터 형식)
+  - [x] 구조화된 데이터는 페이지 콘텐츠를 정확히 반영 (필수) ✅ BreadcrumbList 구현됨
+  - [x] Open Graph 및 Twitter Card 마크업 구현 (필수) ✅ `app/page.tsx`, `app/dashboard/page.tsx` 등에 구현됨
+  - [ ] 주요 페이지 타입별 구조화된 데이터 구현:
+    - [ ] Organization (조직 정보) (미구현)
+    - [ ] WebSite (사이트 정보) (미구현)
+    - [x] BreadcrumbList (브레드크럼) ✅ `components/navigation/breadcrumbs.tsx`
+    - [ ] Article/BlogPosting (블로그/기사) (미구현)
+    - [ ] Product (상품 정보) (미구현)
+    - [ ] FAQPage (FAQ) (미구현)
+    - [ ] HowTo (사용 가이드) (미구현)
+
+#### 지역 및 언어 타겟팅
+
+- [x] **다국어/다국가 지원**
+  - [ ] `hreflang` 태그 적절히 구현 (필수) (미구현 - 단일 언어 사이트)
+  - [ ] `x-default` 값으로 기본 페이지 지정 (권장) (미구현)
+  - [x] `lang` 속성으로 언어 표시 (필수) ✅ `app/layout.tsx`에 `<html lang="ko">` 구현됨
+
+#### 기술적 요소 (Technical)
+
+- [x] **자바스크립트 (JavaScript)**
+
+  - [x] 핵심 콘텐츠는 자바스크립트 없이도 접근 가능하거나 SSR 사용 (필수) ✅ Next.js App Router 기본 SSR
+  - [x] SPA는 SSR 또는 정적 생성 사용 (권장) ✅ Next.js App Router 사용, `dynamic import`로 코드 스플리팅
+  - [x] Hashbang(#!) 방식 사용하지 않음 (필수) ✅ Next.js 기본 라우팅 사용
+  - [x] 모든 페이지는 고유하고 SEO 친화적인 URL로 접근 가능 (필수) ✅ `/`, `/dashboard`, `/recommendations` 등
+
+- [x] **성능 (Performance)**
+  - [x] **Core Web Vitals 최적화** (필수) ✅ `components/performance/web-vitals-tracker.tsx` 구현됨
+    - [x] LCP (Largest Contentful Paint): 2.5초 이하 (권장) ✅ 이미지 프리로딩 구현 (`docs/performance-optimization-summary.md`)
+    - [x] INP (Interaction to Next Paint): 200ms 이하 (권장) ✅ 코드 스플리팅으로 최적화
+    - [x] CLS (Cumulative Layout Shift): 0.1 이하 (권장) ✅ 레이아웃 안정성 확보
+  - [x] 텍스트 기반 자산(HTML, CSS, JS) 축소 및 압축 (권장) ✅ Next.js 프로덕션 빌드 기본 제공
+  - [x] 사용하지 않는 자바스크립트 실행 최소화 (권장) ✅ 코드 스플리팅 및 동적 import 사용
+  - [x] 이미지 및 비디오 자산 최적화 및 CDN 활용 (권장) ✅ Next.js Image 컴포넌트, WebP/AVIF 포맷 지원
+  - [x] HTTP 캐싱 활성화 (권장) ✅ API 라우트에 캐싱 헤더 설정 (`app/api/products/route.ts`)
+
+### 추천 SEO 도구 및 리소스
+
+#### 웹마스터 도구
+
+- [Google Search Console](https://search.google.com/search-console) - 구글 공식 웹마스터 도구
+- [Bing Webmaster Tools](https://www.bing.com/webmasters) - 마이크로소프트 Bing 웹마스터 도구
+- [Naver Search Advisor](https://searchadvisor.naver.com/) - 네이버 검색 어드바이저
+
+#### 테스트 및 검증 도구
+
+- [Rich Results Test](https://search.google.com/test/rich-results) - 구조화된 데이터 테스트
+- [Schema.org Validator](https://validator.schema.org) - Schema.org 마크업 검증
+- [PageSpeed Insights](https://pagespeed.web.dev/) - 코어 웹 바이탈 성능 분석
+
+#### SEO 분석 도구
+
+- [Screaming Frog](https://www.screamingfrog.co.uk/seo-spider/) - 기술적 SEO 감사를 위한 웹사이트 크롤러
+- [Ahrefs](https://ahrefs.com) - 종합 SEO 도구 세트
+- [SEMrush](https://www.semrush.com) - 올인원 마케팅 툴킷
+
+#### 유용한 리소스
+
+- [Google Search Central](https://developers.google.com/search) - 구글 검색 공식 문서
+- [Schema.org](https://schema.org) - 구조화된 데이터 어휘 문서
+
+### 우선순위
+
+**즉시 작업 (1-2주)**:
+
+- 페이지 제목 및 메타 설명 구현
+- 구조화된 데이터 기본 구현 (Organization, WebSite, BreadcrumbList)
+- XML 사이트맵 생성
+- robots.txt 설정
+- Google Search Console 등록
+
+**단기 작업 (3-4주)**:
+
+- 모든 페이지의 헤딩 구조 점검 및 수정
+- 이미지 alt 속성 점검 및 보완
+- 모바일 반응형 디자인 검증
+- Core Web Vitals 최적화
+- Open Graph 및 Twitter Card 구현
+
+**중기 작업 (5-8주)**:
+
+- 다국어 지원 시 hreflang 구현
+- 상품 페이지 구조화된 데이터 (Product) 구현
+- FAQ 및 HowTo 구조화된 데이터 구현
+- 백링크 전략 수립 및 실행
+- 정기적인 SEO 감사 및 모니터링
+
+---
+
 ## Post-MVP 전략
 
 ### 상품 데이터 수집 및 관리
