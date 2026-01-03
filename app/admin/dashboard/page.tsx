@@ -5,6 +5,7 @@ import { Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 import { verifyAdminAccess } from "@/lib/auth/verify-admin"
 
 // 동적 import로 관리자 대시보드 지연 로딩
@@ -79,6 +80,11 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 md:px-6 py-4">
+          <Breadcrumbs className="mb-2 text-xs" />
+        </div>
+      </header>
       <Suspense fallback={
         <div className="container mx-auto px-4 py-8 space-y-6">
           <div className="h-12 bg-muted animate-pulse rounded-lg" />

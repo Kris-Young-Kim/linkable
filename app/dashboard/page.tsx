@@ -7,6 +7,7 @@ import dynamic from "next/dynamic"
 import type { ConsultationRow } from "@/components/dashboard-content"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 
 // 동적 import로 무거운 컴포넌트 지연 로딩
@@ -200,6 +201,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <header className="border-b border-border bg-card">
+        <div className="container mx-auto px-4 md:px-6 py-4">
+          <Breadcrumbs className="mb-2 text-xs" />
+        </div>
+      </header>
       <main id="main-content" role="main">
         <Suspense
           fallback={

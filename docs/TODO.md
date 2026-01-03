@@ -772,7 +772,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 - [x] **브레드크럼 (Breadcrumbs)**
 
   - [x] 브레드크럼은 자바스크립트가 비활성화된 상태에서도 접근 가능 (필수) ✅ `components/navigation/breadcrumbs.tsx` - 서버 렌더링 가능
-  - [ ] 모든 페이지에 일관되게 나타남 (권장) (부분 구현 - 일부 페이지에만 사용)
+  - [x] 모든 페이지에 일관되게 나타남 (권장) ✅ 주요 페이지(대시보드, 상담, 추천, K-IPPA, 관리자)에 브레드크럼 추가 완료
   - [x] 구조화된 데이터(Schema.org BreadcrumbList) 사용 (권장) ✅ `itemScope`, `itemType="https://schema.org/BreadcrumbList"` 구현됨
 
 - [x] **미디어 (Media)**
