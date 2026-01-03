@@ -48,7 +48,7 @@ export function LocalNav({ items, className, label = "Local navigation" }: Local
               key={item.href}
               href={item.href}
               target="_blank"
-              rel="noreferrer"
+              rel="noreferrer noopener"
               className={tabVariants({ active: isActive })}
             >
               <span>{item.label}</span>

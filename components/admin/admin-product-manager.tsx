@@ -1675,7 +1675,7 @@ export function AdminProductManager({
                                   <a
                                     href={product.purchase_link}
                                     target="_blank"
-                                    rel="noreferrer"
+                                    rel="nofollow sponsored noreferrer"
                                     className="text-primary hover:underline text-xs truncate max-w-[200px] block"
                                   >
                                     {product.purchase_link}
@@ -2503,7 +2503,7 @@ function ProductCard({
                     href={product.purchase_link}
                     className="text-primary underline hover:text-primary/80"
                     target="_blank"
-                    rel="noreferrer"
+                    rel="nofollow sponsored noreferrer"
                   >
                     {product.purchase_link}
                   </a>

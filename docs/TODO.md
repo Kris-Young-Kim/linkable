@@ -767,7 +767,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - [x] 링크는 자바스크립트 없이도 크롤링 가능 (필수) ✅ Next.js Link 컴포넌트 사용
   - [x] 앵커 텍스트는 목적지를 설명하며 "여기를 클릭" 같은 용어 피함 (권장) ✅ 확인됨
   - [x] 내부 링크를 통해 관련 콘텐츠 연결 (권장) ✅ Footer, Header 등에 내부 링크 구현
-  - [ ] 제3자 속성이나 광고성 링크에는 `rel="nofollow"` 또는 `rel="sponsored"` 사용 (권장) (확인 필요)
+  - [x] 제3자 속성이나 광고성 링크에는 `rel="nofollow"` 또는 `rel="sponsored"` 사용 (권장) ✅ 제품 구매 링크에 `rel="nofollow sponsored noreferrer"` 추가 (`components/admin/admin-product-manager.tsx`), 외부 링크에 `rel="noreferrer noopener"` 추가 (`components/navigation/local-nav.tsx`)
 
 - [x] **브레드크럼 (Breadcrumbs)**
 

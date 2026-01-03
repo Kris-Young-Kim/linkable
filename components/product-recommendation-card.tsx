@@ -152,6 +152,8 @@ export function ProductRecommendationCard({
             if (liveRegion) liveRegion.textContent = "";
           }, 1000);
         }
+        // 제휴/광고 링크: window.open 사용으로 SEO 크롤러가 따라가지 않음 (의도적)
+        // 만약 <a> 태그로 변경 시 rel="nofollow sponsored noreferrer" 추가 필요
         window.open(purchaseLink, "_blank", "noopener,noreferrer");
       };
 
