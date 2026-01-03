@@ -1,6 +1,6 @@
 /**
  * 공개용 사용자 후기 API
- * 
+ *
  * K-IPPA 평가 데이터를 활용하여 공개 가능한 사용자 후기를 제공합니다.
  * 개인정보 보호를 위해 사용자 정보는 익명화됩니다.
  */
@@ -14,8 +14,18 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") || "6", 10);
-    const minEffectivenessScore = parseFloat(searchParams.get("minScore") || "5", 10);
+
+    // limit 파라미터 검증 및 기본값 설정
+    const limitParam = searchParams.get("limit");
+    const parsedLimit = limitParam ? parseInt(limitParam, 10) : 6;
+    const limit =
+      isNaN(parsedLimit) || parsedLimit <= 0 ? 6 : Math.min(parsedLimit, 100); // 최대 100개로 제한
+
+    // minScore 파라미터 검증 및 기본값 설정
+    const minScoreParam = searchParams.get("minScore");
+    const parsedMinScore = minScoreParam ? parseFloat(minScoreParam) : 5;
+    const minEffectivenessScore =
+      isNaN(parsedMinScore) || parsedMinScore < 0 ? 5 : parsedMinScore;
 
     const supabase = getSupabaseServerClient();
 

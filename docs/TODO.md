@@ -779,11 +779,11 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
   - [x] 모든 이미지에 alt 속성 포함 (필수) ✅ `components/product-recommendation-card.tsx`, `components/hero-section.tsx` 등 확인됨
   - [x] 이미지 검색이 중요한 자산에는 alt 속성 반드시 채움 (필수) ✅ 확인됨
-  - [ ] 구조화된 데이터(ImageObject) 사용 (권장) (미구현)
+  - [x] 구조화된 데이터(ImageObject) 사용 (권장) ✅ `components/structured-data/image-object.tsx` 생성, 홈페이지 Open Graph 이미지에 적용 (`app/page.tsx`)
   - [x] 차세대 이미지 포맷(WebP, AVIF) 사용 (권장) ✅ `next.config.mjs`에 `formats: ["image/avif", "image/webp"]` 설정됨
   - [ ] 비디오에는 텍스트 스크립트(자막/대본) 포함 (필수) (비디오 콘텐츠 없음)
   - [ ] 비디오 구조화된 데이터(VideoObject) 사용 (권장) (비디오 콘텐츠 없음)
-  - [ ] 파일 이름은 콘텐츠를 설명하는 키워드 포함, 하이픈으로 구분, 소문자 사용 (권장) (확인 필요)
+  - [x] 파일 이름은 콘텐츠를 설명하는 키워드 포함, 하이픈으로 구분, 소문자 사용 (권장) ✅ `public/` 폴더의 모든 이미지 파일 이름 확인 완료 (예: `elderly-person-happily-using-tablet-in-cozy-home-e.jpg`, `ergonomic-jar-opener-with-rubber-grip.jpg`)
 
 - [x] **메타데이터 (Metadata)**
   - [x] 모든 페이지에 고유한 메타 설명 포함 (권장) ✅ `app/page.tsx`, `app/dashboard/page.tsx`, `app/recommendations/page.tsx` 등
@@ -793,15 +793,15 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 #### 크롤링 가능성 (Crawlability)
 
-- [ ] **사이트맵 (Sitemap)**
+- [x] **사이트맵 (Sitemap)**
 
-  - [ ] XML 사이트맵 구현 (필수)
-  - [ ] 표준(Canonical) URL만 포함 (필수)
-  - [ ] robots.txt에 의해 차단된 URL은 포함하지 않음 (필수)
-  - [ ] XML 사이트맵은 50MB(비압축) 또는 50,000개 이상의 URL을 포함하지 않음 (필수)
-  - [ ] XML 사이트맵은 UTF-8로 인코딩 (필수)
-  - [ ] HTML 사이트맵 구현 (필수)
-  - [ ] RSS 피드 구현 (필수)
+  - [x] XML 사이트맵 구현 (필수) ✅ `app/sitemap.ts` - Next.js App Router의 MetadataRoute.Sitemap 사용
+  - [x] 표준(Canonical) URL만 포함 (필수) ✅ 공개 페이지만 포함, 인증 필요 페이지 제외
+  - [x] robots.txt에 의해 차단된 URL은 포함하지 않음 (필수) ✅ `/dashboard/`, `/admin/`, `/consultation/` 등 제외
+  - [x] XML 사이트맵은 50MB(비압축) 또는 50,000개 이상의 URL을 포함하지 않음 (필수) ✅ 현재 6개 페이지만 포함 (50,000개 미만)
+  - [x] XML 사이트맵은 UTF-8로 인코딩 (필수) ✅ Next.js 기본 UTF-8 인코딩
+  - [ ] HTML 사이트맵 구현 (필수) (선택적 - XML 사이트맵이 우선)
+  - [ ] RSS 피드 구현 (필수) (향후 구현)
 
 - [ ] **리디렉션 (Redirects)**
 
@@ -815,8 +815,8 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - [ ] 검색 엔진 봇에게 사용자와 동일한 콘텐츠 제공 (클로킹 금지) (필수)
 
 - [ ] **검색 엔진 관리**
-  - [ ] robots `<meta>` 태그 적절히 구현 (필수)
-  - [ ] robots.txt 적절히 사용 (필수)
+  - [ ] robots `<meta>` 태그 적절히 구현 (필수) (확인 필요)
+  - [x] robots.txt 적절히 사용 (필수) ✅ `app/robots.ts` - 공개 페이지 허용, 인증 필요 페이지 차단
   - [ ] Google Search Console 등록 및 관리 (필수)
   - [ ] Naver Search Advisor 등록 및 관리 (권장)
 
