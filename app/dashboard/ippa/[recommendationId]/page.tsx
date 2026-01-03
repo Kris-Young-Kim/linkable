@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import Link from "next/link"
 import { ArrowLeft, TrendingUp, TrendingDown, Minus, History } from "lucide-react"
@@ -143,25 +143,11 @@ export default async function IppaEvaluationPage({
   const data = await fetchRecommendationData(recommendationId, userId)
 
   if (!data) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 py-12 flex flex-col items-center text-center gap-4">
-          <Card className="max-w-xl w-full">
-            <CardHeader>
-              <CardTitle className="text-2xl">평가할 수 없습니다</CardTitle>
-              <CardDescription>
-                해당 추천을 찾을 수 없거나 평가 권한이 없습니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center gap-3">
-              <Button asChild>
-                <Link href="/dashboard">대시보드로 이동</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
+    console.error("[ippa evaluation] 추천을 찾을 수 없음 - 404 반환:", {
+      recommendationId,
+      userId,
+    });
+    notFound();
   }
 
   const { recommendation, consultation, previousEvaluations } = data

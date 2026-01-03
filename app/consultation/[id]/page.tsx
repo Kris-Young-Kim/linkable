@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import dynamic from "next/dynamic";
 import { ArrowLeft, CalendarClock, MessageSquareText } from "lucide-react";
@@ -215,27 +215,14 @@ export default async function ConsultationDetailPage({
     });
   }
 
-  // 상담이 없으면 에러 페이지 표시
+  // 상담이 없으면 404 Not Found 반환 (SEO를 위한 올바른 HTTP 상태 코드)
   if (consultationError || !consultationData) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 py-10 space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>상담을 찾을 수 없습니다</CardTitle>
-              <CardDescription>
-                해당 상담을 찾을 수 없거나 접근 권한이 없습니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild>
-                <Link href="/dashboard">대시보드로 돌아가기</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
+    console.error("[consultation detail] 상담을 찾을 수 없음 - 404 반환:", {
+      consultationId: id,
+      userRowId,
+      error: consultationError,
+    });
+    notFound();
   }
 
   // 관련 데이터를 별도로 조회

@@ -18,14 +18,20 @@ export async function GET(request: Request) {
     // limit 파라미터 검증 및 기본값 설정
     const limitParam = searchParams.get("limit");
     const parsedLimit = limitParam ? parseInt(limitParam, 10) : 6;
+    // NaN, 0 이하, Infinity 체크하여 기본값 6 사용, 최대 100개로 제한
     const limit =
-      isNaN(parsedLimit) || parsedLimit <= 0 ? 6 : Math.min(parsedLimit, 100); // 최대 100개로 제한
+      !Number.isFinite(parsedLimit) || parsedLimit <= 0
+        ? 6
+        : Math.min(parsedLimit, 100);
 
     // minScore 파라미터 검증 및 기본값 설정
     const minScoreParam = searchParams.get("minScore");
     const parsedMinScore = minScoreParam ? parseFloat(minScoreParam) : 5;
+    // NaN, 음수, Infinity 체크하여 기본값 5 사용
     const minEffectivenessScore =
-      isNaN(parsedMinScore) || parsedMinScore < 0 ? 5 : parsedMinScore;
+      !Number.isFinite(parsedMinScore) || parsedMinScore < 0
+        ? 5
+        : parsedMinScore;
 
     const supabase = getSupabaseServerClient();
 
