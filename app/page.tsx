@@ -61,6 +61,24 @@ const HowItWorksSection = dynamic(
   },
 )
 
+const TestimonialsSection = dynamic(
+  () => import("@/components/testimonials-section").then((mod) => ({ default: mod.TestimonialsSection })),
+  {
+    loading: () => (
+      <section className="py-20 md:py-32 bg-muted/30">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="h-12 bg-muted/50 animate-pulse rounded-lg max-w-2xl mx-auto mb-16" />
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 bg-muted/50 animate-pulse rounded-lg" />
+            ))}
+          </div>
+        </div>
+      </section>
+    ),
+  }
+)
+
 const CTASection = dynamic(() => import("@/components/cta-section").then((mod) => ({ default: mod.CTASection })), {
   loading: () => (
     <section className="py-20 md:py-32 bg-background">
@@ -131,6 +149,9 @@ export default function Home() {
         </Suspense>
         <FeaturesSection />
         <HowItWorksSection />
+        <Suspense fallback={<div className="h-96 bg-muted/30 animate-pulse" />}>
+          <TestimonialsSection />
+        </Suspense>
         <CTASection />
       </main>
       <Footer />

@@ -722,12 +722,12 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
   **E-E-A-T는 구글의 핵심 랭킹 신호입니다:**
 
-  - [ ] **Experience (경험)**: 실제 사용 경험 기반 콘텐츠
+  - [x] **Experience (경험)**: 실제 사용 경험 기반 콘텐츠
 
-    - [ ] 실제 사용자 사례 및 후기 포함 (K-IPPA 평가 데이터 활용)
-    - [ ] "16년 경력 보조공학 전문가" 같은 경험 강조
-    - [ ] 실제 사용 환경 사진/영상 포함 (권장)
-    - [ ] 사용자 스토리 및 성공 사례 공유 (권장)
+    - [x] 실제 사용자 사례 및 후기 포함 (K-IPPA 평가 데이터 활용) ✅ `app/api/public/testimonials/route.ts`, `components/testimonials-section.tsx`
+    - [x] "16년 경력 보조공학 전문가" 같은 경험 강조 ✅ `components/pages/about-content.tsx`에 전문가 경험 섹션 추가
+    - [x] 실제 사용 환경 사진/영상 포함 (권장) ✅ About 페이지에 이미지 포함
+    - [x] 사용자 스토리 및 성공 사례 공유 (권장) ✅ 홈페이지에 사용자 후기 섹션 추가 (`app/page.tsx`)
 
   - [x] **Expertise (전문성)**: 주제에 대한 전문 지식
 

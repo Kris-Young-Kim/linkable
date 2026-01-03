@@ -98,6 +98,44 @@ export function AboutContent() {
             ))}
           </div>
 
+          {/* 전문가 경험 강조 섹션 */}
+          <div className="rounded-3xl bg-gradient-to-br from-primary/5 via-primary/10 to-accent/5 p-12 md:p-16 border border-primary/20">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
+                <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest">
+                  전문가 경험
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
+                  16년 경력 보조공학 전문가의<br />
+                  <span className="text-primary">임상 노하우</span>
+                </h2>
+                <div className="w-20 h-2 bg-primary rounded-full" />
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  LinkAble의 AI는 단순한 알고리즘이 아닙니다. 16년간 수천 명의 사용자와 함께한 보조공학사/작업치료사의 실제 임상 경험을 바탕으로 구축되었습니다.
+                </p>
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div>
+                    <p className="text-3xl font-black text-primary">16년</p>
+                    <p className="text-sm text-muted-foreground font-medium">보조공학 경력</p>
+                  </div>
+                  <div>
+                    <p className="text-3xl font-black text-primary">수천 명</p>
+                    <p className="text-sm text-muted-foreground font-medium">상담 경험</p>
+                  </div>
+                </div>
+              </div>
+              <div className="relative aspect-square rounded-2xl overflow-hidden shadow-xl border-4 border-white/10">
+                <Image
+                  src="/elderly-person-happily-using-tablet-in-cozy-home-e.jpg"
+                  alt="보조공학 전문가 상담"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent" />
+              </div>
+            </div>
+          </div>
+
           {/* Founder Quote/Bottom Section */}
           <div className="rounded-[40px] bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-12 md:p-20 text-center text-primary-foreground relative overflow-hidden shadow-2xl">
             <div className="absolute top-0 right-0 p-12 opacity-10 animate-pulse">
