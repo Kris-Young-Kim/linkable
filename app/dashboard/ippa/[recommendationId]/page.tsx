@@ -17,6 +17,10 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 export const metadata: Metadata = {
   title: "K-IPPA 평가 — LinkAble",
   description: "보조기기 사용 후 효과성을 평가하고 개선 경험을 공유하세요.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 async function fetchRecommendationData(recommendationId: string, clerkUserId: string) {

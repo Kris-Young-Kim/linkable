@@ -42,6 +42,10 @@ const BaselineEvaluationClient = dynamic(
 export const metadata: Metadata = {
   title: "기초선 평가 — LinkAble",
   description: "보조기기 사용 전 현재 상태를 평가해주세요.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 async function fetchConsultationData(

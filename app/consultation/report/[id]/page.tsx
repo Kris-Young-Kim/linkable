@@ -2,6 +2,7 @@ import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import { auth } from "@clerk/nextjs/server"
 import dynamicImport from "next/dynamic"
+import type { Metadata } from "next"
 import { CalendarDays, CheckCircle2, Download, MessageSquare } from "lucide-react"
 
 import { getSupabaseServerClient } from "@/lib/supabase/server"
@@ -46,6 +47,15 @@ type MessageRow = {
 }
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "상담 리포트 — LinkAble",
+  description: "상담 분석 결과 리포트를 확인하고 다운로드하세요.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 const statusMap: Record<
   string,

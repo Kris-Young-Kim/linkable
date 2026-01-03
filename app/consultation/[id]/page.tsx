@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import dynamic from "next/dynamic";
+import type { Metadata } from "next";
 import { ArrowLeft, CalendarClock, MessageSquareText } from "lucide-react";
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -135,6 +136,15 @@ const formatDateTime = (value: string) =>
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+
+export const metadata: Metadata = {
+  title: "상담 상세 — LinkAble",
+  description: "상담 내역과 분석 결과를 확인하세요.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 async function fetchUserRowId(clerkUserId: string) {
   const supabase = getSupabaseServerClient();

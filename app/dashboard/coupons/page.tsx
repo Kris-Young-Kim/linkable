@@ -7,6 +7,10 @@ import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 export const metadata: Metadata = {
   title: "쿠폰 샵 — LinkAble",
   description: "포인트로 쿠폰을 교환하거나 무료 쿠폰을 발급받으세요.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default async function CouponsPage() {

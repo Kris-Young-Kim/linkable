@@ -45,6 +45,10 @@ export const metadata: Metadata = {
   title: "LinkAble 대시보드 — K-IPPA 효과성 리포트",
   description:
     "AI 상담 결과와 보조기기 추천, K-IPPA 효과성 데이터를 한눈에 확인하고 다음 액션을 진행하세요.",
+  robots: {
+    index: false,
+    follow: false,
+  },
   alternates: { canonical: pageUrl },
   openGraph: {
     type: "website",

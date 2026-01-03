@@ -814,11 +814,11 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - [x] 올바른 HTTP 상태 코드 사용 (404, 410, 503 등) (필수) ✅ `app/not-found.tsx` 생성, `app/consultation/[id]/page.tsx`, `app/recommendations/[consultationId]/page.tsx`, `app/dashboard/ippa/[recommendationId]/page.tsx`에서 `notFound()` 사용하여 404 반환. API 라우트에서 410 Gone 적절히 사용 중 (`app/api/admin/icf/auto-expand/route.ts` 등)
   - [x] 검색 엔진 봇에게 사용자와 동일한 콘텐츠 제공 (클로킹 금지) (필수) ✅ User-Agent는 분석/로깅 목적으로만 사용되며, 콘텐츠 제공에 대한 조건부 렌더링 없음. 모든 사용자(봇 포함)에게 동일한 콘텐츠 제공
 
-- [ ] **검색 엔진 관리**
-  - [ ] robots `<meta>` 태그 적절히 구현 (필수) (확인 필요)
+- [x] **검색 엔진 관리**
+  - [x] robots `<meta>` 태그 적절히 구현 (필수) ✅ 루트 레이아웃(`app/layout.tsx`)에 기본 설정 추가, 공개 페이지는 `index: true, follow: true`, 인증 필요 페이지는 `index: false, follow: false` 설정 완료. Google Bot 설정 포함 (`max-video-preview`, `max-image-preview`, `max-snippet`)
   - [x] robots.txt 적절히 사용 (필수) ✅ `app/robots.ts` - 공개 페이지 허용, 인증 필요 페이지 차단
-  - [ ] Google Search Console 등록 및 관리 (필수)
-  - [ ] Naver Search Advisor 등록 및 관리 (권장)
+  - [ ] Google Search Console 등록 및 관리 (필수) (수동 작업 필요)
+  - [ ] Naver Search Advisor 등록 및 관리 (권장) (수동 작업 필요)
 
 #### URL 및 도메인 (URLs & Domains)
 

@@ -108,6 +108,10 @@ export const metadata: Metadata = {
   title: "LinkAble — AI 기반 보조기기 매칭",
   description:
     "ICF · ISO 표준 기반으로 불편함을 분석하고 맞춤형 보조기기를 추천하는 디지털 보조공학 코디네이터 서비스.",
+  robots: {
+    index: true,
+    follow: true,
+  },
   alternates: {
     canonical: baseUrl,
   },

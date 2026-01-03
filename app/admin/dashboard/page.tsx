@@ -41,6 +41,10 @@ const pageUrl = `${baseUrl}/admin/dashboard`
 export const metadata: Metadata = {
   title: "LinkAble 관리자 대시보드",
   description: "전체 플랫폼 통계 및 사용자별 종합 데이터를 확인할 수 있는 관리자 페이지입니다.",
+  robots: {
+    index: false,
+    follow: false,
+  },
   alternates: { canonical: pageUrl },
 }
 
