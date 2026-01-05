@@ -59,21 +59,22 @@ export function GlobalNav() {
     <>
       <LanguageSelector />
       {!isLoaded ? (
-        // Clerk가 로드 중일 때는 로그인 버튼 표시 (Clerk 로드 실패 시에도 표시)
+        // Clerk가 로드 중이거나 실패한 경우: 직접 로그인 페이지로 이동하는 버튼 표시
         <>
-          <SignInButton mode="modal">
-            <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base">
+          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
+            <Link href="/sign-in">
               {t("header.signIn")}
-            </Button>
-          </SignInButton>
-          <SignUpButton mode="modal">
-            <Button
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
-            >
+            </Link>
+          </Button>
+          <Button
+            size="lg"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
+            asChild
+          >
+            <Link href="/sign-up">
               {t("header.signUp")}
-            </Button>
-          </SignUpButton>
+            </Link>
+          </Button>
         </>
       ) : (
         <>
@@ -199,14 +200,16 @@ export function GlobalNav() {
                   </SignOutButton>
                 </SignedIn>
                 <SignedOut>
-                  <SignInButton mode="modal">
-                    <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link href="/sign-in">
                       {t("header.signIn")}
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">{t("header.signUp")}</Button>
-                  </SignUpButton>
+                    </Link>
+                  </Button>
+                  <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90" asChild>
+                    <Link href="/sign-up">
+                      {t("header.signUp")}
+                    </Link>
+                  </Button>
                 </SignedOut>
               </div>
             </nav>
