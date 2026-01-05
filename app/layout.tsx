@@ -22,6 +22,11 @@ const inter = Inter({
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 const naverSiteVerification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
 
+// Clerk 프록시 도메인 비활성화를 위한 Frontend API 설정
+// 환경변수에서 직접 지정하거나, Clerk 대시보드에서 프록시 도메인을 제거해야 합니다
+// 환경변수 예시: NEXT_PUBLIC_CLERK_FRONTEND_API=your-app.clerk.accounts.dev
+const clerkFrontendApi = process.env.NEXT_PUBLIC_CLERK_FRONTEND_API;
+
 export const metadata: Metadata = {
   title: "LinkAble - AI 기반 보조기기 매칭",
   description:
@@ -69,7 +74,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      {...(clerkFrontendApi ? { frontendApi: clerkFrontendApi } : {})}
+    >
       <html lang="ko" data-scroll-behavior="smooth">
         <head>
           {/* DNS 프리페치 (Unsplash 도메인) - 메인 페이지에서만 사용되지만 DNS 조회는 전역적으로 유용 */}

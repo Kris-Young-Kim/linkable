@@ -29,7 +29,7 @@ type NavLink = {
 
 export function GlobalNav() {
   const { t } = useLanguage()
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, isLoaded } = useAuth()
 
   const navLinks: NavLink[] = useMemo(
     () => [
@@ -58,50 +58,71 @@ export function GlobalNav() {
   const actionButtons = (
     <>
       <LanguageSelector />
-      <SignedIn>
-        <div className="flex items-center gap-2">
-          <AdminLink />
-          <NotificationsBell />
-          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
-            <Link href="/dashboard">
-              상담 내역
-            </Link>
-          </Button>
-          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
-            <Link href="/chat">
-              <Sparkles className="mr-2 size-4" aria-hidden="true" />
-              {t("header.continueConsultation")}
-            </Link>
-          </Button>
-          <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
-          <SignOutButton>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="min-h-[44px] min-w-[44px] px-3 font-semibold text-base text-foreground/70 hover:text-foreground"
-              aria-label="로그아웃"
-            >
-              <LogOut className="mr-2 size-4" aria-hidden="true" />
-              <span className="hidden sm:inline">로그아웃</span>
+      {!isLoaded ? (
+        // Clerk가 로드 중일 때는 로그인 버튼 표시 (Clerk 로드 실패 시에도 표시)
+        <>
+          <SignInButton mode="modal">
+            <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base">
+              {t("header.signIn")}
             </Button>
-          </SignOutButton>
-        </div>
-      </SignedIn>
-      <SignedOut>
-        <SignInButton mode="modal">
-          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base">
-            {t("header.signIn")}
-          </Button>
-        </SignInButton>
-        <SignUpButton mode="modal">
-          <Button
-            size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
-          >
-            {t("header.signUp")}
-          </Button>
-        </SignUpButton>
-      </SignedOut>
+          </SignInButton>
+          <SignUpButton mode="modal">
+            <Button
+              size="lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
+            >
+              {t("header.signUp")}
+            </Button>
+          </SignUpButton>
+        </>
+      ) : (
+        <>
+          <SignedIn>
+            <div className="flex items-center gap-2">
+              <AdminLink />
+              <NotificationsBell />
+              <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
+                <Link href="/dashboard">
+                  상담 내역
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
+                <Link href="/chat">
+                  <Sparkles className="mr-2 size-4" aria-hidden="true" />
+                  {t("header.continueConsultation")}
+                </Link>
+              </Button>
+              <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
+              <SignOutButton>
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  className="min-h-[44px] min-w-[44px] px-3 font-semibold text-base text-foreground/70 hover:text-foreground"
+                  aria-label="로그아웃"
+                >
+                  <LogOut className="mr-2 size-4" aria-hidden="true" />
+                  <span className="hidden sm:inline">로그아웃</span>
+                </Button>
+              </SignOutButton>
+            </div>
+          </SignedIn>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base">
+                {t("header.signIn")}
+              </Button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <Button
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
+              >
+                {t("header.signUp")}
+              </Button>
+            </SignUpButton>
+          </SignedOut>
+        </>
+      )}
     </>
   )
 
