@@ -23,8 +23,8 @@ export const metadata: Metadata = {
   title: "AI 상담 - LinkAble 링커",
   description: "링커와 대화하며 일상의 불편함을 ICF 코드로 정리하고 맞춤형 보조기기 추천을 받아보세요.",
   robots: {
-    index: true,
-    follow: true,
+    index: false,
+    follow: false,
   },
   alternates: { canonical: pageUrl },
   openGraph: {

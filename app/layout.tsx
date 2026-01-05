@@ -22,13 +22,11 @@ const inter = Inter({
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 const naverSiteVerification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
 
-// Clerk 프록시 도메인 비활성화를 위한 Frontend API 설정
-// 환경변수에서 직접 지정하거나, Clerk 대시보드에서 프록시 도메인을 제거해야 합니다
+// Clerk 프록시 도메인 비활성화
+// 프록시 도메인 사용 시 CORS 오류가 발생할 수 있으므로 기본 Clerk 도메인을 사용합니다.
+// 프록시 도메인을 사용하려면 Clerk 대시보드에서 올바르게 설정해야 합니다.
+// 환경변수로 Frontend API를 명시적으로 설정할 수 있습니다.
 // 환경변수 예시: NEXT_PUBLIC_CLERK_FRONTEND_API=your-app.clerk.accounts.dev
-// 
-// 주의: Clerk 대시보드에서 프록시 도메인이 설정되어 있으면 자동으로 사용됩니다.
-// 프록시 도메인을 사용하지 않으려면 Clerk 대시보드에서 제거하거나,
-// 환경변수로 Frontend API를 명시적으로 설정해야 합니다.
 const clerkFrontendApi = process.env.NEXT_PUBLIC_CLERK_FRONTEND_API;
 
 export const metadata: Metadata = {
@@ -44,9 +42,7 @@ export const metadata: Metadata = {
     "LinkAble",
   ],
   icons: {
-    icon: [
-      { url: "/icon.png", type: "image/png" },
-    ],
+    icon: [{ url: "/icon.png", type: "image/png" }],
     apple: "/icon.png",
   },
   robots: {
@@ -80,6 +76,8 @@ export default function RootLayout({
   return (
     <ClerkProvider
       {...(clerkFrontendApi ? { frontendApi: clerkFrontendApi } : {})}
+      domain={undefined}
+      proxyUrl={undefined}
     >
       <html lang="ko" data-scroll-behavior="smooth">
         <head>
@@ -99,7 +97,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
           {/* Google Analytics 4 (gtag.js) */}
           <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-EV15PW3ERH'}`}
+            src={`https://www.googletagmanager.com/gtag/js?id=${
+              process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-EV15PW3ERH"
+            }`}
             strategy="afterInteractive"
           />
           <Script
@@ -110,18 +110,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-EV15PW3ERH'}');
+                gtag('config', '${
+                  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || "G-EV15PW3ERH"
+                }', {
+                  page_location: 'https://www.linkable.life' + window.location.pathname + window.location.search,
+                  page_title: document.title,
+                });
               `,
             }}
           />
           {/* Meta Pixel (Facebook Pixel) */}
-          {process.env.NEXT_PUBLIC_META_PIXEL_ID && process.env.NEXT_PUBLIC_META_PIXEL_ID !== 'null' && (
-            <>
-              <Script
-                id="meta-pixel"
-                strategy="afterInteractive"
-                dangerouslySetInnerHTML={{
-                  __html: `
+          {process.env.NEXT_PUBLIC_META_PIXEL_ID &&
+            process.env.NEXT_PUBLIC_META_PIXEL_ID !== "null" && (
+              <>
+                <Script
+                  id="meta-pixel"
+                  strategy="afterInteractive"
+                  dangerouslySetInnerHTML={{
+                    __html: `
                     !function(f,b,e,v,n,t,s)
                     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
                     n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -133,19 +139,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     fbq('init', '${process.env.NEXT_PUBLIC_META_PIXEL_ID}');
                     fbq('track', 'PageView');
                   `,
-                }}
-              />
-              <noscript>
-                <img
-                  height="1"
-                  width="1"
-                  style={{ display: "none" }}
-                  src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
-                  alt=""
+                  }}
                 />
-              </noscript>
-            </>
-          )}
+                <noscript>
+                  <img
+                    height="1"
+                    width="1"
+                    style={{ display: "none" }}
+                    src={`https://www.facebook.com/tr?id=${process.env.NEXT_PUBLIC_META_PIXEL_ID}&ev=PageView&noscript=1`}
+                    alt=""
+                  />
+                </noscript>
+              </>
+            )}
         </head>
         <body className={`${inter.className} font-sans antialiased`}>
           <SkipToMain />
