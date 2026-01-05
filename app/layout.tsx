@@ -25,6 +25,10 @@ const naverSiteVerification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
 // Clerk 프록시 도메인 비활성화를 위한 Frontend API 설정
 // 환경변수에서 직접 지정하거나, Clerk 대시보드에서 프록시 도메인을 제거해야 합니다
 // 환경변수 예시: NEXT_PUBLIC_CLERK_FRONTEND_API=your-app.clerk.accounts.dev
+// 
+// 주의: Clerk 대시보드에서 프록시 도메인이 설정되어 있으면 자동으로 사용됩니다.
+// 프록시 도메인을 사용하지 않으려면 Clerk 대시보드에서 제거하거나,
+// 환경변수로 Frontend API를 명시적으로 설정해야 합니다.
 const clerkFrontendApi = process.env.NEXT_PUBLIC_CLERK_FRONTEND_API;
 
 export const metadata: Metadata = {

@@ -1,15 +1,22 @@
-"use client"
-
 import Link from "next/link"
 import Image from "next/image"
 import { ArrowLeft, Target, Heart, Sparkles, ShieldCheck } from "lucide-react"
 
-import { useLanguage } from "@/components/language-provider"
+import { translations } from "@/lib/translations"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 export function AboutContent() {
-  const { t } = useLanguage()
+  // SSR을 위해 translations를 직접 사용 (기본 언어: 한국어)
+  const t = (key: string) => {
+    const keys = key.split(".") as (keyof typeof translations.ko)[]
+    let value: any = translations.ko
+    for (const k of keys) {
+      value = value?.[k]
+      if (value === undefined) return key
+    }
+    return typeof value === "string" ? value : key
+  }
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
