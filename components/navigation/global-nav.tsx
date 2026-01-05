@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import { useMemo } from "react"
-import { Menu, Sparkles } from "lucide-react"
+import { Menu, Sparkles, LogOut } from "lucide-react"
 import {
   SignedIn,
   SignedOut,
   SignInButton,
   SignUpButton,
+  SignOutButton,
   UserButton,
   useAuth,
 } from "@clerk/nextjs"
@@ -73,6 +74,17 @@ export function GlobalNav() {
             </Link>
           </Button>
           <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
+          <SignOutButton>
+            <Button
+              variant="ghost"
+              size="lg"
+              className="min-h-[44px] min-w-[44px] px-3 font-semibold text-base text-foreground/70 hover:text-foreground"
+              aria-label="로그아웃"
+            >
+              <LogOut className="mr-2 size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">로그아웃</span>
+            </Button>
+          </SignOutButton>
         </div>
       </SignedIn>
       <SignedOut>
@@ -158,6 +170,12 @@ export function GlobalNav() {
                     <NotificationsBell />
                     <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
                   </div>
+                  <SignOutButton>
+                    <Button variant="outline" className="w-full" aria-label="로그아웃">
+                      <LogOut className="mr-2 size-4" aria-hidden="true" />
+                      로그아웃
+                    </Button>
+                  </SignOutButton>
                 </SignedIn>
                 <SignedOut>
                   <SignInButton mode="modal">
