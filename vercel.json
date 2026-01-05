@@ -7,10 +7,6 @@
     {
       "path": "/api/cron/backup-database",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/icf-auto-expand",
-      "schedule": "0 3 * * 3"
     }
   ]
 }
