@@ -135,14 +135,14 @@ export async function GET(request: Request) {
     }
 
     // 개인정보 보호를 위해 익명화 처리
-    const testimonials = (evaluations || []).map((eval) => ({
-      id: eval.id,
-      problem: eval.problem_description || "일상생활 활동 개선",
-      comment: eval.feedback_comment,
-      effectivenessScore: Number(eval.effectiveness_score) || 0,
-      productName: eval.products?.name || "보조기기",
-      productImage: eval.products?.image_url || null,
-      evaluatedAt: eval.evaluated_at,
+    const testimonials = (evaluations || []).map((evaluation) => ({
+      id: evaluation.id,
+      problem: evaluation.problem_description || "일상생활 활동 개선",
+      comment: evaluation.feedback_comment,
+      effectivenessScore: Number(evaluation.effectiveness_score) || 0,
+      productName: evaluation.products?.name || "보조기기",
+      productImage: evaluation.products?.image_url || null,
+      evaluatedAt: evaluation.evaluated_at,
       // 개인정보 익명화: 사용자 이름은 "LinkAble 사용자"로 통일
       author: "LinkAble 사용자",
     }));
