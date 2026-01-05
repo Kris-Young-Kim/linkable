@@ -2,12 +2,13 @@ import { MetadataRoute } from "next";
 
 /**
  * robots.txt 생성
- * 
+ *
  * 검색 엔진 크롤러에게 사이트 크롤링 규칙을 제공합니다.
  */
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://linkable.kr";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://www.linkable.life";
 
   return {
     rules: [
