@@ -81,11 +81,10 @@ const ChatHistoryCollapsible = dynamic(
   }
 );
 
-const AutoGenerateRecommendations = dynamic(
-  () =>
-    import("@/components/consultation/auto-generate-recommendations").then(
-      (mod) => ({ default: mod.AutoGenerateRecommendations })
-    )
+const AutoGenerateRecommendations = dynamic(() =>
+  import("@/components/consultation/auto-generate-recommendations").then(
+    (mod) => ({ default: mod.AutoGenerateRecommendations })
+  )
 );
 
 // 플로팅 액션 메뉴 (클라이언트 컴포넌트)
@@ -137,14 +136,73 @@ const formatDateTime = (value: string) =>
     timeStyle: "short",
   }).format(new Date(value));
 
-export const metadata: Metadata = {
-  title: "상담 상세 — LinkAble",
-  description: "상담 내역과 분석 결과를 확인하세요.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const { userId } = await auth();
+
+  // 기본 메타데이터 (인증되지 않은 경우 또는 데이터 조회 실패 시)
+  const defaultMetadata: Metadata = {
+    title: "상담 상세 — LinkAble",
+    description: "상담 내역과 분석 결과를 확인하세요.",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+
+  if (!userId) {
+    return defaultMetadata;
+  }
+
+  try {
+    // 메타데이터 생성을 위한 경량 조회
+    const supabase = getSupabaseServerClient();
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", userId)
+      .maybeSingle();
+
+    if (!userRow?.id) {
+      return defaultMetadata;
+    }
+
+    const { data: consultationData } = await supabase
+      .from("consultations")
+      .select("id, title, status")
+      .eq("id", id)
+      .eq("user_id", userRow.id)
+      .maybeSingle();
+
+    if (!consultationData) {
+      return defaultMetadata;
+    }
+
+    // 상담 제목을 사용하여 동적 메타데이터 생성
+    const title = consultationData.title
+      ? `${consultationData.title} — 상담 상세 | LinkAble`
+      : "상담 상세 — LinkAble";
+    const description = consultationData.title
+      ? `${consultationData.title} 상담의 내역과 분석 결과를 확인하세요.`
+      : "상담 내역과 분석 결과를 확인하세요.";
+
+    return {
+      title,
+      description,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (error) {
+    console.error("[generateMetadata] consultation error:", error);
+    return defaultMetadata;
+  }
+}
 
 async function fetchUserRowId(clerkUserId: string) {
   const supabase = getSupabaseServerClient();
@@ -352,13 +410,11 @@ export default async function ConsultationDetailPage({
     : [];
 
   // K-IPPA 평가 요약 (추천 보조기기 기준)
-  let ippaSummary:
-    | {
-        total: number;
-        averageEffectiveness: number | null;
-        lastEvaluatedAt: string | null;
-      }
-    | null = null;
+  let ippaSummary: {
+    total: number;
+    averageEffectiveness: number | null;
+    lastEvaluatedAt: string | null;
+  } | null = null;
 
   if (recommendations.length > 0) {
     const recommendationIds = recommendations.map((rec) => rec.id);
@@ -373,10 +429,8 @@ export default async function ConsultationDetailPage({
     } else if (ippaRows && ippaRows.length > 0) {
       const total = ippaRows.length;
       const avg =
-        ippaRows.reduce(
-          (sum, row) => sum + (row.effectiveness_score ?? 0),
-          0,
-        ) / total;
+        ippaRows.reduce((sum, row) => sum + (row.effectiveness_score ?? 0), 0) /
+        total;
       const lastEvaluatedAt = ippaRows
         .map((row) => row.evaluated_at)
         .filter(Boolean)
@@ -478,7 +532,8 @@ export default async function ConsultationDetailPage({
                     상담 요약
                   </p>
                   <p className="text-base leading-relaxed text-foreground">
-                    {analysisData?.summary ?? "요약 정보가 준비되지 않았습니다."}
+                    {analysisData?.summary ??
+                      "요약 정보가 준비되지 않았습니다."}
                   </p>
                 </div>
               </CardContent>
@@ -508,7 +563,8 @@ export default async function ConsultationDetailPage({
                           recommendationId={rec.id}
                           productName={rec.product.name}
                           description={
-                            rec.product.description ?? "상세 설명 준비 중입니다."
+                            rec.product.description ??
+                            "상세 설명 준비 중입니다."
                           }
                           functionalSupport={rec.product.description ?? ""}
                           imageUrl={rec.product.image_url ?? undefined}
@@ -531,11 +587,13 @@ export default async function ConsultationDetailPage({
                   <AutoGenerateRecommendations
                     consultationId={id}
                     hasRecommendations={recommendations.length > 0}
-                    hasIcfCodes={!!icfBuckets && (
+                    hasIcfCodes={
+                      !!icfBuckets &&
                       (icfBuckets.b?.length ?? 0) +
-                      (icfBuckets.d?.length ?? 0) +
-                      (icfBuckets.e?.length ?? 0)
-                    ) > 0}
+                        (icfBuckets.d?.length ?? 0) +
+                        (icfBuckets.e?.length ?? 0) >
+                        0
+                    }
                   />
                 )}
               </CardContent>
@@ -546,7 +604,8 @@ export default async function ConsultationDetailPage({
               <CardHeader>
                 <CardTitle>K-IPPA 평가</CardTitle>
                 <CardDescription>
-                  추천 보조기기에 대한 효과성 평가 결과를 확인하고 사후 평가로 이동합니다.
+                  추천 보조기기에 대한 효과성 평가 결과를 확인하고 사후 평가로
+                  이동합니다.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -567,7 +626,8 @@ export default async function ConsultationDetailPage({
                       </div>
                       {ippaSummary.lastEvaluatedAt && (
                         <div className="text-sm text-muted-foreground">
-                          최근 평가: {formatDateTime(ippaSummary.lastEvaluatedAt)}
+                          최근 평가:{" "}
+                          {formatDateTime(ippaSummary.lastEvaluatedAt)}
                         </div>
                       )}
                     </div>
@@ -581,7 +641,9 @@ export default async function ConsultationDetailPage({
                           </Link>
                         </Button>
                       ) : (
-                        <Button disabled>추천이 있어야 평가할 수 있습니다</Button>
+                        <Button disabled>
+                          추천이 있어야 평가할 수 있습니다
+                        </Button>
                       )}
                       <Button asChild variant="outline">
                         <Link href="/dashboard/ippa">내 K-IPPA 내역</Link>
@@ -591,7 +653,8 @@ export default async function ConsultationDetailPage({
                 ) : (
                   <div className="flex flex-col gap-3">
                     <p className="text-sm text-muted-foreground">
-                      아직 K-IPPA 평가가 없습니다. 추천 보조기기 사용 후 효과성을 평가해 주세요.
+                      아직 K-IPPA 평가가 없습니다. 추천 보조기기 사용 후
+                      효과성을 평가해 주세요.
                     </p>
                     <div className="flex gap-3">
                       {recommendations[0] ? (
@@ -603,7 +666,9 @@ export default async function ConsultationDetailPage({
                           </Link>
                         </Button>
                       ) : (
-                        <Button disabled>추천이 있어야 평가할 수 있습니다</Button>
+                        <Button disabled>
+                          추천이 있어야 평가할 수 있습니다
+                        </Button>
                       )}
                       <Button asChild variant="outline">
                         <Link href="/dashboard/ippa">내 K-IPPA 내역</Link>

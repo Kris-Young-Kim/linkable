@@ -39,14 +39,73 @@ const BaselineEvaluationClient = dynamic(
   }
 );
 
-export const metadata: Metadata = {
-  title: "기초선 평가 — LinkAble",
-  description: "보조기기 사용 전 현재 상태를 평가해주세요.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ consultationId: string }>;
+}): Promise<Metadata> {
+  const { consultationId } = await params;
+  const { userId } = await auth();
+
+  // 기본 메타데이터 (인증되지 않은 경우 또는 데이터 조회 실패 시)
+  const defaultMetadata: Metadata = {
+    title: "기초선 평가 — LinkAble",
+    description: "보조기기 사용 전 현재 상태를 평가해주세요.",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+
+  if (!userId) {
+    return defaultMetadata;
+  }
+
+  try {
+    // 메타데이터 생성을 위한 경량 조회 (제목만 필요)
+    const supabase = getSupabaseServerClient();
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", userId)
+      .maybeSingle();
+
+    if (!userRow?.id) {
+      return defaultMetadata;
+    }
+
+    const { data: consultation } = await supabase
+      .from("consultations")
+      .select("id, title")
+      .eq("id", consultationId)
+      .eq("user_id", userRow.id)
+      .maybeSingle();
+
+    if (!consultation) {
+      return defaultMetadata;
+    }
+
+    // 상담 제목을 사용하여 동적 메타데이터 생성
+    const title = consultation.title
+      ? `${consultation.title} — 기초선 평가 | LinkAble`
+      : "기초선 평가 — LinkAble";
+    const description = consultation.title
+      ? `${consultation.title} 상담의 보조기기 사용 전 현재 상태를 평가해주세요.`
+      : "보조기기 사용 전 현재 상태를 평가해주세요.";
+
+    return {
+      title,
+      description,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (error) {
+    console.error("[generateMetadata] baseline evaluation error:", error);
+    return defaultMetadata;
+  }
+}
 
 async function fetchConsultationData(
   consultationId: string,

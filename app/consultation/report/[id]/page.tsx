@@ -48,14 +48,73 @@ type MessageRow = {
 
 export const dynamic = "force-dynamic"
 
-export const metadata: Metadata = {
-  title: "상담 리포트 — LinkAble",
-  description: "상담 분석 결과 리포트를 확인하고 다운로드하세요.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const { userId } = await auth();
+
+  // 기본 메타데이터 (인증되지 않은 경우 또는 데이터 조회 실패 시)
+  const defaultMetadata: Metadata = {
+    title: "상담 리포트 — LinkAble",
+    description: "상담 분석 결과 리포트를 확인하고 다운로드하세요.",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+
+  if (!userId) {
+    return defaultMetadata;
+  }
+
+  try {
+    // 메타데이터 생성을 위한 경량 조회
+    const supabase = getSupabaseServerClient();
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", userId)
+      .maybeSingle();
+
+    if (!userRow?.id) {
+      return defaultMetadata;
+    }
+
+    const { data: consultationData } = await supabase
+      .from("consultations")
+      .select("id, title, status")
+      .eq("id", id)
+      .eq("user_id", userRow.id)
+      .maybeSingle();
+
+    if (!consultationData) {
+      return defaultMetadata;
+    }
+
+    // 상담 제목을 사용하여 동적 메타데이터 생성
+    const title = consultationData.title
+      ? `${consultationData.title} — 상담 리포트 | LinkAble`
+      : "상담 리포트 — LinkAble";
+    const description = consultationData.title
+      ? `${consultationData.title} 상담의 분석 결과 리포트를 확인하고 다운로드하세요.`
+      : "상담 분석 결과 리포트를 확인하고 다운로드하세요.";
+
+    return {
+      title,
+      description,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (error) {
+    console.error("[generateMetadata] consultation report error:", error);
+    return defaultMetadata;
+  }
+}
 
 const statusMap: Record<
   string,

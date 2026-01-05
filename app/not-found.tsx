@@ -33,12 +33,12 @@ export default function NotFound() {
               홈으로 이동
             </Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="gap-2">
-            <Link href="/sitemap">
-              <Search className="h-4 w-4" aria-hidden="true" />
-              사이트맵 보기
-            </Link>
-          </Button>
+                  <Button asChild variant="outline" size="lg" className="gap-2">
+                    <Link href="/site-map">
+                      <Search className="h-4 w-4" aria-hidden="true" />
+                      사이트맵 보기
+                    </Link>
+                  </Button>
         </div>
       </div>
     </div>

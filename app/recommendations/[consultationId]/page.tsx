@@ -92,15 +92,74 @@ const ConsultationFeedbackForm = dynamic(
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-export const metadata: Metadata = {
-  title: "LinkAble 추천 — 맞춤형 보조기기 리스트",
-  description:
-    "링커 분석 결과를 바탕으로 ICF·ISO 기준에 맞춘 맞춤형 보조기기 추천을 확인하세요.",
-  robots: {
-    index: false,
-    follow: false,
-  },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ consultationId: string }>;
+}): Promise<Metadata> {
+  const { consultationId } = await params;
+  const { userId } = await auth();
+
+  // 기본 메타데이터 (인증되지 않은 경우 또는 데이터 조회 실패 시)
+  const defaultMetadata: Metadata = {
+    title: "LinkAble 추천 — 맞춤형 보조기기 리스트",
+    description:
+      "링커 분석 결과를 바탕으로 ICF·ISO 기준에 맞춘 맞춤형 보조기기 추천을 확인하세요.",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+
+  if (!userId) {
+    return defaultMetadata;
+  }
+
+  try {
+    // 메타데이터 생성을 위한 경량 조회 (제목만 필요)
+    const supabase = getSupabaseServerClient();
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", userId)
+      .maybeSingle();
+
+    if (!userRow?.id) {
+      return defaultMetadata;
+    }
+
+    const { data: consultation } = await supabase
+      .from("consultations")
+      .select("id, title")
+      .eq("id", consultationId)
+      .eq("user_id", userRow.id)
+      .maybeSingle();
+
+    if (!consultation) {
+      return defaultMetadata;
+    }
+
+    // 상담 제목을 사용하여 동적 메타데이터 생성
+    const title = consultation.title
+      ? `${consultation.title} — 보조기기 추천 | LinkAble`
+      : "LinkAble 추천 — 맞춤형 보조기기 리스트";
+    const description = consultation.title
+      ? `${consultation.title} 상담을 바탕으로 한 ICF·ISO 기준 맞춤형 보조기기 추천을 확인하세요.`
+      : "링커 분석 결과를 바탕으로 ICF·ISO 기준에 맞춘 맞춤형 보조기기 추천을 확인하세요.";
+
+    return {
+      title,
+      description,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (error) {
+    console.error("[generateMetadata] recommendations error:", error);
+    return defaultMetadata;
+  }
+}
 
 async function fetchConsultationData(
   consultationId: string,

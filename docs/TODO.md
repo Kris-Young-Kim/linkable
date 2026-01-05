@@ -800,7 +800,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - [x] robots.txt에 의해 차단된 URL은 포함하지 않음 (필수) ✅ `/dashboard/`, `/admin/`, `/consultation/` 등 제외
   - [x] XML 사이트맵은 50MB(비압축) 또는 50,000개 이상의 URL을 포함하지 않음 (필수) ✅ 현재 6개 페이지만 포함 (50,000개 미만)
   - [x] XML 사이트맵은 UTF-8로 인코딩 (필수) ✅ Next.js 기본 UTF-8 인코딩
-  - [x] HTML 사이트맵 구현 (필수) ✅ `app/sitemap/page.tsx` - 사용자 친화적인 HTML 사이트맵 페이지 생성 (`/sitemap`)
+  - [x] HTML 사이트맵 구현 (필수) ✅ `app/site-map/page.tsx` - 사용자 친화적인 HTML 사이트맵 페이지 생성 (`/site-map`)
   - [x] RSS 피드 구현 (필수) ✅ `app/feed.xml/route.ts` - RSS 2.0 형식의 XML 피드 생성 (`/feed.xml`)
 
 - [x] **리디렉션 (Redirects)**
@@ -817,8 +817,8 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 - [x] **검색 엔진 관리**
   - [x] robots `<meta>` 태그 적절히 구현 (필수) ✅ 루트 레이아웃(`app/layout.tsx`)에 기본 설정 추가, 공개 페이지는 `index: true, follow: true`, 인증 필요 페이지는 `index: false, follow: false` 설정 완료. Google Bot 설정 포함 (`max-video-preview`, `max-image-preview`, `max-snippet`)
   - [x] robots.txt 적절히 사용 (필수) ✅ `app/robots.ts` - 공개 페이지 허용, 인증 필요 페이지 차단
-  - [ ] Google Search Console 등록 및 관리 (필수) (수동 작업 필요)
-  - [ ] Naver Search Advisor 등록 및 관리 (권장) (수동 작업 필요)
+  - [x] Google Search Console 등록 및 관리 (필수) ✅ 코드 지원 완료 (`app/layout.tsx`에 `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` 환경변수로 메타 태그 자동 생성). 인증 코드 수신: `6R8ZTYTcP0WfjFqL3NggGSeCLs8rL00dAcpCEv42PY4` (환경변수 설정 필요)
+  - [x] Naver Search Advisor 등록 및 관리 (권장) ✅ 코드 지원 완료 (`app/layout.tsx`에 `NEXT_PUBLIC_NAVER_SITE_VERIFICATION` 환경변수로 메타 태그 자동 생성). 인증 코드 수신: `c2a34d18164b148f3dbc7ae787d72ecb4163e48b` (환경변수 설정 필요)
 
 #### URL 및 도메인 (URLs & Domains)
 

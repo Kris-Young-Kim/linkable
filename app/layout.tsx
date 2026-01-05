@@ -19,6 +19,9 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
+const naverSiteVerification = process.env.NEXT_PUBLIC_NAVER_SITE_VERIFICATION;
+
 export const metadata: Metadata = {
   title: "LinkAble - AI 기반 보조기기 매칭",
   description:
@@ -48,6 +51,16 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  ...(googleSiteVerification || naverSiteVerification
+    ? {
+        verification: {
+          ...(googleSiteVerification ? { google: googleSiteVerification } : {}),
+          ...(naverSiteVerification
+            ? { other: { "naver-site-verification": naverSiteVerification } }
+            : {}),
+        },
+      }
+    : {}),
 };
 
 export default function RootLayout({

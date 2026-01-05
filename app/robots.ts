@@ -29,7 +29,7 @@ export default function robots(): MetadataRoute.Robots {
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
     // HTML 사이트맵과 RSS 피드도 참조 가능
-    // HTML 사이트맵: ${baseUrl}/sitemap
+    // HTML 사이트맵: ${baseUrl}/site-map
     // RSS 피드: ${baseUrl}/feed.xml
   };
 }

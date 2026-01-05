@@ -14,13 +14,100 @@ import { Breadcrumbs } from "@/components/navigation/breadcrumbs"
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
-export const metadata: Metadata = {
-  title: "K-IPPA 평가 — LinkAble",
-  description: "보조기기 사용 후 효과성을 평가하고 개선 경험을 공유하세요.",
-  robots: {
-    index: false,
-    follow: false,
-  },
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ recommendationId: string }>;
+}): Promise<Metadata> {
+  const { recommendationId } = await params;
+  const { userId } = await auth();
+
+  // 기본 메타데이터 (인증되지 않은 경우 또는 데이터 조회 실패 시)
+  const defaultMetadata: Metadata = {
+    title: "K-IPPA 평가 — LinkAble",
+    description: "보조기기 사용 후 효과성을 평가하고 개선 경험을 공유하세요.",
+    robots: {
+      index: false,
+      follow: false,
+    },
+  };
+
+  if (!userId) {
+    return defaultMetadata;
+  }
+
+  try {
+    // 메타데이터 생성을 위한 경량 조회 (제품명과 상담 제목만 필요)
+    const supabase = getSupabaseServerClient();
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("id")
+      .eq("clerk_id", userId)
+      .maybeSingle();
+
+    if (!userRow?.id) {
+      return defaultMetadata;
+    }
+
+    const { data: recommendation } = await supabase
+      .from("recommendations")
+      .select(
+        `
+        id,
+        consultation_id,
+        product:product_id(
+          id,
+          name
+        ),
+        consultations:consultation_id(
+          id,
+          title,
+          user_id
+        )
+      `
+      )
+      .eq("id", recommendationId)
+      .maybeSingle();
+
+    if (!recommendation) {
+      return defaultMetadata;
+    }
+
+    const consultation = Array.isArray(recommendation.consultations)
+      ? recommendation.consultations[0]
+      : recommendation.consultations;
+
+    // 사용자 소유 확인
+    if (!consultation || consultation.user_id !== userRow.id) {
+      return defaultMetadata;
+    }
+
+    const product = Array.isArray(recommendation.product)
+      ? recommendation.product[0]
+      : recommendation.product;
+
+    // 제품명과 상담 제목을 사용하여 동적 메타데이터 생성
+    const productName = product?.name || "보조기기";
+    const consultationTitle = consultation?.title || "";
+    const title = consultationTitle
+      ? `${productName} K-IPPA 평가 — ${consultationTitle} | LinkAble`
+      : `${productName} K-IPPA 평가 — LinkAble`;
+    const description = consultationTitle
+      ? `${consultationTitle} 상담에서 추천된 ${productName}의 사용 후 효과성을 평가하고 개선 경험을 공유하세요.`
+      : `${productName} 사용 후 효과성을 평가하고 개선 경험을 공유하세요.`;
+
+    return {
+      title,
+      description,
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (error) {
+    console.error("[generateMetadata] ippa evaluation error:", error);
+    return defaultMetadata;
+  }
 }
 
 async function fetchRecommendationData(recommendationId: string, clerkUserId: string) {
