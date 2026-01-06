@@ -64,19 +64,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DisclaimerModal } from "@/components/disclaimer-modal";
-import {
-  type IcfAnalysisBuckets,
-} from "@/components/features/analysis/icf-visualization";
+import { type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visualization";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { ConsultationFlowGuide } from "@/components/consultation-flow-guide";
 import { ErrorFaqModal } from "@/components/error-faq-modal";
-import {
-  Sparkles,
-  Send,
-  Mic,
-  Paperclip,
-  ArrowLeft,
-} from "lucide-react";
+import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -94,7 +86,6 @@ interface Message {
   timestamp: Date;
   evaluationType?: "importance" | "difficulty"; // 평가 질문 유형
 }
-
 
 export function ChatInterface() {
   const { t } = useLanguage();
@@ -156,7 +147,9 @@ export function ChatInterface() {
   // 채팅이 종료되고 ICF 분석이 완료되었을 때 추천 CTA 표시
   useEffect(() => {
     if (chatEnded && icfAnalysis && consultationId) {
-      console.log("[chat] Chat ended and ICF analysis completed, showing recommendation CTA");
+      console.log(
+        "[chat] Chat ended and ICF analysis completed, showing recommendation CTA"
+      );
       setShowRecommendationCTA(true);
     }
   }, [chatEnded, icfAnalysis, consultationId]);
@@ -169,30 +162,30 @@ export function ChatInterface() {
     // 3. 추천 로딩이 완료되었고 (!isLoadingRecommendations)
     // 4. consultationId가 존재하고 (consultationId)
     // 5. ICF 분석이 완료되었고 (icfAnalysis)
-    const shouldShow = 
+    const shouldShow =
       showRecommendationCTA &&
       !isTyping &&
       !isLoadingRecommendations &&
       Boolean(consultationId) &&
       Boolean(icfAnalysis);
-    
+
     if (shouldShow) {
       // 약간의 지연을 추가하여 사용자가 메시지를 읽을 시간을 줌
       const timer = setTimeout(() => {
         setShowFlowGuide(true);
       }, 1000); // 1초 지연
-      
+
       return () => clearTimeout(timer);
     } else {
       // 조건이 맞지 않으면 즉시 모달 닫기
       setShowFlowGuide(false);
     }
   }, [
-    showRecommendationCTA, 
-    isTyping, 
+    showRecommendationCTA,
+    isTyping,
     isLoadingRecommendations,
     consultationId,
-    icfAnalysis
+    icfAnalysis,
   ]);
 
   const isAuthResolved = isLoaded;
@@ -260,21 +253,21 @@ export function ChatInterface() {
           // alert("마이크 권한이 필요합니다. 브라우저 설정에서 마이크 권한을 허용해주세요.");
           return;
         }
-        
+
         // "no-speech" 에러는 사용자가 말하지 않은 경우로, 조용히 처리
         if (event.error === "no-speech") {
           console.warn("[STT] No speech detected");
           setIsRecording(false);
           return;
         }
-        
+
         // "aborted" 에러는 사용자가 중단한 경우로, 조용히 처리
         if (event.error === "aborted") {
           console.warn("[STT] Recognition aborted");
           setIsRecording(false);
           return;
         }
-        
+
         // 그 외 에러는 로그에 기록
         console.error("[STT] error", event.error, event.message);
         setIsRecording(false);
@@ -324,24 +317,27 @@ export function ChatInterface() {
   const handleSend = async () => {
     // #region agent log (개발 환경에서만 실행, 에러 무시)
     if (process.env.NODE_ENV === "development") {
-      fetch("http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location: "components/chat-interface.tsx:handleSend",
-          message: "handleSend invoked",
-          data: {
-            isSignedIn,
-            hasInput: !!input.trim(),
-            hasImage: !!selectedImage,
-            consultationId,
-          },
-          timestamp: Date.now(),
-          sessionId: "debug-session",
-          runId: "run2",
-          hypothesisId: "C",
-        }),
-      }).catch(() => {
+      fetch(
+        "http://127.0.0.1:7242/ingest/19d8df64-73bd-42a4-84ca-a4d930766c34",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            location: "components/chat-interface.tsx:handleSend",
+            message: "handleSend invoked",
+            data: {
+              isSignedIn,
+              hasInput: !!input.trim(),
+              hasImage: !!selectedImage,
+              consultationId,
+            },
+            timestamp: Date.now(),
+            sessionId: "debug-session",
+            runId: "run2",
+            hypothesisId: "C",
+          }),
+        }
+      ).catch(() => {
         // 디버깅 서버가 실행되지 않아도 에러를 표시하지 않음
       });
     }
@@ -449,23 +445,26 @@ export function ChatInterface() {
         try {
           const errorText = await response.text();
           let errorMessage = "요청 처리 중 오류가 발생했습니다.";
-          
+
           try {
             const errorJson = JSON.parse(errorText);
             errorMessage = errorJson.error || errorMessage;
-            
+
             // 개발 환경에서는 상세 정보도 표시
             if (process.env.NODE_ENV === "development" && errorJson.details) {
               console.error("[Chat] API Error Details:", errorJson.details);
               if (errorJson.errorDetails) {
-                console.error("[Chat] Error Details Object:", errorJson.errorDetails);
+                console.error(
+                  "[Chat] Error Details Object:",
+                  errorJson.errorDetails
+                );
               }
             }
           } catch {
             // JSON 파싱 실패 시 원본 텍스트 사용
             errorMessage = errorText || errorMessage;
           }
-          
+
           throw new Error(errorMessage);
         } catch (err) {
           // 이미 Error 객체면 그대로 throw
@@ -506,11 +505,17 @@ export function ChatInterface() {
                     if (message.id === assistantMessageId) {
                       const updatedContent = `${message.content}${payload.delta}`;
                       // 평가 질문 유형 감지
-                      let evaluationType: "importance" | "difficulty" | undefined;
+                      let evaluationType:
+                        | "importance"
+                        | "difficulty"
+                        | undefined;
                       if (isEvaluationQuestion(updatedContent)) {
                         if (updatedContent.includes("중요")) {
                           evaluationType = "importance";
-                        } else if (updatedContent.includes("어려움") || updatedContent.includes("어려운")) {
+                        } else if (
+                          updatedContent.includes("어려움") ||
+                          updatedContent.includes("어려운")
+                        ) {
                           evaluationType = "difficulty";
                         }
                       }
@@ -595,7 +600,6 @@ export function ChatInterface() {
                 );
                 setIcfAnalysis(payload.icfAnalysis);
               }
-
 
               if (payload.icfAnalysis && payload.consultationId) {
                 trackEvent("consultation_completed", {
@@ -689,182 +693,194 @@ export function ChatInterface() {
   };
 
   // 평가 점수 버튼 클릭 핸들러
-  const handleEvaluationScoreClick = useCallback(async (score: number, evaluationType: "importance" | "difficulty", messageId: string) => {
-    const scoreText = `${score}점`;
-    
-    // 점수를 직접 메시지로 전송
-    const userMessage: Message = {
-      id: generateUUID(),
-      role: "user",
-      content: scoreText,
-      timestamp: new Date(),
-    };
+  const handleEvaluationScoreClick = useCallback(
+    async (
+      score: number,
+      evaluationType: "importance" | "difficulty",
+      messageId: string
+    ) => {
+      const scoreText = `${score}점`;
 
-    const assistantMessageId = generateUUID();
-
-    setMessages((prev) => [
-      ...prev,
-      userMessage,
-      {
-        id: assistantMessageId,
-        role: "assistant",
-        content: "",
+      // 점수를 직접 메시지로 전송
+      const userMessage: Message = {
+        id: generateUUID(),
+        role: "user",
+        content: scoreText,
         timestamp: new Date(),
-      },
-    ]);
-    setInput("");
-    setTimeout(() => scrollToBottom(true), 100);
-    setIsTyping(true);
-    setSuggestedQuestions([]);
-    setIcfAnalysis(null);
-    setShowRecommendationCTA(false);
+      };
 
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: scoreText,
-          consultationId,
-          history: messages.map(({ role, content }) => ({ role, content })),
-          disabilityType: disabilityType === "none" ? undefined : disabilityType,
-          disabilitySeverity: disabilitySeverity === "none" ? undefined : disabilitySeverity,
-        }),
-      });
+      const assistantMessageId = generateUUID();
 
-      if (!response.ok || !response.body) {
-        throw new Error("Failed to send message");
-      }
+      setMessages((prev) => [
+        ...prev,
+        userMessage,
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          content: "",
+          timestamp: new Date(),
+        },
+      ]);
+      setInput("");
+      setTimeout(() => scrollToBottom(true), 100);
+      setIsTyping(true);
+      setSuggestedQuestions([]);
+      setIcfAnalysis(null);
+      setShowRecommendationCTA(false);
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
+      try {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: scoreText,
+            consultationId,
+            history: messages.map(({ role, content }) => ({ role, content })),
+            disabilityType:
+              disabilityType === "none" ? undefined : disabilityType,
+            disabilitySeverity:
+              disabilitySeverity === "none" ? undefined : disabilitySeverity,
+          }),
+        });
 
-      const processEvent = async (eventType: string, data?: string) => {
-        if (!data) return;
-        switch (eventType) {
-          case "text": {
-            try {
-              const payload = JSON.parse(data) as { delta?: string };
-              if (payload?.delta) {
+        if (!response.ok || !response.body) {
+          throw new Error("Failed to send message");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        const processEvent = async (eventType: string, data?: string) => {
+          if (!data) return;
+          switch (eventType) {
+            case "text": {
+              try {
+                const payload = JSON.parse(data) as { delta?: string };
+                if (payload?.delta) {
+                  setMessages((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMessageId
+                        ? {
+                            ...msg,
+                            content: `${msg.content}${payload.delta}`,
+                          }
+                        : msg
+                    )
+                  );
+                }
+              } catch (error) {
+                console.error("[chat] Failed to parse stream delta:", error);
+              }
+              break;
+            }
+            case "analysis": {
+              try {
+                const payload = JSON.parse(data) as {
+                  consultationId?: string;
+                  followUpQuestions?: string[];
+                  icfAnalysis?: IcfAnalysisBuckets | null;
+                  problemDescription?: string;
+                  isGreeting?: boolean;
+                };
+                if (!consultationId && payload.consultationId) {
+                  setConsultationId(payload.consultationId);
+                }
+                if (payload.isGreeting) {
+                  break;
+                }
+                if (payload.followUpQuestions) {
+                  setSuggestedQuestions(
+                    payload.followUpQuestions.filter(Boolean)
+                  );
+                }
+                if (payload.icfAnalysis) {
+                  setIcfAnalysis(payload.icfAnalysis);
+                }
+                if (payload.icfAnalysis && payload.consultationId) {
+                  trackEvent("consultation_completed", {
+                    consultation_id: payload.consultationId,
+                    has_recommendations: true,
+                  });
+                }
+              } catch (error) {
+                console.error(
+                  "[chat] Failed to parse analysis payload:",
+                  error
+                );
+              }
+              break;
+            }
+            case "error": {
+              try {
+                const payload = JSON.parse(data) as { message?: string };
+                const errorMessage = payload.message || t("chat.errorResponse");
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === assistantMessageId
                       ? {
                           ...msg,
-                          content: `${msg.content}${payload.delta}`,
+                          content: errorMessage,
                         }
                       : msg
                   )
                 );
+                setErrorState(errorMessage);
+              } catch (error) {
+                console.error("[chat] Failed to parse error payload:", error);
               }
-            } catch (error) {
-              console.error("[chat] Failed to parse stream delta:", error);
+              break;
             }
-            break;
+            default:
+              break;
           }
-          case "analysis": {
-            try {
-              const payload = JSON.parse(data) as {
-                consultationId?: string;
-                followUpQuestions?: string[];
-                icfAnalysis?: IcfAnalysisBuckets | null;
-                problemDescription?: string;
-                isGreeting?: boolean;
-              };
-              if (!consultationId && payload.consultationId) {
-                setConsultationId(payload.consultationId);
+        };
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          let boundary = buffer.indexOf("\n\n");
+          while (boundary !== -1) {
+            const eventChunk = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+
+            const lines = eventChunk.split("\n");
+            let eventType = "message";
+            let dataPayload = "";
+
+            for (const line of lines) {
+              if (line.startsWith("event:")) {
+                eventType = line.slice(6).trim();
+              } else if (line.startsWith("data:")) {
+                dataPayload += line.slice(5).trim();
               }
-              if (payload.isGreeting) {
-                break;
-              }
-              if (payload.followUpQuestions) {
-                setSuggestedQuestions(
-                  payload.followUpQuestions.filter(Boolean)
-                );
-              }
-              if (payload.icfAnalysis) {
-                setIcfAnalysis(payload.icfAnalysis);
-              }
-              if (payload.icfAnalysis && payload.consultationId) {
-                trackEvent("consultation_completed", {
-                  consultation_id: payload.consultationId,
-                  has_recommendations: true,
-                });
-              }
-            } catch (error) {
-              console.error("[chat] Failed to parse analysis payload:", error);
             }
-            break;
+
+            await processEvent(eventType, dataPayload);
+            boundary = buffer.indexOf("\n\n");
           }
-          case "error": {
-            try {
-              const payload = JSON.parse(data) as { message?: string };
-              const errorMessage = payload.message || t("chat.errorResponse");
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === assistantMessageId
-                    ? {
-                        ...msg,
-                        content: errorMessage,
-                      }
-                    : msg
-                )
-              );
-              setErrorState(errorMessage);
-            } catch (error) {
-              console.error("[chat] Failed to parse error payload:", error);
-            }
-            break;
-          }
-          default:
-            break;
         }
-      };
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let boundary = buffer.indexOf("\n\n");
-        while (boundary !== -1) {
-          const eventChunk = buffer.slice(0, boundary);
-          buffer = buffer.slice(boundary + 2);
-
-          const lines = eventChunk.split("\n");
-          let eventType = "message";
-          let dataPayload = "";
-
-          for (const line of lines) {
-            if (line.startsWith("event:")) {
-              eventType = line.slice(6).trim();
-            } else if (line.startsWith("data:")) {
-              dataPayload += line.slice(5).trim();
-            }
-          }
-
-          await processEvent(eventType, dataPayload);
-          boundary = buffer.indexOf("\n\n");
-        }
+      } catch (error) {
+        console.error("chat_error", error);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMessageId
+              ? {
+                  ...msg,
+                  content: t("chat.errorResponse"),
+                }
+              : msg
+          )
+        );
+      } finally {
+        setIsTyping(false);
+        setTimeout(() => scrollToBottom(true), 100);
       }
-    } catch (error) {
-      console.error("chat_error", error);
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantMessageId
-            ? {
-                ...msg,
-                content: t("chat.errorResponse"),
-              }
-            : msg
-        )
-      );
-    } finally {
-      setIsTyping(false);
-      setTimeout(() => scrollToBottom(true), 100);
-    }
-  }, [consultationId, messages, disabilityType, disabilitySeverity, t]);
+    },
+    [consultationId, messages, disabilityType, disabilitySeverity, t]
+  );
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     // Enter: 전송, Shift+Enter: 줄바꿈
@@ -1190,7 +1206,13 @@ export function ChatInterface() {
                                 variant="outline"
                                 size="sm"
                                 className="min-w-[48px]"
-                                onClick={() => handleEvaluationScoreClick(score, message.evaluationType!, message.id)}
+                                onClick={() =>
+                                  handleEvaluationScoreClick(
+                                    score,
+                                    message.evaluationType!,
+                                    message.id
+                                  )
+                                }
                                 disabled={isTyping}
                               >
                                 {score}
@@ -1229,7 +1251,6 @@ export function ChatInterface() {
                   ))}
                 </div>
               )}
-
 
               <div ref={messagesEndRef} />
             </div>
@@ -1278,7 +1299,8 @@ export function ChatInterface() {
                 <div className="mb-3 flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
                   <InlineSpinner size="sm" />
                   <p className="text-sm text-muted-foreground">
-                    {t("chat.uploadingImage") || "이미지를 업로드하고 있습니다..."}
+                    {t("chat.uploadingImage") ||
+                      "이미지를 업로드하고 있습니다..."}
                   </p>
                 </div>
               )}
