@@ -542,6 +542,7 @@ export function ChatInterface() {
                 icfAnalysis?: IcfAnalysisBuckets | null;
                 problemDescription?: string;
                 isGreeting?: boolean;
+                isoMatches?: unknown[];
               };
               // #region agent log (개발 환경에서만 실행, 에러 무시)
               if (process.env.NODE_ENV === "development") {
