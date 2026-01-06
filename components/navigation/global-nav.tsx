@@ -99,8 +99,6 @@ export function GlobalNav() {
                 userProfileProps={{
                   additionalOAuthScopes: {
                     google: ["email", "profile"],
-                    kakao: ["profile_nickname", "account_email"],
-                    apple: ["email", "name"],
                   },
                 }}
               />
@@ -206,8 +204,6 @@ export function GlobalNav() {
                 userProfileProps={{
                   additionalOAuthScopes: {
                     google: ["email", "profile"],
-                    kakao: ["profile_nickname", "account_email"],
-                    apple: ["email", "name"],
                   },
                 }}
               />
