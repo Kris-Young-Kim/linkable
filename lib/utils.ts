@@ -95,3 +95,55 @@ export function isChatEndingIntent(message: string): boolean {
 
   return false;
 }
+
+/**
+ * 시각 보조기기 즉시 추천 의도를 감지하는 함수
+ * 사용자가 화면 낭독기, 시각 보조기기 등을 요청하면 true를 반환
+ */
+export function isVisualAidRequestIntent(message: string): boolean {
+  if (!message) return false;
+
+  const trimmed = message.trim().toLowerCase();
+
+  // 시각 보조기기 요청 패턴
+  const visualAidPatterns = [
+    // 화면 낭독 관련
+    /화면\s*낭독/gi,
+    /낭독\s*소프트웨어/gi,
+    /낭독\s*프로그램/gi,
+    /screen\s*reader/gi,
+    /text\s*to\s*speech/gi,
+    /tts/gi,
+
+    // 시각 보조기기 일반
+    /시각\s*보조기기/gi,
+    /시각\s*장애\s*기기/gi,
+    /시각\s*장애\s*도구/gi,
+    /visual\s*aid/gi,
+    /visual\s*assistive/gi,
+
+    // 확대 관련
+    /화면\s*확대/gi,
+    /돋보기\s*소프트웨어/gi,
+    /magnifier/gi,
+    /zoom\s*software/gi,
+
+    // 점자 관련
+    /점자\s*디스플레이/gi,
+    /점자\s*단말기/gi,
+    /braille\s*display/gi,
+
+    // 시각장애 키워드 + 요청
+    /(시각장애|실명|맹인|저시력|시력\s*장애).*(추천|알려|소개|필요|사용)/gi,
+    /(시각장애|실명|맹인|저시력|시력\s*장애).*(기기|도구|소프트웨어|프로그램)/gi,
+  ];
+
+  // 패턴 매칭
+  for (const pattern of visualAidPatterns) {
+    if (pattern.test(trimmed)) {
+      return true;
+    }
+  }
+
+  return false;
+}

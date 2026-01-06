@@ -75,7 +75,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
-import { cn, generateUUID, isChatEndingIntent } from "@/lib/utils";
+import { cn, generateUUID, isChatEndingIntent, isVisualAidRequestIntent } from "@/lib/utils";
 import { isEvaluationQuestion } from "@/core/assessment/ippa-score-parser";
 import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
 
@@ -354,6 +354,12 @@ export function ChatInterface() {
     // 채팅 종료 의도 감지
     if (trimmed && isChatEndingIntent(trimmed)) {
       console.log("[chat] Chat ending intent detected:", trimmed);
+      setChatEnded(true);
+    }
+
+    // 시각 보조기기 즉시 요청 감지 (화면 낭독기, 시각 보조기기 등)
+    if (trimmed && isVisualAidRequestIntent(trimmed)) {
+      console.log("[chat] Visual aid request intent detected:", trimmed);
       setChatEnded(true);
     }
 
