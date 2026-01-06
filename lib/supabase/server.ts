@@ -6,25 +6,28 @@ import { fetchWithRetry } from "../api-utils";
 /**
  * 환경변수 지연 로딩
  */
-function getSupabaseEnv() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const missingVars = [];
-  if (!supabaseUrl) missingVars.push("NEXT_PUBLIC_SUPABASE_URL");
-  if (!serviceRoleKey) missingVars.push("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseAnonKey) missingVars.push("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-
-  if (missingVars.length > 0) {
-    throw new Error(`Supabase server client env vars are missing: ${missingVars.join(", ")}`);
+function getSupabaseUrl(): string {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is required");
   }
+  return url;
+}
 
-  return {
-    supabaseUrl,
-    serviceRoleKey,
-    supabaseAnonKey,
-  };
+function getSupabaseServiceRoleKey(): string {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
+  }
+  return key;
+}
+
+function getSupabaseAnonKey(): string {
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!key) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is required");
+  }
+  return key;
 }
 
 let cachedClient: SupabaseClient | null = null;
@@ -35,7 +38,8 @@ let cachedClient: SupabaseClient | null = null;
  */
 export const getSupabaseServerClient = () => {
   if (!cachedClient) {
-    const { supabaseUrl, serviceRoleKey } = getSupabaseEnv();
+    const supabaseUrl = getSupabaseUrl();
+    const serviceRoleKey = getSupabaseServiceRoleKey();
 
     cachedClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
@@ -108,7 +112,8 @@ export async function getSupabaseUserClient(): Promise<SupabaseClient> {
   const supabaseJWT = createSupabaseJWT(userId, jwtOptions);
 
   // JWT를 사용하여 Supabase 클라이언트 생성
-  const { supabaseUrl, supabaseAnonKey } = getSupabaseEnv();
+  const supabaseUrl = getSupabaseUrl();
+  const supabaseAnonKey = getSupabaseAnonKey();
 
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
