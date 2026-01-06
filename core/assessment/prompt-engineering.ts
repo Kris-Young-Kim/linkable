@@ -78,12 +78,21 @@ export const buildPrompt = ({
             ? pendingCodes[currentActivityIndex]
             : pendingCodes[0];
 
+        // 현재 활동의 평가 상태 확인
+        const currentActivity = evaluatedActivities.find(
+          (a) => a.icfCode === currentCode
+        );
+        const hasImportance = currentActivity?.importance !== undefined;
+        const hasDifficulty = currentActivity?.preDifficulty !== undefined;
+
         evaluationHint = `
 평가 진행 상황:
 - 추출된 활동 코드: ${extractedIcfCodes.join(", ")}
 - 평가 완료된 활동: ${evaluatedActivities.length}개
 - 다음 평가할 활동: ${currentCode || "없음"}
+- 현재 활동 평가 상태: 중요도 ${hasImportance ? "완료" : "미완료"}, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
 - 평가가 필요한 활동이 있으면 자연스럽게 질문하되, 한 번에 하나씩만 질문한다.
+- 반드시 중요도를 먼저 물어보고, 중요도 평가가 완료된 후에만 어려움 정도를 물어본다.
 `;
       }
     }
@@ -133,12 +142,21 @@ export const buildStreamingPrompt = ({
             ? pendingCodes[currentActivityIndex]
             : pendingCodes[0];
 
+        // 현재 활동의 평가 상태 확인
+        const currentActivity = evaluatedActivities.find(
+          (a) => a.icfCode === currentCode
+        );
+        const hasImportance = currentActivity?.importance !== undefined;
+        const hasDifficulty = currentActivity?.preDifficulty !== undefined;
+
         evaluationHint = `
 **평가 진행 상황**
 - 추출된 활동 코드: ${extractedIcfCodes.join(", ")}
 - 평가 완료된 활동: ${evaluatedActivities.length}개
 - 다음 평가할 활동: ${currentCode || "없음"}
+- 현재 활동 평가 상태: 중요도 ${hasImportance ? "완료" : "미완료"}, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
 - 평가가 필요한 활동이 있으면 자연스럽게 질문하되, 한 번에 하나씩만 질문한다.
+- 반드시 중요도를 먼저 물어보고, 중요도 평가가 완료된 후에만 어려움 정도를 물어본다.
 `;
       }
     }
@@ -163,14 +181,16 @@ export const buildStreamingPrompt = ({
 **K-IPPA 평가 권유 (부드럽고 자연스럽게)**
 - ICF 분석이 완료되고 D-Level 활동 코드가 추출되면, 자연스럽게 평가를 유도한다.
 - 한 번에 하나의 활동에 대해서만 질문한다. 여러 활동이 있어도 하나씩 순서대로 진행한다.
-- 평가가 필요한 활동이 있으면 다음과 같이 질문한다:
-  * 중요도: "이 활동(예: 걷기)이 일상생활에서 얼마나 중요한가요? 1점(별로 안 중요)부터 5점(매우 중요)까지로 답변해주세요."
-  * 어려움 정도: "지금 이 활동을 하실 때 어려움 정도는 어떤가요? 1점(쉬워요)부터 5점(거의 못 해요)까지로 답변해주세요."
+- **반드시 중요도를 먼저 물어보고, 중요도 평가가 완료된 후에만 어려움 정도를 물어본다.**
+- 평가가 필요한 활동이 있으면 다음과 같이 순서대로 질문한다:
+  * **1단계 - 중요도 (필수, 먼저 질문)**: "이 활동(예: 걷기)이 일상생활에서 얼마나 중요한가요? 1점(별로 안 중요)부터 5점(매우 중요)까지로 답변해주세요."
+  * **2단계 - 어려움 정도 (중요도 평가 완료 후)**: "지금 이 활동을 하실 때 어려움 정도는 어떤가요? 1점(쉬워요)부터 5점(거의 못 해요)까지로 답변해주세요."
+- 중요도가 평가되지 않은 활동에 대해서는 절대 어려움 정도를 먼저 물어보지 않는다.
 - 사용자가 숫자로 답변하거나 자연어로 답변(예: "매우 중요해요", "5점", "어려워요")해도 모두 이해한다.
 - 평가가 완료된 활동은 다시 질문하지 않는다.
 - 강요하지 않고, 사용자가 답하기 편한 분위기를 만든다.
 - 답변하지 않아도 상담은 계속 진행한다.
-- 평가 질문 후에는 사용자의 답변을 확인하고 감사 인사를 한 후 다음 활동으로 넘어간다.
+- 평가 질문 후에는 사용자의 답변을 확인하고 감사 인사를 한 후 다음 단계로 넘어간다.
 
 **채팅 종료 확인 (평가 완료 후)**
 - 모든 평가가 완료되고 ICF 분석이 충분히 진행되었을 때, 사용자에게 채팅을 종료할지 물어본다.
