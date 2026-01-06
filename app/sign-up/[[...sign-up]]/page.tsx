@@ -26,11 +26,6 @@ export default function SignUpPage() {
           signInUrl="/sign-in"
           fallbackRedirectUrl="/onboarding"
           forceRedirectUrl="/onboarding"
-          additionalOAuthScopes={{
-            google: ["email", "profile"],
-            kakao: ["profile_nickname", "account_email"],
-            apple: ["email", "name"],
-          }}
         />
       </div>
     </div>
