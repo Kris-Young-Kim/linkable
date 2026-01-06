@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
-import { SignUp } from "@clerk/nextjs";
+import { UserProfile } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
-  title: "회원가입 - LinkAble",
-  description: "LinkAble에 회원가입하세요",
+  title: "프로필 설정 - LinkAble",
+  description: "LinkAble 프로필 및 계정 설정",
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default function SignUpPage() {
+export default function ProfilePage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
-      <div className="w-full max-w-md">
-        <SignUp
+      <div className="w-full max-w-4xl">
+        <UserProfile
           appearance={{
             elements: {
               rootBox: "mx-auto",
@@ -22,10 +22,7 @@ export default function SignUpPage() {
             },
           }}
           routing="path"
-          path="/sign-up"
-          signInUrl="/sign-in"
-          fallbackRedirectUrl="/onboarding"
-          forceRedirectUrl="/onboarding"
+          path="/profile"
           additionalOAuthScopes={{
             google: ["email", "profile"],
             kakao: ["profile_nickname", "account_email"],

@@ -25,7 +25,8 @@
     "scrape:icf": "tsx scripts/scrape-icf-browser-v3.ts",
     "backup:db": "tsx scripts/backup-database-json.ts",
     "deploy:edge-function": "tsx scripts/deploy-edge-function.ts",
-    "test:edge-function": "tsx scripts/test-edge-function.ts"
+    "test:edge-function": "tsx scripts/test-edge-function.ts",
+    "check:clerk": "tsx scripts/check-clerk-config.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",

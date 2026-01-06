@@ -24,7 +24,13 @@ export default function SignInPage() {
           routing="path"
           path="/sign-in"
           signUpUrl="/sign-up"
-          afterSignInUrl="/dashboard"
+          fallbackRedirectUrl="/dashboard"
+          forceRedirectUrl="/dashboard"
+          additionalOAuthScopes={{
+            google: ["email", "profile"],
+            kakao: ["profile_nickname", "account_email"],
+            apple: ["email", "name"],
+          }}
         />
       </div>
     </div>

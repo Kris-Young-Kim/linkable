@@ -25,8 +25,20 @@ export function RoleGuard({ children }: { children: React.ReactNode }) {
 
     async function checkRole() {
       try {
-        // 로그인하지 않았거나, 온보딩 페이지나 API 경로는 체크하지 않음
-        if (!isSignedIn || !userId || pathname === "/onboarding" || pathname?.startsWith("/api")) {
+        // 인증 관련 경로는 체크하지 않음
+        const authPaths = [
+          "/onboarding",
+          "/sign-in",
+          "/sign-up",
+          "/api",
+        ]
+        
+        const isAuthPath = authPaths.some(path => 
+          pathname === path || pathname?.startsWith(path)
+        )
+        
+        // 로그인하지 않았거나, 인증 관련 페이지는 체크하지 않음
+        if (!isSignedIn || !userId || isAuthPath) {
           console.log("[RoleGuard] Skipping role check", { isSignedIn, userId, pathname })
           setIsChecking(false)
           return

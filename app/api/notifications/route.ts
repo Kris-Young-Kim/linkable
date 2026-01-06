@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@clerk/nextjs/server"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
+import { ensureUserRecord } from "@/lib/auth/ensure-user-record"
 
 const supabase = getSupabaseServerClient()
 
@@ -21,16 +22,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // 사용자 ID 조회
-    const { data: userRow, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("clerk_id", userId)
-      .single()
-
-    if (userError || !userRow?.id) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
+    // 사용자 레코드가 없으면 자동 생성
+    const userRowId = await ensureUserRecord(userId)
 
     // 읽지 않은 알림만 조회 (또는 최근 50개)
     const { searchParams } = new URL(request.url)
@@ -40,7 +33,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from("notifications")
       .select("*")
-      .eq("user_id", userRow.id)
+      .eq("user_id", userRowId)
       .order("created_at", { ascending: false })
       .limit(limit)
 
@@ -96,16 +89,8 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "notificationId is required" }, { status: 400 })
     }
 
-    // 사용자 ID 조회
-    const { data: userRow, error: userError } = await supabase
-      .from("users")
-      .select("id")
-      .eq("clerk_id", userId)
-      .single()
-
-    if (userError || !userRow?.id) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 })
-    }
+    // 사용자 레코드가 없으면 자동 생성
+    const userRowId = await ensureUserRecord(userId)
 
     // 알림 업데이트
     const updateData: { is_read: boolean; read_at?: string } = {
@@ -120,7 +105,7 @@ export async function PATCH(request: NextRequest) {
       .from("notifications")
       .update(updateData)
       .eq("id", body.notificationId)
-      .eq("user_id", userRow.id) // 본인 알림만 수정 가능
+      .eq("user_id", userRowId) // 본인 알림만 수정 가능
 
     if (updateError) {
       if (isMissingNotificationTable(updateError)) {

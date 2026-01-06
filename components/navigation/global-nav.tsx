@@ -93,7 +93,17 @@ export function GlobalNav() {
                   {t("header.continueConsultation")}
                 </Link>
               </Button>
-              <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
+              <UserButton
+                appearance={{ elements: { userButtonBox: "ml-2" } }}
+                afterSignOutUrl="/"
+                userProfileProps={{
+                  additionalOAuthScopes: {
+                    google: ["email", "profile"],
+                    kakao: ["profile_nickname", "account_email"],
+                    apple: ["email", "name"],
+                  },
+                }}
+              />
               <SignOutButton>
                 <Button
                   variant="ghost"
@@ -190,7 +200,17 @@ export function GlobalNav() {
                   <div className="flex items-center justify-between">
                     <AdminLink />
                     <NotificationsBell />
-                    <UserButton appearance={{ elements: { userButtonBox: "ml-2" } }} afterSignOutUrl="/" />
+                    <UserButton
+                appearance={{ elements: { userButtonBox: "ml-2" } }}
+                afterSignOutUrl="/"
+                userProfileProps={{
+                  additionalOAuthScopes: {
+                    google: ["email", "profile"],
+                    kakao: ["profile_nickname", "account_email"],
+                    apple: ["email", "name"],
+                  },
+                }}
+              />
                   </div>
                   <SignOutButton>
                     <Button variant="outline" className="w-full" aria-label="로그아웃">

@@ -5,6 +5,7 @@ import { google } from "@ai-sdk/google";
 
 import { getSupabaseServerClient, getSupabaseUserClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/logging";
+import { ensureUserRecord } from "@/lib/auth/ensure-user-record";
 import {
   buildPrompt,
   buildStreamingPrompt,
@@ -40,55 +41,6 @@ type ChatRequestBody = {
 };
 
 const supabase = getSupabaseServerClient();
-
-const ensureUserRecord = async (clerkUserId: string) => {
-  const { data, error } = await supabase
-    .from("users")
-    .select("id")
-    .eq("clerk_id", clerkUserId)
-    .single();
-
-  if (data?.id) {
-    return data.id;
-  }
-
-  if (error && error.code !== "PGRST116") {
-    throw error;
-  }
-
-  const user = await currentUser();
-  const email =
-    user?.primaryEmailAddress?.emailAddress ??
-    user?.emailAddresses?.[0]?.emailAddress ??
-    `${clerkUserId}@linkable.local`;
-  const name = user?.fullName ?? user?.username ?? "LinkAble User";
-
-  // Clerk 메타데이터에서 role 가져오기 (있으면)
-  const role = (user?.publicMetadata?.role as string) || "user";
-
-  const { data: insertData, error: insertError } = await supabase
-    .from("users")
-    .insert({
-      clerk_id: clerkUserId,
-      email,
-      name,
-      role,
-    })
-    .select("id")
-    .single();
-
-  if (insertError) {
-    throw insertError;
-  }
-
-  logEvent({
-    category: "system",
-    action: "user_created",
-    payload: { clerkUserId },
-  });
-
-  return insertData.id;
-};
 
 const createConsultationIfNeeded = async (
   existingId: string | undefined,
