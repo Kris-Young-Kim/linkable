@@ -64,9 +64,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DisclaimerModal } from "@/components/disclaimer-modal";
-import { ProductRecommendationCard } from "@/components/product-recommendation-card";
 import {
-  IcfVisualization,
   type IcfAnalysisBuckets,
 } from "@/components/features/analysis/icf-visualization";
 import { TypingIndicator } from "@/components/chat/typing-indicator";
@@ -78,8 +76,6 @@ import {
   Mic,
   Paperclip,
   ArrowLeft,
-  ShoppingBag,
-  Package,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -87,7 +83,8 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
-import { cn, generateUUID } from "@/lib/utils";
+import { cn, generateUUID, isChatEndingIntent } from "@/lib/utils";
+import { isEvaluationQuestion } from "@/core/assessment/ippa-score-parser";
 import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
 
 interface Message {
@@ -95,15 +92,9 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  evaluationType?: "importance" | "difficulty"; // 평가 질문 유형
 }
 
-type IsoMatch = {
-  isoCode: string;
-  label: string;
-  description: string;
-  reason: string;
-  score: number;
-};
 
 export function ChatInterface() {
   const { t } = useLanguage();
@@ -130,10 +121,9 @@ export function ChatInterface() {
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [showRecommendationCTA, setShowRecommendationCTA] = useState(false);
   const [showFlowGuide, setShowFlowGuide] = useState(false);
-  const [isoMatches, setIsoMatches] = useState<IsoMatch[]>([]);
+  const [chatEnded, setChatEnded] = useState(false);
   const [disabilityType, setDisabilityType] = useState<string>("none");
   const [disabilitySeverity, setDisabilitySeverity] = useState<string>("none");
-  const [showIcf, setShowIcf] = useState(false);
 
   // useCallback으로 onClose 함수 메모이제이션하여 무한 루프 방지
   const handleCloseFlowGuide = useCallback(() => {
@@ -163,18 +153,24 @@ export function ChatInterface() {
     3
   );
 
+  // 채팅이 종료되고 ICF 분석이 완료되었을 때 추천 CTA 표시
+  useEffect(() => {
+    if (chatEnded && icfAnalysis && consultationId) {
+      console.log("[chat] Chat ended and ICF analysis completed, showing recommendation CTA");
+      setShowRecommendationCTA(true);
+    }
+  }, [chatEnded, icfAnalysis, consultationId]);
+
   // 채팅이 완전히 종료되고 추천이 준비되었을 때만 모달 표시
   useEffect(() => {
     // 조건:
     // 1. showRecommendationCTA가 true (상담 완료)
-    // 2. 추천이 준비되었고 (previewRecommendations.length > 0)
-    // 3. 타이핑이 끝났고 (!isTyping)
-    // 4. 추천 로딩이 완료되었고 (!isLoadingRecommendations)
-    // 5. consultationId가 존재하고 (consultationId)
-    // 6. ICF 분석이 완료되었고 (icfAnalysis)
+    // 2. 타이핑이 끝났고 (!isTyping)
+    // 3. 추천 로딩이 완료되었고 (!isLoadingRecommendations)
+    // 4. consultationId가 존재하고 (consultationId)
+    // 5. ICF 분석이 완료되었고 (icfAnalysis)
     const shouldShow = 
       showRecommendationCTA &&
-      previewRecommendations.length > 0 &&
       !isTyping &&
       !isLoadingRecommendations &&
       Boolean(consultationId) &&
@@ -192,7 +188,6 @@ export function ChatInterface() {
       setShowFlowGuide(false);
     }
   }, [
-    previewRecommendations.length, 
     showRecommendationCTA, 
     isTyping, 
     isLoadingRecommendations,
@@ -360,6 +355,12 @@ export function ChatInterface() {
       return;
     }
 
+    // 채팅 종료 의도 감지
+    if (trimmed && isChatEndingIntent(trimmed)) {
+      console.log("[chat] Chat ending intent detected:", trimmed);
+      setChatEnded(true);
+    }
+
     const userMessage: Message = {
       id: generateUUID(),
       role: "user",
@@ -501,14 +502,26 @@ export function ChatInterface() {
               const payload = JSON.parse(data) as { delta?: string };
               if (payload?.delta) {
                 setMessages((prev) =>
-                  prev.map((message) =>
-                    message.id === assistantMessageId
-                      ? {
-                          ...message,
-                          content: `${message.content}${payload.delta}`,
+                  prev.map((message) => {
+                    if (message.id === assistantMessageId) {
+                      const updatedContent = `${message.content}${payload.delta}`;
+                      // 평가 질문 유형 감지
+                      let evaluationType: "importance" | "difficulty" | undefined;
+                      if (isEvaluationQuestion(updatedContent)) {
+                        if (updatedContent.includes("중요")) {
+                          evaluationType = "importance";
+                        } else if (updatedContent.includes("어려움") || updatedContent.includes("어려운")) {
+                          evaluationType = "difficulty";
                         }
-                      : message
-                  )
+                      }
+                      return {
+                        ...message,
+                        content: updatedContent,
+                        evaluationType,
+                      };
+                    }
+                    return message;
+                  })
                 );
               }
             } catch (error) {
@@ -523,7 +536,6 @@ export function ChatInterface() {
                 followUpQuestions?: string[];
                 icfAnalysis?: IcfAnalysisBuckets | null;
                 problemDescription?: string;
-                isoMatches?: IsoMatch[];
                 isGreeting?: boolean;
               };
               // #region agent log (개발 환경에서만 실행, 에러 무시)
@@ -584,17 +596,12 @@ export function ChatInterface() {
                 setIcfAnalysis(payload.icfAnalysis);
               }
 
-              if (payload.isoMatches) {
-                setIsoMatches(payload.isoMatches);
-              }
 
               if (payload.icfAnalysis && payload.consultationId) {
                 trackEvent("consultation_completed", {
                   consultation_id: payload.consultationId,
                   has_recommendations: true,
                 });
-
-                setShowRecommendationCTA(true);
               }
             } catch (error) {
               console.error("[chat] Failed to parse analysis payload:", error);
@@ -680,6 +687,184 @@ export function ChatInterface() {
       setIsTyping(false);
     }
   };
+
+  // 평가 점수 버튼 클릭 핸들러
+  const handleEvaluationScoreClick = useCallback(async (score: number, evaluationType: "importance" | "difficulty", messageId: string) => {
+    const scoreText = `${score}점`;
+    
+    // 점수를 직접 메시지로 전송
+    const userMessage: Message = {
+      id: generateUUID(),
+      role: "user",
+      content: scoreText,
+      timestamp: new Date(),
+    };
+
+    const assistantMessageId = generateUUID();
+
+    setMessages((prev) => [
+      ...prev,
+      userMessage,
+      {
+        id: assistantMessageId,
+        role: "assistant",
+        content: "",
+        timestamp: new Date(),
+      },
+    ]);
+    setInput("");
+    setTimeout(() => scrollToBottom(true), 100);
+    setIsTyping(true);
+    setSuggestedQuestions([]);
+    setIcfAnalysis(null);
+    setShowRecommendationCTA(false);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: scoreText,
+          consultationId,
+          history: messages.map(({ role, content }) => ({ role, content })),
+          disabilityType: disabilityType === "none" ? undefined : disabilityType,
+          disabilitySeverity: disabilitySeverity === "none" ? undefined : disabilitySeverity,
+        }),
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to send message");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      const processEvent = async (eventType: string, data?: string) => {
+        if (!data) return;
+        switch (eventType) {
+          case "text": {
+            try {
+              const payload = JSON.parse(data) as { delta?: string };
+              if (payload?.delta) {
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessageId
+                      ? {
+                          ...msg,
+                          content: `${msg.content}${payload.delta}`,
+                        }
+                      : msg
+                  )
+                );
+              }
+            } catch (error) {
+              console.error("[chat] Failed to parse stream delta:", error);
+            }
+            break;
+          }
+          case "analysis": {
+            try {
+              const payload = JSON.parse(data) as {
+                consultationId?: string;
+                followUpQuestions?: string[];
+                icfAnalysis?: IcfAnalysisBuckets | null;
+                problemDescription?: string;
+                isGreeting?: boolean;
+              };
+              if (!consultationId && payload.consultationId) {
+                setConsultationId(payload.consultationId);
+              }
+              if (payload.isGreeting) {
+                break;
+              }
+              if (payload.followUpQuestions) {
+                setSuggestedQuestions(
+                  payload.followUpQuestions.filter(Boolean)
+                );
+              }
+              if (payload.icfAnalysis) {
+                setIcfAnalysis(payload.icfAnalysis);
+              }
+              if (payload.icfAnalysis && payload.consultationId) {
+                trackEvent("consultation_completed", {
+                  consultation_id: payload.consultationId,
+                  has_recommendations: true,
+                });
+              }
+            } catch (error) {
+              console.error("[chat] Failed to parse analysis payload:", error);
+            }
+            break;
+          }
+          case "error": {
+            try {
+              const payload = JSON.parse(data) as { message?: string };
+              const errorMessage = payload.message || t("chat.errorResponse");
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === assistantMessageId
+                    ? {
+                        ...msg,
+                        content: errorMessage,
+                      }
+                    : msg
+                )
+              );
+              setErrorState(errorMessage);
+            } catch (error) {
+              console.error("[chat] Failed to parse error payload:", error);
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let boundary = buffer.indexOf("\n\n");
+        while (boundary !== -1) {
+          const eventChunk = buffer.slice(0, boundary);
+          buffer = buffer.slice(boundary + 2);
+
+          const lines = eventChunk.split("\n");
+          let eventType = "message";
+          let dataPayload = "";
+
+          for (const line of lines) {
+            if (line.startsWith("event:")) {
+              eventType = line.slice(6).trim();
+            } else if (line.startsWith("data:")) {
+              dataPayload += line.slice(5).trim();
+            }
+          }
+
+          await processEvent(eventType, dataPayload);
+          boundary = buffer.indexOf("\n\n");
+        }
+      }
+    } catch (error) {
+      console.error("chat_error", error);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? {
+                ...msg,
+                content: t("chat.errorResponse"),
+              }
+            : msg
+        )
+      );
+    } finally {
+      setIsTyping(false);
+      setTimeout(() => scrollToBottom(true), 100);
+    }
+  }, [consultationId, messages, disabilityType, disabilitySeverity, t]);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     // Enter: 전송, Shift+Enter: 줄바꿈
@@ -953,36 +1138,73 @@ export function ChatInterface() {
             className="flex-1 overflow-y-auto px-4 py-6 min-h-0"
           >
             <div className="mx-auto max-w-3xl space-y-6">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {message.role === "assistant" && (
-                    <div
-                      className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent"
-                      aria-hidden="true"
-                    >
-                      <Sparkles className="size-5 text-white" />
-                    </div>
-                  )}
+              {messages.map((message, index) => (
+                <div key={message.id} className="space-y-3">
                   <div
-                    className={`max-w-[75%] rounded-2xl px-5 py-4 text-lg leading-relaxed ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-blue-50 text-foreground dark:bg-blue-950"
+                    className={`flex gap-3 ${
+                      message.role === "user" ? "justify-end" : "justify-start"
                     }`}
-                    role="article"
-                    aria-label={
-                      message.role === "user"
-                        ? t("chat.yourMessage")
-                        : t("chat.coordinatorMessage")
-                    }
                   >
-                    {message.content}
+                    {message.role === "assistant" && (
+                      <div
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-primary to-accent"
+                        aria-hidden="true"
+                      >
+                        <Sparkles className="size-5 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`max-w-[75%] rounded-2xl px-5 py-4 text-lg leading-relaxed ${
+                        message.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-blue-50 text-foreground dark:bg-blue-950"
+                      }`}
+                      role="article"
+                      aria-label={
+                        message.role === "user"
+                          ? t("chat.yourMessage")
+                          : t("chat.coordinatorMessage")
+                      }
+                    >
+                      {message.content}
+                    </div>
                   </div>
+                  {/* 평가 질문에 대한 5점 척도 버튼 */}
+                  {message.role === "assistant" &&
+                    message.evaluationType &&
+                    // 다음 메시지가 사용자 메시지가 아니고, 타이핑 중이 아닐 때만 표시
+                    messages[index + 1]?.role !== "user" &&
+                    !isTyping && (
+                      <div className="flex justify-start pl-[52px]">
+                        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
+                          <p className="mb-3 text-sm font-medium text-foreground">
+                            {message.evaluationType === "importance"
+                              ? "일상생활에서 얼마나 중요한가요?"
+                              : "지금 이 활동을 하실 때 어려움 정도는 어떤가요?"}
+                          </p>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map((score) => (
+                              <Button
+                                key={score}
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="min-w-[48px]"
+                                onClick={() => handleEvaluationScoreClick(score, message.evaluationType!, message.id)}
+                                disabled={isTyping}
+                              >
+                                {score}
+                              </Button>
+                            ))}
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {message.evaluationType === "importance"
+                              ? "1점: 별로 안 중요 → 5점: 매우 중요"
+                              : "1점: 쉬워요 → 5점: 거의 못 해요"}
+                          </p>
+                        </div>
+                      </div>
+                    )}
                 </div>
               ))}
 
@@ -1008,188 +1230,6 @@ export function ChatInterface() {
                 </div>
               )}
 
-              {/* ICF Visualization (선택 시 표시) */}
-              {icfAnalysis && (
-                <div className="flex justify-center">
-                  <div className="w-full max-w-2xl space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-foreground">
-                        ICF 분석 (원할 때만 확인)
-                      </p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowIcf((prev) => !prev)}
-                      >
-                        {showIcf ? "닫기" : "ICF 분석 보기"}
-                      </Button>
-                    </div>
-                    {showIcf && <IcfVisualization data={icfAnalysis} />}
-                  </div>
-                </div>
-              )}
-
-              {/* Recommendation Preview Cards */}
-              {showRecommendationCTA &&
-                consultationId &&
-                icfAnalysis && // ICF 분석이 완료된 경우에만 표시
-                previewRecommendations.length > 0 &&
-                !isLoadingRecommendations && (
-                  <div className="flex justify-center px-4 py-6">
-                    <div className="w-full max-w-4xl">
-                      <div className="mb-4 text-center">
-                        <p className="text-lg font-semibold text-foreground">
-                          {t("chat.recommendationPreview")}
-                        </p>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        {previewRecommendations.map((product, index) => (
-                          <div
-                            key={product.id || index}
-                            className="flex flex-col"
-                          >
-                            <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-muted/50 group">
-                              {product.image_url ? (
-                                <Image
-                                  src={product.image_url}
-                                  alt={
-                                    product.name ||
-                                    t("recommendations.defaultCategory")
-                                  }
-                                  fill
-                                  className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                  loading="lazy"
-                                  quality={95}
-                                  placeholder="blur"
-                                  blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
-                                />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-muted">
-                                  <Package
-                                    className="size-12 text-muted-foreground/50"
-                                    aria-hidden="true"
-                                  />
-                                </div>
-                              )}
-                              {/* 이미지 오버레이 그라데이션 */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none" />
-                            </div>
-                            <div className="flex-1 rounded-b-lg border border-t-0 border-border bg-card p-4">
-                              <h3 className="mb-2 line-clamp-2 text-base font-semibold text-foreground">
-                                {product.name ||
-                                  t("recommendations.defaultCategory")}
-                              </h3>
-                              {product.match_reason && (
-                                <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
-                                  {product.match_reason}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-6 text-center">
-                        <Button
-                          size="lg"
-                          className={cn(
-                            "min-h-[44px] px-8",
-                            "bg-primary text-primary-foreground hover:bg-primary/90",
-                            "shadow-lg shadow-primary/30",
-                            "ring-2 ring-primary ring-offset-2",
-                            "animate-pulse hover:animate-none",
-                            "transition-all duration-300 hover:scale-105",
-                            "font-bold"
-                          )}
-                          onClick={() => {
-                            trackEvent("cta_recommendation_from_chat", {
-                              consultation_id: consultationId,
-                            });
-                            router.push(`/recommendations/${consultationId}`);
-                          }}
-                        >
-                          <ShoppingBag
-                            className="mr-2 size-5"
-                            aria-hidden="true"
-                          />
-                          {t("chat.viewMoreRecommendations")}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-              {/* Recommendation CTA (Fallback when no preview) */}
-              {showRecommendationCTA &&
-                consultationId &&
-                icfAnalysis && // ICF 분석이 완료된 경우에만 표시
-                previewRecommendations.length === 0 && (
-                  <div className="flex justify-center px-4 py-6">
-                    <div className="w-full max-w-2xl">
-                      <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 text-center">
-                        {isoMatches.length > 0 && (
-                          <div className="mb-4 text-left space-y-3">
-                            <p className="text-sm font-semibold text-primary">
-                              ISO 매칭 결과
-                            </p>
-                            <div className="grid gap-3 sm:grid-cols-2">
-                              {isoMatches.slice(0, 3).map((match, index) => (
-                                <div
-                                  key={`${match.isoCode}-${match.label}-${index}`}
-                                  className="rounded-lg border border-primary/20 bg-background px-3 py-2 text-left"
-                                >
-                                  <div className="text-xs text-muted-foreground">
-                                    ISO {match.isoCode}
-                                  </div>
-                                  <div className="font-semibold text-foreground">
-                                    {match.label}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                                    {match.reason || match.description}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        {isLoadingRecommendations ? (
-                          <LoadingSpinner
-                            size="lg"
-                            text={t("chat.loadingRecommendations") || "추천을 준비하고 있습니다..."}
-                          />
-                        ) : (
-                          <div className="flex flex-col items-center gap-4">
-                            <p className="text-base font-medium text-foreground">
-                              {t("chat.recommendationsReady")}
-                            </p>
-                            <CTAButton
-                              variant="recommendations"
-                              href={`/recommendations/${consultationId}`}
-                              size="lg"
-                              className={cn(
-                                "shadow-lg shadow-primary/30",
-                                "ring-2 ring-primary ring-offset-2",
-                                "animate-pulse hover:animate-none",
-                                "transition-all duration-300 hover:scale-105",
-                                "font-bold"
-                              )}
-                              onClick={() =>
-                                trackEvent("cta_recommendation_from_chat", {
-                                  consultation_id: consultationId,
-                                })
-                              }
-                            >
-                              {t("chat.viewRecommendations")}
-                            </CTAButton>
-                            <p className="text-xs text-muted-foreground max-w-md">
-                              {t("chat.recommendationsHint")}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
 
               <div ref={messagesEndRef} />
             </div>

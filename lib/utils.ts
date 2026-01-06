@@ -65,3 +65,33 @@ export function isGreetingMessage(message: string): boolean {
 
   return false;
 }
+
+/**
+ * 채팅 종료 의도를 감지하는 함수
+ * 사용자가 "종료", "끝", "완료" 등을 입력하면 true를 반환
+ */
+export function isChatEndingIntent(message: string): boolean {
+  if (!message) return false;
+
+  const trimmed = message.trim().toLowerCase();
+
+  // 채팅 종료 의도 패턴
+  const endingPatterns = [
+    /^(종료|끝|완료|그만|마무리|끝내|종료할|끝낼|완료할|마칠)[!?.]*$/,
+    /^(종료|끝|완료|그만|마무리|끝내|종료할|끝낼|완료할|마칠)\s*(해|할|하자|할까|할게|하겠|하겠어|하겠습니다|합니다|해요|할래|할게요)[!?.]*$/,
+    /^(네|예|응|좋아|좋아요|알겠|알겠어|알겠습니다|알겠어요)\s*(종료|끝|완료|그만|마무리|끝내|종료할|끝낼|완료할|마칠)[!?.]*$/,
+    /^(종료|끝|완료|그만|마무리|끝내|종료할|끝낼|완료할|마칠)\s*(네|예|응|좋아|좋아요|알겠|알겠어|알겠습니다|알겠어요)[!?.]*$/,
+    /^(finish|end|done|stop|complete|close)[!?.]*$/i,
+    /^(yes|ok|okay|sure|alright)\s*(finish|end|done|stop|complete|close)[!?.]*$/i,
+    /^(finish|end|done|stop|complete|close)\s*(yes|ok|okay|sure|alright)[!?.]*$/i,
+  ];
+
+  // 패턴 매칭
+  for (const pattern of endingPatterns) {
+    if (pattern.test(trimmed)) {
+      return true;
+    }
+  }
+
+  return false;
+}
