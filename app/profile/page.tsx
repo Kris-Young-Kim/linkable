@@ -25,7 +25,6 @@ export default function ProfilePage() {
           path="/profile"
           additionalOAuthScopes={{
             google: ["email", "profile"],
-            kakao: ["profile_nickname", "account_email"],
             apple: ["email", "name"],
           }}
         />
