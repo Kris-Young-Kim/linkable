@@ -548,16 +548,25 @@ export async function POST(request: Request) {
           );
 
           // 평가 컨텍스트에 ICF 코드 추가 (분석 파싱 후)
+          // D-Level 활동 코드만 평가 대상이므로 d로 시작하는 코드만 포함
           if (evaluationContext && parsedAnalysis?.icf_analysis?.d) {
-            evaluationContext.extractedIcfCodes = parsedAnalysis.icf_analysis.d;
-            const evaluatedCodes = new Set(
-              evaluationContext.evaluatedActivities.map((a) => a.icfCode)
+            const dLevelCodes = parsedAnalysis.icf_analysis.d.filter((code: string) =>
+              code.toLowerCase().startsWith("d")
             );
-            const pendingCodes = evaluationContext.extractedIcfCodes.filter(
-              (code: string) => !evaluatedCodes.has(code)
-            );
-            if (pendingCodes.length > 0) {
-              evaluationContext.currentActivityIndex = 0;
+            if (dLevelCodes.length > 0) {
+              evaluationContext.extractedIcfCodes = dLevelCodes;
+              const evaluatedCodes = new Set(
+                evaluationContext.evaluatedActivities.map((a) => a.icfCode)
+              );
+              const pendingCodes = evaluationContext.extractedIcfCodes.filter(
+                (code: string) => !evaluatedCodes.has(code)
+              );
+              if (pendingCodes.length > 0) {
+                evaluationContext.currentActivityIndex = 0;
+              }
+            } else {
+              // D-Level 코드가 없으면 평가 컨텍스트 초기화
+              evaluationContext.extractedIcfCodes = [];
             }
           }
 

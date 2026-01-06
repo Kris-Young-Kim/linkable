@@ -514,7 +514,8 @@ export function ChatInterface() {
                           evaluationType = "importance";
                         } else if (
                           updatedContent.includes("어려움") ||
-                          updatedContent.includes("어려운")
+                          updatedContent.includes("어려운") ||
+                          updatedContent.includes("어려움 정도")
                         ) {
                           evaluationType = "difficulty";
                         }
@@ -1189,8 +1190,9 @@ export function ChatInterface() {
                   {/* 평가 질문에 대한 5점 척도 버튼 */}
                   {message.role === "assistant" &&
                     message.evaluationType &&
-                    // 다음 메시지가 사용자 메시지가 아니고, 타이핑 중이 아닐 때만 표시
-                    messages[index + 1]?.role !== "user" &&
+                    // 다음 메시지가 존재하고 사용자 메시지가 아니고, 타이핑 중이 아닐 때만 표시
+                    messages[index + 1] != null &&
+                    messages[index + 1].role !== "user" &&
                     !isTyping && (
                       <div className="flex justify-start pl-[52px]">
                         <div className="rounded-lg border border-border bg-card p-4 shadow-sm">

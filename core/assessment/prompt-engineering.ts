@@ -65,9 +65,14 @@ export const buildPrompt = ({
     const { extractedIcfCodes, evaluatedActivities, currentActivityIndex } =
       evaluationContext;
 
-    if (extractedIcfCodes && extractedIcfCodes.length > 0) {
+    // D-Level 활동 코드만 필터링 (d로 시작하는 코드만 평가 대상)
+    const dLevelCodes = extractedIcfCodes?.filter((code) =>
+      code.toLowerCase().startsWith("d")
+    ) || [];
+
+    if (dLevelCodes.length > 0) {
       const evaluatedCodes = new Set(evaluatedActivities.map((a) => a.icfCode));
-      const pendingCodes = extractedIcfCodes.filter(
+      const pendingCodes = dLevelCodes.filter(
         (code) => !evaluatedCodes.has(code)
       );
 
@@ -87,7 +92,7 @@ export const buildPrompt = ({
 
         evaluationHint = `
 평가 진행 상황:
-- 추출된 활동 코드: ${extractedIcfCodes.join(", ")}
+- 추출된 D-Level 활동 코드: ${dLevelCodes.join(", ")}
 - 평가 완료된 활동: ${evaluatedActivities.length}개
 - 다음 평가할 활동: ${currentCode || "없음"}
 - 현재 활동 평가 상태: 중요도 ${hasImportance ? "완료" : "미완료"}, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
@@ -129,9 +134,14 @@ export const buildStreamingPrompt = ({
     const { extractedIcfCodes, evaluatedActivities, currentActivityIndex } =
       evaluationContext;
 
-    if (extractedIcfCodes && extractedIcfCodes.length > 0) {
+    // D-Level 활동 코드만 필터링 (d로 시작하는 코드만 평가 대상)
+    const dLevelCodes = extractedIcfCodes?.filter((code) =>
+      code.toLowerCase().startsWith("d")
+    ) || [];
+
+    if (dLevelCodes.length > 0) {
       const evaluatedCodes = new Set(evaluatedActivities.map((a) => a.icfCode));
-      const pendingCodes = extractedIcfCodes.filter(
+      const pendingCodes = dLevelCodes.filter(
         (code) => !evaluatedCodes.has(code)
       );
 
@@ -151,7 +161,7 @@ export const buildStreamingPrompt = ({
 
         evaluationHint = `
 **평가 진행 상황**
-- 추출된 활동 코드: ${extractedIcfCodes.join(", ")}
+- 추출된 D-Level 활동 코드: ${dLevelCodes.join(", ")}
 - 평가 완료된 활동: ${evaluatedActivities.length}개
 - 다음 평가할 활동: ${currentCode || "없음"}
 - 현재 활동 평가 상태: 중요도 ${hasImportance ? "완료" : "미완료"}, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
@@ -179,18 +189,21 @@ export const buildStreamingPrompt = ({
 - 데이터베이스나 기술 용어는 절대 사용하지 않는다.
 
 **K-IPPA 평가 권유 (부드럽고 자연스럽게)**
-- ICF 분석이 완료되고 D-Level 활동 코드가 추출되면, 자연스럽게 평가를 유도한다.
-- 한 번에 하나의 활동에 대해서만 질문한다. 여러 활동이 있어도 하나씩 순서대로 진행한다.
-- **반드시 중요도를 먼저 물어보고, 중요도 평가가 완료된 후에만 어려움 정도를 물어본다.**
-- 평가가 필요한 활동이 있으면 다음과 같이 순서대로 질문한다:
+- **중요: D-Level 활동 코드(d로 시작하는 코드)만 평가 대상입니다.**
+- B-Level 신체 기능 코드(b로 시작)나 E-Level 환경 코드(e로 시작)만 추출되었을 때는 평가 질문을 하지 않습니다.
+- ICF 분석에서 D-Level 활동 코드가 추출되었을 때만, 자연스럽게 평가를 유도합니다.
+- 사용자가 구체적인 활동(예: "걷기가 어려워요", "옷 입기가 힘들어요")에 대한 어려움을 언급했을 때만 평가 질문을 합니다.
+- 한 번에 하나의 활동에 대해서만 질문합니다. 여러 활동이 있어도 하나씩 순서대로 진행합니다.
+- **반드시 중요도를 먼저 물어보고, 중요도 평가가 완료된 후에만 어려움 정도를 물어봅니다.**
+- 평가가 필요한 활동이 있으면 다음과 같이 순서대로 질문합니다:
   * **1단계 - 중요도 (필수, 먼저 질문)**: "이 활동(예: 걷기)이 일상생활에서 얼마나 중요한가요? 1점(별로 안 중요)부터 5점(매우 중요)까지로 답변해주세요."
   * **2단계 - 어려움 정도 (중요도 평가 완료 후)**: "지금 이 활동을 하실 때 어려움 정도는 어떤가요? 1점(쉬워요)부터 5점(거의 못 해요)까지로 답변해주세요."
-- 중요도가 평가되지 않은 활동에 대해서는 절대 어려움 정도를 먼저 물어보지 않는다.
-- 사용자가 숫자로 답변하거나 자연어로 답변(예: "매우 중요해요", "5점", "어려워요")해도 모두 이해한다.
-- 평가가 완료된 활동은 다시 질문하지 않는다.
-- 강요하지 않고, 사용자가 답하기 편한 분위기를 만든다.
-- 답변하지 않아도 상담은 계속 진행한다.
-- 평가 질문 후에는 사용자의 답변을 확인하고 감사 인사를 한 후 다음 단계로 넘어간다.
+- 중요도가 평가되지 않은 활동에 대해서는 절대 어려움 정도를 먼저 물어보지 않습니다.
+- 사용자가 숫자로 답변하거나 자연어로 답변(예: "매우 중요해요", "5점", "어려워요")해도 모두 이해합니다.
+- 평가가 완료된 활동은 다시 질문하지 않습니다.
+- 강요하지 않고, 사용자가 답하기 편한 분위기를 만듭니다.
+- 답변하지 않아도 상담은 계속 진행합니다.
+- 평가 질문 후에는 사용자의 답변을 확인하고 감사 인사를 한 후 다음 단계로 넘어갑니다.
 
 **채팅 종료 확인 (평가 완료 후)**
 - 모든 평가가 완료되고 ICF 분석이 충분히 진행되었을 때, 사용자에게 채팅을 종료할지 물어본다.
