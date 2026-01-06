@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-01-06T07:31:49.794Z",
+  "timestamp": "2026-01-06T07:27:05.572Z",
   "totalTests": 50,
-  "passedTests": 50,
-  "failedTests": 0,
+  "passedTests": 49,
+  "failedTests": 1,
   "overallAccuracy": {
-    "precision": 0.5133023088023088,
-    "recall": 0.9399999999999998,
-    "f1": 0.6640107393372411,
-    "top1Accuracy": 0.76,
-    "top3Accuracy": 1,
-    "top5Accuracy": 1
+    "precision": 0.5083023088023088,
+    "recall": 0.9199999999999998,
+    "f1": 0.654816730626527,
+    "top1Accuracy": 0.74,
+    "top3Accuracy": 0.98,
+    "top5Accuracy": 0.98
   },
   "categoryBreakdown": {
     "시각": {
@@ -103,12 +103,12 @@
     "가정생활": {
       "count": 5,
       "accuracy": {
-        "precision": 0.31666666666666665,
-        "recall": 1,
-        "f1": 0.4810126582278481,
-        "top1Accuracy": 0.2,
-        "top3Accuracy": 1,
-        "top5Accuracy": 1
+        "precision": 0.26666666666666666,
+        "recall": 0.8,
+        "f1": 0.4,
+        "top1Accuracy": 0,
+        "top3Accuracy": 0.8,
+        "top5Accuracy": 0.8
       }
     },
     "환경": {
@@ -147,14 +147,14 @@
   },
   "matchingMethodComparison": {
     "ruleBased": {
-      "precision": 0.5689754134754135,
-      "recall": 1.7416666666666665,
-      "f1": 0.857740383350136
+      "precision": 0.5663087468087468,
+      "recall": 1.7216666666666667,
+      "f1": 0.852277421059682
     },
     "keywordBased": {
-      "precision": 0.5628563658563658,
-      "recall": 1.7416666666666665,
-      "f1": 0.8507688200103704
+      "precision": 0.5601896991896992,
+      "recall": 1.7216666666666667,
+      "f1": 0.8453292210116621
     },
     "graphBased": {
       "precision": 0.30666666666666664,
@@ -162,9 +162,9 @@
       "f1": 0.23840531561461792
     },
     "hybrid": {
-      "precision": 0.5133023088023088,
-      "recall": 0.9399999999999998,
-      "f1": 0.6640107393372411
+      "precision": 0.5083023088023088,
+      "recall": 0.9199999999999998,
+      "f1": 0.654816730626527
     }
   },
   "testResults": [
@@ -6604,39 +6604,27 @@
         "15 03"
       ],
       "actualIso": [
-        "15 03",
         "12 31",
         "15 12",
         "24 06"
       ],
       "isoAccuracy": {
-        "precision": 0.25,
-        "recall": 1,
-        "f1": 0.4,
-        "top1Accuracy": true,
-        "top3Accuracy": true,
-        "top5Accuracy": true
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "top1Accuracy": false,
+        "top3Accuracy": false,
+        "top5Accuracy": false
       },
-      "passed": true,
+      "passed": false,
       "errors": [
+        "F1 점수 부족: 0.000 (목표: 0.7)",
+        "누락된 ISO 코드: 15 03",
         "과도한 ISO 코드: 12 31, 15 12, 24 06..."
       ],
       "matchingDetails": {
         "ruleBased": [
           {
-            "isoCode": "15 03",
-            "label": "요리 준비 보조기기",
-            "description": "식사 준비 및 요리를 돕는 보조기기 (ISO 1503)",
-            "score": 1.2,
-            "matchedIcf": [
-              {
-                "code": "d630",
-                "description": "식사 준비하기"
-              }
-            ],
-            "reason": "d630(식사 준비하기) 이(가) 관찰되어 요리 준비 보조기기 솔루션을 추천합니다."
-          },
-          {
             "isoCode": "12 31",
             "label": "근력 저하 체위 변경 보조기기",
             "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
@@ -6648,23 +6636,6 @@
               }
             ],
             "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
-          },
-          {
-            "isoCode": "15 03",
-            "label": "음식 및 음료 준비 보조기기",
-            "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 1.017,
-            "matchedIcf": [
-              {
-                "code": "d630",
-                "description": "식사 준비하기"
-              },
-              {
-                "code": "d640",
-                "description": "가사 일하기"
-              }
-            ],
-            "reason": "d630(식사 준비하기) + d640(가사 일하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
           },
           {
             "isoCode": "15 12",
@@ -6704,23 +6675,23 @@
               }
             ],
             "reason": "b730(근력) 이(가) 관찰되어 체위 변경 보조기기 솔루션을 추천합니다."
+          },
+          {
+            "isoCode": "15 03",
+            "label": "음식 및 음료 준비 보조기기",
+            "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
+            "score": 0.85,
+            "matchedIcf": [
+              {
+                "code": "d640",
+                "description": "가사 일하기"
+              }
+            ],
+            "reason": "d640(가사 일하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
           }
         ],
         "keywordBased": [
           {
-            "isoCode": "15 03",
-            "label": "요리 준비 보조기기",
-            "description": "식사 준비 및 요리를 돕는 보조기기 (ISO 1503)",
-            "score": 1.2,
-            "matchedIcf": [
-              {
-                "code": "d630",
-                "description": "식사 준비하기"
-              }
-            ],
-            "reason": "d630(식사 준비하기) 이(가) 관찰되어 요리 준비 보조기기 솔루션을 추천합니다."
-          },
-          {
             "isoCode": "12 31",
             "label": "근력 저하 체위 변경 보조기기",
             "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
@@ -6732,23 +6703,6 @@
               }
             ],
             "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
-          },
-          {
-            "isoCode": "15 03",
-            "label": "음식 및 음료 준비 보조기기",
-            "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 1.017,
-            "matchedIcf": [
-              {
-                "code": "d630",
-                "description": "식사 준비하기"
-              },
-              {
-                "code": "d640",
-                "description": "가사 일하기"
-              }
-            ],
-            "reason": "d630(식사 준비하기) + d640(가사 일하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
           },
           {
             "isoCode": "15 12",
@@ -6788,6 +6742,19 @@
               }
             ],
             "reason": "b730(근력) 이(가) 관찰되어 체위 변경 보조기기 솔루션을 추천합니다."
+          },
+          {
+            "isoCode": "15 03",
+            "label": "음식 및 음료 준비 보조기기",
+            "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
+            "score": 0.85,
+            "matchedIcf": [
+              {
+                "code": "d640",
+                "description": "가사 일하기"
+              }
+            ],
+            "reason": "d640(가사 일하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
           }
         ],
         "graphBased": [
@@ -6806,20 +6773,6 @@
           }
         ],
         "hybrid": [
-          {
-            "isoCode": "15 03",
-            "label": "요리 준비 보조기기",
-            "description": "식사 준비 및 요리를 돕는 보조기기 (ISO 1503)",
-            "score": 1,
-            "matchedIcf": [
-              {
-                "code": "d630",
-                "description": "식사 준비하기"
-              }
-            ],
-            "reason": "d630(식사 준비하기) 이(가) 관찰되어 요리 준비 보조기기 솔루션을 추천합니다. [통합 점수: 110.8%, 소스: 2개]",
-            "category": "primary"
-          },
           {
             "isoCode": "12 31",
             "label": "근력 저하 체위 변경 보조기기",
@@ -6860,7 +6813,7 @@
               }
             ],
             "reason": "b730(근력) 이(가) 관찰되어 근력 저하 손 기능 보조기기 솔루션을 추천합니다. [통합 점수: 47.0%, 소스: 1개]",
-            "category": "secondary"
+            "category": "primary"
           }
         ]
       }
@@ -6893,23 +6846,10 @@
       "matchingDetails": {
         "ruleBased": [
           {
-            "isoCode": "12 31",
-            "label": "근력 저하 체위 변경 보조기기",
-            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
-            "score": 1.02,
-            "matchedIcf": [
-              {
-                "code": "b730",
-                "description": "근력"
-              }
-            ],
-            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
-          },
-          {
             "isoCode": "15 03",
             "label": "음식 및 음료 준비 보조기기",
             "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 1.017,
+            "score": 1.05,
             "matchedIcf": [
               {
                 "code": "d640",
@@ -6921,6 +6861,19 @@
               }
             ],
             "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
+          },
+          {
+            "isoCode": "12 31",
+            "label": "근력 저하 체위 변경 보조기기",
+            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
+            "score": 1.02,
+            "matchedIcf": [
+              {
+                "code": "b730",
+                "description": "근력"
+              }
+            ],
+            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
           },
           {
             "isoCode": "15 12",
@@ -6964,23 +6917,10 @@
         ],
         "keywordBased": [
           {
-            "isoCode": "12 31",
-            "label": "근력 저하 체위 변경 보조기기",
-            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
-            "score": 1.02,
-            "matchedIcf": [
-              {
-                "code": "b730",
-                "description": "근력"
-              }
-            ],
-            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
-          },
-          {
             "isoCode": "15 03",
             "label": "음식 및 음료 준비 보조기기",
             "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 1.017,
+            "score": 1.05,
             "matchedIcf": [
               {
                 "code": "d640",
@@ -6992,6 +6932,19 @@
               }
             ],
             "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
+          },
+          {
+            "isoCode": "12 31",
+            "label": "근력 저하 체위 변경 보조기기",
+            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
+            "score": 1.02,
+            "matchedIcf": [
+              {
+                "code": "b730",
+                "description": "근력"
+              }
+            ],
+            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
           },
           {
             "isoCode": "15 12",
@@ -7067,7 +7020,7 @@
             "isoCode": "15 03",
             "label": "음식 및 음료 준비 보조기기",
             "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 0.5085,
+            "score": 0.525,
             "matchedIcf": [
               {
                 "code": "d640",
@@ -7078,7 +7031,7 @@
                 "description": "가정 관리하기"
               }
             ],
-            "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다. [통합 점수: 50.8%, 소스: 1개]",
+            "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다. [통합 점수: 52.5%, 소스: 1개]",
             "category": "primary"
           },
           {
@@ -12108,23 +12061,10 @@
       "matchingDetails": {
         "ruleBased": [
           {
-            "isoCode": "12 31",
-            "label": "근력 저하 체위 변경 보조기기",
-            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
-            "score": 1.02,
-            "matchedIcf": [
-              {
-                "code": "b730",
-                "description": "근력"
-              }
-            ],
-            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
-          },
-          {
             "isoCode": "15 03",
             "label": "음식 및 음료 준비 보조기기",
             "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 1.017,
+            "score": 1.05,
             "matchedIcf": [
               {
                 "code": "d640",
@@ -12136,6 +12076,19 @@
               }
             ],
             "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
+          },
+          {
+            "isoCode": "12 31",
+            "label": "근력 저하 체위 변경 보조기기",
+            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
+            "score": 1.02,
+            "matchedIcf": [
+              {
+                "code": "b730",
+                "description": "근력"
+              }
+            ],
+            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
           },
           {
             "isoCode": "15 12",
@@ -12179,23 +12132,10 @@
         ],
         "keywordBased": [
           {
-            "isoCode": "12 31",
-            "label": "근력 저하 체위 변경 보조기기",
-            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
-            "score": 1.02,
-            "matchedIcf": [
-              {
-                "code": "b730",
-                "description": "근력"
-              }
-            ],
-            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
-          },
-          {
             "isoCode": "15 03",
             "label": "음식 및 음료 준비 보조기기",
             "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 1.017,
+            "score": 1.05,
             "matchedIcf": [
               {
                 "code": "d640",
@@ -12207,6 +12147,19 @@
               }
             ],
             "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다."
+          },
+          {
+            "isoCode": "12 31",
+            "label": "근력 저하 체위 변경 보조기기",
+            "description": "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
+            "score": 1.02,
+            "matchedIcf": [
+              {
+                "code": "b730",
+                "description": "근력"
+              }
+            ],
+            "reason": "b730(근력) 이(가) 관찰되어 근력 저하 체위 변경 보조기기 솔루션을 추천합니다."
           },
           {
             "isoCode": "15 12",
@@ -12282,7 +12235,7 @@
             "isoCode": "15 03",
             "label": "음식 및 음료 준비 보조기기",
             "description": "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-            "score": 0.5085,
+            "score": 0.525,
             "matchedIcf": [
               {
                 "code": "d640",
@@ -12293,7 +12246,7 @@
                 "description": "가정 관리하기"
               }
             ],
-            "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다. [통합 점수: 50.8%, 소스: 1개]",
+            "reason": "d640(가사 일하기) + d650(가정 관리하기) 이(가) 관찰되어 음식 및 음료 준비 보조기기 솔루션을 추천합니다. [통합 점수: 52.5%, 소스: 1개]",
             "category": "primary"
           },
           {

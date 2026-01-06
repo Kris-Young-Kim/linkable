@@ -43,6 +43,135 @@ const supabase = createClient(supabaseUrl, serviceRoleKey, {
   },
 });
 
+/**
+ * 누락된 데이터베이스 함수들을 생성하는 함수
+ */
+async function ensureDatabaseFunctions() {
+  console.log("🔧 누락된 데이터베이스 함수들을 확인하고 생성합니다...");
+
+  try {
+    // get_realtime_weight_adjustment 함수 확인 및 생성
+    const { data: weightFuncExists, error: weightFuncError } = await supabase.rpc('get_realtime_weight_adjustment', {
+      p_icf_codes: ['test'],
+      p_iso_code: 'test'
+    });
+
+    if (weightFuncError && weightFuncError.message.includes('Could not find the function')) {
+      console.log("  - get_realtime_weight_adjustment 함수 생성 중...");
+      const { error: createWeightFuncError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE OR REPLACE FUNCTION get_realtime_weight_adjustment(
+              p_icf_codes TEXT[],
+              p_iso_code VARCHAR(50)
+          )
+          RETURNS DECIMAL(5, 4) AS $$
+          DECLARE
+              v_icf_key TEXT;
+              v_adjustment DECIMAL(5, 4);
+          BEGIN
+              v_icf_key := array_to_string(ARRAY(SELECT unnest(p_icf_codes) ORDER BY 1), ',');
+              SELECT weight_adjustment INTO v_adjustment
+              FROM realtime_learning_stats
+              WHERE icf_codes_key = v_icf_key AND iso_code = p_iso_code;
+              RETURN COALESCE(v_adjustment, 1.0);
+          END;
+          $$ LANGUAGE plpgsql;
+        `
+      });
+
+      if (createWeightFuncError) {
+        console.log("  ⚠️ get_realtime_weight_adjustment 함수 생성 실패:", createWeightFuncError.message);
+      } else {
+        console.log("  ✅ get_realtime_weight_adjustment 함수 생성 완료");
+      }
+    }
+
+    // save_iso_matching_measurement 함수 확인 및 생성
+    const { data: saveFuncExists, error: saveFuncError } = await supabase.rpc('save_iso_matching_measurement', {
+      p_overall_precision: 0.5,
+      p_overall_recall: 0.5,
+      p_overall_f1: 0.5,
+      p_total_tests: 1,
+      p_passed_tests: 1,
+      p_failed_tests: 0
+    });
+
+    if (saveFuncError && saveFuncError.message.includes('Could not find the function')) {
+      console.log("  - save_iso_matching_measurement 함수 생성 중...");
+      const { error: createSaveFuncError } = await supabase.rpc('exec_sql', {
+        sql: `
+          CREATE OR REPLACE FUNCTION save_iso_matching_measurement(
+              p_overall_precision DECIMAL,
+              p_overall_recall DECIMAL,
+              p_overall_f1 DECIMAL,
+              p_top1_accuracy DECIMAL DEFAULT NULL,
+              p_top3_accuracy DECIMAL DEFAULT NULL,
+              p_top5_accuracy DECIMAL DEFAULT NULL,
+              p_total_tests INTEGER,
+              p_passed_tests INTEGER,
+              p_failed_tests INTEGER,
+              p_category_breakdown JSONB DEFAULT '{}'::jsonb,
+              p_matching_method_comparison JSONB DEFAULT '{}'::jsonb,
+              p_measured_by TEXT DEFAULT 'system',
+              p_notes TEXT DEFAULT NULL
+          )
+          RETURNS UUID AS $$
+          DECLARE
+              v_measurement_id UUID;
+          BEGIN
+              INSERT INTO ai_quality_measurements (
+                  measurement_type,
+                  overall_precision,
+                  overall_recall,
+                  overall_f1,
+                  top1_accuracy,
+                  top3_accuracy,
+                  top5_accuracy,
+                  total_tests,
+                  passed_tests,
+                  failed_tests,
+                  category_breakdown,
+                  matching_method_comparison,
+                  measured_by,
+                  notes
+              ) VALUES (
+                  'iso_matching',
+                  p_overall_precision,
+                  p_overall_recall,
+                  p_overall_f1,
+                  p_top1_accuracy,
+                  p_top3_accuracy,
+                  p_top5_accuracy,
+                  p_total_tests,
+                  p_passed_tests,
+                  p_failed_tests,
+                  p_category_breakdown,
+                  p_matching_method_comparison,
+                  p_measured_by,
+                  p_notes
+              )
+              RETURNING id INTO v_measurement_id;
+
+              RETURN v_measurement_id;
+          END;
+          $$ LANGUAGE plpgsql;
+        `
+      });
+
+      if (createSaveFuncError) {
+        console.log("  ⚠️ save_iso_matching_measurement 함수 생성 실패:", createSaveFuncError.message);
+      } else {
+        console.log("  ✅ save_iso_matching_measurement 함수 생성 완료");
+      }
+    }
+
+    console.log("🔧 데이터베이스 함수 확인 완료");
+  } catch (error) {
+    console.log("⚠️ 데이터베이스 함수 확인 중 오류 발생:", error);
+    // 함수 생성에 실패해도 계속 진행
+  }
+}
+
 interface TestCase {
   id: string;
   category: string;
@@ -478,10 +607,54 @@ function printReport(result: MeasurementResult) {
 }
 
 /**
+ * 단일 테스트 케이스 실행 (디버깅용)
+ */
+async function testSingleCase() {
+  console.log("🔍 TC024 단일 테스트 실행");
+
+  const testCase: TestCase = {
+    id: "TC024",
+    category: "가정생활",
+    userInput: "요리하기가 어려워요",
+    expectedIcf: {
+      b: ["b730"],
+      d: ["d630", "d640"],
+      e: []
+    },
+    expectedIso: ["15 03"],
+    description: "요리 어려움"
+  };
+
+  await ensureDatabaseFunctions();
+  const result = await runTestCase(testCase);
+
+  console.log(`\n결과: ${result.passed ? "✅ 통과" : "❌ 실패"}`);
+  console.log(`F1 점수: ${result.isoAccuracy.f1.toFixed(3)}`);
+  console.log(`예상 ISO: ${result.expectedIso.join(", ")}`);
+  console.log(`실제 ISO: ${result.actualIso.join(", ")}`);
+
+  console.log("\n매칭 상세:");
+  console.log("규칙 기반:", result.matchingDetails.ruleBased.map(m => m.isoCode));
+  console.log("키워드 기반:", result.matchingDetails.keywordBased.map(m => m.isoCode));
+  console.log("그래프 기반:", result.matchingDetails.graphBased.map(m => m.isoCode));
+  console.log("하이브리드:", result.matchingDetails.hybrid.map(m => m.isoCode));
+}
+
+/**
  * 메인 실행 함수
  */
 async function main() {
   try {
+    // 단일 테스트 실행 옵션 확인
+    const args = process.argv.slice(2);
+    if (args.includes('--single')) {
+      await testSingleCase();
+      return;
+    }
+
+    // 데이터베이스 함수들 확인 및 생성
+    await ensureDatabaseFunctions();
+
     const result = await runMeasurement();
     printReport(result);
 

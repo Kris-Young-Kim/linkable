@@ -170,11 +170,18 @@ export const isoMappingTable: IsoMappingRule[] = [
 
   // 가정 활동
   {
-    icf: ["d640", "d650"],
+    icf: ["d630", "d640", "d650"],
     iso: "15 03",
     label: "음식 및 음료 준비 보조기기",
     description: "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-    baseScore: 0.65,
+    baseScore: 0.75,
+  },
+  {
+    icf: ["d630"],
+    iso: "15 03",
+    label: "요리 준비 보조기기",
+    description: "식사 준비 및 요리를 돕는 보조기기 (ISO 1503)",
+    baseScore: 0.8,
   },
   {
     icf: ["d640"],
@@ -191,6 +198,20 @@ export const isoMappingTable: IsoMappingRule[] = [
     label: "세면, 목욕 및 샤워 보조기기",
     description: "세면, 목욕, 샤워 활동을 돕는 보조기기 (ISO 0933)",
     baseScore: 0.68,
+  },
+  {
+    icf: ["d510"],
+    iso: "09 33",
+    label: "세면 보조기기",
+    description: "세면 활동을 돕는 보조기기 (ISO 0933)",
+    baseScore: 0.6,
+  },
+  {
+    icf: ["d520"],
+    iso: "09 33",
+    label: "목욕 및 샤워 보조기기",
+    description: "목욕 및 샤워 활동을 돕는 보조기기 (ISO 0933)",
+    baseScore: 0.65,
   },
   {
     icf: ["d530"],

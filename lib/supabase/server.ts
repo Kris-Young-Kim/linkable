@@ -3,26 +3,29 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { createSupabaseJWT } from "./jwt-helper";
 import { fetchWithRetry } from "../api-utils";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+/**
+ * 환경변수 지연 로딩
+ */
+function getSupabaseEnv() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !serviceRoleKey) {
   const missingVars = [];
   if (!supabaseUrl) missingVars.push("NEXT_PUBLIC_SUPABASE_URL");
   if (!serviceRoleKey) missingVars.push("SUPABASE_SERVICE_ROLE_KEY");
-  throw new Error(`Supabase server client env vars are missing: ${missingVars.join(", ")}`);
-}
+  if (!supabaseAnonKey) missingVars.push("NEXT_PUBLIC_SUPABASE_ANON_KEY");
 
-if (!supabaseAnonKey) {
-  throw new Error("NEXT_PUBLIC_SUPABASE_ANON_KEY is required for user client");
-}
+  if (missingVars.length > 0) {
+    throw new Error(`Supabase server client env vars are missing: ${missingVars.join(", ")}`);
+  }
 
-// 타입 안전성을 위해 명시적으로 string 타입으로 선언
-// 위의 체크를 통과했으므로 undefined가 아님을 보장
-const supabaseUrlString: string = supabaseUrl;
-const serviceRoleKeyString: string = serviceRoleKey;
-const supabaseAnonKeyString: string = supabaseAnonKey;
+  return {
+    supabaseUrl,
+    serviceRoleKey,
+    supabaseAnonKey,
+  };
+}
 
 let cachedClient: SupabaseClient | null = null;
 
@@ -32,7 +35,9 @@ let cachedClient: SupabaseClient | null = null;
  */
 export const getSupabaseServerClient = () => {
   if (!cachedClient) {
-    cachedClient = createClient(supabaseUrlString, serviceRoleKeyString, {
+    const { supabaseUrl, serviceRoleKey } = getSupabaseEnv();
+
+    cachedClient = createClient(supabaseUrl, serviceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -103,7 +108,9 @@ export async function getSupabaseUserClient(): Promise<SupabaseClient> {
   const supabaseJWT = createSupabaseJWT(userId, jwtOptions);
 
   // JWT를 사용하여 Supabase 클라이언트 생성
-  const client = createClient(supabaseUrlString, supabaseAnonKeyString, {
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseEnv();
+
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
     global: {
       headers: {
         Authorization: `Bearer ${supabaseJWT}`,

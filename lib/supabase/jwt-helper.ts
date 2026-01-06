@@ -7,15 +7,23 @@
 
 import jwt from "jsonwebtoken"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseJwtSecret = process.env.SUPABASE_JWT_SECRET
-
-if (!supabaseUrl) {
-  throw new Error("NEXT_PUBLIC_SUPABASE_URL is required")
+/**
+ * 환경변수 가져오기 (지연 로딩)
+ */
+function getSupabaseUrl(): string {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  if (!url) {
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is required")
+  }
+  return url
 }
 
-if (!supabaseJwtSecret) {
-  throw new Error("SUPABASE_JWT_SECRET is required. Get it from Supabase Dashboard > Settings > API > JWT Settings")
+function getSupabaseJwtSecret(): string {
+  const secret = process.env.SUPABASE_JWT_SECRET
+  if (!secret) {
+    throw new Error("SUPABASE_JWT_SECRET is required. Get it from Supabase Dashboard > Settings > API > JWT Settings")
+  }
+  return secret
 }
 
 interface SupabaseJWTPayload {
@@ -71,11 +79,14 @@ export function createSupabaseJWT(
   const jwtRole = "authenticated"
   const userRole = options?.userRole || options?.role || "user" // 실제 사용자 역할
 
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseJwtSecret = getSupabaseJwtSecret()
+
   const payload: SupabaseJWTPayload = {
     aud: "authenticated",
     exp: now + expiresIn,
     iat: now,
-    iss: supabaseUrl as string,
+    iss: supabaseUrl,
     sub: clerkUserId, // Supabase user ID 대신 clerk_id 사용
     email: options?.email,
     role: jwtRole, // 항상 "authenticated"로 설정 (PostgreSQL role)
@@ -90,7 +101,7 @@ export function createSupabaseJWT(
     },
   }
 
-  return jwt.sign(payload, supabaseJwtSecret as string, {
+  return jwt.sign(payload, supabaseJwtSecret, {
     algorithm: "HS256",
   })
 }
@@ -103,7 +114,8 @@ export function createSupabaseJWT(
  */
 export function verifySupabaseJWT(token: string): SupabaseJWTPayload | null {
   try {
-    const decoded = jwt.verify(token, supabaseJwtSecret as string, {
+    const supabaseJwtSecret = getSupabaseJwtSecret()
+    const decoded = jwt.verify(token, supabaseJwtSecret, {
       algorithms: ["HS256"],
     }) as SupabaseJWTPayload
 

@@ -406,6 +406,9 @@ type PrimaryIntent =
   | "hearing"
   | "communication"
   | "self_care_feeding"
+  | "self_care_bathing"
+  | "self_care_dressing"
+  | "self_care_toileting"
   | "unknown";
 
 function normalizeIsoCode(isoCode: string) {
@@ -485,7 +488,25 @@ function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
     return "mobility_walking_aid";
   }
 
-  // 6. 식사/자가관리
+  // 6. 자가관리 - 목욕/샤워
+  const bathingKeywords = ["목욕", "샤워", "씻기", "bathing", "shower", "washing"];
+  if (hasIcf("d510") || hasIcf("d520") || includesAny(bathingKeywords)) {
+    return "self_care_bathing";
+  }
+
+  // 7. 자가관리 - 옷 입기
+  const dressingKeywords = ["옷 입기", "옷입기", "착의", "dressing", "의복"];
+  if (hasIcf("d540") || includesAny(dressingKeywords)) {
+    return "self_care_dressing";
+  }
+
+  // 8. 자가관리 - 배변
+  const toiletingKeywords = ["배변", "화장실", "toileting", "toilet"];
+  if (hasIcf("d530") || includesAny(toiletingKeywords)) {
+    return "self_care_toileting";
+  }
+
+  // 9. 식사/자가관리
   if (hasIcf("d55") || hasIcf("d550") || includesAny(["식사", "먹기", "feeding", "음식"])) {
     return "self_care_feeding";
   }
@@ -504,17 +525,23 @@ function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatc
     vision: ["2203", "2206", "1208", "1806"], // 시각 보조기기, 안내 지팡이, 조명
     hearing: ["2106", "2127"], // 청각 보조기기, 평형 보조기기
     communication: ["2230", "2109"], // 의사소통 보조기기, 음성 보조기기
-    self_care_feeding: ["1509", "0933", "0918"], // 식사 보조기기, 자가관리 보조기기
+    self_care_feeding: ["1509"], // 식사 보조기기
+    self_care_bathing: ["0933"], // 목욕/샤워 보조기기
+    self_care_dressing: ["0918"], // 옷 입기 보조기기
+    self_care_toileting: ["0912"], // 배변 보조기기
     unknown: [],
   };
 
   const penalty: Record<PrimaryIntent, string[]> = {
-    mobility_wheelchair: ["090", "150", "2203", "2206", "2106", "2230"], // 시각, 청각, 의사소통 제거
-    mobility_walking_aid: ["090", "150", "2203", "2206", "2106", "2230"], // 시각, 청각, 의사소통 제거
+    mobility_wheelchair: ["150", "2203", "2206", "2106", "2230"], // 시각, 청각, 의사소통 제거 (09 제외)
+    mobility_walking_aid: ["150", "2203", "2206", "2106", "2230"], // 시각, 청각, 의사소통 제거 (09 제외)
     vision: ["1206", "1222", "1223", "1203", "2106", "2230", "2109"], // 이동 보조, 청각, 의사소통 제거
     hearing: ["1206", "1222", "1223", "2203", "2206", "2230"], // 이동 보조, 시각, 의사소통 제거
     communication: ["1206", "1222", "1223", "2203", "2206", "2106"], // 이동 보조, 시각, 청각 제거
     self_care_feeding: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_bathing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_dressing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_toileting: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
     unknown: [],
   };
 
@@ -566,6 +593,9 @@ function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent, context?: Ma
     hearing: ["1206", "1222", "1223", "2203", "2206", "2230", "2109"], // 이동 보조, 시각, 의사소통 제거
     communication: ["1206", "1222", "1223", "2203", "2206", "2106"], // 이동 보조, 시각, 청각 제거
     self_care_feeding: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_bathing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_dressing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_toileting: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
     unknown: [],
   };
 
