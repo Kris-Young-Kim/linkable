@@ -11,17 +11,14 @@ export function ensureUTF8Output(): void {
     if (process.stdout.setEncoding) {
       process.stdout.setEncoding('utf8');
     }
-    // process.stdout에 직접 UTF-8 설정 (Node.js 12+)
-    if (typeof process.stdout._handle !== 'undefined' && process.stdout._handle.setEncoding) {
-      process.stdout._handle.setEncoding('utf8');
-    }
     // stderr도 동일하게 설정
     if (process.stderr.setEncoding) {
       process.stderr.setEncoding('utf8');
     }
-    if (typeof process.stderr._handle !== 'undefined' && process.stderr._handle.setEncoding) {
-      process.stderr._handle.setEncoding('utf8');
-    }
+
+    // 환경 변수 설정 (자식 프로세스에 UTF-8 상속)
+    process.env.LANG = 'C.UTF-8';
+    process.env.LC_ALL = 'C.UTF-8';
   }
 }
 
