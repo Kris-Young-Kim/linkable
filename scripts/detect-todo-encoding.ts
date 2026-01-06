@@ -1,6 +1,10 @@
 
 import fs from 'fs';
 import iconv from 'iconv-lite';
+import { ensureUTF8Output } from '../lib/utils';
+
+// Windows에서 UTF-8 출력 강제
+ensureUTF8Output();
 
 const file = 'docs/TODO.md';
 const buffer = fs.readFileSync(file);

@@ -68,7 +68,7 @@ import { type IcfAnalysisBuckets } from "@/components/features/analysis/icf-visu
 import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { ConsultationFlowGuide } from "@/components/consultation-flow-guide";
 import { ErrorFaqModal } from "@/components/error-faq-modal";
-import { Sparkles, Send, Mic, Paperclip, ArrowLeft } from "lucide-react";
+import { Sparkles, Send, Mic, Paperclip, ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -127,6 +127,9 @@ export function ChatInterface() {
     null
   );
   const [errorState, setErrorState] = useState<string | null>(null);
+  const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
+  const [isSubmittingEvaluation, setIsSubmittingEvaluation] = useState<string | null>(null); // messageId로 로딩 상태 추적
+  const [isNavigatingToRecommendations, setIsNavigatingToRecommendations] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -315,6 +318,9 @@ export function ChatInterface() {
   }, []);
 
   const handleSend = async () => {
+    // 이미 제출 중이면 중복 요청 방지
+    if (isSubmittingMessage) return;
+
     // #region agent log (개발 환경에서만 실행, 에러 무시)
     if (process.env.NODE_ENV === "development") {
       fetch(
@@ -403,6 +409,7 @@ export function ChatInterface() {
     });
 
     try {
+      setIsSubmittingMessage(true);
       // 이미지가 있으면 base64로 변환
       let imagePayload: { base64: string; mimeType: string } | undefined =
         undefined;
@@ -697,6 +704,7 @@ export function ChatInterface() {
       );
     } finally {
       setIsTyping(false);
+      setIsSubmittingMessage(false);
     }
   };
 
@@ -707,6 +715,9 @@ export function ChatInterface() {
       evaluationType: "importance" | "difficulty",
       messageId: string
     ) => {
+      // 이미 제출 중이면 중복 요청 방지
+      if (isSubmittingEvaluation === messageId) return;
+
       const scoreText = `${score}점`;
 
       // 점수를 직접 메시지로 전송
@@ -737,6 +748,7 @@ export function ChatInterface() {
       setShowRecommendationCTA(false);
 
       try {
+        setIsSubmittingEvaluation(messageId);
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -884,6 +896,7 @@ export function ChatInterface() {
         );
       } finally {
         setIsTyping(false);
+        setIsSubmittingEvaluation(null);
         setTimeout(() => scrollToBottom(true), 100);
       }
     },
@@ -1214,7 +1227,10 @@ export function ChatInterface() {
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                className="min-w-[48px]"
+                                className={cn(
+                                  "min-w-[48px] transition-opacity",
+                                  isSubmittingEvaluation === message.id && "opacity-50 cursor-not-allowed"
+                                )}
                                 onClick={() =>
                                   handleEvaluationScoreClick(
                                     score,
@@ -1222,7 +1238,7 @@ export function ChatInterface() {
                                     message.id
                                   )
                                 }
-                                disabled={isTyping}
+                                disabled={isTyping || isSubmittingEvaluation === message.id}
                               >
                                 {score}
                               </Button>
@@ -1258,6 +1274,59 @@ export function ChatInterface() {
                       {question}
                     </Button>
                   ))}
+                </div>
+              )}
+
+              {/* 채팅 완료 후 추천 보조기기 확인 버튼 */}
+              {showRecommendationCTA && !isTyping && consultationId && icfAnalysis && (
+                <div className="flex justify-center pt-4">
+                  <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 shadow-lg">
+                    <div className="text-center space-y-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <Sparkles className="size-6 text-primary" aria-hidden="true" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">
+                            상담이 완료되었습니다
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            맞춤형 보조기기 추천을 확인해보세요
+                          </p>
+                        </div>
+                      </div>
+                      <CTAButton
+                        variant="recommendations"
+                        href={`/recommendations/${consultationId}`}
+                        className="w-full max-w-xs mx-auto shadow-lg shadow-primary/30 animate-pulse hover:animate-none transition-all duration-300 hover:scale-105"
+                        disabled={isNavigatingToRecommendations}
+                        onClick={() => {
+                          // 이미 이동 중이면 중복 클릭 방지
+                          if (isNavigatingToRecommendations) return;
+
+                          setIsNavigatingToRecommendations(true);
+                          console.log("[chat] Navigating to recommendations page");
+                          trackEvent("recommendations_viewed_from_chat", {
+                            consultation_id: consultationId,
+                            has_recommendations: true,
+                          });
+                        }}
+                      >
+                        {isNavigatingToRecommendations ? (
+                          <>
+                            <InlineSpinner size="sm" className="mr-2" />
+                            이동 중...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
+                            추천 보조기기 확인하기
+                            <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+                          </>
+                        )}
+                      </CTAButton>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1381,10 +1450,14 @@ export function ChatInterface() {
                       size="lg"
                       className="size-11"
                       onClick={handleSend}
-                      disabled={!input.trim() || isTyping || requiresLogin}
-                      aria-label={t("chat.sendMessage")}
+                      disabled={!input.trim() || isTyping || requiresLogin || isSubmittingMessage}
+                      aria-label={isSubmittingMessage ? t("chat.sendingMessage") || "메시지 전송 중" : t("chat.sendMessage")}
                     >
-                      <Send className="size-5" aria-hidden="true" />
+                      {isSubmittingMessage ? (
+                        <InlineSpinner size="sm" />
+                      ) : (
+                        <Send className="size-5" aria-hidden="true" />
+                      )}
                     </Button>
                   </div>
                 </div>

@@ -1,6 +1,30 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * Windows PowerShell에서 한글 깨짐 방지를 위한 UTF-8 인코딩 설정
+ * Node.js 스크립트 시작 부분에서 호출 권장
+ */
+export function ensureUTF8Output(): void {
+  if (process.platform === 'win32') {
+    // 콘솔 인코딩을 UTF-8로 설정
+    if (process.stdout.setEncoding) {
+      process.stdout.setEncoding('utf8');
+    }
+    // process.stdout에 직접 UTF-8 설정 (Node.js 12+)
+    if (typeof process.stdout._handle !== 'undefined' && process.stdout._handle.setEncoding) {
+      process.stdout._handle.setEncoding('utf8');
+    }
+    // stderr도 동일하게 설정
+    if (process.stderr.setEncoding) {
+      process.stderr.setEncoding('utf8');
+    }
+    if (typeof process.stderr._handle !== 'undefined' && process.stderr._handle.setEncoding) {
+      process.stderr._handle.setEncoding('utf8');
+    }
+  }
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

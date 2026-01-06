@@ -1,13 +1,18 @@
 #!/usr/bin/env tsx
 /**
  * 데이터베이스 JSON 백업 스크립트
- * 
+ *
  * 사용법:
  *   tsx scripts/backup-database-json.ts
- * 
+ *
  * 이 스크립트는 Supabase API를 사용하여 모든 테이블 데이터를 JSON 파일로 백업합니다.
  * CLI 없이 동작합니다.
  */
+
+import { ensureUTF8Output } from '../lib/utils';
+
+// Windows에서 UTF-8 출력 강제
+ensureUTF8Output();
 
 import { createClient } from "@supabase/supabase-js";
 import { writeFileSync, mkdirSync } from "fs";

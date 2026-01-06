@@ -1,10 +1,15 @@
 #!/usr/bin/env tsx
 /**
  * Supabase Edge Function 테스트 스크립트
- * 
+ *
  * 사용법:
  *   pnpm run test:edge-function
  */
+
+import { ensureUTF8Output } from '../lib/utils';
+
+// Windows에서 UTF-8 출력 강제
+ensureUTF8Output();
 
 import { config } from 'dotenv';
 import { resolve } from 'path';
