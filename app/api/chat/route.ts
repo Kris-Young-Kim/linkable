@@ -630,7 +630,7 @@ export async function POST(request: Request) {
                 consultationId,
                 userMessage: trimmedMessage,
                 isoMatchesCount: isoMatches.length,
-                hasIcfCodes: parsedAnalysis?.normalizedCodes?.length > 0,
+                hasIcfCodes: (parsedAnalysis?.normalizedCodes?.length ?? 0) > 0,
               },
             });
           } else if (parsedAnalysis && !isGreeting) {
