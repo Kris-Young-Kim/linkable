@@ -554,16 +554,17 @@ export function ChatInterface() {
             }
             break;
           }
-          case "analysis": {
-            try {
-              const payload = JSON.parse(data) as {
-                consultationId?: string;
-                followUpQuestions?: string[];
-                icfAnalysis?: IcfAnalysisBuckets | null;
-                problemDescription?: string;
-                isGreeting?: boolean;
-                isoMatches?: unknown[];
-              };
+            case "analysis": {
+              try {
+                const payload = JSON.parse(data) as {
+                  consultationId?: string;
+                  followUpQuestions?: string[];
+                  icfAnalysis?: IcfAnalysisBuckets | null;
+                  problemDescription?: string;
+                  isGreeting?: boolean;
+                  isoMatches?: unknown[];
+                  isRecommendationRequest?: boolean;
+                };
               // #region agent log (개발 환경에서만 실행, 에러 무시)
               if (process.env.NODE_ENV === "development") {
                 fetch(
@@ -817,6 +818,8 @@ export function ChatInterface() {
                   icfAnalysis?: IcfAnalysisBuckets | null;
                   problemDescription?: string;
                   isGreeting?: boolean;
+                  isoMatches?: unknown[];
+                  isRecommendationRequest?: boolean;
                 };
                 if (!consultationId && payload.consultationId) {
                   setConsultationId(payload.consultationId);
@@ -831,6 +834,14 @@ export function ChatInterface() {
                 }
                 if (payload.icfAnalysis) {
                   setIcfAnalysis(payload.icfAnalysis);
+                }
+                // 추천 요청이 감지되면 채팅 종료 및 추천 CTA 표시
+                if (payload.isRecommendationRequest) {
+                  console.log("[chat] Recommendation request detected, ending chat and showing CTA");
+                  setChatEnded(true);
+                  if (payload.icfAnalysis || payload.isoMatches?.length > 0) {
+                    setShowRecommendationCTA(true);
+                  }
                 }
                 if (payload.icfAnalysis && payload.consultationId) {
                   trackEvent("consultation_completed", {
