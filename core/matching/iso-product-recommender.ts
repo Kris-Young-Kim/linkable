@@ -96,13 +96,18 @@ function parseIsoCodeHierarchy(isoCode: string): {
 /**
  * 두 ISO 코드가 관련되어 있는지 확인 (Subclass 레벨까지 일치 필요)
  * @param targetIsoCode 목표 ISO 코드
- * @param candidateIsoCode 후보 ISO 코드
+ * @param candidateIsoCode 후보 ISO 코드 (null 가능)
  * @returns 관련 여부
  */
 function areIsoCodesRelated(
   targetIsoCode: string,
-  candidateIsoCode: string
+  candidateIsoCode: string | null
 ): boolean {
+  // null 체크: ISO 코드가 없으면 관련 없음
+  if (!candidateIsoCode || !targetIsoCode) {
+    return false;
+  }
+
   const target = parseIsoCodeHierarchy(targetIsoCode);
   const candidate = parseIsoCodeHierarchy(candidateIsoCode);
 
@@ -461,8 +466,9 @@ async function calculateAdvancedProductScores(
       
       // 관련 매칭: Subclass 레벨 필터링을 통과한 제품만 관련 제품으로 간주
       // areIsoCodesRelated 함수를 사용하여 관련 여부 확인
+      // null 체크: product.iso_code가 null이면 관련 매칭 없음
       let isRelatedMatch = false;
-      if (!isExactMatch) {
+      if (!isExactMatch && product.iso_code) {
         isRelatedMatch = areIsoCodesRelated(targetIsoCode, product.iso_code);
       }
 
@@ -577,7 +583,9 @@ async function calculateAdvancedProductScores(
 }
 
 /**
- * 가중 평균으로 최종 점수 계산
+ * 신뢰도 기반 동적 가중치로 최종 점수 계산
+ * 
+ * 각 점수 요소의 신뢰도를 계산하고, 신뢰도가 높은 요소의 가중치를 동적으로 증가시킴
  */
 function calculateWeightedScore(
   breakdown: ProductRecommendation["scoreBreakdown"],
@@ -591,7 +599,7 @@ function calculateWeightedScore(
   if (!breakdown) return 0;
 
   // 기본 가중치 (제품-ICF 직접 매칭 가중치 상향)
-  let weights = {
+  let baseWeights = {
     isoMatch: 0.35,
     semanticMatch: 0.2, // 시맨틱 매칭 가중치 하향 (0.25 → 0.2)
     contextMatch: 0.15,
@@ -599,39 +607,60 @@ function calculateWeightedScore(
     directIcfMatch: 0.15, // 직접 ICF 매칭 가중치 상향 (0.1 → 0.15)
   };
 
-  // 상황별 가중치 조정
+  // 각 점수 요소의 신뢰도 계산
+  const confidences = {
+    isoMatch: calculateIsoMatchConfidence(breakdown.isoMatch, flags.isExactMatch),
+    semanticMatch: calculateSemanticMatchConfidence(breakdown.semanticMatch, flags.hasSemanticMatch),
+    contextMatch: calculateContextMatchConfidence(breakdown.contextMatch),
+    qualityScore: calculateQualityScoreConfidence(breakdown.qualityScore, flags.hasQualityMetrics),
+    directIcfMatch: calculateDirectIcfMatchConfidence(breakdown.directIcfMatch, flags.hasDirectIcfMatch),
+  };
+
+  // 상황별 기본 가중치 조정
   if (flags.isExactMatch) {
     // 정확한 ISO 매칭이 있으면 ISO 매칭 가중치 대폭 증가, 시맨틱 매칭 영향력 감소
-    weights.isoMatch = 0.7; // ISO 매칭 가중치 대폭 증가
-    weights.semanticMatch = 0.1; // 시맨틱 매칭 영향력 감소
-    weights.contextMatch = 0.1;
-    weights.qualityScore = 0.05;
-    weights.directIcfMatch = 0.05;
+    baseWeights.isoMatch = 0.7; // ISO 매칭 가중치 대폭 증가
+    baseWeights.semanticMatch = 0.1; // 시맨틱 매칭 영향력 감소
+    baseWeights.contextMatch = 0.1;
+    baseWeights.qualityScore = 0.05;
+    baseWeights.directIcfMatch = 0.05;
   } else {
     // 정확한 매칭이 없을 때만 시맨틱 매칭 활용
     if (flags.hasSemanticMatch) {
-      weights.semanticMatch = 0.35;
-      weights.isoMatch = 0.3;
+      baseWeights.semanticMatch = 0.35;
+      baseWeights.isoMatch = 0.3;
     }
   }
 
   if (flags.hasDirectIcfMatch) {
-    // 직접 ICF 매칭이 있으면 가중치 대폭 증가 (0.4 → 0.5)
-    weights.directIcfMatch = 0.5; // 제품-ICF 직접 매칭 가중치 상향
-    weights.isoMatch = 0.25; // ISO 매칭 가중치 하향
-    weights.semanticMatch = 0.15; // 시맨틱 매칭 가중치 하향
+    // 직접 ICF 매칭이 있으면 가중치 대폭 증가
+    baseWeights.directIcfMatch = 0.5; // 제품-ICF 직접 매칭 가중치 상향
+    baseWeights.isoMatch = 0.25; // ISO 매칭 가중치 하향
+    baseWeights.semanticMatch = 0.15; // 시맨틱 매칭 가중치 하향
   }
 
   if (flags.hasQualityMetrics) {
     // 품질 지표가 있으면 가중치 증가
-    weights.qualityScore = 0.2;
+    baseWeights.qualityScore = 0.2;
   }
+
+  // 신뢰도 기반 동적 가중치 조정
+  // 신뢰도가 높으면 가중치 증가 (0.5 ~ 1.5 범위)
+  const weights = {
+    isoMatch: baseWeights.isoMatch * (0.7 + confidences.isoMatch * 0.6),
+    semanticMatch: baseWeights.semanticMatch * (0.7 + confidences.semanticMatch * 0.6),
+    contextMatch: baseWeights.contextMatch * (0.7 + confidences.contextMatch * 0.6),
+    qualityScore: baseWeights.qualityScore * (0.7 + confidences.qualityScore * 0.6),
+    directIcfMatch: baseWeights.directIcfMatch * (0.7 + confidences.directIcfMatch * 0.6),
+  };
 
   // 가중치 정규화
   const totalWeight = Object.values(weights).reduce((sum, w) => sum + w, 0);
-  Object.keys(weights).forEach((key) => {
-    (weights as any)[key] = (weights as any)[key] / totalWeight;
-  });
+  if (totalWeight > 0) {
+    Object.keys(weights).forEach((key) => {
+      (weights as any)[key] = (weights as any)[key] / totalWeight;
+    });
+  }
 
   // 가중 평균 계산
   const score =
@@ -642,6 +671,58 @@ function calculateWeightedScore(
     breakdown.directIcfMatch * weights.directIcfMatch;
 
   return score;
+}
+
+/**
+ * ISO 매칭 점수의 신뢰도 계산
+ */
+function calculateIsoMatchConfidence(score: number, isExactMatch: boolean): number {
+  if (isExactMatch) {
+    return 1.0; // 정확한 매칭은 최고 신뢰도
+  }
+  // 점수가 높을수록 신뢰도 높음
+  return Math.min(score * 1.2, 1.0);
+}
+
+/**
+ * 시맨틱 매칭 점수의 신뢰도 계산
+ */
+function calculateSemanticMatchConfidence(score: number, hasMatch: boolean): number {
+  if (!hasMatch || score === 0) {
+    return 0.3; // 매칭이 없으면 낮은 신뢰도
+  }
+  // 시맨틱 매칭은 점수가 0.5 이상일 때 신뢰도 높음
+  return score >= 0.5 ? 0.8 : score * 1.2;
+}
+
+/**
+ * 컨텍스트 매칭 점수의 신뢰도 계산
+ */
+function calculateContextMatchConfidence(score: number): number {
+  // 컨텍스트 매칭은 보조적이므로 신뢰도가 상대적으로 낮음
+  return Math.min(score * 1.0, 0.7);
+}
+
+/**
+ * 품질 점수의 신뢰도 계산
+ */
+function calculateQualityScoreConfidence(score: number, hasMetrics: boolean): number {
+  if (!hasMetrics) {
+    return 0.2; // 품질 지표가 없으면 낮은 신뢰도
+  }
+  // 품질 점수가 높을수록 신뢰도 높음
+  return Math.min(score * 1.3, 1.0);
+}
+
+/**
+ * 직접 ICF 매칭 점수의 신뢰도 계산
+ */
+function calculateDirectIcfMatchConfidence(score: number, hasMatch: boolean): number {
+  if (!hasMatch || score === 0) {
+    return 0.3; // 매칭이 없으면 낮은 신뢰도
+  }
+  // 직접 ICF 매칭은 점수가 높을수록 신뢰도 높음
+  return Math.min(score * 1.4, 1.0);
 }
 
 /**

@@ -221,15 +221,24 @@ export async function hybridMatch(
       }
     }
 
-    // 5단계: 결과 통합 및 재랭킹
+    // 5단계: 결과 통합 및 재랭킹 (신뢰도 기반 동적 가중치 적용)
     const combined = combineMatches(
       [
         {
           matches: keywordMatches,
           weight: finalConfig.weights.ruleBased + finalConfig.weights.keyword,
+          source: "rule+keyword",
         },
-        { matches: semanticMatches, weight: finalConfig.weights.semantic },
-        { matches: graphMatches, weight: finalConfig.weights.knowledgeGraph },
+        { 
+          matches: semanticMatches, 
+          weight: finalConfig.weights.semantic,
+          source: "semantic",
+        },
+        { 
+          matches: graphMatches, 
+          weight: finalConfig.weights.knowledgeGraph,
+          source: "knowledge_graph",
+        },
       ],
       finalConfig.minScore
     );
@@ -346,22 +355,96 @@ export async function hybridMatch(
 }
 
 /**
- * 여러 매칭 결과를 가중치 기반으로 통합
+ * 여러 매칭 결과를 신뢰도 기반 동적 가중치로 통합
+ * 
+ * 신뢰도 기반 가중치 조정:
+ * - 각 매칭 레이어의 신뢰도(점수 분포, 일치도)를 계산
+ * - 높은 신뢰도를 가진 레이어의 가중치를 동적으로 증가
+ * - 낮은 신뢰도를 가진 레이어의 가중치를 동적으로 감소
  */
 function combineMatches(
-  matchLayers: Array<{ matches: IsoMatch[]; weight: number }>,
+  matchLayers: Array<{ matches: IsoMatch[]; weight: number; source?: string }>,
   minScore: number
 ): IsoMatch[] {
   const scoreMap = new Map<string, number>();
   const matchMap = new Map<string, IsoMatch>();
   const sourceMap = new Map<string, string[]>(); // 어떤 소스에서 매칭되었는지 추적
+  const confidenceMap = new Map<string, number>(); // 각 ISO 코드별 신뢰도
 
-  // 각 레이어의 매칭 결과를 가중 평균
-  for (const layer of matchLayers) {
-    for (const match of layer.matches) {
+  // 1단계: 각 레이어의 신뢰도 계산
+  const layerConfidences = matchLayers.map((layer) => {
+    if (layer.matches.length === 0) {
+      return { confidence: 0, layer };
+    }
+
+    // 신뢰도 계산 지표:
+    // - 평균 점수: 높을수록 신뢰도 높음
+    // - 점수 분산: 낮을수록 일관성 높음 (신뢰도 높음)
+    // - 상위 매칭 비율: 상위 점수 매칭이 많을수록 신뢰도 높음
+    const scores = layer.matches.map((m) => m.score);
+    const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+    
+    // 분산 계산
+    const variance = scores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / scores.length;
+    const stdDev = Math.sqrt(variance);
+    
+    // 상위 매칭 비율 (0.7 이상 점수 비율)
+    const highScoreRatio = scores.filter((s) => s >= 0.7).length / scores.length;
+    
+    // 신뢰도 계산 (0-1 범위)
+    // 평균 점수 40%, 분산 역수 30%, 상위 매칭 비율 30%
+    const scoreConfidence = Math.min(avgScore, 1.0);
+    const consistencyConfidence = Math.max(0, 1.0 - stdDev); // 분산이 낮을수록 높음
+    const qualityConfidence = highScoreRatio;
+    
+    const confidence = 
+      scoreConfidence * 0.4 + 
+      consistencyConfidence * 0.3 + 
+      qualityConfidence * 0.3;
+
+    return { confidence, layer };
+  });
+
+  // 2단계: 신뢰도 기반 동적 가중치 계산
+  const totalBaseWeight = matchLayers.reduce((sum, layer) => sum + layer.weight, 0);
+  const totalConfidence = layerConfidences.reduce((sum, lc) => sum + lc.confidence, 0);
+  
+  // 신뢰도 기반 가중치 조정 계수 (0.5 ~ 1.5 범위)
+  const adjustedLayers = layerConfidences.map(({ confidence, layer }) => {
+    // 신뢰도가 높으면 가중치 증가, 낮으면 감소
+    // 신뢰도 0.5 기준으로 조정 (0.5 = 1.0x, 0.8 = 1.3x, 0.2 = 0.7x)
+    const confidenceMultiplier = 0.5 + confidence * 1.0; // 0.5 ~ 1.5 범위
+    
+    // 정규화: 전체 가중치 합이 일정하게 유지되도록
+    const adjustedWeight = layer.weight * confidenceMultiplier;
+    
+    return {
+      ...layer,
+      adjustedWeight,
+      confidence,
+      originalWeight: layer.weight,
+    };
+  });
+
+  // 가중치 정규화 (전체 합이 totalBaseWeight와 비슷하게 유지)
+  const totalAdjustedWeight = adjustedLayers.reduce((sum, l) => sum + l.adjustedWeight, 0);
+  const normalizationFactor = totalBaseWeight / totalAdjustedWeight;
+  
+  adjustedLayers.forEach((layer) => {
+    layer.adjustedWeight *= normalizationFactor;
+  });
+
+  // 3단계: 동적 가중치를 적용하여 매칭 결과 통합
+  for (const adjustedLayer of adjustedLayers) {
+    const { matches, adjustedWeight, confidence, source } = adjustedLayer;
+    
+    for (const match of matches) {
       const existingScore = scoreMap.get(match.isoCode) || 0;
-      const weightedScore = match.score * layer.weight;
-      scoreMap.set(match.isoCode, existingScore + weightedScore);
+      
+      // 신뢰도 기반 가중 점수 계산
+      // 신뢰도가 높을수록 가중치가 높아지고, 점수도 더 반영됨
+      const confidenceWeightedScore = match.score * adjustedWeight * (0.8 + confidence * 0.2);
+      scoreMap.set(match.isoCode, existingScore + confidenceWeightedScore);
 
       // 가장 높은 점수의 매치 정보 저장
       const existing = matchMap.get(match.isoCode);
@@ -371,23 +454,33 @@ function combineMatches(
 
       // 소스 추적
       const sources = sourceMap.get(match.isoCode) || [];
-      sources.push("layer");
+      sources.push(source || "unknown");
       sourceMap.set(match.isoCode, sources);
+
+      // 신뢰도 누적 (여러 소스에서 매칭되면 신뢰도 증가)
+      const currentConfidence = confidenceMap.get(match.isoCode) || 0;
+      confidenceMap.set(match.isoCode, Math.min(1.0, currentConfidence + confidence * 0.3));
     }
   }
 
-  // 통합된 점수로 매치 업데이트
+  // 4단계: 통합된 점수로 매치 업데이트 (신뢰도 반영)
   const combined = Array.from(matchMap.values())
     .map((match) => {
       const finalScore = scoreMap.get(match.isoCode)!;
       const sources = sourceMap.get(match.isoCode) || [];
+      const matchConfidence = confidenceMap.get(match.isoCode) || 0.5;
+
+      // 신뢰도 보너스: 여러 소스에서 일치하고 신뢰도가 높으면 점수 보너스
+      const confidenceBonus = matchConfidence > 0.7 && sources.length > 1 
+        ? 1.1 // 10% 보너스
+        : 1.0;
+
+      const adjustedScore = Math.min(finalScore * confidenceBonus, 1.0);
 
       return {
         ...match,
-        score: Math.min(finalScore, 1.0), // 최대 1.0으로 제한
-        reason: `${match.reason} [통합 점수: ${(finalScore * 100).toFixed(
-          1
-        )}%, 소스: ${sources.length}개]`,
+        score: adjustedScore,
+        reason: `${match.reason} [통합: ${(adjustedScore * 100).toFixed(1)}%, 신뢰도: ${(matchConfidence * 100).toFixed(0)}%, 소스: ${sources.length}개]`,
       };
     })
     .filter((match) => match.score >= minScore) // 최소 점수 필터
