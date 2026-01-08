@@ -104,6 +104,10 @@ export async function POST(request: NextRequest) {
     const recommendationResult = await recommendProductsByMultipleIsoCodes(
       isoMatches,
       {
+        icfCodes,
+        isoMatches,
+      },
+      {
         limit: defaultOptions.limit,
         maxProductsPerIso: defaultOptions.maxProductsPerIso,
         diversifyCategories: defaultOptions.diversifyCategories,

@@ -128,10 +128,17 @@ async function testSingleIsoRecommendation() {
 
     try {
       // 실제로는 데이터베이스에서 조회하지만, 여기서는 샘플 데이터 사용
-      const result = await recommendProductsByIsoCode(testCase.isoCode, {
-        limit: 5,
-        minScore: 0.1
-      });
+      const result = await recommendProductsByIsoCode(
+        testCase.isoCode,
+        {
+          icfCodes: [],
+          isoMatches: [],
+        },
+        {
+          limit: 5,
+          minScore: 0.1
+        }
+      );
 
       console.log(`   찾은 제품: ${result.products.length}개`);
       console.log(`   신뢰도: ${(result.confidence * 100).toFixed(1)}%`);
@@ -190,11 +197,18 @@ async function testMultipleIsoRecommendation() {
   console.log("   ISO 매칭: 15 03(요리), 12 31(체위 변경)");
 
   try {
-    const result = await recommendProductsByMultipleIsoCodes(isoMatches, {
-      limit: 8,
-      maxProductsPerIso: 4,
-      diversifyCategories: true
-    });
+    const result = await recommendProductsByMultipleIsoCodes(
+      isoMatches,
+      {
+        icfCodes: ["b730", "d630", "d640"],
+        isoMatches,
+      },
+      {
+        limit: 8,
+        maxProductsPerIso: 4,
+        diversifyCategories: true
+      }
+    );
 
     console.log(`\n📊 추천 결과:`);
     console.log(`   총 추천 제품: ${result.recommendations.length}개`);

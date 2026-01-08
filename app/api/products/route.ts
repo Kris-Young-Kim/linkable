@@ -7,6 +7,11 @@ import { getIsoMatches } from "@/core/matching/iso-mapping";
 import { appendKeywordIsoMatches } from "@/core/matching/keyword-inference";
 import { fastMatch, accurateMatch } from "@/core/matching/hybrid-matcher";
 import { rankProducts } from "@/core/matching/ranking";
+import {
+  recommendProductsByMultipleIsoCodes,
+  formatProductRecommendations,
+  type ProductRecommendation,
+} from "@/core/matching/iso-product-recommender";
 import { logEvent } from "@/lib/logging";
 import { getMultipleIsoCodeLinksFromEnv } from "@/lib/config/iso-links-env";
 
@@ -327,6 +332,10 @@ export async function GET(request: Request) {
     });
   }
 
+  // 고도화된 제품 추천 시스템 사용 여부
+  const useAdvancedProductRecommendation =
+    process.env.ENABLE_ADVANCED_PRODUCT_RECOMMENDATION !== "false"; // 기본값: true
+
   // 하이브리드 매칭 시스템 사용
   // 빠른 응답이 필요한 경우 fastMatch, 정확도가 중요한 경우 accurateMatch
   const useHybridMatching = process.env.ENABLE_HYBRID_MATCHING === "true";
@@ -364,6 +373,160 @@ export async function GET(request: Request) {
   }
 
   const isoCodes = isoMatches.map((match) => match.isoCode);
+
+  // 고도화된 제품 추천 시스템 사용
+  if (useAdvancedProductRecommendation && isoMatches.length > 0 && icfCodes.length > 0) {
+    try {
+      console.log("[Products API] Using advanced product recommendation system");
+      
+      const recommendationResult = await recommendProductsByMultipleIsoCodes(
+        isoMatches,
+        {
+          icfCodes,
+          isoMatches,
+          userMessage: analysisSummary || undefined,
+          analysisSummary: analysisSummary || undefined,
+          userProfile: {
+            disabilityType: disabilityType ?? undefined,
+            disabilitySeverity: disabilitySeverity ?? undefined,
+            userId: supabaseUserId,
+            consultationId: consultationId,
+          },
+        },
+        {
+          limit,
+          maxProductsPerIso: Math.ceil(limit / isoMatches.length),
+          diversifyCategories: true,
+          useSemanticMatching: true,
+          useQualityMetrics: true,
+        }
+      );
+
+      // 환경 변수 제품 추가 (ISO 코드가 매칭된 경우)
+      const envLinksMap = getMultipleIsoCodeLinksFromEnv(isoCodes);
+      const envProducts: any[] = [];
+
+      for (const [isoCode, links] of envLinksMap.entries()) {
+        const isoMatch = isoMatches.find((match) => match.isoCode === isoCode);
+        if (!isoMatch) continue;
+
+        links.forEach((link, index) => {
+          const productId = `env_${isoCode.replace(/\s/g, "_")}_${index}`;
+          envProducts.push({
+            id: productId,
+            name: isoMatch.label || `ISO ${isoCode} 보조기기`,
+            iso_code: isoCode,
+            manufacturer: null,
+            description: isoMatch.description || null,
+            image_url: null,
+            purchase_link: link,
+            price: null,
+            category: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            is_active: true,
+          });
+        });
+      }
+
+      // 환경 변수 제품을 추천 결과에 추가 (기본 점수 부여)
+      if (envProducts.length > 0) {
+        const envRecommendations = envProducts.map((product, index) => {
+          const isoMatch = isoMatches.find((m) => m.isoCode === product.iso_code);
+          return {
+            id: product.id,
+            name: product.name,
+            description: product.description,
+            iso_code: product.iso_code,
+            category: product.category,
+            manufacturer: product.manufacturer,
+            price: product.price,
+            image_url: product.image_url,
+            purchase_link: product.purchase_link,
+            score: (isoMatch?.score || 0.7) * 0.9, // ISO 매칭 점수의 90%
+            match_reason: `ISO 코드 매칭${isoMatch ? ` (${isoMatch.label})` : ""}`,
+            priority: 8, // 환경 변수 제품은 중간 우선순위
+            scoreBreakdown: {
+              isoMatch: isoMatch?.score || 0.7,
+              semanticMatch: 0,
+              contextMatch: 0.5,
+              qualityScore: 0, // 환경 변수 제품은 품질 지표 없음
+              directIcfMatch: 0,
+            },
+          } as ProductRecommendation;
+        });
+
+        recommendationResult.recommendations.push(...envRecommendations);
+        // 점수 순으로 재정렬
+        recommendationResult.recommendations.sort((a, b) => {
+          if (a.priority !== b.priority) return b.priority - a.priority;
+          return b.score - a.score;
+        });
+        // 상위 limit개만 유지
+        recommendationResult.recommendations = recommendationResult.recommendations.slice(0, limit);
+      }
+
+      // 추천 결과를 기존 형식으로 변환
+      const formattedProducts = formatProductRecommendations(
+        recommendationResult.recommendations,
+        {
+          includePricing: true,
+          includeManufacturer: true,
+          maxDescriptionLength: 150,
+        }
+      );
+
+      // 추천 저장 (consultationId가 있는 경우, 환경 변수 제품 제외)
+      if (consultationId && recommendationResult.recommendations.length > 0) {
+        const recommendationItems: RecommendationPersistenceItem[] =
+          recommendationResult.recommendations
+            .filter((rec) => !rec.id.startsWith("env_")) // 환경 변수 제품 제외
+            .map((rec, index) => ({
+              productId: rec.id,
+              matchReason: rec.match_reason,
+              rank: index + 1,
+            }));
+
+        await persistRecommendations(consultationId, recommendationItems, supabase);
+      }
+
+      logEvent({
+        category: "matching",
+        action: "advanced_product_recommendation_used",
+        payload: {
+          consultationId,
+          icfCodesCount: icfCodes.length,
+          isoMatchesCount: isoMatches.length,
+          recommendedProductsCount: recommendationResult.recommendations.length,
+          envProductsCount: envProducts.length,
+        },
+      });
+
+      return NextResponse.json(
+        {
+          products: formattedProducts,
+          isoBreakdown: recommendationResult.isoBreakdown.map((breakdown) => ({
+            isoCode: breakdown.isoCode,
+            productsCount: breakdown.products.length,
+            confidence: breakdown.confidence,
+          })),
+        },
+        { headers }
+      );
+    } catch (error) {
+      console.error(
+        "[Products API] Advanced recommendation failed, falling back to legacy:",
+        error
+      );
+      logEvent({
+        category: "matching",
+        action: "advanced_recommendation_fallback",
+        payload: { error: String(error), consultationId },
+        level: "warn",
+      });
+      // 폴백: 기존 로직 사용
+    }
+  }
 
   // API 응답 최적화: 클라이언트에서 사용하지 않는 필드 제거
   // created_at, updated_at은 서버에서만 사용 (랭킹 계산용)
