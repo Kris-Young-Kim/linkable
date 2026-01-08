@@ -15,6 +15,8 @@
 import { findIcfCode } from "@/core/assessment/icf-codes";
 import { createEmbedding as generateEmbedding } from "@/lib/embeddings/gemini-embedding";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { callGemini } from "@/lib/gemini";
+import { logEvent } from "@/lib/logging";
 import type { IsoMatch } from "./iso-mapping";
 
 export interface ProductIcfMatch {
@@ -68,6 +70,15 @@ export async function matchProductToIcf(
     matches.push(...semanticMatches);
   } catch (error) {
     console.warn("[Product-ICF Matcher] Semantic matching failed:", error);
+    // 실패해도 계속 진행
+  }
+
+  // 4. AI 기반 매칭 (Gemini API 활용)
+  try {
+    const aiMatches = await matchByAI(product, targetIcfCodes);
+    matches.push(...aiMatches);
+  } catch (error) {
+    console.warn("[Product-ICF Matcher] AI matching failed:", error);
     // 실패해도 계속 진행
   }
 
@@ -237,6 +248,110 @@ async function matchBySemantic(
 }
 
 /**
+ * AI 기반 매칭 (Gemini API 활용)
+ * 제품 정보를 AI로 분석하여 ICF 코드를 직접 추론
+ */
+async function matchByAI(
+  product: ProductInfo,
+  targetIcfCodes: string[]
+): Promise<ProductIcfMatch[]> {
+  const matches: ProductIcfMatch[] = [];
+
+  try {
+    // ICF 코드 설명 준비
+    const icfDescriptions = targetIcfCodes
+      .map((code) => {
+        const meta = findIcfCode(code);
+        return meta ? `${code}: ${meta.description}` : code;
+      })
+      .join("\n");
+
+    const prompt = `
+너는 보조공학 전문가입니다. 제품 정보를 분석하여 ICF 코드와의 관련성을 평가하세요.
+
+제품 정보:
+- 이름: ${product.name}
+${product.description ? `- 설명: ${product.description}` : ""}
+${product.category ? `- 카테고리: ${product.category}` : ""}
+
+대상 ICF 코드:
+${icfDescriptions}
+
+다음 JSON 형식으로 응답하세요:
+{
+  "matches": [
+    {
+      "icfCode": "d450",
+      "score": 0.85,
+      "confidence": 0.9,
+      "reasoning": "이 제품은 보행을 돕는 보조기기로, d450(보행)과 직접적으로 관련됩니다."
+    }
+  ]
+}
+
+중요:
+- icfCode는 반드시 대상 ICF 코드 중 하나여야 함
+- score는 0.0-1.0 사이 값 (관련성 점수)
+- confidence는 0.0-1.0 사이 값 (신뢰도)
+- reasoning은 한국어로 작성
+- 관련성이 낮으면 포함하지 않음 (score < 0.5)
+- JSON만 반환하고 다른 설명은 포함하지 마세요
+`;
+
+    const { json } = await callGemini(prompt);
+
+    if (json && typeof json === "object" && "matches" in json) {
+      const data = json as any;
+      if (Array.isArray(data.matches)) {
+        for (const match of data.matches) {
+          if (
+            match.icfCode &&
+            targetIcfCodes.includes(match.icfCode.toLowerCase())
+          ) {
+            const score = Math.max(0, Math.min(1, Number(match.score) || 0));
+            const confidence = Math.max(
+              0,
+              Math.min(1, Number(match.confidence) || 0)
+            );
+
+            if (score >= 0.5) {
+              // 최소 점수 이상인 경우만 포함
+              matches.push({
+                icfCode: match.icfCode.toUpperCase(),
+                score: score * 0.9, // AI 매칭은 최대 0.9점
+                method: "ai",
+                confidence,
+                evidence: [
+                  match.reasoning || "AI 분석 결과",
+                  `AI 신뢰도: ${(confidence * 100).toFixed(1)}%`,
+                ],
+              });
+            }
+          }
+        }
+      }
+    }
+
+    if (matches.length > 0) {
+      logEvent({
+        category: "matching",
+        action: "product_icf_ai_match",
+        payload: {
+          productName: product.name,
+          matchedIcfCodes: matches.map((m) => m.icfCode),
+          avgScore: matches.reduce((sum, m) => sum + m.score, 0) / matches.length,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("[Product-ICF Matcher] AI matching error:", error);
+    // 에러 발생 시 조용히 실패 (다른 매칭 방법에 영향 없음)
+  }
+
+  return matches;
+}
+
+/**
  * 코사인 유사도 계산
  */
 function cosineSimilarity(vecA: number[], vecB: number[]): number {
@@ -275,12 +390,12 @@ function mergeMatches(matches: ProductIcfMatch[]): ProductIcfMatch[] {
       const scores = [existing.score, match.score];
       const confidences = [existing.confidence, match.confidence];
 
-      // 방법별 가중치
+      // 방법별 가중치 (AI 기반 매칭 가중치 상향)
       const methodWeights: Record<string, number> = {
-        semantic: 0.4,
-        keyword: 0.3,
-        category: 0.2,
-        ai: 0.1,
+        ai: 0.5, // AI 기반 매칭 가중치 상향 (0.1 → 0.5)
+        semantic: 0.3, // 시맨틱 매칭 가중치 하향 (0.4 → 0.3)
+        keyword: 0.15, // 키워드 매칭 가중치 하향 (0.3 → 0.15)
+        category: 0.05, // 카테고리 매칭 가중치 하향 (0.2 → 0.05)
       };
 
       let totalWeight = 0;
@@ -314,10 +429,11 @@ export function combineProductIcfScore(
   productIcfScore: number,
   icfToIsoScore: number
 ): number {
-  // 가중 평균: ICF→ISO 점수 50%, 제품→ICF 점수 40%, 기본 점수 10%
+  // 가중 평균: ICF→ISO 점수 45%, 제품→ICF 점수 50% (상향), 기본 점수 5%
+  // 제품-ICF 직접 매칭 가중치 상향 (0.4 → 0.5)
   return (
-    icfToIsoScore * 0.5 +
-    productIcfScore * 0.4 +
-    0.1
+    icfToIsoScore * 0.45 +
+    productIcfScore * 0.5 +
+    0.05
   );
 }

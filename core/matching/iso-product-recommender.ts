@@ -72,6 +72,66 @@ interface RecommendationContext {
 }
 
 /**
+ * ISO 코드 계층 구조 파싱
+ * ISO 9999:2022 구조:
+ * - Class: 2자리 (예: "12")
+ * - Subclass: 4자리 (예: "12 23")
+ * - Division: 6자리 (예: "12 23 01")
+ */
+function parseIsoCodeHierarchy(isoCode: string): {
+  class: string;
+  subclass: string | null;
+  division: string | null;
+  fullCode: string;
+} {
+  const parts = isoCode.split(" ").filter(Boolean);
+  return {
+    class: parts[0] || "",
+    subclass: parts.length >= 2 ? `${parts[0]} ${parts[1]}` : null,
+    division: parts.length >= 3 ? `${parts[0]} ${parts[1]} ${parts[2]}` : null,
+    fullCode: isoCode,
+  };
+}
+
+/**
+ * 두 ISO 코드가 관련되어 있는지 확인 (Subclass 레벨까지 일치 필요)
+ * @param targetIsoCode 목표 ISO 코드
+ * @param candidateIsoCode 후보 ISO 코드
+ * @returns 관련 여부
+ */
+function areIsoCodesRelated(
+  targetIsoCode: string,
+  candidateIsoCode: string
+): boolean {
+  const target = parseIsoCodeHierarchy(targetIsoCode);
+  const candidate = parseIsoCodeHierarchy(candidateIsoCode);
+
+  // 정확한 매칭은 관련 제품이 아님
+  if (target.fullCode === candidate.fullCode) {
+    return false;
+  }
+
+  // 명시적 관련 매핑 확인
+  const relatedIsoMapping: Record<string, string[]> = {
+    "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
+    "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
+  };
+
+  if (relatedIsoMapping[target.fullCode]?.includes(candidate.fullCode)) {
+    return true;
+  }
+
+  // Division 레벨: 같은 Subclass 내 Division만 관련
+  if (target.division && candidate.division && target.subclass === candidate.subclass) {
+    return true;
+  }
+
+  // Subclass 레벨: 같은 Class 내에서도 다른 Subclass는 관련 없음
+  // (너무 넓은 매칭 방지)
+  return false;
+}
+
+/**
  * 단일 ISO 코드에 대한 제품 추천 (고도화 버전)
  */
 export async function recommendProductsByIsoCode(
@@ -115,29 +175,46 @@ export async function recommendProductsByIsoCode(
       };
     }
 
-    // 2. 관련 ISO 코드 제품 검색 (부분 매칭) - 더 엄격한 필터링
+    // 2. 관련 ISO 코드 제품 검색 (부분 매칭) - Subclass 레벨 필터링 강화
     let relatedProducts: any[] = [];
     if (includeRelated && exactProducts.length < limit) {
-      // 같은 클래스 내에서만 관련 제품 검색하되, 직접적으로 관련된 서브클래스만 포함
-      // 예: "12 23" (전동휠체어) 요청 시 "12 22" (수동휠체어)만 포함, "12 06" (보행기)는 제외
-      const isoParts = isoCode.split(" ");
+      // ISO 코드 계층 구조 기반 스마트 필터링
+      // Class 레벨(2자리): "12" → 너무 넓음, 사용하지 않음
+      // Subclass 레벨(4자리): "12 23" → 적절한 범위
+      // Division 레벨(6자리): "12 23 01" → 가장 정확
+      const isoParts = isoCode.split(" ").filter(Boolean);
       const isoClass = isoParts[0]; // "12"
-      const isoSubclass = isoParts[1]; // "23"
+      const isoSubclass = isoParts[1]; // "23" (있을 경우)
       
-      // 직접 관련된 ISO 코드만 허용 (같은 클래스 내에서도 제한)
-      // 전동휠체어(12 23)는 수동휠체어(12 22)와만 관련
-      // 수동휠체어(12 22)는 전동휠체어(12 23)와만 관련
+      // Subclass 레벨까지 일치하는 관련 제품만 허용
+      // 예: "12 23" (전동휠체어) 요청 시 "12 23 XX" 또는 직접 관련된 "12 22"만 포함
+      // "12 06" (보행기), "12 31" (체위 변경) 등은 제외
       const relatedIsoCodes: string[] = [];
       
-      if (isoCode === "12 23") {
-        // 전동휠체어는 수동휠체어만 관련 제품으로 포함
-        relatedIsoCodes.push("12 22");
-      } else if (isoCode === "12 22") {
-        // 수동휠체어는 전동휠체어만 관련 제품으로 포함
-        relatedIsoCodes.push("12 23");
-      } else if (isoClass === "12" && isoSubclass) {
-        // 다른 12 클래스 제품은 관련 제품을 포함하지 않음 (너무 넓은 매칭 방지)
-        // 필요시 여기에 특정 케이스 추가 가능
+      // 명시적으로 관련된 ISO 코드 매핑 (전문가 지식 기반)
+      const relatedIsoMapping: Record<string, string[]> = {
+        // 이동 보조기기 (Class 12)
+        "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
+        "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
+        "12 06": [], // 보행기 → 관련 제품 없음 (독립적)
+        "12 31": [], // 체위 변경 → 관련 제품 없음 (독립적)
+        
+        // 식사 보조기기 (Class 15)
+        "15 09": [], // 식사 보조기기 → 관련 제품 없음 (독립적)
+        
+        // 의사소통 보조기기 (Class 22)
+        "22 30": [], // 의사소통 보조기기 → 관련 제품 없음 (독립적)
+      };
+      
+      // 명시적 매핑이 있으면 사용
+      if (relatedIsoMapping[isoCode]) {
+        relatedIsoCodes.push(...relatedIsoMapping[isoCode]);
+      } else if (isoSubclass) {
+        // Subclass가 있으면 같은 Subclass 내 Division 레벨 제품만 허용
+        // 예: "12 23" → "12 23 01", "12 23 02" 등만 허용
+        // Division 레벨 검색: 같은 Subclass 내에서만 검색
+        // 주의: Division 레벨 제품은 정확한 매칭으로 처리되므로 여기서는 제외
+        // 관련 제품은 명시적 매핑이 있는 경우에만 포함
       }
       
       // 관련 ISO 코드가 있을 때만 검색
@@ -382,23 +459,19 @@ async function calculateAdvancedProductScores(
       // 1. ISO 코드 매칭 점수 (기본 점수) - 정확한 매칭 우선순위 대폭 강화
       const isExactMatch = product.iso_code === targetIsoCode;
       
-      // 관련 매칭: 같은 클래스 내에서 직접 관련된 제품만 (예: 전동휠체어 <-> 수동휠체어)
+      // 관련 매칭: Subclass 레벨 필터링을 통과한 제품만 관련 제품으로 간주
+      // areIsoCodesRelated 함수를 사용하여 관련 여부 확인
       let isRelatedMatch = false;
       if (!isExactMatch) {
-        if (targetIsoCode === "12 23" && product.iso_code === "12 22") {
-          isRelatedMatch = true; // 전동휠체어 <-> 수동휠체어
-        } else if (targetIsoCode === "12 22" && product.iso_code === "12 23") {
-          isRelatedMatch = true; // 수동휠체어 <-> 전동휠체어
-        }
-        // 다른 직접 관련 케이스는 여기에 추가 가능
+        isRelatedMatch = areIsoCodesRelated(targetIsoCode, product.iso_code);
       }
 
       if (isExactMatch) {
-        breakdown.isoMatch = 1.0; // 정확 매칭: 최고 점수 (인덱스 보정 제거)
+        breakdown.isoMatch = 1.0; // 정확 매칭: 최고 점수
       } else if (isRelatedMatch) {
-        breakdown.isoMatch = 0.5 - index * 0.05; // 관련 매칭: 낮은 점수
+        breakdown.isoMatch = 0.4 - index * 0.02; // 관련 매칭: 낮은 점수 (더 낮게 조정)
       } else {
-        breakdown.isoMatch = 0.1; // 기타 매칭: 매우 낮은 점수 (필터링 대상)
+        breakdown.isoMatch = 0.05; // 기타 매칭: 매우 낮은 점수 (필터링 대상, 더 낮게 조정)
       }
 
       // 2. ICF-제품 시맨틱 매칭 점수
@@ -444,9 +517,13 @@ async function calculateAdvancedProductScores(
         );
 
         if (directMatches.length > 0) {
-          // 최고 점수 사용
+          // 최고 점수 사용 (AI 기반 매칭 포함)
           const maxDirectScore = Math.max(...directMatches.map((m) => m.score));
-          breakdown.directIcfMatch = maxDirectScore * 0.7; // 최대 0.7점
+          // AI 기반 매칭이 포함된 경우 점수 상향
+          const hasAIMatch = directMatches.some((m) => m.method === "ai");
+          breakdown.directIcfMatch = hasAIMatch
+            ? maxDirectScore * 0.9 // AI 매칭 포함 시 최대 0.9점
+            : maxDirectScore * 0.8; // 기타 매칭 시 최대 0.8점
         }
       } catch (error) {
         console.warn(
@@ -513,13 +590,13 @@ function calculateWeightedScore(
 ): number {
   if (!breakdown) return 0;
 
-  // 기본 가중치
+  // 기본 가중치 (제품-ICF 직접 매칭 가중치 상향)
   let weights = {
     isoMatch: 0.35,
-    semanticMatch: 0.25,
+    semanticMatch: 0.2, // 시맨틱 매칭 가중치 하향 (0.25 → 0.2)
     contextMatch: 0.15,
     qualityScore: 0.15,
-    directIcfMatch: 0.1,
+    directIcfMatch: 0.15, // 직접 ICF 매칭 가중치 상향 (0.1 → 0.15)
   };
 
   // 상황별 가중치 조정
@@ -539,9 +616,10 @@ function calculateWeightedScore(
   }
 
   if (flags.hasDirectIcfMatch) {
-    // 직접 ICF 매칭이 있으면 가중치 증가
-    weights.directIcfMatch = 0.2;
-    weights.isoMatch = 0.3;
+    // 직접 ICF 매칭이 있으면 가중치 대폭 증가 (0.4 → 0.5)
+    weights.directIcfMatch = 0.5; // 제품-ICF 직접 매칭 가중치 상향
+    weights.isoMatch = 0.25; // ISO 매칭 가중치 하향
+    weights.semanticMatch = 0.15; // 시맨틱 매칭 가중치 하향
   }
 
   if (flags.hasQualityMetrics) {
