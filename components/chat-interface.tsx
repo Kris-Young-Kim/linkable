@@ -75,7 +75,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
-import { cn, generateUUID, isChatEndingIntent, isVisualAidRequestIntent } from "@/lib/utils";
+import { cn, generateUUID, isChatEndingIntent, isVisualAidRequestIntent, isProductRecommendationRequestIntent } from "@/lib/utils";
 import { isEvaluationQuestion } from "@/core/assessment/ippa-score-parser";
 import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
 
@@ -369,6 +369,12 @@ export function ChatInterface() {
       setChatEnded(true);
     }
 
+    // 보조기기 추천 요청 의도 감지
+    if (trimmed && isProductRecommendationRequestIntent(trimmed)) {
+      console.log("[chat] Product recommendation request intent detected:", trimmed);
+      // 서버에서 처리하지만, 클라이언트에서도 미리 감지하여 로깅
+    }
+
     const userMessage: Message = {
       id: generateUUID(),
       role: "user",
@@ -614,6 +620,15 @@ export function ChatInterface() {
                   payload.icfAnalysis
                 );
                 setIcfAnalysis(payload.icfAnalysis);
+              }
+
+              // 추천 요청이 감지되면 채팅 종료 및 추천 CTA 표시
+              if (payload.isRecommendationRequest) {
+                console.log("[chat] Recommendation request detected, ending chat and showing CTA");
+                setChatEnded(true);
+                if (payload.icfAnalysis || payload.isoMatches?.length > 0) {
+                  setShowRecommendationCTA(true);
+                }
               }
 
               if (payload.icfAnalysis && payload.consultationId) {

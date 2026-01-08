@@ -14,7 +14,7 @@ import { parseAnalysis } from "@/core/assessment/parser";
 import { enforceIcfConsistency } from "@/core/assessment/icf-validator";
 import { callGemini } from "@/lib/gemini";
 import { getIsoMatches } from "@/core/matching/iso-mapping";
-import { isGreetingMessage } from "@/lib/utils";
+import { isGreetingMessage, isProductRecommendationRequestIntent } from "@/lib/utils";
 import {
   extractScoreFromAnswer,
   isEvaluationAnswer,
@@ -590,10 +590,53 @@ export async function POST(request: Request) {
             ? isGreetingMessage(trimmedMessage)
             : false;
 
-          const isoMatches =
-            parsedAnalysis && !isGreeting
-              ? getIsoMatches(parsedAnalysis.normalizedCodes ?? [])
-              : [];
+          // 보조기기 추천 요청 의도 감지
+          const isRecommendationRequest = trimmedMessage
+            ? isProductRecommendationRequestIntent(trimmedMessage)
+            : false;
+
+          // 추천 요청이 감지되면 ICF 코드가 없어도 기존 분석 결과를 사용하여 추천 제공
+          let isoMatches: ReturnType<typeof getIsoMatches> = [];
+          if (isRecommendationRequest) {
+            // 추천 요청이 있으면 기존 분석 결과 또는 현재 분석 결과 사용
+            if (parsedAnalysis?.normalizedCodes && parsedAnalysis.normalizedCodes.length > 0) {
+              isoMatches = getIsoMatches(parsedAnalysis.normalizedCodes);
+            } else {
+              // ICF 코드가 없으면 기존 상담의 분석 결과 조회
+              const { data: existingAnalysis } = await supabaseUser
+                .from("analysis_results")
+                .select("icf_codes")
+                .eq("consultation_id", consultationId)
+                .maybeSingle();
+              
+              if (existingAnalysis?.icf_codes) {
+                const icfCodesObj = existingAnalysis.icf_codes as Record<string, unknown>;
+                const allCodes: string[] = [
+                  ...((icfCodesObj.b as string[]) || []),
+                  ...((icfCodesObj.d as string[]) || []),
+                  ...((icfCodesObj.e as string[]) || []),
+                ];
+                if (allCodes.length > 0) {
+                  isoMatches = getIsoMatches(allCodes.map((c) => c.toLowerCase()));
+                }
+              }
+            }
+            
+            // 추천 요청 감지 로그
+            logEvent({
+              category: "consultation",
+              action: "recommendation_request_detected",
+              payload: {
+                consultationId,
+                userMessage: trimmedMessage,
+                isoMatchesCount: isoMatches.length,
+                hasIcfCodes: parsedAnalysis?.normalizedCodes?.length > 0,
+              },
+            });
+          } else if (parsedAnalysis && !isGreeting) {
+            // 일반적인 경우: 분석 결과에서 ISO 매칭
+            isoMatches = getIsoMatches(parsedAnalysis.normalizedCodes ?? []);
+          }
 
           sendEvent("analysis", {
             consultationId,
@@ -608,6 +651,7 @@ export async function POST(request: Request) {
               "상담 내용을 요약해 주세요.",
             isoMatches,
             isGreeting, // 인사 메시지 여부 전달
+            isRecommendationRequest, // 추천 요청 여부 전달
           });
 
           sendEvent("done", { consultationId });

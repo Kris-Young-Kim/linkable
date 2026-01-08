@@ -168,3 +168,52 @@ export function isVisualAidRequestIntent(message: string): boolean {
 
   return false;
 }
+
+/**
+ * 보조기기 추천 요청 의도를 감지하는 함수
+ * 사용자가 명시적으로 보조기기 추천을 요청하면 true를 반환
+ */
+export function isProductRecommendationRequestIntent(message: string): boolean {
+  if (!message) return false;
+
+  const trimmed = message.trim().toLowerCase();
+
+  // 보조기기 추천 요청 패턴
+  const recommendationPatterns = [
+    // 명시적 추천 요청
+    /(보조기기|보조\s*기기|보조\s*도구|보조\s*장비|보조\s*용품).*(추천|알려|소개|제안|추천해|알려줘|소개해|제안해)/gi,
+    /(추천|알려|소개|제안|추천해|알려줘|소개해|제안해).*(보조기기|보조\s*기기|보조\s*도구|보조\s*장비|보조\s*용품)/gi,
+    
+    // 간단한 추천 요청
+    /^추천\s*(해|해줘|해주세요|해줄래|해줄까|해줄게|해줄게요|해줄래요|해줄까요|해줄게요|해줄게요|해줄게요)[!?.]*$/,
+    /^추천\s*(해|해줘|해주세요|해줄래|해줄까|해줄게|해줄게요|해줄래요|해줄까요|해줄게요|해줄게요|해줄게요)\s*(보조기기|기기|도구|장비|용품)[!?.]*$/,
+    /^(보조기기|기기|도구|장비|용품)\s*(추천|알려|소개|제안)[!?.]*$/,
+    
+    // 영어 패턴
+    /(recommend|suggest|show|tell|give).*(assistive|aid|device|tool|equipment|product)/gi,
+    /(assistive|aid|device|tool|equipment|product).*(recommend|suggest|show|tell|give)/gi,
+    /^recommend/i,
+    /^suggest/i,
+    
+    // "뭐가 좋을까", "뭘 써야 할까" 같은 질문
+    /(뭐|무엇|어떤|어느|어떤\s*것|어떤\s*게|어떤\s*거).*(좋|추천|필요|써야|사용|사용해야|쓰면|사용하면)/gi,
+    /(좋|추천|필요|써야|사용|사용해야|쓰면|사용하면).*(뭐|무엇|어떤|어느|어떤\s*것|어떤\s*게|어떤\s*거)/gi,
+    
+    // "필요해", "필요합니다" + 보조기기 관련 키워드
+    /(보조기기|보조\s*기기|보조\s*도구|보조\s*장비|보조\s*용품).*(필요|필요해|필요합니다|필요해요|필요하네|필요하네요)/gi,
+    /(필요|필요해|필요합니다|필요해요|필요하네|필요하네요).*(보조기기|보조\s*기기|보조\s*도구|보조\s*장비|보조\s*용품)/gi,
+    
+    // "알려줘", "알려주세요" + 보조기기 관련 키워드
+    /(보조기기|보조\s*기기|보조\s*도구|보조\s*장비|보조\s*용품).*(알려|알려줘|알려주세요|알려줄래|알려줄까)/gi,
+    /(알려|알려줘|알려주세요|알려줄래|알려줄까).*(보조기기|보조\s*기기|보조\s*도구|보조\s*장비|보조\s*용품)/gi,
+  ];
+
+  // 패턴 매칭
+  for (const pattern of recommendationPatterns) {
+    if (pattern.test(trimmed)) {
+      return true;
+    }
+  }
+
+  return false;
+}
