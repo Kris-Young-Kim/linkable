@@ -15,9 +15,9 @@ export async function POST(request: NextRequest) {
 
     const { role } = (await request.json()) as { role?: string }
 
-    if (!role || !["user", "manager", "admin"].includes(role)) {
+    if (!role || !["user", "manager", "admin", "expert"].includes(role)) {
       return NextResponse.json(
-        { error: "Invalid role. Must be 'user', 'manager', or 'admin'" },
+        { error: "Invalid role. Must be 'user', 'manager', 'admin', or 'expert'" },
         { status: 400 }
       )
     }
