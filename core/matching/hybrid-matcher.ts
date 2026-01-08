@@ -108,11 +108,15 @@ export async function hybridMatch(
 
       // 시맨틱 매칭 임계값도 설정에 포함 (semanticMatch 함수에 전달)
       if (config.similarityThreshold === undefined) {
-        (config as any).similarityThreshold = dbConfigConverted.similarityThreshold;
+        (config as any).similarityThreshold =
+          dbConfigConverted.similarityThreshold;
       }
     }
   } catch (error) {
-    console.error("[hybrid-matcher] Failed to load weight config, using default:", error);
+    console.error(
+      "[hybrid-matcher] Failed to load weight config, using default:",
+      error
+    );
   }
 
   const finalConfig = { ...DEFAULT_CONFIG, ...config };
@@ -186,7 +190,8 @@ export async function hybridMatch(
           context.userMessage || context.analysisSummary || "",
           {
             useEmbeddings: true,
-            similarityThreshold: (finalConfig as any).similarityThreshold || 0.7,
+            similarityThreshold:
+              (finalConfig as any).similarityThreshold || 0.7,
             topK: finalConfig.topK,
           }
         );
@@ -229,13 +234,13 @@ export async function hybridMatch(
           weight: finalConfig.weights.ruleBased + finalConfig.weights.keyword,
           source: "rule+keyword",
         },
-        { 
-          matches: semanticMatches, 
+        {
+          matches: semanticMatches,
           weight: finalConfig.weights.semantic,
           source: "semantic",
         },
-        { 
-          matches: graphMatches, 
+        {
+          matches: graphMatches,
           weight: finalConfig.weights.knowledgeGraph,
           source: "knowledge_graph",
         },
@@ -291,9 +296,10 @@ export async function hybridMatch(
       icfCodes: context.icfCodes,
       matchedIsoCodes: tagged.map((m) => m.isoCode),
       topMatchScore: tagged[0]?.score,
-      averageMatchScore: tagged.length > 0
-        ? tagged.reduce((sum, m) => sum + m.score, 0) / tagged.length
-        : 0,
+      averageMatchScore:
+        tagged.length > 0
+          ? tagged.reduce((sum, m) => sum + m.score, 0) / tagged.length
+          : 0,
       executionTimeMs: duration,
       semanticMatchUsed: finalConfig.useSemantic,
       knowledgeGraphUsed: finalConfig.useKnowledgeGraph,
@@ -316,14 +322,17 @@ export async function hybridMatch(
         finalConfig.useSemantic && finalConfig.useKnowledgeGraph
           ? "hybrid"
           : finalConfig.useSemantic
-            ? "semantic"
-            : finalConfig.useKnowledgeGraph
-              ? "knowledge_graph"
-              : "rule",
+          ? "semantic"
+          : finalConfig.useKnowledgeGraph
+          ? "knowledge_graph"
+          : "rule",
         tagged[0].score // 신뢰도는 최고 점수 사용
       ).catch((err) => {
         // 저장 실패는 조용히 무시
-        console.error("[hybrid-matcher] Failed to save precomputed mapping:", err);
+        console.error(
+          "[hybrid-matcher] Failed to save precomputed mapping:",
+          err
+        );
       });
     }
 
@@ -356,7 +365,7 @@ export async function hybridMatch(
 
 /**
  * 여러 매칭 결과를 신뢰도 기반 동적 가중치로 통합
- * 
+ *
  * 신뢰도 기반 가중치 조정:
  * - 각 매칭 레이어의 신뢰도(점수 분포, 일치도)를 계산
  * - 높은 신뢰도를 가진 레이어의 가중치를 동적으로 증가
@@ -383,41 +392,50 @@ function combineMatches(
     // - 상위 매칭 비율: 상위 점수 매칭이 많을수록 신뢰도 높음
     const scores = layer.matches.map((m) => m.score);
     const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length;
-    
+
     // 분산 계산
-    const variance = scores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) / scores.length;
+    const variance =
+      scores.reduce((sum, s) => sum + Math.pow(s - avgScore, 2), 0) /
+      scores.length;
     const stdDev = Math.sqrt(variance);
-    
+
     // 상위 매칭 비율 (0.7 이상 점수 비율)
-    const highScoreRatio = scores.filter((s) => s >= 0.7).length / scores.length;
-    
+    const highScoreRatio =
+      scores.filter((s) => s >= 0.7).length / scores.length;
+
     // 신뢰도 계산 (0-1 범위)
     // 평균 점수 40%, 분산 역수 30%, 상위 매칭 비율 30%
     const scoreConfidence = Math.min(avgScore, 1.0);
     const consistencyConfidence = Math.max(0, 1.0 - stdDev); // 분산이 낮을수록 높음
     const qualityConfidence = highScoreRatio;
-    
-    const confidence = 
-      scoreConfidence * 0.4 + 
-      consistencyConfidence * 0.3 + 
+
+    const confidence =
+      scoreConfidence * 0.4 +
+      consistencyConfidence * 0.3 +
       qualityConfidence * 0.3;
 
     return { confidence, layer };
   });
 
   // 2단계: 신뢰도 기반 동적 가중치 계산
-  const totalBaseWeight = matchLayers.reduce((sum, layer) => sum + layer.weight, 0);
-  const totalConfidence = layerConfidences.reduce((sum, lc) => sum + lc.confidence, 0);
-  
+  const totalBaseWeight = matchLayers.reduce(
+    (sum, layer) => sum + layer.weight,
+    0
+  );
+  const totalConfidence = layerConfidences.reduce(
+    (sum, lc) => sum + lc.confidence,
+    0
+  );
+
   // 신뢰도 기반 가중치 조정 계수 (0.5 ~ 1.5 범위)
   const adjustedLayers = layerConfidences.map(({ confidence, layer }) => {
     // 신뢰도가 높으면 가중치 증가, 낮으면 감소
     // 신뢰도 0.5 기준으로 조정 (0.5 = 1.0x, 0.8 = 1.3x, 0.2 = 0.7x)
     const confidenceMultiplier = 0.5 + confidence * 1.0; // 0.5 ~ 1.5 범위
-    
+
     // 정규화: 전체 가중치 합이 일정하게 유지되도록
     const adjustedWeight = layer.weight * confidenceMultiplier;
-    
+
     return {
       ...layer,
       adjustedWeight,
@@ -427,9 +445,12 @@ function combineMatches(
   });
 
   // 가중치 정규화 (전체 합이 totalBaseWeight와 비슷하게 유지)
-  const totalAdjustedWeight = adjustedLayers.reduce((sum, l) => sum + l.adjustedWeight, 0);
+  const totalAdjustedWeight = adjustedLayers.reduce(
+    (sum, l) => sum + l.adjustedWeight,
+    0
+  );
   const normalizationFactor = totalBaseWeight / totalAdjustedWeight;
-  
+
   adjustedLayers.forEach((layer) => {
     layer.adjustedWeight *= normalizationFactor;
   });
@@ -437,13 +458,14 @@ function combineMatches(
   // 3단계: 동적 가중치를 적용하여 매칭 결과 통합
   for (const adjustedLayer of adjustedLayers) {
     const { matches, adjustedWeight, confidence, source } = adjustedLayer;
-    
+
     for (const match of matches) {
       const existingScore = scoreMap.get(match.isoCode) || 0;
-      
+
       // 신뢰도 기반 가중 점수 계산
       // 신뢰도가 높을수록 가중치가 높아지고, 점수도 더 반영됨
-      const confidenceWeightedScore = match.score * adjustedWeight * (0.8 + confidence * 0.2);
+      const confidenceWeightedScore =
+        match.score * adjustedWeight * (0.8 + confidence * 0.2);
       scoreMap.set(match.isoCode, existingScore + confidenceWeightedScore);
 
       // 가장 높은 점수의 매치 정보 저장
@@ -459,7 +481,10 @@ function combineMatches(
 
       // 신뢰도 누적 (여러 소스에서 매칭되면 신뢰도 증가)
       const currentConfidence = confidenceMap.get(match.isoCode) || 0;
-      confidenceMap.set(match.isoCode, Math.min(1.0, currentConfidence + confidence * 0.3));
+      confidenceMap.set(
+        match.isoCode,
+        Math.min(1.0, currentConfidence + confidence * 0.3)
+      );
     }
   }
 
@@ -471,16 +496,21 @@ function combineMatches(
       const matchConfidence = confidenceMap.get(match.isoCode) || 0.5;
 
       // 신뢰도 보너스: 여러 소스에서 일치하고 신뢰도가 높으면 점수 보너스
-      const confidenceBonus = matchConfidence > 0.7 && sources.length > 1 
-        ? 1.1 // 10% 보너스
-        : 1.0;
+      const confidenceBonus =
+        matchConfidence > 0.7 && sources.length > 1
+          ? 1.1 // 10% 보너스
+          : 1.0;
 
       const adjustedScore = Math.min(finalScore * confidenceBonus, 1.0);
 
       return {
         ...match,
         score: adjustedScore,
-        reason: `${match.reason} [통합: ${(adjustedScore * 100).toFixed(1)}%, 신뢰도: ${(matchConfidence * 100).toFixed(0)}%, 소스: ${sources.length}개]`,
+        reason: `${match.reason} [통합: ${(adjustedScore * 100).toFixed(
+          1
+        )}%, 신뢰도: ${(matchConfidence * 100).toFixed(0)}%, 소스: ${
+          sources.length
+        }개]`,
       };
     })
     .filter((match) => match.score >= minScore) // 최소 점수 필터
@@ -509,36 +539,79 @@ function normalizeIsoCode(isoCode: string) {
 }
 
 function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
-  const text = `${context.userMessage ?? ""} ${context.analysisSummary ?? ""}`.toLowerCase();
+  const text = `${context.userMessage ?? ""} ${
+    context.analysisSummary ?? ""
+  }`.toLowerCase();
   const icfSet = new Set(context.icfCodes.map((c) => c.toLowerCase()));
 
-  const hasIcf = (prefix: string) => Array.from(icfSet).some((c) => c.startsWith(prefix));
-  const includesAny = (keywords: string[]) => keywords.some((k) => text.includes(k));
+  const hasIcf = (prefix: string) =>
+    Array.from(icfSet).some((c) => c.startsWith(prefix));
+  const includesAny = (keywords: string[]) =>
+    keywords.some((k) => text.includes(k));
 
   // 1. 시각 장애 감지 (최우선 처리)
   // 시각 중증/실명 키워드
   const severeVisualKeywords = [
-    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이",
-    "시각 중증", "맹인", "실명", "blind", "앞이 안 보임", "앞이 안보임",
-    "전혀 안 보", "전혀 안보", "하나도 안 보", "하나도 안보"
+    "앞이 안 보",
+    "앞이 안보",
+    "앞이 안 보이",
+    "앞이 안보이",
+    "시각 중증",
+    "맹인",
+    "실명",
+    "blind",
+    "앞이 안 보임",
+    "앞이 안보임",
+    "전혀 안 보",
+    "전혀 안보",
+    "하나도 안 보",
+    "하나도 안보",
   ];
-  const isSevereVisualImpairment = includesAny(severeVisualKeywords) ||
-    (hasIcf("b210") && includesAny(["중증", "심각", "심각한", "심하게", "전혀", "하나도"]));
+  const isSevereVisualImpairment =
+    includesAny(severeVisualKeywords) ||
+    (hasIcf("b210") &&
+      includesAny(["중증", "심각", "심각한", "심하게", "전혀", "하나도"]));
 
   // 시각 장애 키워드
   const visualKeywords = [
-    "시각", "저시력", "시력", "vision", "눈", "시야", "시야각",
-    "확대경", "돋보기", "점자", "스크린리더", "음성변환"
+    "시각",
+    "저시력",
+    "시력",
+    "vision",
+    "눈",
+    "시야",
+    "시야각",
+    "확대경",
+    "돋보기",
+    "점자",
+    "스크린리더",
+    "음성변환",
   ];
 
-  if (hasIcf("b210") || hasIcf("b215") || includesAny(visualKeywords) || isSevereVisualImpairment) {
+  if (
+    hasIcf("b210") ||
+    hasIcf("b215") ||
+    includesAny(visualKeywords) ||
+    isSevereVisualImpairment
+  ) {
     return "vision";
   }
 
   // 2. 청각 장애 감지
   const hearingKeywords = [
-    "청각", "청력", "난청", "보청기", "hearing", "귀", "듣기",
-    "소리", "알림", "진동", "평형", "어지럼", "전정"
+    "청각",
+    "청력",
+    "난청",
+    "보청기",
+    "hearing",
+    "귀",
+    "듣기",
+    "소리",
+    "알림",
+    "진동",
+    "평형",
+    "어지럼",
+    "전정",
   ];
 
   if (hasIcf("b230") || hasIcf("b235") || includesAny(hearingKeywords)) {
@@ -547,42 +620,93 @@ function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
 
   // 3. 언어/의사소통 장애 감지
   const languageKeywords = [
-    "언어", "음성", "구어", "말하기", "발음", "발성", "의사소통",
-    "소통", "communication", "aac", "대화", "말하기 보조",
-    "음성 생성", "음성 인식", "프록스토커"
+    "언어",
+    "음성",
+    "구어",
+    "말하기",
+    "발음",
+    "발성",
+    "의사소통",
+    "소통",
+    "communication",
+    "aac",
+    "대화",
+    "말하기 보조",
+    "음성 생성",
+    "음성 인식",
+    "프록스토커",
   ];
 
-  if (hasIcf("b240") || hasIcf("b320") || hasIcf("b330") ||
-    hasIcf("d3") || includesAny(languageKeywords)) {
+  if (
+    hasIcf("b240") ||
+    hasIcf("b320") ||
+    hasIcf("b330") ||
+    hasIcf("d3") ||
+    includesAny(languageKeywords)
+  ) {
     return "communication";
   }
 
   // 4. 지체 장애 / 뇌병변 감지 (휠체어)
   const physicalKeywords = [
-    "지체", "절단", "관절", "지체기능", "변형", "신체", "physical",
-    "뇌병변", "뇌손상", "뇌졸중", "뇌성마비", "cerebral palsy",
-    "뇌전증", "epilepsy", "척수", "spinal", "마비", "paralysis"
+    "지체",
+    "절단",
+    "관절",
+    "지체기능",
+    "변형",
+    "신체",
+    "physical",
+    "뇌병변",
+    "뇌손상",
+    "뇌졸중",
+    "뇌성마비",
+    "cerebral palsy",
+    "뇌전증",
+    "epilepsy",
+    "척수",
+    "spinal",
+    "마비",
+    "paralysis",
   ];
 
   const mobilityKeywords = [
-    "휠체어", "wheelchair", "전동 휠체어", "수동 휠체어",
-    "이동", "보행", "걷기"
+    "휠체어",
+    "wheelchair",
+    "전동 휠체어",
+    "수동 휠체어",
+    "이동",
+    "보행",
+    "걷기",
   ];
 
-  if (includesAny(physicalKeywords) ||
+  if (
+    includesAny(physicalKeywords) ||
     includesAny(mobilityKeywords) ||
-    hasIcf("d46") || hasIcf("d450") || hasIcf("d465")) {
+    hasIcf("d46") ||
+    hasIcf("d450") ||
+    hasIcf("d465")
+  ) {
     return "mobility_wheelchair";
   }
 
   // 5. 보행 보조 (지체 장애이지만 휠체어가 아닌 경우)
-  if (includesAny(["보행기", "워커", "지팡이", "walking aid", "보행 보조"]) ||
-    hasIcf("d410") || hasIcf("d450")) {
+  if (
+    includesAny(["보행기", "워커", "지팡이", "walking aid", "보행 보조"]) ||
+    hasIcf("d410") ||
+    hasIcf("d450")
+  ) {
     return "mobility_walking_aid";
   }
 
   // 6. 자가관리 - 목욕/샤워
-  const bathingKeywords = ["목욕", "샤워", "씻기", "bathing", "shower", "washing"];
+  const bathingKeywords = [
+    "목욕",
+    "샤워",
+    "씻기",
+    "bathing",
+    "shower",
+    "washing",
+  ];
   if (hasIcf("d510") || hasIcf("d520") || includesAny(bathingKeywords)) {
     return "self_care_bathing";
   }
@@ -600,14 +724,21 @@ function detectPrimaryIntent(context: MatchContext): PrimaryIntent {
   }
 
   // 9. 식사/자가관리
-  if (hasIcf("d55") || hasIcf("d550") || includesAny(["식사", "먹기", "feeding", "음식"])) {
+  if (
+    hasIcf("d55") ||
+    hasIcf("d550") ||
+    includesAny(["식사", "먹기", "feeding", "음식"])
+  ) {
     return "self_care_feeding";
   }
 
   return "unknown";
 }
 
-function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatch[] {
+function applyIntentWeights(
+  matches: IsoMatch[],
+  intent: PrimaryIntent
+): IsoMatch[] {
   if (intent === "unknown") return matches;
 
   // 의도별 우선/페널티 ISO 코드 (공백 제거 기준)
@@ -633,8 +764,24 @@ function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatc
     communication: ["1206", "1222", "1223", "2203", "2206", "2106"], // 이동 보조, 시각, 청각 제거
     self_care_feeding: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
     self_care_bathing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
-    self_care_dressing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
-    self_care_toileting: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_dressing: [
+      "1222",
+      "1223",
+      "1206",
+      "2203",
+      "2206",
+      "2106",
+      "2230",
+    ], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_toileting: [
+      "1222",
+      "1223",
+      "1206",
+      "2203",
+      "2206",
+      "2106",
+      "2230",
+    ], // 이동 보조, 시각, 청각, 의사소통 제거
     unknown: [],
   };
 
@@ -661,19 +808,40 @@ function applyIntentWeights(matches: IsoMatch[], intent: PrimaryIntent): IsoMatc
     .sort((a, b) => b.score - a.score);
 }
 
-function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent, context?: MatchContext): IsoMatch[] {
+function filterByIntent(
+  matches: IsoMatch[],
+  intent: PrimaryIntent,
+  context?: MatchContext
+): IsoMatch[] {
   if (intent === "unknown") return matches;
 
   // 시각 중증/실명 감지 (컨텍스트에서)
-  const text = `${context?.userMessage ?? ""} ${context?.analysisSummary ?? ""}`.toLowerCase();
+  const text = `${context?.userMessage ?? ""} ${
+    context?.analysisSummary ?? ""
+  }`.toLowerCase();
   const severeVisualKeywords = [
-    "앞이 안 보", "앞이 안보", "앞이 안 보이", "앞이 안보이",
-    "시각 중증", "맹인", "실명", "blind", "앞이 안 보임", "앞이 안보임",
-    "전혀 안 보", "전혀 안보", "하나도 안 보", "하나도 안보"
+    "앞이 안 보",
+    "앞이 안보",
+    "앞이 안 보이",
+    "앞이 안보이",
+    "시각 중증",
+    "맹인",
+    "실명",
+    "blind",
+    "앞이 안 보임",
+    "앞이 안보임",
+    "전혀 안 보",
+    "전혀 안보",
+    "하나도 안 보",
+    "하나도 안보",
   ];
-  const isSevereVisualImpairment = severeVisualKeywords.some((k) => text.includes(k)) ||
+  const isSevereVisualImpairment =
+    severeVisualKeywords.some((k) => text.includes(k)) ||
     (context?.icfCodes.some((c) => c.toLowerCase().startsWith("b210")) &&
-      (text.includes("중증") || text.includes("심각") || text.includes("전혀") || text.includes("하나도")));
+      (text.includes("중증") ||
+        text.includes("심각") ||
+        text.includes("전혀") ||
+        text.includes("하나도")));
 
   // 의도별 하드 제외 리스트 (공백 제거된 ISO prefix)
   // 보조공학사 기본 지식: 장애 유형별 부적절한 보조기기 제외
@@ -687,8 +855,24 @@ function filterByIntent(matches: IsoMatch[], intent: PrimaryIntent, context?: Ma
     communication: ["1206", "1222", "1223", "2203", "2206", "2106"], // 이동 보조, 시각, 청각 제거
     self_care_feeding: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
     self_care_bathing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
-    self_care_dressing: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
-    self_care_toileting: ["1222", "1223", "1206", "2203", "2206", "2106", "2230"], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_dressing: [
+      "1222",
+      "1223",
+      "1206",
+      "2203",
+      "2206",
+      "2106",
+      "2230",
+    ], // 이동 보조, 시각, 청각, 의사소통 제거
+    self_care_toileting: [
+      "1222",
+      "1223",
+      "1206",
+      "2203",
+      "2206",
+      "2106",
+      "2230",
+    ], // 이동 보조, 시각, 청각, 의사소통 제거
     unknown: [],
   };
 

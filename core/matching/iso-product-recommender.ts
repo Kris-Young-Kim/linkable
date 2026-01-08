@@ -13,7 +13,10 @@
 
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import type { IsoMatch } from "./iso-mapping";
-import { matchProductToIcf, combineProductIcfScore } from "./product-icf-matcher";
+import {
+  matchProductToIcf,
+  combineProductIcfScore,
+} from "./product-icf-matcher";
 import { createEmbedding } from "@/lib/embeddings/gemini-embedding";
 import { findIcfCode } from "@/core/assessment/icf-codes";
 import { logEvent } from "@/lib/logging";
@@ -127,7 +130,11 @@ function areIsoCodesRelated(
   }
 
   // Division 레벨: 같은 Subclass 내 Division만 관련
-  if (target.division && candidate.division && target.subclass === candidate.subclass) {
+  if (
+    target.division &&
+    candidate.division &&
+    target.subclass === candidate.subclass
+  ) {
     return true;
   }
 
@@ -190,12 +197,12 @@ export async function recommendProductsByIsoCode(
       const isoParts = isoCode.split(" ").filter(Boolean);
       const isoClass = isoParts[0]; // "12"
       const isoSubclass = isoParts[1]; // "23" (있을 경우)
-      
+
       // Subclass 레벨까지 일치하는 관련 제품만 허용
       // 예: "12 23" (전동휠체어) 요청 시 "12 23 XX" 또는 직접 관련된 "12 22"만 포함
       // "12 06" (보행기), "12 31" (체위 변경) 등은 제외
       const relatedIsoCodes: string[] = [];
-      
+
       // 명시적으로 관련된 ISO 코드 매핑 (전문가 지식 기반)
       const relatedIsoMapping: Record<string, string[]> = {
         // 이동 보조기기 (Class 12)
@@ -203,14 +210,14 @@ export async function recommendProductsByIsoCode(
         "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
         "12 06": [], // 보행기 → 관련 제품 없음 (독립적)
         "12 31": [], // 체위 변경 → 관련 제품 없음 (독립적)
-        
+
         // 식사 보조기기 (Class 15)
         "15 09": [], // 식사 보조기기 → 관련 제품 없음 (독립적)
-        
+
         // 의사소통 보조기기 (Class 22)
         "22 30": [], // 의사소통 보조기기 → 관련 제품 없음 (독립적)
       };
-      
+
       // 명시적 매핑이 있으면 사용
       if (relatedIsoMapping[isoCode]) {
         relatedIsoCodes.push(...relatedIsoMapping[isoCode]);
@@ -221,7 +228,7 @@ export async function recommendProductsByIsoCode(
         // 주의: Division 레벨 제품은 정확한 매칭으로 처리되므로 여기서는 제외
         // 관련 제품은 명시적 매핑이 있는 경우에만 포함
       }
-      
+
       // 관련 ISO 코드가 있을 때만 검색
       if (relatedIsoCodes.length > 0) {
         const { data: relatedData, error: relatedError } = await supabase
@@ -240,7 +247,9 @@ export async function recommendProductsByIsoCode(
 
     // 3. 제품 품질 지표 조회 (비동기, 병렬 처리)
     const qualityMetricsPromise = useQualityMetrics
-      ? getProductQualityMetrics([...exactProducts, ...relatedProducts].map((p) => p.id))
+      ? getProductQualityMetrics(
+          [...exactProducts, ...relatedProducts].map((p) => p.id)
+        )
       : Promise.resolve(new Map<string, ProductQualityMetrics>());
 
     // 4. 제품 점수 계산 (다층 점수 시스템)
@@ -273,13 +282,13 @@ export async function recommendProductsByIsoCode(
         const bExact = b.iso_code === isoCode;
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
-        
+
         // 2순위: 우선순위
         if (a.priority !== b.priority) return b.priority - a.priority;
-        
+
         // 3순위: 점수
         if (Math.abs(a.score - b.score) > 0.05) return b.score - a.score;
-        
+
         // 4순위: 품질 점수
         const aQuality = a.scoreBreakdown?.qualityScore || 0;
         const bQuality = b.scoreBreakdown?.qualityScore || 0;
@@ -446,7 +455,10 @@ async function calculateAdvancedProductScores(
     try {
       icfEmbedding = await createEmbedding(icfText);
     } catch (error) {
-      console.warn("[Product Recommender] Failed to create ICF embedding:", error);
+      console.warn(
+        "[Product Recommender] Failed to create ICF embedding:",
+        error
+      );
     }
   }
 
@@ -463,7 +475,7 @@ async function calculateAdvancedProductScores(
 
       // 1. ISO 코드 매칭 점수 (기본 점수) - 정확한 매칭 우선순위 대폭 강화
       const isExactMatch = product.iso_code === targetIsoCode;
-      
+
       // 관련 매칭: Subclass 레벨 필터링을 통과한 제품만 관련 제품으로 간주
       // areIsoCodesRelated 함수를 사용하여 관련 여부 확인
       // null 체크: product.iso_code가 null이면 관련 매칭 없음
@@ -584,7 +596,7 @@ async function calculateAdvancedProductScores(
 
 /**
  * 신뢰도 기반 동적 가중치로 최종 점수 계산
- * 
+ *
  * 각 점수 요소의 신뢰도를 계산하고, 신뢰도가 높은 요소의 가중치를 동적으로 증가시킴
  */
 function calculateWeightedScore(
@@ -609,11 +621,23 @@ function calculateWeightedScore(
 
   // 각 점수 요소의 신뢰도 계산
   const confidences = {
-    isoMatch: calculateIsoMatchConfidence(breakdown.isoMatch, flags.isExactMatch),
-    semanticMatch: calculateSemanticMatchConfidence(breakdown.semanticMatch, flags.hasSemanticMatch),
+    isoMatch: calculateIsoMatchConfidence(
+      breakdown.isoMatch,
+      flags.isExactMatch
+    ),
+    semanticMatch: calculateSemanticMatchConfidence(
+      breakdown.semanticMatch,
+      flags.hasSemanticMatch
+    ),
     contextMatch: calculateContextMatchConfidence(breakdown.contextMatch),
-    qualityScore: calculateQualityScoreConfidence(breakdown.qualityScore, flags.hasQualityMetrics),
-    directIcfMatch: calculateDirectIcfMatchConfidence(breakdown.directIcfMatch, flags.hasDirectIcfMatch),
+    qualityScore: calculateQualityScoreConfidence(
+      breakdown.qualityScore,
+      flags.hasQualityMetrics
+    ),
+    directIcfMatch: calculateDirectIcfMatchConfidence(
+      breakdown.directIcfMatch,
+      flags.hasDirectIcfMatch
+    ),
   };
 
   // 상황별 기본 가중치 조정
@@ -648,10 +672,14 @@ function calculateWeightedScore(
   // 신뢰도가 높으면 가중치 증가 (0.5 ~ 1.5 범위)
   const weights = {
     isoMatch: baseWeights.isoMatch * (0.7 + confidences.isoMatch * 0.6),
-    semanticMatch: baseWeights.semanticMatch * (0.7 + confidences.semanticMatch * 0.6),
-    contextMatch: baseWeights.contextMatch * (0.7 + confidences.contextMatch * 0.6),
-    qualityScore: baseWeights.qualityScore * (0.7 + confidences.qualityScore * 0.6),
-    directIcfMatch: baseWeights.directIcfMatch * (0.7 + confidences.directIcfMatch * 0.6),
+    semanticMatch:
+      baseWeights.semanticMatch * (0.7 + confidences.semanticMatch * 0.6),
+    contextMatch:
+      baseWeights.contextMatch * (0.7 + confidences.contextMatch * 0.6),
+    qualityScore:
+      baseWeights.qualityScore * (0.7 + confidences.qualityScore * 0.6),
+    directIcfMatch:
+      baseWeights.directIcfMatch * (0.7 + confidences.directIcfMatch * 0.6),
   };
 
   // 가중치 정규화
@@ -676,7 +704,10 @@ function calculateWeightedScore(
 /**
  * ISO 매칭 점수의 신뢰도 계산
  */
-function calculateIsoMatchConfidence(score: number, isExactMatch: boolean): number {
+function calculateIsoMatchConfidence(
+  score: number,
+  isExactMatch: boolean
+): number {
   if (isExactMatch) {
     return 1.0; // 정확한 매칭은 최고 신뢰도
   }
@@ -687,7 +718,10 @@ function calculateIsoMatchConfidence(score: number, isExactMatch: boolean): numb
 /**
  * 시맨틱 매칭 점수의 신뢰도 계산
  */
-function calculateSemanticMatchConfidence(score: number, hasMatch: boolean): number {
+function calculateSemanticMatchConfidence(
+  score: number,
+  hasMatch: boolean
+): number {
   if (!hasMatch || score === 0) {
     return 0.3; // 매칭이 없으면 낮은 신뢰도
   }
@@ -706,7 +740,10 @@ function calculateContextMatchConfidence(score: number): number {
 /**
  * 품질 점수의 신뢰도 계산
  */
-function calculateQualityScoreConfidence(score: number, hasMetrics: boolean): number {
+function calculateQualityScoreConfidence(
+  score: number,
+  hasMetrics: boolean
+): number {
   if (!hasMetrics) {
     return 0.2; // 품질 지표가 없으면 낮은 신뢰도
   }
@@ -717,7 +754,10 @@ function calculateQualityScoreConfidence(score: number, hasMetrics: boolean): nu
 /**
  * 직접 ICF 매칭 점수의 신뢰도 계산
  */
-function calculateDirectIcfMatchConfidence(score: number, hasMatch: boolean): number {
+function calculateDirectIcfMatchConfidence(
+  score: number,
+  hasMatch: boolean
+): number {
   if (!hasMatch || score === 0) {
     return 0.3; // 매칭이 없으면 낮은 신뢰도
   }
@@ -817,13 +857,15 @@ function calculateQualityScore(metrics: ProductQualityMetrics): number {
   // 효과성 점수 (0-0.2점)
   // 효과성 점수가 높을수록 좋은 제품
   if (metrics.totalEvaluations > 0) {
-    const effectivenessScore = Math.min(metrics.averageEffectivenessScore / 20, 1) * 0.2; // 최대 20점 기준
+    const effectivenessScore =
+      Math.min(metrics.averageEffectivenessScore / 20, 1) * 0.2; // 최대 20점 기준
     score += effectivenessScore;
   }
 
   // 신뢰도 보너스 (샘플 수가 많을수록 신뢰도 높음)
   const sampleBonus = Math.min(
-    (metrics.totalClicks + metrics.totalFeedbacks + metrics.totalEvaluations) / 100,
+    (metrics.totalClicks + metrics.totalFeedbacks + metrics.totalEvaluations) /
+      100,
     0.1
   );
   score += sampleBonus;
@@ -878,21 +920,26 @@ async function getProductQualityMetrics(
       const clickThroughRate = totalClicks > 0 ? clickedCount / totalClicks : 0;
 
       // 피드백 계산
-      const relatedRecs = recommendationsForFeedback?.filter(
-        (r) => r.product_id === productId
-      ) || [];
-      const relatedConsultations = new Set(relatedRecs.map((r) => r.consultation_id));
-      const feedbacks = feedbackData?.filter((f) =>
-        relatedConsultations.has(f.consultation_id)
-      ) || [];
+      const relatedRecs =
+        recommendationsForFeedback?.filter((r) => r.product_id === productId) ||
+        [];
+      const relatedConsultations = new Set(
+        relatedRecs.map((r) => r.consultation_id)
+      );
+      const feedbacks =
+        feedbackData?.filter((f) =>
+          relatedConsultations.has(f.consultation_id)
+        ) || [];
       const totalFeedbacks = feedbacks.length;
       const averageFeedbackRating =
         totalFeedbacks > 0
-          ? feedbacks.reduce((sum, f) => sum + (f.accuracy_rating || 0), 0) / totalFeedbacks
+          ? feedbacks.reduce((sum, f) => sum + (f.accuracy_rating || 0), 0) /
+            totalFeedbacks
           : 0;
 
       // 효과성 점수 계산
-      const evaluations = ippaData?.filter((e) => e.product_id === productId) || [];
+      const evaluations =
+        ippaData?.filter((e) => e.product_id === productId) || [];
       const totalEvaluations = evaluations.length;
       const averageEffectivenessScore =
         totalEvaluations > 0
@@ -912,7 +959,10 @@ async function getProductQualityMetrics(
       });
     }
   } catch (error) {
-    console.error("[Product Recommender] Failed to get quality metrics:", error);
+    console.error(
+      "[Product Recommender] Failed to get quality metrics:",
+      error
+    );
   }
 
   return metricsMap;
@@ -1113,7 +1163,9 @@ function deduplicateAndRescoreProducts(
 /**
  * 카테고리별 다양화 (중복 카테고리 제품 제한)
  */
-function diversifyByCategory(recommendations: ProductRecommendation[]): ProductRecommendation[] {
+function diversifyByCategory(
+  recommendations: ProductRecommendation[]
+): ProductRecommendation[] {
   const categoryCount = new Map<string, number>();
   const maxPerCategory = 3; // 카테고리당 최대 제품 수
 
@@ -1166,10 +1218,14 @@ export function formatProductRecommendations(
     score_breakdown: rec.scoreBreakdown
       ? {
           iso_match: Math.round(rec.scoreBreakdown.isoMatch * 100) / 100,
-          semantic_match: Math.round(rec.scoreBreakdown.semanticMatch * 100) / 100,
-          context_match: Math.round(rec.scoreBreakdown.contextMatch * 100) / 100,
-          quality_score: Math.round(rec.scoreBreakdown.qualityScore * 100) / 100,
-          direct_icf_match: Math.round(rec.scoreBreakdown.directIcfMatch * 100) / 100,
+          semantic_match:
+            Math.round(rec.scoreBreakdown.semanticMatch * 100) / 100,
+          context_match:
+            Math.round(rec.scoreBreakdown.contextMatch * 100) / 100,
+          quality_score:
+            Math.round(rec.scoreBreakdown.qualityScore * 100) / 100,
+          direct_icf_match:
+            Math.round(rec.scoreBreakdown.directIcfMatch * 100) / 100,
         }
       : undefined,
   }));
