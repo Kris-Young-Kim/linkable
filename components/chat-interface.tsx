@@ -627,7 +627,7 @@ export function ChatInterface() {
               if (payload.isRecommendationRequest) {
                 console.log("[chat] Recommendation request detected, ending chat and showing CTA");
                 setChatEnded(true);
-                if (payload.icfAnalysis || payload.isoMatches?.length > 0) {
+                if (payload.icfAnalysis || (payload.isoMatches?.length ?? 0) > 0) {
                   setShowRecommendationCTA(true);
                 }
               }
@@ -839,7 +839,7 @@ export function ChatInterface() {
                 if (payload.isRecommendationRequest) {
                   console.log("[chat] Recommendation request detected, ending chat and showing CTA");
                   setChatEnded(true);
-                  if (payload.icfAnalysis || payload.isoMatches?.length > 0) {
+                  if (payload.icfAnalysis || (payload.isoMatches?.length ?? 0) > 0) {
                     setShowRecommendationCTA(true);
                   }
                 }
