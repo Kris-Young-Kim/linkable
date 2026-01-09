@@ -214,14 +214,26 @@ async function syncProductsLocal(
     errors: [],
   }
 
+  // ISO 코드 변환 유틸리티 import
+  const { convertToDivisionLevel } = await import("../lib/utils/iso-code-converter");
+
   for (const product of products) {
     try {
+      // ISO 코드를 Division 레벨로 변환
+      let isoCode = product.iso_code;
+      if (isoCode && isoCode !== "N999999" && isoCode !== "00 00") {
+        const convertedCode = await convertToDivisionLevel(isoCode, supabase);
+        if (convertedCode) {
+          isoCode = convertedCode;
+        }
+      }
+
       // 기존 상품 확인 (이름과 ISO 코드로)
       const { data: existing } = await supabase
         .from("products")
         .select("id")
         .eq("name", product.name)
-        .eq("iso_code", product.iso_code)
+        .eq("iso_code", isoCode)
         .maybeSingle()
 
       if (existing) {
@@ -230,6 +242,7 @@ async function syncProductsLocal(
           .from("products")
           .update({
             ...product,
+            iso_code: isoCode,
             updated_at: new Date().toISOString(),
           })
           .eq("id", existing.id)
@@ -241,13 +254,14 @@ async function syncProductsLocal(
         }
 
         result.updated++
-        console.log(`  🔄 업데이트: ${product.name} (ISO: ${product.iso_code})`)
+        console.log(`  🔄 업데이트: ${product.name} (ISO: ${isoCode}${isoCode !== product.iso_code ? `, 변환됨: ${product.iso_code} → ${isoCode}` : ''})`)
       } else {
         // 신규 생성
         const { data, error } = await supabase
           .from("products")
           .insert({
             ...product,
+            iso_code: isoCode,
             is_active: product.is_active ?? true,
           })
           .select("id")
@@ -258,7 +272,7 @@ async function syncProductsLocal(
         }
 
         result.created++
-        console.log(`  ✅ 생성: ${product.name} (ISO: ${product.iso_code})`)
+        console.log(`  ✅ 생성: ${product.name} (ISO: ${isoCode}${isoCode !== product.iso_code ? `, 변환됨: ${product.iso_code} → ${isoCode}` : ''})`)
       }
     } catch (error) {
       result.failed++

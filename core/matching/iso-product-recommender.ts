@@ -97,9 +97,16 @@ function parseIsoCodeHierarchy(isoCode: string): {
 }
 
 /**
- * 두 ISO 코드가 관련되어 있는지 확인 (Subclass 레벨까지 일치 필요)
- * @param targetIsoCode 목표 ISO 코드
- * @param candidateIsoCode 후보 ISO 코드 (null 가능)
+ * 두 ISO 코드가 관련되어 있는지 확인 (Division 레벨 기준)
+ * 
+ * ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨(6자리)에만 존재합니다.
+ * 관련 제품 판단 기준:
+ * - 같은 Division: 관련 없음 (정확한 매칭)
+ * - 같은 Subclass 내 다른 Division: 관련 있음
+ * - 다른 Subclass: 관련 없음 (너무 넓은 매칭 방지)
+ * 
+ * @param targetIsoCode 목표 ISO 코드 (Division 레벨 권장)
+ * @param candidateIsoCode 후보 ISO 코드 (null 가능, Division 레벨 권장)
  * @returns 관련 여부
  */
 function areIsoCodesRelated(
@@ -119,27 +126,32 @@ function areIsoCodesRelated(
     return false;
   }
 
-  // 명시적 관련 매핑 확인
+  // 명시적 관련 매핑 확인 (Division 레벨 기준)
+  // Subclass 레벨 코드도 지원하지만, Division 레벨로 확장하여 비교
   const relatedIsoMapping: Record<string, string[]> = {
-    "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
-    "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
+    "12 23": ["12 22"], // 전동휠체어 → 수동휠체어 (Subclass 레벨)
+    "12 22": ["12 23"], // 수동휠체어 → 전동휠체어 (Subclass 레벨)
   };
 
-  if (relatedIsoMapping[target.fullCode]?.includes(candidate.fullCode)) {
+  // Subclass 레벨 매핑 확인 (Division 레벨 코드도 Subclass로 변환하여 비교)
+  const targetSubclass = target.division ? target.subclass : target.fullCode;
+  const candidateSubclass = candidate.division ? candidate.subclass : candidate.fullCode;
+  
+  if (relatedIsoMapping[targetSubclass || target.fullCode]?.includes(candidateSubclass || candidate.fullCode)) {
     return true;
   }
 
-  // Division 레벨: 같은 Subclass 내 Division만 관련
+  // Division 레벨: 같은 Subclass 내 다른 Division만 관련
   if (
     target.division &&
     candidate.division &&
-    target.subclass === candidate.subclass
+    target.subclass === candidate.subclass &&
+    target.division !== candidate.division
   ) {
     return true;
   }
 
-  // Subclass 레벨: 같은 Class 내에서도 다른 Subclass는 관련 없음
-  // (너무 넓은 매칭 방지)
+  // 다른 경우는 관련 없음 (너무 넓은 매칭 방지)
   return false;
 }
 
@@ -168,13 +180,35 @@ export async function recommendProductsByIsoCode(
   const supabase = getSupabaseServerClient();
 
   try {
+    // ISO 코드 레벨 파싱
+    const isoParts = isoCode.split(" ").filter(Boolean);
+    const isDivision = isoParts.length >= 3; // Division 레벨 (6자리)
+    const isSubclass = isoParts.length === 2; // Subclass 레벨 (4자리)
+    const isClass = isoParts.length === 1; // Class 레벨 (2자리)
+
     // 1. 정확한 ISO 코드 매칭 제품 검색
     let exactQuery = supabase
       .from("products")
       .select("*")
-      .eq("iso_code", isoCode)
       .eq("is_active", true)
       .order("created_at", { ascending: false });
+
+    // Division 레벨이면 정확히 일치하는 제품만 검색
+    if (isDivision) {
+      exactQuery = exactQuery.eq("iso_code", isoCode);
+    }
+    // Subclass 레벨이면 해당 Subclass의 모든 Division 제품 검색
+    else if (isSubclass) {
+      exactQuery = exactQuery.like("iso_code", `${isoCode} %`);
+    }
+    // Class 레벨이면 해당 Class의 모든 Division 제품 검색
+    else if (isClass) {
+      exactQuery = exactQuery.like("iso_code", `${isoCode} %`);
+    }
+    // 기타는 정확히 일치
+    else {
+      exactQuery = exactQuery.eq("iso_code", isoCode);
+    }
 
     const { data: exactProducts, error: exactError } = await exactQuery;
     if (exactError) {
@@ -187,23 +221,17 @@ export async function recommendProductsByIsoCode(
       };
     }
 
-    // 2. 관련 ISO 코드 제품 검색 (부분 매칭) - Subclass 레벨 필터링 강화
+    // 2. 관련 ISO 코드 제품 검색 (Division 레벨 기준)
     let relatedProducts: any[] = [];
     if (includeRelated && exactProducts.length < limit) {
       // ISO 코드 계층 구조 기반 스마트 필터링
-      // Class 레벨(2자리): "12" → 너무 넓음, 사용하지 않음
-      // Subclass 레벨(4자리): "12 23" → 적절한 범위
-      // Division 레벨(6자리): "12 23 01" → 가장 정확
+      // Division 레벨(6자리): "12 23 03" → 가장 정확, 정확히 일치하는 제품만 검색
+      // Subclass 레벨(4자리): "12 23" → 해당 Subclass의 모든 Division 제품 검색
+      // Class 레벨(2자리): "12" → 해당 Class의 모든 Division 제품 검색 (너무 넓음, 권장하지 않음)
       const isoParts = isoCode.split(" ").filter(Boolean);
-      const isoClass = isoParts[0]; // "12"
-      const isoSubclass = isoParts[1]; // "23" (있을 경우)
 
-      // Subclass 레벨까지 일치하는 관련 제품만 허용
-      // 예: "12 23" (전동휠체어) 요청 시 "12 23 XX" 또는 직접 관련된 "12 22"만 포함
-      // "12 06" (보행기), "12 31" (체위 변경) 등은 제외
-      const relatedIsoCodes: string[] = [];
-
-      // 명시적으로 관련된 ISO 코드 매핑 (전문가 지식 기반)
+      // 명시적으로 관련된 ISO 코드 매핑 (전문가 지식 기반, Subclass 레벨)
+      // Division 레벨로 자동 확장됨
       const relatedIsoMapping: Record<string, string[]> = {
         // 이동 보조기기 (Class 12)
         "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
@@ -218,15 +246,34 @@ export async function recommendProductsByIsoCode(
         "22 30": [], // 의사소통 보조기기 → 관련 제품 없음 (독립적)
       };
 
-      // 명시적 매핑이 있으면 사용
-      if (relatedIsoMapping[isoCode]) {
-        relatedIsoCodes.push(...relatedIsoMapping[isoCode]);
-      } else if (isoSubclass) {
-        // Subclass가 있으면 같은 Subclass 내 Division 레벨 제품만 허용
-        // 예: "12 23" → "12 23 01", "12 23 02" 등만 허용
-        // Division 레벨 검색: 같은 Subclass 내에서만 검색
-        // 주의: Division 레벨 제품은 정확한 매칭으로 처리되므로 여기서는 제외
-        // 관련 제품은 명시적 매핑이 있는 경우에만 포함
+      // ISO 코드를 Subclass 레벨로 변환하여 매핑 확인
+      const isoSubclass = isoParts.length >= 2 
+        ? `${isoParts[0]} ${isoParts[1]}` 
+        : isoCode;
+
+      const relatedIsoCodes: string[] = [];
+
+      // 명시적 매핑이 있으면 Division 레벨로 확장
+      if (relatedIsoMapping[isoSubclass]) {
+        for (const relatedCode of relatedIsoMapping[isoSubclass]) {
+          const relatedParts = relatedCode.split(" ").filter(Boolean);
+          if (relatedParts.length === 2) {
+            // Subclass 레벨이면 해당 Subclass의 모든 Division 검색
+            const { data: relatedDivisions } = await supabase
+              .from("iso_codes")
+              .select("code")
+              .eq("parent_code", relatedCode)
+              .eq("level", 3) // Division 레벨만
+              .eq("is_active", true);
+            
+            if (relatedDivisions && relatedDivisions.length > 0) {
+              relatedIsoCodes.push(...relatedDivisions.map((d: any) => d.code));
+            }
+          } else if (relatedParts.length >= 3) {
+            // 이미 Division 레벨이면 그대로 사용
+            relatedIsoCodes.push(relatedCode);
+          }
+        }
       }
 
       // 관련 ISO 코드가 있을 때만 검색

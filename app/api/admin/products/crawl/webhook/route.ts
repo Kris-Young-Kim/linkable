@@ -83,11 +83,22 @@ export async function POST(req: NextRequest) {
 
                 // 4. 서비스 데이터(products) 동기화
                 // TODO: 향후 별도의 매핑 엔진(Mappping Engine)으로 분리 고려
+                
+                // ISO 코드를 Division 레벨로 변환
+                let isoCode = p.iso_code || "N999999";
+                if (isoCode !== "N999999" && isoCode !== "00 00") {
+                    const { convertToDivisionLevel } = await import("@/lib/utils/iso-code-converter");
+                    const convertedCode = await convertToDivisionLevel(isoCode, supabase);
+                    if (convertedCode) {
+                        isoCode = convertedCode;
+                    }
+                }
+                
                 const { error: productError } = await supabase
                     .from("products")
                     .upsert({
                         name: p.title,
-                        iso_code: p.iso_code || "N999999",
+                        iso_code: isoCode,
                         price: p.price || null,
                         purchase_link: p.product_url,
                         image_url: p.image_url || null,

@@ -1,0 +1,1246 @@
+[
+  {
+    "testCase": {
+      "name": "식사 보조기기",
+      "icfCodes": [
+        "d550",
+        "b765"
+      ],
+      "expectedIsoSubclass": "15 09",
+      "expectedIsoDivision": "15 09 13",
+      "description": "식사 활동과 손 떨림이 있는 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "15 09 03",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 06",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 09",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 13",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 16",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 18",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 21",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 24",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 27",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09 30",
+          "score": 1.159,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.1590000000000003,
+      "maxScore": 1.159,
+      "matchAccuracy": 1
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "15 09",
+          "score": 1.22,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09",
+          "score": 1.1,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 09",
+          "score": 1,
+          "label": "식사 및 음주 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "24 06",
+          "score": 0.98,
+          "label": "손 떨림 보정 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0750000000000002,
+      "maxScore": 1.22,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.08400000000000007,
+      "accuracyDiff": 0.19999999999999996
+    }
+  },
+  {
+    "testCase": {
+      "name": "전동 휠체어",
+      "icfCodes": [
+        "d465",
+        "d450"
+      ],
+      "expectedIsoSubclass": "12 23",
+      "description": "전동 휠체어가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "12 23 03",
+          "score": 1.121,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 06",
+          "score": 1.121,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 09",
+          "score": 1.121,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 12",
+          "score": 1.121,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 15",
+          "score": 1.121,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 18",
+          "score": 1.121,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 03",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 06",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 07",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 09",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.1096,
+      "maxScore": 1.121,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "12 23",
+          "score": 1.18,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06",
+          "score": 1.15,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22",
+          "score": 1.1,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 30",
+          "score": 1.05,
+          "label": "수직 접근성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 24",
+          "score": 0.92,
+          "label": "집 구조 개선 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 03",
+          "score": 0.9,
+          "label": "한팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 08",
+          "score": 0.85,
+          "label": "안내 지팡이 및 상징 지팡이",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0214285714285716,
+      "maxScore": 1.18,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.08817142857142835,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "수동 휠체어",
+      "icfCodes": [
+        "d465"
+      ],
+      "expectedIsoSubclass": "12 22",
+      "description": "수동 휠체어가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "12 22 03",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 06",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 09",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 12",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 15",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 18",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 21",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 22 24",
+          "score": 1.045,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 03",
+          "score": 0.9309999999999999,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23 06",
+          "score": 0.9309999999999999,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0221999999999998,
+      "maxScore": 1.045,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "12 22",
+          "score": 1.1,
+          "label": "수동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23",
+          "score": 0.98,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.04,
+      "maxScore": 1.1,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": -0.01780000000000026,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "보행 보조기기",
+      "icfCodes": [
+        "d450"
+      ],
+      "expectedIsoSubclass": "12 06",
+      "description": "보행 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "12 06 03",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 06",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 07",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 09",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 12",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 06 15",
+          "score": 1.0924999999999998,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 30 03",
+          "score": 0.9974999999999999,
+          "label": "수직 접근성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 30 05",
+          "score": 0.9974999999999999,
+          "label": "수직 접근성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 30 07",
+          "score": 0.9974999999999999,
+          "label": "수직 접근성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 30 08",
+          "score": 0.9974999999999999,
+          "label": "수직 접근성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0544999999999998,
+      "maxScore": 1.0924999999999998,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "12 06",
+          "score": 1.15,
+          "label": "양팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 30",
+          "score": 1.05,
+          "label": "수직 접근성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 23",
+          "score": 0.98,
+          "label": "전동 휠체어",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 24",
+          "score": 0.92,
+          "label": "집 구조 개선 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 03",
+          "score": 0.9,
+          "label": "한팔 조작 보행 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 08",
+          "score": 0.85,
+          "label": "안내 지팡이 및 상징 지팡이",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 0.9750000000000001,
+      "maxScore": 1.15,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.07949999999999968,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "목욕 보조기기",
+      "icfCodes": [
+        "d510",
+        "d520"
+      ],
+      "expectedIsoSubclass": "15 03",
+      "description": "목욕 및 샤워 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "15 03 03",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 06",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 09",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 12",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 15",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 18",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 21",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 24",
+          "score": 1.0924999999999998,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 03",
+          "score": 1.064,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 06",
+          "score": 1.064,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0867999999999998,
+      "maxScore": 1.0924999999999998,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "15 03",
+          "score": 1.15,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03",
+          "score": 1.12,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03",
+          "score": 1.08,
+          "label": "세면 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "09 33",
+          "score": 1.08,
+          "label": "세면, 목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "09 33",
+          "score": 1.05,
+          "label": "목욕 및 샤워 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "09 33",
+          "score": 1,
+          "label": "세면 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 04",
+          "score": 0.92,
+          "label": "착의 및 몸단장 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0571428571428572,
+      "maxScore": 1.15,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.029657142857142604,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "시각 보조기기",
+      "icfCodes": [
+        "b210",
+        "d110"
+      ],
+      "expectedIsoSubclass": "22 03",
+      "description": "시각 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "22 03 03",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03 06",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03 09",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03 12",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03 15",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03 18",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03 21",
+          "score": 1.14,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 06 03",
+          "score": 0.9309999999999999,
+          "label": "읽기 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 06 06",
+          "score": 0.9309999999999999,
+          "label": "읽기 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 06 09",
+          "score": 0.9309999999999999,
+          "label": "읽기 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0772999999999997,
+      "maxScore": 1.14,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "22 03",
+          "score": 1.2,
+          "label": "시각 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 06",
+          "score": 0.98,
+          "label": "읽기 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "22 03",
+          "score": 0.95,
+          "label": "시각 관련 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 06",
+          "score": 0.9,
+          "label": "조명 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0075,
+      "maxScore": 1.2,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.06979999999999964,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "의사소통 보조기기",
+      "icfCodes": [
+        "d360",
+        "e125"
+      ],
+      "expectedIsoSubclass": "22 30",
+      "description": "의사소통 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "22 30",
+          "score": 1.121,
+          "label": "의사소통 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.121,
+      "maxScore": 1.121,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "22 30",
+          "score": 1.18,
+          "label": "의사소통 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.18,
+      "maxScore": 1.18,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": -0.05899999999999994,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "체위 변경 보조기기",
+      "icfCodes": [
+        "b730",
+        "d410",
+        "d420"
+      ],
+      "expectedIsoSubclass": "12 31",
+      "description": "체위 변경 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "12 31 03",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 06",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 09",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 12",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 15",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 18",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 21",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 24",
+          "score": 1.159,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 03",
+          "score": 1.14,
+          "label": "체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31 06",
+          "score": 1.14,
+          "label": "체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.1552000000000002,
+      "maxScore": 1.159,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "12 31",
+          "score": 1.22,
+          "label": "근력 저하 체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31",
+          "score": 1.2,
+          "label": "체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 31",
+          "score": 1.12,
+          "label": "체위 변경 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "24 06",
+          "score": 0.94,
+          "label": "근력 저하 손 기능 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "06 03",
+          "score": 0.9,
+          "label": "관절 이동성 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 09",
+          "score": 0.9,
+          "label": "앉기 보조 가구",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 18",
+          "score": 0.88,
+          "label": "지지 손잡이 및 그랩바",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "18 18",
+          "score": 0.88,
+          "label": "지지 손잡이 및 그랩바",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0050000000000001,
+      "maxScore": 1.22,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.1502000000000001,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "가정생활 보조기기",
+      "icfCodes": [
+        "d630",
+        "d640"
+      ],
+      "expectedIsoSubclass": "12 21",
+      "description": "가정생활 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "15 06 03",
+          "score": 1.14,
+          "label": "요리 및 조리 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 06 06",
+          "score": 1.14,
+          "label": "요리 및 조리 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 06 09",
+          "score": 1.14,
+          "label": "요리 및 조리 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 06 15",
+          "score": 1.14,
+          "label": "요리 및 조리 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 06 18",
+          "score": 1.14,
+          "label": "요리 및 조리 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 1.0924999999999998,
+          "label": "식사 준비 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 05",
+          "score": 1.045,
+          "label": "청소 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 1.026,
+          "label": "가사 일 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 03",
+          "score": 0.9661499999999998,
+          "label": "음식 및 음료 준비 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03 06",
+          "score": 0.9661499999999998,
+          "label": "음식 및 음료 준비 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0795799999999995,
+      "maxScore": 1.14,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "15 06",
+          "score": 1.2,
+          "label": "요리 및 조리 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 1.15,
+          "label": "식사 준비 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 05",
+          "score": 1.1,
+          "label": "청소 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 1.08,
+          "label": "가사 일 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "15 03",
+          "score": 1.017,
+          "label": "음식 및 음료 준비 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 0.987,
+          "label": "가정생활 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 0.95,
+          "label": "가정생활 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "12 21",
+          "score": 0.9,
+          "label": "가사 활동 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.0479999999999998,
+      "maxScore": 1.2,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": 0.03157999999999972,
+      "accuracyDiff": 0
+    }
+  },
+  {
+    "testCase": {
+      "name": "청각 보조기기",
+      "icfCodes": [
+        "b230",
+        "d115"
+      ],
+      "expectedIsoSubclass": "21 06",
+      "description": "청각 보조가 필요한 경우"
+    },
+    "divisionLevel": {
+      "matches": [
+        {
+          "isoCode": "21 06",
+          "score": 1.178,
+          "label": "청각 보조기기(보청기)",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "21 27",
+          "score": 0.874,
+          "label": "평형/전정 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.026,
+      "maxScore": 1.178,
+      "matchAccuracy": 0.8
+    },
+    "subclassLevel": {
+      "matches": [
+        {
+          "isoCode": "21 06",
+          "score": 1.24,
+          "label": "청각 보조기기(보청기)",
+          "productCount": 0,
+          "topProductScores": []
+        },
+        {
+          "isoCode": "21 27",
+          "score": 0.92,
+          "label": "평형/전정 보조기기",
+          "productCount": 0,
+          "topProductScores": []
+        }
+      ],
+      "totalProducts": 0,
+      "avgScore": 1.08,
+      "maxScore": 1.24,
+      "matchAccuracy": 0.8
+    },
+    "comparison": {
+      "productCountDiff": 0,
+      "scoreDiff": -0.05400000000000005,
+      "accuracyDiff": 0
+    }
+  }
+]

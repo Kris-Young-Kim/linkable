@@ -1,4 +1,5 @@
 import { findIcfCode } from "../assessment/icf-codes";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 type IsoMappingRule = {
   icf: string[];
@@ -22,10 +23,15 @@ export type IsoMatch = {
  *
  * 참고: ISO 9999:2022 구조
  * - Class: 2자리 (예: 12, 15, 18)
- * - Subclass: 4자리 (예: 1202, 1509, 1830)
- * - Division: 6자리 (예: 120201, 150901, 183001)
+ * - Subclass: 4자리 (예: 12 23, 15 09, 18 30)
+ * - Division: 6자리 (예: 12 23 03, 15 09 13, 18 30 01)
  *
- * 코드 형식: Subclass 레벨 사용 (4자리), 표시는 공백 포함 (예: "12 02")
+ * 중요: 모든 제품은 Division 레벨(6자리)에만 분류됩니다.
+ * 이 매핑 테이블은 Subclass 레벨로 매핑하지만, getIsoMatchesAsync()를 통해
+ * 자동으로 Division 레벨로 확장됩니다.
+ *
+ * 코드 형식: Subclass 레벨 매핑 (4자리, 공백 포함 예: "15 09")
+ * → Division 레벨로 자동 확장 (6자리, 공백 포함 예: "15 09 13", "15 09 16", ...)
  */
 export const isoMappingTable: IsoMappingRule[] = [
   // 청각 및 의사소통 보조기기
@@ -168,7 +174,58 @@ export const isoMappingTable: IsoMappingRule[] = [
     baseScore: 0.7,
   },
 
-  // 가정 활동
+  // 가정 활동 (Class 12, Subclass 21: 가정생활 보조기기)
+  {
+    icf: ["d630", "d640", "d650", "d660"],
+    iso: "12 21",
+    label: "가정생활 보조기기",
+    description: "가정생활 전반을 돕는 종합 보조기기 (ISO 1221)",
+    baseScore: 0.75,
+  },
+  {
+    icf: ["d630", "d640", "d650"],
+    iso: "12 21",
+    label: "가정생활 보조기기",
+    description: "식사 준비, 가사, 가정 관리를 돕는 보조기기 (ISO 1221)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["d640", "d650"],
+    iso: "12 21",
+    label: "가사 활동 보조기기",
+    description: "가사 일과 가정 관리를 돕는 보조기기 (ISO 1221)",
+    baseScore: 0.7,
+  },
+  {
+    icf: ["d630"],
+    iso: "12 21",
+    label: "식사 준비 보조기기",
+    description: "식사 준비 및 요리를 돕는 보조기기 (ISO 1221)",
+    baseScore: 0.75,
+  },
+  {
+    icf: ["d640"],
+    iso: "12 21",
+    label: "가사 일 보조기기",
+    description: "가사 일을 돕는 보조기기 (ISO 1221)",
+    baseScore: 0.68,
+  },
+  {
+    icf: ["d650"],
+    iso: "12 21",
+    label: "가정 관리 보조기기",
+    description: "가정 관리 활동을 돕는 보조기기 (ISO 1221)",
+    baseScore: 0.65,
+  },
+  {
+    icf: ["d660"],
+    iso: "12 21",
+    label: "타인 돌보기 보조기기",
+    description: "가족 구성원 돌보기를 돕는 보조기기 (ISO 1221)",
+    baseScore: 0.6,
+  },
+
+  // 가정 활동 (Class 15: 자가관리 보조기기 - 요리 및 청소)
   {
     icf: ["d630", "d640", "d650"],
     iso: "15 03",
@@ -178,20 +235,85 @@ export const isoMappingTable: IsoMappingRule[] = [
   },
   {
     icf: ["d630"],
-    iso: "15 03",
-    label: "요리 준비 보조기기",
-    description: "식사 준비 및 요리를 돕는 보조기기 (ISO 1503)",
+    iso: "15 06",
+    label: "요리 및 조리 보조기기",
+    description: "식사 준비 및 요리를 돕는 보조기기 (ISO 1506)",
     baseScore: 0.8,
   },
   {
     icf: ["d640"],
-    iso: "15 12",
+    iso: "15 05",
     label: "청소 보조기기",
-    description: "가정 청소 활동을 돕는 보조기기 (ISO 1512)",
+    description: "가정 청소 활동을 돕는 보조기기 (ISO 1505)",
+    baseScore: 0.7,
+  },
+  {
+    icf: ["d650"],
+    iso: "15 05",
+    label: "가정 관리 보조기기",
+    description: "가정 관리 및 청소를 돕는 보조기기 (ISO 1505)",
+    baseScore: 0.65,
+  },
+
+  // 자가관리 (Class 15: 자가관리 보조기기)
+  {
+    icf: ["d510", "d520"],
+    iso: "15 03",
+    label: "목욕 및 샤워 보조기기",
+    description: "세면, 목욕, 샤워 활동을 돕는 보조기기 (ISO 1503)",
+    baseScore: 0.75,
+  },
+  {
+    icf: ["d510"],
+    iso: "15 03",
+    label: "세면 보조기기",
+    description: "세면 활동을 돕는 보조기기 (ISO 1503)",
+    baseScore: 0.68,
+  },
+  {
+    icf: ["d520"],
+    iso: "15 03",
+    label: "목욕 및 샤워 보조기기",
+    description: "목욕 및 샤워 활동을 돕는 보조기기 (ISO 1503)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["d540"],
+    iso: "15 04",
+    label: "착의 보조기기",
+    description: "옷 입기 활동을 돕는 보조기기 (ISO 1504)",
+    baseScore: 0.7,
+  },
+  {
+    icf: ["d540", "d520"],
+    iso: "15 04",
+    label: "착의 및 몸단장 보조기기",
+    description: "옷 입기 및 몸단장 활동을 돕는 보조기기 (ISO 1504)",
+    baseScore: 0.72,
+  },
+  {
+    icf: ["d560"],
+    iso: "15 09",
+    label: "음주 보조기기",
+    description: "음주 활동을 돕는 보조기기 (ISO 1509)",
+    baseScore: 0.65,
+  },
+  {
+    icf: ["d550", "d560"],
+    iso: "15 09",
+    label: "식사 및 음주 보조기기",
+    description: "식사와 음주 활동을 종합적으로 돕는 보조기기 (ISO 1509)",
+    baseScore: 0.8,
+  },
+  {
+    icf: ["d570"],
+    iso: "15 09",
+    label: "건강 관리 보조기기",
+    description: "자신의 건강 돌보기를 돕는 보조기기 (ISO 1509)",
     baseScore: 0.6,
   },
 
-  // 자가관리
+  // 자가관리 (기존 ISO 09 코드 유지 - 호환성)
   {
     icf: ["d510", "d520"],
     iso: "09 33",
@@ -283,8 +405,8 @@ export const isoMappingTable: IsoMappingRule[] = [
     baseScore: 0.72,
   },
   {
-    icf: ["b167", "d310"],
-    iso: "22 30",
+    icf: ["b167", "d310"], // 활동에 어려운 점 (행위)
+    iso: "22 30", // 제품 분류 
     label: "언어 이해 보조기기",
     description:
       "언어 정신 기능 및 구어 메시지 이해를 돕는 보조기기 (ISO 2230)",
@@ -460,6 +582,116 @@ const buildReason = (icfCodes: string[], label: string) => {
   return `${tokens} 이(가) 관찰되어 ${label} 솔루션을 추천합니다.`;
 };
 
+/**
+ * Subclass ISO 코드를 Division 레벨로 확장
+ * 
+ * ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨(6자리)에만 존재합니다.
+ * Subclass 레벨 매핑 결과를 Division 레벨로 확장하여 실제 제품을 검색할 수 있도록 합니다.
+ * 
+ * @param subclassCode Subclass 코드 (예: "15 09")
+ * @param supabase Supabase 클라이언트 (선택적)
+ * @returns Division 코드 배열 (예: ["15 09 13", "15 09 16", "15 09 18", ...])
+ */
+async function expandSubclassToDivisions(
+  subclassCode: string,
+  supabase?: any
+): Promise<string[]> {
+  const client = supabase || getSupabaseServerClient();
+
+  try {
+    // Subclass 코드 정규화
+    const normalizedSubclass = subclassCode.replace(/\s/g, "");
+    const subclassWithSpace = subclassCode.includes(" ")
+      ? subclassCode
+      : `${subclassCode.slice(0, 2)} ${subclassCode.slice(2)}`;
+
+    // parent_code가 이 Subclass인 모든 Division 조회
+    const { data: divisions, error } = await client
+      .from("iso_codes")
+      .select("code, name, level")
+      .or(`parent_code.eq.${subclassCode},parent_code.eq.${normalizedSubclass},parent_code.eq.${subclassWithSpace}`)
+      .eq("level", 3) // Division 레벨만
+      .eq("is_active", true)
+      .order("code", { ascending: true });
+
+    if (error) {
+      console.error(
+        `[expandSubclassToDivisions] Error expanding ${subclassCode}:`,
+        error
+      );
+      return []; // 에러 시 빈 배열 반환
+    }
+
+    if (divisions && divisions.length > 0) {
+      return divisions.map((div: any) => div.code);
+    }
+
+    // Division이 없으면 Subclass 자체를 반환 (폴백)
+    return [subclassCode];
+  } catch (error) {
+    console.error(
+      `[expandSubclassToDivisions] Exception expanding ${subclassCode}:`,
+      error
+    );
+    return [subclassCode]; // 예외 시 Subclass 자체 반환
+  }
+}
+
+/**
+ * ISO 매칭 결과를 Division 레벨로 확장
+ * @param matches 원본 ISO 매칭 결과
+ * @param supabase Supabase 클라이언트 (선택적)
+ * @returns Division 레벨로 확장된 ISO 매칭 결과
+ */
+export async function expandIsoMatchesToDivisions(
+  matches: IsoMatch[],
+  supabase?: any
+): Promise<IsoMatch[]> {
+  const expandedMatches: IsoMatch[] = [];
+
+  for (const match of matches) {
+    const isoCode = match.isoCode;
+    const parts = isoCode.split(" ").filter(Boolean);
+
+    // 이미 Division 레벨이면 그대로 추가
+    if (parts.length >= 3) {
+      expandedMatches.push(match);
+      continue;
+    }
+
+    // Subclass 레벨이면 Division으로 확장
+    if (parts.length === 2) {
+      const divisions = await expandSubclassToDivisions(isoCode, supabase);
+
+      // 각 Division에 대해 매칭 결과 생성
+      for (const divisionCode of divisions) {
+        expandedMatches.push({
+          ...match,
+          isoCode: divisionCode,
+          score: match.score * 0.95, // Division 확장 시 약간의 점수 감소 (추론 불확실성 반영)
+          reason: `${match.reason} (Division: ${divisionCode})`,
+        });
+      }
+    } else {
+      // Class 레벨이면 그대로 추가 (확장하지 않음, 너무 넓음)
+      expandedMatches.push(match);
+    }
+  }
+
+  // 점수 순으로 정렬
+  return expandedMatches.sort((a, b) => b.score - a.score);
+}
+
+/**
+ * ICF 코드로 ISO 매칭 (동기 버전, 하위 호환성 유지)
+ * 
+ * 주의: 이 함수는 Subclass 레벨 매칭 결과를 반환합니다.
+ * Division 레벨 매칭이 필요하면 getIsoMatchesAsync()를 사용하세요.
+ * 
+ * @param icfCodes ICF 코드 배열
+ * @returns Subclass 레벨 ISO 매칭 결과 (Division 확장 안 됨)
+ * @deprecated Division 레벨 매칭을 위해 getIsoMatchesAsync() 사용 권장
+ */
 export const getIsoMatches = (icfCodes: string[]): IsoMatch[] => {
   const normalized = icfCodes
     .map((code) => code.trim().toLowerCase())
@@ -498,3 +730,40 @@ export const getIsoMatches = (icfCodes: string[]): IsoMatch[] => {
     .filter((item): item is IsoMatch => item !== null)
     .sort((a, b) => b.score - a.score);
 };
+
+/**
+ * ICF 코드로 ISO 매칭 (Division 레벨로 확장된 비동기 버전)
+ * 
+ * ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨(6자리)에만 존재하므로,
+ * 이 함수는 Subclass 레벨 매핑 결과를 자동으로 Division 레벨로 확장합니다.
+ * 
+ * 예시:
+ * - 입력: ["d550", "b765"] (식사 + 손 떨림)
+ * - Subclass 매칭: "15 09" (식음용 보조기구)
+ * - Division 확장: ["15 09 13", "15 09 16", "15 09 18", ...] (커트러리, 컵, 접시 등)
+ * 
+ * @param icfCodes ICF 코드 배열
+ * @param options 옵션
+ * @param options.expandToDivisions Division 레벨로 확장할지 여부 (기본값: true)
+ * @param options.supabase Supabase 클라이언트 (선택적)
+ * @returns Division 레벨로 확장된 ISO 매칭 결과
+ */
+export async function getIsoMatchesAsync(
+  icfCodes: string[],
+  options?: {
+    expandToDivisions?: boolean; // Division 레벨로 확장할지 여부
+    supabase?: any; // Supabase 클라이언트 (선택적)
+  }
+): Promise<IsoMatch[]> {
+  const { expandToDivisions = true, supabase } = options || {};
+
+  // 기본 매칭 수행
+  const baseMatches = getIsoMatches(icfCodes);
+
+  // Division 레벨로 확장
+  if (expandToDivisions) {
+    return await expandIsoMatchesToDivisions(baseMatches, supabase);
+  }
+
+  return baseMatches;
+}

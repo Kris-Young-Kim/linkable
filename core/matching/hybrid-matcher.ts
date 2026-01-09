@@ -5,7 +5,8 @@
  * 가장 정확하고 신뢰할 수 있는 ICF-ISO 매칭을 제공합니다.
  */
 
-import { getIsoMatches } from "./iso-mapping";
+import { getIsoMatches, getIsoMatchesAsync } from "./iso-mapping";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { appendKeywordIsoMatches } from "./keyword-inference";
 import { semanticMatch } from "./semantic-matcher";
 import { inferIsoFromGraph } from "./knowledge-graph";
@@ -156,8 +157,14 @@ export async function hybridMatch(
       },
     });
 
-    // 1단계: 규칙 기반 매칭 (빠른 필터링)
-    const ruleMatches = getIsoMatches(context.icfCodes);
+    // 1단계: 규칙 기반 매칭 (Division 레벨로 확장)
+    // ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨에만 존재하므로
+    // Subclass 레벨 매칭 결과를 Division 레벨로 자동 확장
+    const supabase = getSupabaseServerClient();
+    const ruleMatches = await getIsoMatchesAsync(context.icfCodes, {
+      expandToDivisions: true,
+      supabase,
+    });
     logEvent({
       category: "matching",
       action: "rule_based_matches",
@@ -358,8 +365,18 @@ export async function hybridMatch(
       level: "error",
     });
 
-    // 폴백: 기본 규칙 기반 매칭
-    return getIsoMatches(context.icfCodes);
+    // 폴백: 기본 규칙 기반 매칭 (Division 레벨로 확장)
+    try {
+      const supabase = getSupabaseServerClient();
+      return await getIsoMatchesAsync(context.icfCodes, {
+        expandToDivisions: true,
+        supabase,
+      });
+    } catch (fallbackError) {
+      // 최종 폴백: Division 확장 없이 Subclass 레벨만 반환
+      console.error("[hybrid-matcher] Fallback to Subclass level:", fallbackError);
+      return getIsoMatches(context.icfCodes);
+    }
   }
 }
 
@@ -885,6 +902,11 @@ function filterByIntent(
 
 /**
  * 빠른 매칭 (규칙 기반만, 실시간 응답용)
+ * 
+ * 주의: 이 함수는 동기 함수로, Division 확장 없이 Subclass 레벨만 반환합니다.
+ * Division 레벨 매칭이 필요하면 hybridMatch() 또는 getIsoMatchesAsync()를 사용하세요.
+ * 
+ * @deprecated Division 레벨 매칭을 위해 hybridMatch() 사용 권장
  */
 export function fastMatch(
   icfCodes: string[],

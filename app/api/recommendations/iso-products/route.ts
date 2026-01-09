@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
-import { getIsoMatches } from "@/core/matching/iso-mapping";
+import { getIsoMatchesAsync } from "@/core/matching/iso-mapping";
 import {
   recommendProductsByMultipleIsoCodes,
   formatProductRecommendations
@@ -88,8 +88,12 @@ export async function POST(request: NextRequest) {
       options: defaultOptions
     });
 
-    // 1. ICF → ISO 매칭
-    const isoMatches = getIsoMatches(icfCodes);
+    // 1. ICF → ISO 매칭 (Division 레벨로 확장)
+    const supabase = getSupabaseServerClient();
+    const isoMatches = await getIsoMatchesAsync(icfCodes, {
+      expandToDivisions: true,
+      supabase,
+    });
 
     if (isoMatches.length === 0) {
       return NextResponse.json({

@@ -6,6 +6,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
 import type { ProductSyncResult } from "./types"
 import { validatePurchaseLink } from "./link-validator"
+import { convertToDivisionLevel } from "@/lib/utils/iso-code-converter"
 
 export interface ProductInput {
   name: string
@@ -27,6 +28,14 @@ export async function upsertProduct(
   options?: { validateLink?: boolean },
 ): Promise<{ id: string; created: boolean }> {
   const supabase = getSupabaseServerClient()
+
+  // ISO 코드를 Division 레벨로 변환
+  if (product.iso_code && product.iso_code !== "N999999" && product.iso_code !== "00 00") {
+    const convertedCode = await convertToDivisionLevel(product.iso_code, supabase);
+    if (convertedCode) {
+      product.iso_code = convertedCode;
+    }
+  }
 
   // 링크 검증 (옵션)
   if (options?.validateLink && product.purchase_link) {

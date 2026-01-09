@@ -6,7 +6,8 @@
  */
 
 import type { IsoMatch } from "./iso-mapping";
-import { getIsoMatches } from "./iso-mapping";
+import { getIsoMatches, getIsoMatchesAsync } from "./iso-mapping";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { findIcfCode } from "../assessment/icf-codes";
 import {
   searchSimilarIcfIsoMappings,
@@ -48,8 +49,14 @@ export async function semanticMatch(
     return [];
   }
 
-  // 1. 기본 규칙 기반 매칭 (빠른 필터링)
-  const ruleMatches = getIsoMatches(icfCodes);
+  // 1. 기본 규칙 기반 매칭 (Division 레벨로 확장)
+  // ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨에만 존재하므로
+  // Subclass 레벨 매칭 결과를 Division 레벨로 자동 확장
+  const supabase = getSupabaseServerClient();
+  const ruleMatches = await getIsoMatchesAsync(icfCodes, {
+    expandToDivisions: true,
+    supabase,
+  });
 
   // 임베딩을 사용하지 않는 경우 기본 매칭 반환
   if (!config.useEmbeddings) {

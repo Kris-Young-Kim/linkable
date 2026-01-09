@@ -114,8 +114,17 @@ export async function POST(request: Request) {
         continue
       }
 
-      // ISO 코드 정규화 (빈 문자열은 null로 변환, null일 때는 기본값 설정)
-      const normalizedIsoCode = product.iso_code?.trim() || "N999999";
+      // ISO 코드 정규화 및 Division 레벨로 변환
+      let normalizedIsoCode = product.iso_code?.trim() || "N999999";
+      
+      // Division 레벨이 아닌 경우 자동 변환
+      if (normalizedIsoCode !== "N999999" && normalizedIsoCode !== "00 00") {
+        const { convertToDivisionLevel } = await import("@/lib/utils/iso-code-converter");
+        const convertedCode = await convertToDivisionLevel(normalizedIsoCode, supabase);
+        if (convertedCode) {
+          normalizedIsoCode = convertedCode;
+        }
+      }
 
       try {
         const parsedPrice =

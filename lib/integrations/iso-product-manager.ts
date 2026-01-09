@@ -45,6 +45,16 @@ export async function syncIsoCodeProducts(
   let success = 0
   let failed = 0
 
+  // ISO 코드 레벨 검증: Division 레벨(6자리)만 허용
+  const parts = isoCode.split(" ").filter(Boolean);
+  if (parts.length < 3) {
+    throw new Error(
+      `제품은 Division 레벨(6자리) ISO 코드로만 등록할 수 있습니다. ` +
+      `제공된 코드: "${isoCode}"는 ${parts.length === 2 ? 'Subclass' : 'Class'} 레벨입니다. ` +
+      `Division 레벨 코드를 사용하세요 (예: "15 09 13").`
+    );
+  }
+
   for (const product of products) {
     try {
       await upsertProduct({
