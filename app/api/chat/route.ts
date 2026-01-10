@@ -733,7 +733,17 @@ export async function POST(request: Request) {
       // 객체인 경우 JSON으로 직렬화 시도
       try {
         errorMessage = JSON.stringify(error);
-        errorDetails = error as typeof errorDetails;
+        // 타입 안전하게 변환
+        const errorObj = error as Record<string, unknown>;
+        errorDetails = {
+          name: typeof errorObj.name === "string" ? errorObj.name : undefined,
+          message: typeof errorObj.message === "string" ? errorObj.message : undefined,
+          stack: typeof errorObj.stack === "string" ? errorObj.stack : undefined,
+          code: typeof errorObj.code === "string" ? errorObj.code : undefined,
+          details: typeof errorObj.details === "string" ? errorObj.details : undefined,
+          hint: typeof errorObj.hint === "string" ? errorObj.hint : undefined,
+          raw: errorMessage,
+        };
       } catch {
         errorMessage = String(error);
         errorDetails = { raw: String(error) };
