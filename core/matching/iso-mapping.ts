@@ -18,558 +18,64 @@ export type IsoMatch = {
   reason: string;
 };
 
+// DB 매핑 테이블 캐시
+let cachedMappingTable: IsoMappingRule[] | null = null;
+let cacheTimestamp: number = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5분 캐시
+
 /**
- * ISO 9999:2022 (7th Edition) 기준 ICF → ISO 매핑 테이블
- *
- * 참고: ISO 9999:2022 구조
- * - Class: 2자리 (예: 12, 15, 18)
- * - Subclass: 4자리 (예: 12 23, 15 09, 18 30)
- * - Division: 6자리 (예: 12 23 03, 15 09 13, 18 30 01)
- *
- * 중요: 모든 제품은 Division 레벨(6자리)에만 분류됩니다.
- * 이 매핑 테이블은 Subclass 레벨로 매핑하지만, getIsoMatchesAsync()를 통해
- * 자동으로 Division 레벨로 확장됩니다.
- *
- * 코드 형식: Subclass 레벨 매핑 (4자리, 공백 포함 예: "15 09")
- * → Division 레벨로 자동 확장 (6자리, 공백 포함 예: "15 09 13", "15 09 16", ...)
+ * DB에서 ICF-ISO 매핑 테이블 조회
+ * @param supabase Supabase 클라이언트 (선택적)
+ * @returns ICF-ISO 매핑 규칙 배열
  */
-export const isoMappingTable: IsoMappingRule[] = [
-  // 청각 및 의사소통 보조기기
-  {
-    icf: ["b230", "d115"],
-    iso: "21 06",
-    label: "청각 보조기기(보청기)",
-    description: "난청 사용자를 위한 보청기 및 증폭 기기 (ISO 2106)",
-    baseScore: 0.84,
-  },
-  {
-    icf: ["b235", "d115"],
-    iso: "21 27",
-    label: "평형/전정 보조기기",
-    description: "어지럼 및 전정 기능 저하를 보조하는 기기 (ISO 2127)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["d360", "e125"],
-    iso: "22 30",
-    label: "의사소통 보조기기",
-    description: "의사소통 디바이스 및 AAC 솔루션 (ISO 2230)",
-    baseScore: 0.78,
-  },
+async function loadMappingTableFromDB(
+  supabase?: ReturnType<typeof getSupabaseServerClient>
+): Promise<IsoMappingRule[]> {
+  // 캐시가 유효하면 반환
+  if (cachedMappingTable && Date.now() - cacheTimestamp < CACHE_TTL) {
+    return cachedMappingTable;
+  }
 
-  // 수직 접근성 (경사로, 승강기)
-  {
-    icf: ["d450", "e120"],
-    iso: "18 30",
-    label: "수직 접근성 보조기기",
-    description:
-      "문턱이나 계단을 해소해 걷기/휠체어 이동을 돕는 경사로 및 승강기 (ISO 1830)",
-    baseScore: 0.85,
-  },
-  {
-    icf: ["e120"],
-    iso: "18 30",
-    label: "수직 접근성 보조기기",
-    description: "건물 및 건축물의 수직 이동을 돕는 보조기기 (ISO 1830)",
-    baseScore: 0.75,
-  },
+  const client = supabase || getSupabaseServerClient();
 
-  // 식사/음주 보조기기
-  {
-    icf: ["b765", "d550"],
-    iso: "15 09",
-    label: "식사 및 음주 보조기기",
-    description:
-      "손 떨림을 보정해 식사를 돕는 무게조절 식기 및 적응형 식사 도구 (ISO 1509)",
-    baseScore: 0.82,
-  },
-  {
-    icf: ["d550"],
-    iso: "15 09",
-    label: "식사 및 음주 보조기기",
-    description: "식사와 음주 활동을 돕는 보조기기 (ISO 1509)",
-    baseScore: 0.7,
-  },
+  try {
+    const { data, error } = await client
+      .from("icf_iso_mappings")
+      .select("icf_codes, iso_code, label, description, base_score")
+      .eq("is_active", true)
+      .order("base_score", { ascending: false });
 
-  // 체위 변경 보조기기
-  {
-    icf: ["b730", "d410", "d420"],
-    iso: "12 31",
-    label: "체위 변경 보조기기",
-    description:
-      "서기/앉기/누우기를 돕는 전동 리프트형 체어 및 체위 변경 보조기 (ISO 1231)",
-    baseScore: 0.8,
-  },
-  {
-    icf: ["d410", "d420"],
-    iso: "12 31",
-    label: "체위 변경 보조기기",
-    description: "앉기와 서기 동작을 돕는 보조기기 (ISO 1231)",
-    baseScore: 0.72,
-  },
+    if (error) {
+      console.error("[loadMappingTableFromDB] Error:", error);
+      return [];
+    }
 
-  // 보행 보조기기
-  {
-    icf: ["d450"],
-    iso: "12 06",
-    label: "양팔 조작 보행 보조기기",
-    description: "양팔로 조작하는 보행 보조기기 (지팡이, 보행기 등) (ISO 1206)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["d450", "b760"],
-    iso: "12 03",
-    label: "한팔 조작 보행 보조기기",
-    description: "한 팔로 조작하는 보행 보조기기 (ISO 1203)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["d450", "b235"],
-    iso: "12 08",
-    label: "안내 지팡이 및 상징 지팡이",
-    description: "시각 장애인을 위한 안내 지팡이 및 상징 지팡이 (ISO 1208)",
-    baseScore: 0.65,
-  },
+    if (data && data.length > 0) {
+      cachedMappingTable = data.map((row) => ({
+        icf: row.icf_codes as string[],
+        iso: row.iso_code,
+        label: row.label,
+        description: row.description || "",
+        baseScore: Number(row.base_score) || 0.7,
+      }));
+      cacheTimestamp = Date.now();
+      return cachedMappingTable;
+    }
 
-  // 손잡이 및 지지대
-  {
-    icf: ["e120", "d410"],
-    iso: "18 18",
-    label: "지지 손잡이 및 그랩바",
-    description:
-      "욕실, 계단 등에서 균형 유지와 안전을 돕는 손잡이 및 그랩바 (ISO 1818)",
-    baseScore: 0.68,
-  },
+    return [];
+  } catch (error) {
+    console.error("[loadMappingTableFromDB] Exception:", error);
+    return [];
+  }
+}
 
-  // 여가 및 레크리에이션
-  {
-    icf: ["d920", "e310"],
-    iso: "30 03",
-    label: "놀이 보조기기",
-    description:
-      "가족과 함께 사용할 수 있는 여가·인지 재활 놀이 키트 (ISO 3003)",
-    baseScore: 0.6,
-  },
-  {
-    icf: ["d920"],
-    iso: "30 03",
-    label: "놀이 보조기기",
-    description: "여가 및 놀이 활동을 돕는 보조기기 (ISO 3003)",
-    baseScore: 0.55,
-  },
-
-  // 휠체어
-  {
-    icf: ["d465", "d450"],
-    iso: "12 23",
-    label: "전동 휠체어",
-    description: "전동으로 이동하는 휠체어 (ISO 1223)",
-    baseScore: 0.78,
-  },
-  {
-    icf: ["d465"],
-    iso: "12 22",
-    label: "수동 휠체어",
-    description: "수동으로 이동하는 휠체어 (ISO 1222)",
-    baseScore: 0.7,
-  },
-
-  // 가정 활동 (Class 12, Subclass 21: 가정생활 보조기기)
-  {
-    icf: ["d630", "d640", "d650", "d660"],
-    iso: "12 21",
-    label: "가정생활 보조기기",
-    description: "가정생활 전반을 돕는 종합 보조기기 (ISO 1221)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["d630", "d640", "d650"],
-    iso: "12 21",
-    label: "가정생활 보조기기",
-    description: "식사 준비, 가사, 가정 관리를 돕는 보조기기 (ISO 1221)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["d640", "d650"],
-    iso: "12 21",
-    label: "가사 활동 보조기기",
-    description: "가사 일과 가정 관리를 돕는 보조기기 (ISO 1221)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["d630"],
-    iso: "12 21",
-    label: "식사 준비 보조기기",
-    description: "식사 준비 및 요리를 돕는 보조기기 (ISO 1221)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["d640"],
-    iso: "12 21",
-    label: "가사 일 보조기기",
-    description: "가사 일을 돕는 보조기기 (ISO 1221)",
-    baseScore: 0.68,
-  },
-  {
-    icf: ["d650"],
-    iso: "12 21",
-    label: "가정 관리 보조기기",
-    description: "가정 관리 활동을 돕는 보조기기 (ISO 1221)",
-    baseScore: 0.65,
-  },
-  {
-    icf: ["d660"],
-    iso: "12 21",
-    label: "타인 돌보기 보조기기",
-    description: "가족 구성원 돌보기를 돕는 보조기기 (ISO 1221)",
-    baseScore: 0.6,
-  },
-
-  // 가정 활동 (Class 15: 자가관리 보조기기 - 요리 및 청소)
-  {
-    icf: ["d630", "d640", "d650"],
-    iso: "15 03",
-    label: "음식 및 음료 준비 보조기기",
-    description: "요리 및 음식 준비를 돕는 보조기기 (ISO 1503)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["d630"],
-    iso: "15 06",
-    label: "요리 및 조리 보조기기",
-    description: "식사 준비 및 요리를 돕는 보조기기 (ISO 1506)",
-    baseScore: 0.8,
-  },
-  {
-    icf: ["d640"],
-    iso: "15 05",
-    label: "청소 보조기기",
-    description: "가정 청소 활동을 돕는 보조기기 (ISO 1505)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["d650"],
-    iso: "15 05",
-    label: "가정 관리 보조기기",
-    description: "가정 관리 및 청소를 돕는 보조기기 (ISO 1505)",
-    baseScore: 0.65,
-  },
-
-  // 자가관리 (Class 15: 자가관리 보조기기)
-  {
-    icf: ["d510", "d520"],
-    iso: "15 03",
-    label: "목욕 및 샤워 보조기기",
-    description: "세면, 목욕, 샤워 활동을 돕는 보조기기 (ISO 1503)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["d510"],
-    iso: "15 03",
-    label: "세면 보조기기",
-    description: "세면 활동을 돕는 보조기기 (ISO 1503)",
-    baseScore: 0.68,
-  },
-  {
-    icf: ["d520"],
-    iso: "15 03",
-    label: "목욕 및 샤워 보조기기",
-    description: "목욕 및 샤워 활동을 돕는 보조기기 (ISO 1503)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["d540"],
-    iso: "15 04",
-    label: "착의 보조기기",
-    description: "옷 입기 활동을 돕는 보조기기 (ISO 1504)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["d540", "d520"],
-    iso: "15 04",
-    label: "착의 및 몸단장 보조기기",
-    description: "옷 입기 및 몸단장 활동을 돕는 보조기기 (ISO 1504)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["d560"],
-    iso: "15 09",
-    label: "음주 보조기기",
-    description: "음주 활동을 돕는 보조기기 (ISO 1509)",
-    baseScore: 0.65,
-  },
-  {
-    icf: ["d550", "d560"],
-    iso: "15 09",
-    label: "식사 및 음주 보조기기",
-    description: "식사와 음주 활동을 종합적으로 돕는 보조기기 (ISO 1509)",
-    baseScore: 0.8,
-  },
-  {
-    icf: ["d570"],
-    iso: "15 09",
-    label: "건강 관리 보조기기",
-    description: "자신의 건강 돌보기를 돕는 보조기기 (ISO 1509)",
-    baseScore: 0.6,
-  },
-
-  // 자가관리 (기존 ISO 09 코드 유지 - 호환성)
-  {
-    icf: ["d510", "d520"],
-    iso: "09 33",
-    label: "세면, 목욕 및 샤워 보조기기",
-    description: "세면, 목욕, 샤워 활동을 돕는 보조기기 (ISO 0933)",
-    baseScore: 0.68,
-  },
-  {
-    icf: ["d510"],
-    iso: "09 33",
-    label: "세면 보조기기",
-    description: "세면 활동을 돕는 보조기기 (ISO 0933)",
-    baseScore: 0.6,
-  },
-  {
-    icf: ["d520"],
-    iso: "09 33",
-    label: "목욕 및 샤워 보조기기",
-    description: "목욕 및 샤워 활동을 돕는 보조기기 (ISO 0933)",
-    baseScore: 0.65,
-  },
-  {
-    icf: ["d530"],
-    iso: "09 12",
-    label: "배변 보조기기",
-    description: "배변 활동을 돕는 보조기기 (ISO 0912)",
-    baseScore: 0.65,
-  },
-  {
-    icf: ["d540"],
-    iso: "09 18",
-    label: "옷 입기 보조기기",
-    description: "옷 입기 활동을 돕는 보조기기 (ISO 0918)",
-    baseScore: 0.62,
-  },
-
-  // 시각 보조기기 (b2xx 확대)
-  {
-    icf: ["b210", "d110"],
-    iso: "22 03",
-    label: "시각 보조기기",
-    description:
-      "저시력 사용자를 위한 확대경, 돋보기, 시각 보조기기 (ISO 2203)",
-    baseScore: 0.8,
-  },
-  {
-    icf: ["b210", "d166"],
-    iso: "22 06",
-    label: "읽기 보조기기",
-    description:
-      "시각 장애인을 위한 점자 디스플레이, 스크린 리더, 음성 변환 기기 (ISO 2206)",
-    baseScore: 0.78,
-  },
-  {
-    icf: ["b215", "d110"],
-    iso: "22 03",
-    label: "시각 관련 보조기기",
-    description: "시각 기능 보조를 위한 기기 (ISO 2203)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["e240", "b210"],
-    iso: "18 06",
-    label: "조명 보조기기",
-    description: "시각 보조를 위한 조명 기기 (ISO 1806)",
-    baseScore: 0.7,
-  },
-
-  // 의사소통 보조기기 (d3xx 확대)
-  {
-    icf: ["b240", "d320"],
-    iso: "21 09",
-    label: "음성 보조기기",
-    description: "음성 생성 및 보조 기기 (ISO 2109)",
-    baseScore: 0.76,
-  },
-  {
-    icf: ["d330", "d350"],
-    iso: "22 30",
-    label: "대화 보조기기",
-    description: "대화 및 의사소통을 돕는 보조기기 (ISO 2230)",
-    baseScore: 0.74,
-  },
-  {
-    icf: ["d335", "d345"],
-    iso: "22 30",
-    label: "메시지 생성 보조기기",
-    description: "비공식 및 공식 메시지 생성을 돕는 보조기기 (ISO 2230)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["b167", "d310"], // 활동에 어려운 점 (행위)
-    iso: "22 30", // 제품 분류 
-    label: "언어 이해 보조기기",
-    description:
-      "언어 정신 기능 및 구어 메시지 이해를 돕는 보조기기 (ISO 2230)",
-    baseScore: 0.7,
-  },
-
-  // 인지 보조기기 (b1xx, d1xx)
-  {
-    icf: ["b144", "d160"],
-    iso: "04 03",
-    label: "인지 훈련 보조기기",
-    description: "기억 및 주의 기능 훈련을 위한 보조기기 (ISO 0403)",
-    baseScore: 0.68,
-  },
-  {
-    icf: ["b140", "d160"],
-    iso: "04 03",
-    label: "주의 집중 보조기기",
-    description: "주의 기능 향상을 위한 보조기기 (ISO 0403)",
-    baseScore: 0.65,
-  },
-  {
-    icf: ["b160", "b164", "d175"],
-    iso: "04 03",
-    label: "사고 및 문제해결 보조기기",
-    description: "사고 기능 및 문제해결 능력 향상을 위한 보조기기 (ISO 0403)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["b117", "d163"],
-    iso: "04 03",
-    label: "지적 기능 보조기기",
-    description: "지적 기능 및 생각하기 능력 향상을 위한 보조기기 (ISO 0403)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["d140", "d145", "d170"],
-    iso: "22 33",
-    label: "학습 보조기기",
-    description: "읽기, 쓰기, 계산 학습을 돕는 보조기기 (ISO 2233)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["b144", "d163"],
-    iso: "22 33",
-    label: "기억 보조기기",
-    description: "기억 기능 보조를 위한 디지털 기기 (ISO 2233)",
-    baseScore: 0.73,
-  },
-
-  // 자세 및 체위 변경 보조기기 (b7xx, d4xx 확대)
-  {
-    icf: ["b710", "d410"],
-    iso: "06 03",
-    label: "관절 이동성 보조기기",
-    description: "관절 이동성 기능 향상을 위한 보조기 (ISO 0603)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["b730", "d420"],
-    iso: "12 31",
-    label: "근력 저하 체위 변경 보조기기",
-    description: "근력 저하 시 체위 변경을 돕는 보조기기 (ISO 1231)",
-    baseScore: 0.82,
-  },
-  {
-    icf: ["d415", "b760"],
-    iso: "12 31",
-    label: "안정한 자세 유지 보조기기",
-    description: "안정한 자세 유지를 돕는 보조기기 (ISO 1231)",
-    baseScore: 0.75,
-  },
-  {
-    icf: ["b235", "d415"],
-    iso: "12 08",
-    label: "균형 보조기기",
-    description: "전정 기능 저하 시 균형 유지를 돕는 보조기기 (ISO 1208)",
-    baseScore: 0.73,
-  },
-  {
-    icf: ["b760", "d440"],
-    iso: "24 06",
-    label: "손 기능 보조기기",
-    description:
-      "수의적 운동 조절 기능 향상을 위한 손 기능 보조기기 (ISO 2406)",
-    baseScore: 0.76,
-  },
-  {
-    icf: ["b765", "d440"],
-    iso: "24 06",
-    label: "손 떨림 보정 보조기기",
-    description: "불수의적 운동 조절 보정을 위한 보조기기 (ISO 2406)",
-    baseScore: 0.78,
-  },
-  {
-    icf: ["d430", "d435"],
-    iso: "24 03",
-    label: "물건 들기 및 옮기기 보조기기",
-    description: "물건 들기 및 옮기기 활동을 돕는 보조기기 (ISO 2403)",
-    baseScore: 0.68,
-  },
-  {
-    icf: ["d445", "b730"],
-    iso: "24 06",
-    label: "근력 저하 손 기능 보조기기",
-    description: "근력 저하 시 손과 팔 사용을 돕는 보조기기 (ISO 2406)",
-    baseScore: 0.74,
-  },
-
-  // 환경 접근성 보조기기 (e1xx 확대)
-  {
-    icf: ["e110", "d450"],
-    iso: "18 24",
-    label: "집 구조 개선 보조기기",
-    description: "집 안 구조 개선을 위한 보조기기 (ISO 1824)",
-    baseScore: 0.72,
-  },
-  {
-    icf: ["e155", "d460"],
-    iso: "18 30",
-    label: "건축물 접근성 보조기기",
-    description: "건축물 설계 및 건물 제품을 통한 접근성 개선 (ISO 1830)",
-    baseScore: 0.8,
-  },
-  {
-    icf: ["d410", "e120"],
-    iso: "18 18",
-    label: "지지 손잡이 및 그랩바",
-    description:
-      "욕실, 계단 등에서 균형 유지와 안전을 돕는 손잡이 및 그랩바 (ISO 1818)",
-    baseScore: 0.68,
-  },
-  {
-    icf: ["e110", "d410"],
-    iso: "18 09",
-    label: "앉기 보조 가구",
-    description: "집 안에서 안정적인 앉기를 돕는 가구 (ISO 1809)",
-    baseScore: 0.7,
-  },
-  {
-    icf: ["e110", "d415"],
-    iso: "18 12",
-    label: "안정 자세 유지 보조 침대",
-    description: "안정적인 자세 유지를 돕는 침대 및 침대 장비 (ISO 1812)",
-    baseScore: 0.68,
-  },
-
-  // 여가 및 레크리에이션 확대
-  {
-    icf: ["d910", "e140"],
-    iso: "30 09",
-    label: "스포츠 보조기기",
-    description: "스포츠 활동을 돕는 보조기기 (ISO 3009)",
-    baseScore: 0.65,
-  },
-  {
-    icf: ["d920", "e140"],
-    iso: "30 03",
-    label: "레크리에이션 보조기기",
-    description: "레크리에이션 활동을 돕는 보조기기 (ISO 3003)",
-    baseScore: 0.6,
-  },
-];
+/**
+ * 매핑 테이블 캐시 무효화
+ */
+export function invalidateMappingCache(): void {
+  cachedMappingTable = null;
+  cacheTimestamp = 0;
+}
 
 const buildReason = (icfCodes: string[], label: string) => {
   const tokens = icfCodes
@@ -583,116 +89,15 @@ const buildReason = (icfCodes: string[], label: string) => {
 };
 
 /**
- * Subclass ISO 코드를 Division 레벨로 확장
- * 
- * ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨(6자리)에만 존재합니다.
- * Subclass 레벨 매핑 결과를 Division 레벨로 확장하여 실제 제품을 검색할 수 있도록 합니다.
- * 
- * @param subclassCode Subclass 코드 (예: "15 09")
- * @param supabase Supabase 클라이언트 (선택적)
- * @returns Division 코드 배열 (예: ["15 09 13", "15 09 16", "15 09 18", ...])
- */
-async function expandSubclassToDivisions(
-  subclassCode: string,
-  supabase?: any
-): Promise<string[]> {
-  const client = supabase || getSupabaseServerClient();
-
-  try {
-    // Subclass 코드 정규화
-    const normalizedSubclass = subclassCode.replace(/\s/g, "");
-    const subclassWithSpace = subclassCode.includes(" ")
-      ? subclassCode
-      : `${subclassCode.slice(0, 2)} ${subclassCode.slice(2)}`;
-
-    // parent_code가 이 Subclass인 모든 Division 조회
-    const { data: divisions, error } = await client
-      .from("iso_codes")
-      .select("code, name, level")
-      .or(`parent_code.eq.${subclassCode},parent_code.eq.${normalizedSubclass},parent_code.eq.${subclassWithSpace}`)
-      .eq("level", 3) // Division 레벨만
-      .eq("is_active", true)
-      .order("code", { ascending: true });
-
-    if (error) {
-      console.error(
-        `[expandSubclassToDivisions] Error expanding ${subclassCode}:`,
-        error
-      );
-      return []; // 에러 시 빈 배열 반환
-    }
-
-    if (divisions && divisions.length > 0) {
-      return divisions.map((div: any) => div.code);
-    }
-
-    // Division이 없으면 Subclass 자체를 반환 (폴백)
-    return [subclassCode];
-  } catch (error) {
-    console.error(
-      `[expandSubclassToDivisions] Exception expanding ${subclassCode}:`,
-      error
-    );
-    return [subclassCode]; // 예외 시 Subclass 자체 반환
-  }
-}
-
-/**
- * ISO 매칭 결과를 Division 레벨로 확장
- * @param matches 원본 ISO 매칭 결과
- * @param supabase Supabase 클라이언트 (선택적)
- * @returns Division 레벨로 확장된 ISO 매칭 결과
- */
-export async function expandIsoMatchesToDivisions(
-  matches: IsoMatch[],
-  supabase?: any
-): Promise<IsoMatch[]> {
-  const expandedMatches: IsoMatch[] = [];
-
-  for (const match of matches) {
-    const isoCode = match.isoCode;
-    const parts = isoCode.split(" ").filter(Boolean);
-
-    // 이미 Division 레벨이면 그대로 추가
-    if (parts.length >= 3) {
-      expandedMatches.push(match);
-      continue;
-    }
-
-    // Subclass 레벨이면 Division으로 확장
-    if (parts.length === 2) {
-      const divisions = await expandSubclassToDivisions(isoCode, supabase);
-
-      // 각 Division에 대해 매칭 결과 생성
-      for (const divisionCode of divisions) {
-        expandedMatches.push({
-          ...match,
-          isoCode: divisionCode,
-          score: match.score * 0.95, // Division 확장 시 약간의 점수 감소 (추론 불확실성 반영)
-          reason: `${match.reason} (Division: ${divisionCode})`,
-        });
-      }
-    } else {
-      // Class 레벨이면 그대로 추가 (확장하지 않음, 너무 넓음)
-      expandedMatches.push(match);
-    }
-  }
-
-  // 점수 순으로 정렬
-  return expandedMatches.sort((a, b) => b.score - a.score);
-}
-
-/**
- * ICF 코드로 ISO 매칭 (동기 버전, 하위 호환성 유지)
- * 
- * 주의: 이 함수는 Subclass 레벨 매칭 결과를 반환합니다.
- * Division 레벨 매칭이 필요하면 getIsoMatchesAsync()를 사용하세요.
- * 
+ * 매핑 테이블을 사용하여 ICF 코드 매칭 수행
  * @param icfCodes ICF 코드 배열
- * @returns Subclass 레벨 ISO 매칭 결과 (Division 확장 안 됨)
- * @deprecated Division 레벨 매칭을 위해 getIsoMatchesAsync() 사용 권장
+ * @param mappingTable 매핑 테이블
+ * @returns ISO 매칭 결과
  */
-export const getIsoMatches = (icfCodes: string[]): IsoMatch[] => {
+function getIsoMatchesFromTable(
+  icfCodes: string[],
+  mappingTable: IsoMappingRule[]
+): IsoMatch[] {
   const normalized = icfCodes
     .map((code) => code.trim().toLowerCase())
     .filter(Boolean);
@@ -701,7 +106,7 @@ export const getIsoMatches = (icfCodes: string[]): IsoMatch[] => {
     return [];
   }
 
-  return isoMappingTable
+  return mappingTable
     .map((rule) => {
       const matched = rule.icf.filter((code) => normalized.includes(code));
       if (!matched.length) {
@@ -729,41 +134,48 @@ export const getIsoMatches = (icfCodes: string[]): IsoMatch[] => {
     })
     .filter((item): item is IsoMatch => item !== null)
     .sort((a, b) => b.score - a.score);
-};
+}
 
 /**
- * ICF 코드로 ISO 매칭 (Division 레벨로 확장된 비동기 버전)
- * 
- * ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨(6자리)에만 존재하므로,
- * 이 함수는 Subclass 레벨 매핑 결과를 자동으로 Division 레벨로 확장합니다.
- * 
- * 예시:
- * - 입력: ["d550", "b765"] (식사 + 손 떨림)
- * - Subclass 매칭: "15 09" (식음용 보조기구)
- * - Division 확장: ["15 09 13", "15 09 16", "15 09 18", ...] (커트러리, 컵, 접시 등)
- * 
+ * ICF 코드로 ISO 매칭 (비동기, DB 매핑 사용)
+ *
+ * DB에서 ICF-ISO 매핑 테이블을 조회하여 매칭을 수행합니다.
+ * 모든 ISO 코드는 Division 레벨(level 3, 6자리)입니다.
+ *
  * @param icfCodes ICF 코드 배열
  * @param options 옵션
- * @param options.expandToDivisions Division 레벨로 확장할지 여부 (기본값: true)
  * @param options.supabase Supabase 클라이언트 (선택적)
- * @returns Division 레벨로 확장된 ISO 매칭 결과
+ * @returns ISO 매칭 결과 (Division 레벨)
  */
 export async function getIsoMatchesAsync(
   icfCodes: string[],
   options?: {
-    expandToDivisions?: boolean; // Division 레벨로 확장할지 여부
-    supabase?: any; // Supabase 클라이언트 (선택적)
+    supabase?: ReturnType<typeof getSupabaseServerClient>;
   }
 ): Promise<IsoMatch[]> {
-  const { expandToDivisions = true, supabase } = options || {};
+  const { supabase } = options || {};
 
-  // 기본 매칭 수행
-  const baseMatches = getIsoMatches(icfCodes);
+  const mappingTable = await loadMappingTableFromDB(supabase);
 
-  // Division 레벨로 확장
-  if (expandToDivisions) {
-    return await expandIsoMatchesToDivisions(baseMatches, supabase);
-  }
-
-  return baseMatches;
+  return getIsoMatchesFromTable(icfCodes, mappingTable);
 }
+
+/**
+ * ICF 코드로 ISO 매칭 (동기 버전)
+ *
+ * 주의: 캐시된 매핑 테이블만 사용합니다. 캐시가 없으면 빈 배열 반환.
+ * 가능하면 getIsoMatchesAsync()를 사용하세요.
+ *
+ * @param icfCodes ICF 코드 배열
+ * @returns ISO 매칭 결과
+ * @deprecated getIsoMatchesAsync() 사용 권장
+ */
+export const getIsoMatches = (icfCodes: string[]): IsoMatch[] => {
+  if (!cachedMappingTable) {
+    console.warn(
+      "[getIsoMatches] 캐시된 매핑 테이블이 없습니다. getIsoMatchesAsync()를 먼저 호출하세요."
+    );
+    return [];
+  }
+  return getIsoMatchesFromTable(icfCodes, cachedMappingTable);
+};

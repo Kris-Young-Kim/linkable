@@ -13,7 +13,7 @@ import {
 import { parseAnalysis } from "@/core/assessment/parser";
 import { enforceIcfConsistency } from "@/core/assessment/icf-validator";
 import { callGemini } from "@/lib/gemini";
-import { getIsoMatches } from "@/core/matching/iso-mapping";
+import { getIsoMatchesAsync, IsoMatch } from "@/core/matching/iso-mapping";
 import { isGreetingMessage, isProductRecommendationRequestIntent } from "@/lib/utils";
 import {
   extractScoreFromAnswer,
@@ -596,11 +596,11 @@ export async function POST(request: Request) {
             : false;
 
           // 추천 요청이 감지되면 ICF 코드가 없어도 기존 분석 결과를 사용하여 추천 제공
-          let isoMatches: ReturnType<typeof getIsoMatches> = [];
+          let isoMatches: IsoMatch[] = [];
           if (isRecommendationRequest) {
             // 추천 요청이 있으면 기존 분석 결과 또는 현재 분석 결과 사용
             if (parsedAnalysis?.normalizedCodes && parsedAnalysis.normalizedCodes.length > 0) {
-              isoMatches = getIsoMatches(parsedAnalysis.normalizedCodes);
+              isoMatches = await getIsoMatchesAsync(parsedAnalysis.normalizedCodes);
             } else {
               // ICF 코드가 없으면 기존 상담의 분석 결과 조회
               const { data: existingAnalysis } = await supabaseUser
@@ -608,7 +608,7 @@ export async function POST(request: Request) {
                 .select("icf_codes")
                 .eq("consultation_id", consultationId)
                 .maybeSingle();
-              
+
               if (existingAnalysis?.icf_codes) {
                 const icfCodesObj = existingAnalysis.icf_codes as Record<string, unknown>;
                 const allCodes: string[] = [
@@ -617,11 +617,11 @@ export async function POST(request: Request) {
                   ...((icfCodesObj.e as string[]) || []),
                 ];
                 if (allCodes.length > 0) {
-                  isoMatches = getIsoMatches(allCodes.map((c) => c.toLowerCase()));
+                  isoMatches = await getIsoMatchesAsync(allCodes.map((c) => c.toLowerCase()));
                 }
               }
             }
-            
+
             // 추천 요청 감지 로그
             logEvent({
               category: "consultation",
@@ -635,7 +635,7 @@ export async function POST(request: Request) {
             });
           } else if (parsedAnalysis && !isGreeting) {
             // 일반적인 경우: 분석 결과에서 ISO 매칭
-            isoMatches = getIsoMatches(parsedAnalysis.normalizedCodes ?? []);
+            isoMatches = await getIsoMatchesAsync(parsedAnalysis.normalizedCodes ?? []);
           }
 
           sendEvent("analysis", {

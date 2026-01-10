@@ -1,13 +1,16 @@
 /**
  * ICF-ISO 매핑 임베딩 생성 API
- * 
+ *
  * 관리자 전용: 규칙 기반 매핑 데이터를 벡터 DB에 저장
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/auth/verify-admin";
-import { generateEmbeddingsForIcfCodes, generateAllEmbeddings } from "@/lib/embeddings/embedding-pipeline";
-import { getIsoMatches } from "@/core/matching/iso-mapping";
+import {
+  generateEmbeddingsForIcfCodes,
+  generateAllEmbeddings,
+} from "@/lib/embeddings/embedding-pipeline";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/logging";
 
 export async function POST(request: NextRequest) {
@@ -15,22 +18,38 @@ export async function POST(request: NextRequest) {
     // 관리자 권한 확인
     const hasAccess = await verifyAdminAccess();
     if (!hasAccess) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
     const body = await request.json().catch(() => ({}));
     const { icfCodes, generateAll } = body;
 
     if (generateAll) {
-      // 모든 규칙 기반 매핑에 대한 임베딩 생성
-      // iso-mapping.ts의 모든 규칙에서 ICF 코드 조합 추출
-      const { isoMappingTable } = await import("@/core/matching/iso-mapping");
+      // DB에서 모든 규칙 기반 매핑의 ICF 코드 조합 추출
+      const supabase = getSupabaseServerClient();
+      const { data: mappings, error } = await supabase
+        .from("icf_iso_mappings")
+        .select("icf_codes")
+        .eq("is_active", true);
+
+      if (error) {
+        console.error("[embeddings/generate] DB error:", error);
+        return NextResponse.json(
+          { error: "매핑 데이터 조회 중 오류가 발생했습니다." },
+          { status: 500 }
+        );
+      }
+
+      if (!mappings || mappings.length === 0) {
+        return NextResponse.json(
+          { error: "매핑 데이터가 없습니다." },
+          { status: 404 }
+        );
+      }
+
       const icfCodeSets = Array.from(
         new Set(
-          isoMappingTable.map((rule) => JSON.stringify(rule.icf.sort()))
+          mappings.map((m) => JSON.stringify((m.icf_codes as string[]).sort()))
         )
       ).map((json) => JSON.parse(json) as string[]);
 
@@ -73,4 +92,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

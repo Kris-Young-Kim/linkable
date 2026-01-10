@@ -6,7 +6,7 @@
  */
 
 import type { IsoMatch } from "./iso-mapping";
-import { getIsoMatches, getIsoMatchesAsync } from "./iso-mapping";
+import { getIsoMatchesAsync } from "./iso-mapping";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 import { findIcfCode } from "../assessment/icf-codes";
 import {

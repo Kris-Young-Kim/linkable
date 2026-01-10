@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/auth/verify-admin";
-import { isoMappingTable } from "@/core/matching/iso-mapping";
 import { iso9999Catalog } from "@/lib/iso-9999-catalog";
 import { searchIsoCodesAsync } from "@/lib/iso-9999-catalog-async";
 import { inferIsoCodeFromProduct } from "@/core/matching/ai-iso-inference";
