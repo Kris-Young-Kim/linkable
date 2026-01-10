@@ -52,6 +52,23 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          {
+            key: "Content-Security-Policy",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://scripts.clarity.ms https://www.linkable.life https://linkable.life",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "img-src 'self' data: https: blob:",
+              "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://*.supabase.co https://*.supabase.in https://generativelanguage.googleapis.com https://www.clarity.ms https://e.clarity.ms https://www.linkable.life https://linkable.life",
+              "frame-src 'self' https://www.googletagmanager.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+              "upgrade-insecure-requests",
+            ].join("; "),
+          },
         ],
       },
     ];

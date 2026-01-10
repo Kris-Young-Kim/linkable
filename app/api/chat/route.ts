@@ -699,8 +699,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("[Chat API] Error:", error);
-    
     // 에러 메시지를 안전하게 직렬화
     let errorMessage: string;
     let errorDetails: {
@@ -718,13 +716,24 @@ export async function POST(request: Request) {
       errorDetails = {
         name: error.name,
         message: error.message,
-        stack: error.stack,
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       };
+      
+      // Supabase 에러인 경우 추가 정보 추출
+      if ("code" in error) {
+        errorDetails.code = String(error.code);
+      }
+      if ("details" in error) {
+        errorDetails.details = String(error.details);
+      }
+      if ("hint" in error) {
+        errorDetails.hint = String(error.hint);
+      }
     } else if (typeof error === "object" && error !== null) {
       // 객체인 경우 JSON으로 직렬화 시도
       try {
         errorMessage = JSON.stringify(error);
-        errorDetails = error;
+        errorDetails = error as typeof errorDetails;
       } catch {
         errorMessage = String(error);
         errorDetails = { raw: String(error) };
@@ -733,31 +742,44 @@ export async function POST(request: Request) {
       errorMessage = String(error);
     }
     
-    logEvent({
-      category: "consultation",
-      action: "chat_api_error",
-      payload: { 
-        error: errorMessage,
-        details: errorDetails,
-        errorType: error instanceof Error ? error.constructor.name : typeof error,
-      },
-      level: "error",
+    // 상세 로깅 (서버 콘솔)
+    console.error("[Chat API] Error:", {
+      message: errorMessage,
+      details: errorDetails,
+      timestamp: new Date().toISOString(),
+      userId: (await auth()).userId,
     });
     
-    // 개발 환경에서는 상세 에러 정보 반환
-    if (process.env.NODE_ENV === "development") {
-      return NextResponse.json(
-        { 
-          error: "Failed to process request. 잠시 후 다시 시도해 주세요.",
-          details: errorMessage,
-          errorDetails: errorDetails,
+    // 데이터베이스에 에러 로깅 (에러가 발생해도 로깅은 시도)
+    try {
+      await logEvent({
+        category: "consultation",
+        action: "chat_api_error",
+        payload: { 
+          error: errorMessage,
+          details: errorDetails,
+          errorType: error instanceof Error ? error.constructor.name : typeof error,
         },
-        { status: 500 }
-      );
+        level: "error",
+      });
+    } catch (logError) {
+      // 로깅 실패해도 계속 진행
+      console.error("[Chat API] Failed to log error:", logError);
     }
     
+    // 프로덕션에서도 기본적인 에러 정보 반환 (보안을 위해 민감한 정보는 제외)
+    const isDevelopment = process.env.NODE_ENV === "development";
+    
     return NextResponse.json(
-      { error: "Failed to process request. 잠시 후 다시 시도해 주세요." },
+      { 
+        error: "Failed to process request. 잠시 후 다시 시도해 주세요.",
+        ...(isDevelopment && {
+          details: errorMessage,
+          errorDetails: errorDetails,
+        }),
+        // 프로덕션에서도 에러 타입만 제공 (디버깅에 도움)
+        errorType: error instanceof Error ? error.constructor.name : typeof error,
+      },
       { status: 500 }
     );
   }
