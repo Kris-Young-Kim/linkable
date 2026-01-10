@@ -6,7 +6,7 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { callGemini } from "@/lib/gemini"
 import { logEvent } from "./logging"
-import { getIsoMatches } from "@/core/matching/iso-mapping"
+import { getIsoMatchesAsync } from "@/core/matching/iso-mapping"
 
 interface IcfCodeStatistics {
   icf_code: string
@@ -43,7 +43,7 @@ export async function generateIsoHintsForIcfCode(
   }
 
   // 2. 기존 ISO 매핑 규칙에서 추론
-  const existingMatches = getIsoMatches([code])
+  const existingMatches = await getIsoMatchesAsync([code])
   existingMatches.forEach((match) => hints.add(match.isoCode))
 
   // 3. AI 기반 의미론적 매핑

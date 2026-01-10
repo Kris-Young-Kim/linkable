@@ -3,7 +3,7 @@ import {
   getSupabaseServerClient,
   getSupabaseUserClient,
 } from "@/lib/supabase/server";
-import { getIsoMatches } from "@/core/matching/iso-mapping";
+import type { IsoMatch } from "@/core/matching/iso-mapping";
 import { appendKeywordIsoMatches } from "@/core/matching/keyword-inference";
 import { fastMatch, accurateMatch } from "@/core/matching/hybrid-matcher";
 import { rankProducts } from "@/core/matching/ranking";
@@ -340,7 +340,7 @@ export async function GET(request: Request) {
   // 빠른 응답이 필요한 경우 fastMatch, 정확도가 중요한 경우 accurateMatch
   const useHybridMatching = process.env.ENABLE_HYBRID_MATCHING === "true";
 
-  let isoMatches: Awaited<ReturnType<typeof getIsoMatches>>;
+  let isoMatches: IsoMatch[];
 
   // 사용자 ID 조회 (컨텍스트 가중치용) - Supabase users 테이블의 ID
   let supabaseUserId: string | undefined;

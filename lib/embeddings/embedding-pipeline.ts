@@ -4,7 +4,7 @@
  * 기존 규칙 기반 매핑 데이터를 벡터 DB에 저장하기 위한 배치 처리 스크립트
  */
 
-import { getIsoMatches } from "@/core/matching/iso-mapping";
+import { getIsoMatchesAsync } from "@/core/matching/iso-mapping";
 import { findIcfCode } from "@/core/assessment/icf-codes";
 import { saveIcfIsoEmbedding } from "./vector-store";
 import { logEvent } from "@/lib/logging";
@@ -21,8 +21,8 @@ export async function generateEmbeddingsForIcfCodes(
   let savedCount = 0;
 
   try {
-    // 1. 규칙 기반 매칭으로 ISO 코드 찾기
-    const isoMatches = getIsoMatches(icfCodes);
+    // 1. 규칙 기반 매칭으로 ISO 코드 찾기 (DB 조회)
+    const isoMatches = await getIsoMatchesAsync(icfCodes);
 
     // 2. 각 매칭에 대해 임베딩 생성 및 저장
     for (const match of isoMatches) {
