@@ -1326,16 +1326,25 @@ export function ChatInterface() {
                         href={`/recommendations/${consultationId}`}
                         className="w-full max-w-xs mx-auto shadow-lg shadow-primary/30 animate-pulse hover:animate-none transition-all duration-300 hover:scale-105"
                         disabled={isNavigatingToRecommendations}
-                        onClick={() => {
+                        onClick={(e) => {
                           // 이미 이동 중이면 중복 클릭 방지
-                          if (isNavigatingToRecommendations) return;
+                          if (isNavigatingToRecommendations) {
+                            e.preventDefault();
+                            return;
+                          }
 
+                          // Link의 기본 동작 방지하고 프로그래밍 방식으로 네비게이션
+                          e.preventDefault();
                           setIsNavigatingToRecommendations(true);
                           console.log("[chat] Navigating to recommendations page");
+                          
                           trackEvent("recommendations_viewed_from_chat", {
                             consultation_id: consultationId,
                             has_recommendations: true,
                           });
+
+                          // 명시적으로 라우터로 이동
+                          router.push(`/recommendations/${consultationId}`);
                         }}
                       >
                         {isNavigatingToRecommendations ? (
