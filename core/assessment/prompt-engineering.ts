@@ -79,9 +79,8 @@ const extractAskedQuestions = (history: PromptContext["history"]): string[] => {
         content.includes("어려움")
       ) {
         // 질문의 핵심 부분만 추출 (너무 길면 요약)
-        const questionSummary = content.length > 100 
-          ? content.substring(0, 100) + "..."
-          : content;
+        const questionSummary =
+          content.length > 100 ? content.substring(0, 100) + "..." : content;
         questions.push(questionSummary);
       }
     }
@@ -102,8 +101,9 @@ export const buildPrompt = ({
 
   // 이미 물어본 질문 추출
   const askedQuestions = extractAskedQuestions(history);
-  const duplicatePreventionHint = askedQuestions.length > 0
-    ? `
+  const duplicatePreventionHint =
+    askedQuestions.length > 0
+      ? `
 **⚠️ 반복 질문 금지 (절대 위반 금지)**
 이미 물어본 질문 목록:
 ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
@@ -114,7 +114,7 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
 - 평가 질문의 경우, 평가가 완료된 활동은 다시 질문하지 않는다.
 - 사용자가 이미 답변한 내용을 바탕으로 다음 단계로 진행한다.
 `
-    : "";
+      : "";
 
   // 평가 컨텍스트 정보 구성
   let evaluationHint = "";
@@ -123,9 +123,9 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
       evaluationContext;
 
     // D-Level 활동 코드만 필터링 (d로 시작하는 코드만 평가 대상)
-    const dLevelCodes = extractedIcfCodes?.filter((code) =>
-      code.toLowerCase().startsWith("d")
-    ) || [];
+    const dLevelCodes =
+      extractedIcfCodes?.filter((code) => code.toLowerCase().startsWith("d")) ||
+      [];
 
     if (dLevelCodes.length > 0) {
       const evaluatedCodes = new Set(evaluatedActivities.map((a) => a.icfCode));
@@ -150,15 +150,21 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
         evaluationHint = `
 평가 진행 상황 (선택적, 정보 제공이 우선):
 - 추출된 D-Level 활동 코드: ${dLevelCodes.join(", ")}
-- 평가 완료된 활동: ${evaluatedActivities.length}개 (${evaluatedActivities.map(a => a.icfCode).join(", ")})
+- 평가 완료된 활동: ${evaluatedActivities.length}개 (${evaluatedActivities
+          .map((a) => a.icfCode)
+          .join(", ")})
 - 다음 평가할 활동: ${currentCode || "없음"}
-- 현재 활동 평가 상태: 중요도 ${hasImportance ? "완료" : "미완료"}, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
+- 현재 활동 평가 상태: 중요도 ${
+          hasImportance ? "완료" : "미완료"
+        }, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
 
 **중요: 평가는 선택사항입니다.**
 - 사용자가 평가를 원하지 않으면 즉시 보조기기 정보를 제공합니다.
 - 평가는 최대 1-2개 활동에만 진행하고, 즉시 보조기기 정보를 제공합니다.
 - 평가 질문은 한 문장으로만, 짧고 간결하게 합니다.
-- 평가 완료된 활동(${evaluatedActivities.map(a => a.icfCode).join(", ")})은 절대 다시 질문하지 않습니다.
+- 평가 완료된 활동(${evaluatedActivities
+          .map((a) => a.icfCode)
+          .join(", ")})은 절대 다시 질문하지 않습니다.
 `;
       }
     }
@@ -200,15 +206,20 @@ export const buildStreamingPrompt = ({
 - 추가 질문을 하지 말고, 즉시 제품 추천 페이지로 안내하세요.
 - 다음과 같이 답변하세요: "지금까지의 상담 내용을 바탕으로 맞춤형 보조기기를 추천해드리겠습니다. 아래 '맞춤형 보조기기 추천 받기' 버튼을 클릭하시면 추천 페이지로 이동합니다."
 - 또는: "상담 내용을 바탕으로 보조기기를 추천해드리겠습니다. 추천 페이지에서 자세한 정보를 확인하실 수 있습니다."
-- 제품 추천 페이지 링크: ${consultationId ? `/recommendations?consultationId=${consultationId}` : "/recommendations"}
+- 제품 추천 페이지 링크: ${
+        consultationId
+          ? `/recommendations?consultationId=${consultationId}`
+          : "/recommendations"
+      }
 - 절대 추가 질문을 하지 말고, 바로 추천으로 안내하세요.
 `
     : "";
 
   // 이미 물어본 질문 추출
   const askedQuestions = extractAskedQuestions(history);
-  const duplicatePreventionHint = askedQuestions.length > 0
-    ? `
+  const duplicatePreventionHint =
+    askedQuestions.length > 0
+      ? `
 **⚠️ 반복 질문 금지 (절대 위반 금지)**
 이미 물어본 질문 목록:
 ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
@@ -220,7 +231,7 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
 - 사용자가 이미 답변한 내용을 바탕으로 다음 단계로 진행한다.
 - 같은 내용을 반복해서 물어보면 사용자 경험이 나빠지므로 절대 금지한다.
 `
-    : "";
+      : "";
 
   // 평가 컨텍스트 정보 구성
   let evaluationHint = "";
@@ -229,9 +240,9 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
       evaluationContext;
 
     // D-Level 활동 코드만 필터링 (d로 시작하는 코드만 평가 대상)
-    const dLevelCodes = extractedIcfCodes?.filter((code) =>
-      code.toLowerCase().startsWith("d")
-    ) || [];
+    const dLevelCodes =
+      extractedIcfCodes?.filter((code) => code.toLowerCase().startsWith("d")) ||
+      [];
 
     if (dLevelCodes.length > 0) {
       const evaluatedCodes = new Set(evaluatedActivities.map((a) => a.icfCode));
@@ -253,18 +264,48 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
         const hasImportance = currentActivity?.importance !== undefined;
         const hasDifficulty = currentActivity?.preDifficulty !== undefined;
 
+        // 현재 활동의 ICF 코드 정보 가져오기
+        const currentIcfInfo = currentCode ? `ICF 코드: ${currentCode}` : "";
+
         evaluationHint = `
 **평가 진행 상황 (선택적, 정보 제공이 우선)**
 - 추출된 D-Level 활동 코드: ${dLevelCodes.join(", ")}
-- 평가 완료된 활동: ${evaluatedActivities.length}개 (${evaluatedActivities.map(a => a.icfCode).join(", ")})
-- 다음 평가할 활동: ${currentCode || "없음"}
-- 현재 활동 평가 상태: 중요도 ${hasImportance ? "완료" : "미완료"}, 어려움 정도 ${hasDifficulty ? "완료" : "미완료"}
+- 평가 완료된 활동: ${evaluatedActivities.length}개 (${evaluatedActivities
+          .map((a) => a.icfCode)
+          .join(", ")})
+- 다음 평가할 활동: ${currentCode || "없음"} ${currentIcfInfo}
+
+**현재 활동 평가 상태:**
+- 중요도: ${hasImportance ? "✅ 완료" : "❌ 미완료"}
+- 어려움 정도: ${hasDifficulty ? "✅ 완료" : "❌ 미완료"}
+
+**K-IPPA 평가 질문 형식 (체크 가능한 형태로 제공)**
+${
+  !hasImportance || !hasDifficulty
+    ? `
+- 다음 활동에 대해 체크 가능한 형태로 질문하세요:
+  "${currentCode} 활동에 대해 두 가지를 체크해주시면 더 정확한 추천을 드릴 수 있어요:
+  1. 이 활동이 일상생활에서 얼마나 중요한가요? (1=낮음, 5=매우 높음) - 중요도 체크
+  2. 이 활동을 수행하는 것이 얼마나 어려우신가요? (1=쉬움, 5=매우 어려움) - 어려움 정도 체크
+  
+  체크해주시면 바로 맞춤형 보조기기를 추천해드리겠습니다."
+  
+- 또는 간단하게: "중요도와 어려움 정도를 체크해주시면 바로 추천해드릴게요."
+- 사용자가 체크를 완료하면(예: "중요도 4, 어려움 5" 또는 "중요해요, 매우 어려워요" 등) 즉시 보조기기 추천으로 넘어갑니다.
+`
+    : `
+- 현재 활동(${currentCode})의 평가가 완료되었습니다. 즉시 보조기기 정보를 제공하고 추천 페이지로 안내하세요.
+`
+}
 
 **중요: 평가는 선택사항입니다.**
-- 사용자가 평가를 원하지 않으면 즉시 보조기기 정보를 제공합니다.
+- 사용자가 평가를 원하지 않으면(예: "체크 안 해도 돼요", "건너뛰고 추천해줘" 등) 즉시 보조기기 정보를 제공합니다.
 - 평가는 최대 1-2개 활동에만 진행하고, 즉시 보조기기 정보를 제공합니다.
 - 평가 질문은 한 문장으로만, 짧고 간결하게 합니다.
-- 평가 완료된 활동(${evaluatedActivities.map(a => a.icfCode).join(", ")})은 절대 다시 질문하지 않습니다.
+- 평가 완료된 활동(${evaluatedActivities
+          .map((a) => a.icfCode)
+          .join(", ")})은 절대 다시 질문하지 않습니다.
+- 평가가 완료되면 즉시 "지금까지의 상담 내용을 바탕으로 맞춤형 보조기기를 추천해드리겠습니다"라고 안내하고 추천 페이지로 안내합니다.
 `;
       }
     }
@@ -296,15 +337,25 @@ ${askedQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}
 ${duplicatePreventionHint}
 ${recommendationHint}
 
-**K-IPPA 평가 권유 (선택적, 최소화)**
+**K-IPPA 평가 권유 (선택적, 체크 가능한 형태로 제공)**
 - **중요: 평가는 선택사항이며, 정보 제공이 우선입니다.**
 - 사용자가 명시적으로 평가를 원하지 않으면 평가 질문을 하지 않습니다.
 - D-Level 활동 코드(d로 시작하는 코드)만 평가 대상입니다.
 - B-Level 신체 기능 코드(b로 시작)나 E-Level 환경 코드(e로 시작)만 추출되었을 때는 평가 질문을 하지 않습니다.
 - 사용자가 구체적인 활동 어려움을 언급하고 평가를 원할 때만 평가를 진행합니다.
 - 평가는 최대 1-2개 활동에 대해서만 진행하고, 즉시 보조기기 정보를 제공합니다.
+
+**K-IPPA 평가 질문 형식 (체크 가능한 형태)**
+- 평가 질문을 할 때는 다음과 같은 체크 가능한 형태로 제공합니다:
+  예시: "다음 두 가지를 체크해주시면 더 정확한 추천을 드릴 수 있어요:
+  1. [활동명]이 일상생활에서 얼마나 중요한가요? (1=낮음, 5=매우 높음) - 중요도 체크
+  2. [활동명]을 수행하는 것이 얼마나 어려우신가요? (1=쉬움, 5=매우 어려움) - 어려움 정도 체크
+  
+  체크해주시면 바로 맞춤형 보조기기를 추천해드리겠습니다."
+- 또는 간단하게: "중요도와 어려움 정도를 체크해주시면 바로 추천해드릴게요."
+- 사용자가 체크를 완료하면(예: "중요도 4, 어려움 5" 또는 "중요해요, 매우 어려워요" 등) 즉시 보조기기 추천으로 넘어갑니다.
 - 평가 질문은 짧고 간결하게, 한 문장으로만 질문합니다.
-- 사용자가 평가를 원하지 않으면 즉시 보조기기 정보를 제공합니다.
+- 사용자가 평가를 원하지 않으면(예: "체크 안 해도 돼요", "건너뛰고 추천해줘" 등) 즉시 보조기기 정보를 제공합니다.
 
 **대화 마무리 (짧고 간결하게)**
 - 사용자가 문제를 설명하고 보조기기 정보를 받으면, 즉시 추천 페이지로 안내한다.
