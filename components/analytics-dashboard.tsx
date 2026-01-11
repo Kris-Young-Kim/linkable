@@ -4,6 +4,7 @@ import useSWR from "swr"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { TrendingUp, MousePointerClick, ClipboardCheck, BarChart3 } from "lucide-react"
 import { useLanguage } from "@/components/language-provider"
+import { TrendCharts } from "@/components/analytics/trend-charts"
 
 interface AnalyticsMetrics {
   recommendationAccuracy: {
@@ -28,13 +29,46 @@ interface AnalyticsMetrics {
   averageEffectiveness: number
 }
 
-interface AnalyticsDashboardProps {
-  apiEndpoint?: string
+interface TrendData {
+  daily: Array<{
+    date: string
+    recommendations: number
+    ippaEvaluations: number
+    consultations: number
+    completedConsultations?: number
+  }>
+  weekly: Array<{
+    week: string
+    weekStart: string
+    recommendations: number
+    ippaEvaluations: number
+    consultations: number
+    completedConsultations?: number
+  }>
+  monthly: Array<{
+    month: string
+    monthStart: string
+    recommendations: number
+    ippaEvaluations: number
+    consultations: number
+    completedConsultations?: number
+    newUsers?: number
+  }>
+  hourly: Array<{
+    hour: number
+    consultations: number
+    recommendationClicks: number
+  }>
 }
 
-export function AnalyticsDashboard({ apiEndpoint = "/api/analytics" }: AnalyticsDashboardProps = {}) {
+interface AnalyticsDashboardProps {
+  apiEndpoint?: string
+  isAdmin?: boolean
+}
+
+export function AnalyticsDashboard({ apiEndpoint = "/api/analytics", isAdmin = false }: AnalyticsDashboardProps = {}) {
   const { t } = useLanguage()
-  const { data, error, isLoading } = useSWR<{ metrics: AnalyticsMetrics }>(
+  const { data, error, isLoading } = useSWR<{ metrics: AnalyticsMetrics; trends?: TrendData }>(
     apiEndpoint,
     {
       revalidateOnFocus: true,
@@ -44,6 +78,7 @@ export function AnalyticsDashboard({ apiEndpoint = "/api/analytics" }: Analytics
   )
 
   const metrics = data?.metrics
+  const trends = data?.trends
 
   if (isLoading) {
     return (
@@ -159,6 +194,11 @@ export function AnalyticsDashboard({ apiEndpoint = "/api/analytics" }: Analytics
           </div>
         </CardContent>
       </Card>
+
+      {/* 시간별 트렌드 차트 */}
+      {trends && (
+        <TrendCharts trends={trends} isAdmin={isAdmin} />
+      )}
     </div>
   )
 }

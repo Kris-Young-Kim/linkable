@@ -151,12 +151,15 @@ export async function getIsoMatchesAsync(
   icfCodes: string[],
   options?: {
     supabase?: ReturnType<typeof getSupabaseServerClient>;
+    expandToDivisions?: boolean;
   }
 ): Promise<IsoMatch[]> {
-  const { supabase } = options || {};
+  const { supabase, expandToDivisions = false } = options || {};
 
   const mappingTable = await loadMappingTableFromDB(supabase);
 
+  // expandToDivisions 옵션은 현재 구현에서는 사용되지 않지만,
+  // 타입 호환성을 위해 유지 (향후 Division 레벨 확장 기능 구현 시 사용)
   return getIsoMatchesFromTable(icfCodes, mappingTable);
 }
 

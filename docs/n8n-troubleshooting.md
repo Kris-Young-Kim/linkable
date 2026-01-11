@@ -1,83 +1,85 @@
-﻿# n8n ?뚰겕?뚮줈??臾몄젣 ?닿껐 媛?대뱶
+﻿# n8n 문제 해결 가이드
 
-## "No property named 'body' exists!" ?먮윭 ?닿껐
+## "No property named 'body' exists!" 오류 해결
 
-### 臾몄젣 ?먯씤
+### 문제 원인
 
-HTML Extract ?몃뱶媛 HTTP Request ?몃뱶??異쒕젰?먯꽌 `body` ?띿꽦??李얠? 紐삵븷 ??諛쒖깮?⑸땲??
+HTML Extract 노드가 HTTP Request 노드의 출력에서 `body` 속성을 찾지 못할 때 발생합니다.
 
-### ?닿껐 諛⑸쾿
+### 해결 방법
 
-#### 諛⑸쾿 1: HTTP Request ?몃뱶??異쒕젰 援ъ“ ?뺤씤
+#### 방법 1: HTTP Request 노드의 출력 확인
 
-1. **"荑좏뙜寃?됲럹?댁?" ?몃뱶 ?대┃**
-2. **"Execute step" 踰꾪듉 ?대┃**
-3. **OUTPUT ?⑤꼸 ?뺤씤**
-   - `body` ?띿꽦???덈뒗吏 ?뺤씤
-   - ?먮뒗 `data` ?띿꽦??HTML???덈뒗吏 ?뺤씤
+1. **"네이버 쇼핑 검색" 노드 클릭**
+2. **"Execute step" 버튼 클릭**
+3. **OUTPUT 패널 확인**
+   - `body` 속성이 있는지 확인
+   - 또는 `data` 속성에 HTML이 있는지 확인
 
-#### 諛⑸쾿 2: HTML Extract ?몃뱶??Source Data ?ㅼ젙 ?섏젙
+#### 방법 2: HTML Extract 노드의 Source Data 설정 변경
 
-**?듭뀡 A: `body` ???`data` ?ъ슜**
+**옵션 A: `body` 또는 `data` 사용**
 
-1. **"?곹뭹 ?뺣낫 異붿텧" ?몃뱶 ?대┃**
-2. **Parameters ??뿉??**
-   - **Source Data**: `JSON` ?좏깮
-   - **Data Property Name**: `body` ??`data`濡?蹂寃?
-   - ?먮뒗 Expression 紐⑤뱶濡?蹂寃? `={{ $json.data }}`
+1. **"제품 정보 추출" 노드 클릭**
+2. **Parameters 탭에서**
+   - **Source Data**: `JSON` 선택
+   - **Data Property Name**: `body` 또는 `data`로 변경
+   - 또는 Expression 방식: `={{ $json.data }}`
 
-**?듭뀡 B: Expression?쇰줈 吏곸젒 吏??*
+**옵션 B: Expression으로 유연하게 처리**
 
-1. **"?곹뭹 ?뺣낫 異붿텧" ?몃뱶 ?대┃**
-2. **Parameters ??뿉??**
-   - **Source Data**: `Expression` ?좏깮
-   - **Data Property Name**: `={{ $json.body || $json.data || $json }}` ?낅젰
+1. **"제품 정보 추출" 노드 클릭**
+2. **Parameters 탭에서**
+   - **Source Data**: `Expression` 선택
+   - **Data Property Name**: `={{ $json.body || $json.data || $json }}` 입력
 
-#### 諛⑸쾿 3: 荑좏뙜 ?뚰듃?덉뒪 ?섏씠吏 ?뱀꽦 怨좊젮
+#### 방법 3: 네이버 파트너스 페이지 특성 고려
 
-荑좏뙜 ?뚰듃?덉뒪 ?섏씠吏(`https://partners.naver.com`)??JavaScript濡??숈쟻 濡쒕뵫???ъ슜?섎뒗 SPA?낅땲?? ?쇰컲 HTTP Request濡쒕뒗 ?꾩쟾??HTML??媛?몄삤湲??대젮?????덉뒿?덈떎.
+네이버 파트너스 페이지(`https://partners.naver.com`)는 JavaScript로 동적 로딩을 사용하는 SPA입니다. 일반 HTTP Request로는 완전한 HTML을 가져올 수 없습니다.
 
-**???1: Playwright ?몃뱶 ?ъ슜**
+**대안 1: Playwright 노드 사용**
 
-1. **HTTP Request ?몃뱶 ???Playwright ?몃뱶 ?ъ슜**
-2. **Playwright ?몃뱶 ?ㅼ젙:**
-   - **Operation**: `Extract Data from Website` ?좏깮
+1. **HTTP Request 노드 대신 Playwright 노드 사용**
+2. **Playwright 노드 설정:**
+   - **Operation**: `Extract Data from Website` 선택
    - **URL**: `https://partners.naver.com/#affiliate/ws/link/0/%EB%B3%B4%EC%A1%B0%EA%B8%B0%EA%B8%B0`
-   - **Wait for Selector**: ?섏씠吏 濡쒕뵫 ?湲???됲꽣 ?낅젰
-   - **Wait Time**: `5000` (5珥?
+   - **Wait for Selector**: 페이지 로딩 완료를 기다릴 선택자 입력
+   - **Wait Time**: `5000` (5초)
 
-**???2: ?쇰컲 荑좏뙜 寃???섏씠吏 ?ъ슜**
+**대안 2: 일반 네이버 검색 페이지 사용**
 
-荑좏뙜 ?뚰듃?덉뒪 ????쇰컲 荑좏뙜 寃???섏씠吏瑜??ъ슜:
+네이버 파트너스 대신 일반 네이버 검색 페이지를 사용:
 
 ```
-https://www.naver.com/np/search?q=蹂댁“湲곌린&channel=user
+https://www.naver.com/np/search?q=보조기기&channel=user
 ```
 
-???섏씠吏???쒕쾭 ?ъ씠???뚮뜑留곸쓣 ?ъ슜?섎?濡?HTTP Request濡?HTML??媛?몄삱 ???덉뒿?덈떎.
+이 검색 페이지는 서버 사이드 렌더링을 사용하므로 HTTP Request로 HTML을 가져올 수 있습니다.
 
-### ?ㅼ젣 ?닿껐 ?④퀎 (?꾩옱 ?곹솴)
+### 빠른 해결 순서 (현재 권장)
 
-1. **"荑좏뙜寃?됲럹?댁?" ?몃뱶?먯꽌 OUTPUT ?뺤씤**
-   - `body` ?띿꽦???덈뒗吏 ?뺤씤
-   - ?녿떎硫?`data` ?띿꽦 ?뺤씤
+1. **"네이버 쇼핑 검색" 노드에서 OUTPUT 확인**
 
-2. **"?곹뭹 ?뺣낫 異붿텧" ?몃뱶 ?ㅼ젙 ?섏젙**
-   - **Source Data**: `JSON` ?좏깮
-   - **Data Property Name**: 
-     - 癒쇱? `data` ?쒕룄
-     - ???섎㈃ Expression 紐⑤뱶: `={{ $json.body || $json.data || $json }}`
+   - `body` 속성이 있는지 확인
+   - 없다면 `data` 속성 확인
 
-3. **?뚯뒪??*
-   - "Execute step" 踰꾪듉 ?대┃
-   - OUTPUT?먯꽌 ?먮윭媛 ?щ씪議뚮뒗吏 ?뺤씤
+2. **"제품 정보 추출" 노드 설정 변경**
 
-### 荑좏뙜 ?뚰듃?덉뒪 ?섏씠吏 ?ㅽ겕?섑븨 ?쒗븳?ы빆
+   - **Source Data**: `JSON` 선택
+   - **Data Property Name**:
+     - 가능하면 `data` 사용
+     - 안되면 Expression 방식: `={{ $json.body || $json.data || $json }}`
 
-荑좏뙜 ?뚰듃?덉뒪 ?섏씠吏??
-- JavaScript濡??숈쟻 濡쒕뵫
-- 濡쒓렇???꾩슂?????덉쓬
-- 遊?李⑤떒 媛??
+3. **테스트**
+   - "Execute step" 버튼 클릭
+   - OUTPUT에서 오류가 해결되었는지 확인
 
-**沅뚯옣 諛⑸쾿**: ?쇰컲 荑좏뙜 寃???섏씠吏(`www.naver.com/np/search`) ?ъ슜
+### 네이버 파트너스 페이지 특성 참고
 
+네이버 파트너스 페이지는
+
+- JavaScript로 동적 로딩
+- 로그인이 필요할 수 있음
+- 복잡한 구조
+
+**권장 방법**: 일반 네이버 검색 페이지(`www.naver.com/np/search`) 사용

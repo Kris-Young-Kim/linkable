@@ -293,6 +293,215 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 시간별 트렌드 데이터 계산
+    console.log("[Admin Analytics] Calculating time-based trends");
+    
+    // 일별 트렌드 (최근 30일)
+    const dailyTrendData: Array<{
+      date: string;
+      recommendations: number;
+      ippaEvaluations: number;
+      consultations: number;
+      completedConsultations: number;
+    }> = [];
+    
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+      
+      const dateStr = date.toISOString().split('T')[0];
+      
+      // 해당 날짜의 추천 수
+      const { data: dayRecs } = await supabase
+        .from("recommendations")
+        .select("id")
+        .gte("created_at", date.toISOString())
+        .lt("created_at", nextDate.toISOString());
+      
+      // 해당 날짜의 평가 수
+      const { data: dayEvals } = await supabase
+        .from("ippa_evaluations")
+        .select("id")
+        .gte("evaluated_at", date.toISOString())
+        .lt("evaluated_at", nextDate.toISOString());
+      
+      // 해당 날짜의 상담 수
+      const { data: dayConsults } = await supabase
+        .from("consultations")
+        .select("id, status")
+        .gte("created_at", date.toISOString())
+        .lt("created_at", nextDate.toISOString());
+      
+      dailyTrendData.push({
+        date: dateStr,
+        recommendations: dayRecs?.length ?? 0,
+        ippaEvaluations: dayEvals?.length ?? 0,
+        consultations: dayConsults?.length ?? 0,
+        completedConsultations: dayConsults?.filter(c => c.status === "completed").length ?? 0,
+      });
+    }
+
+    // 주별 트렌드 (최근 12주)
+    const weeklyTrendData: Array<{
+      week: string;
+      weekStart: string;
+      recommendations: number;
+      ippaEvaluations: number;
+      consultations: number;
+      completedConsultations: number;
+    }> = [];
+    
+    for (let i = 11; i >= 0; i--) {
+      const now = new Date();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - (now.getDay() + 7 * i));
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+      
+      const weekLabel = `${weekStart.toISOString().split('T')[0]} ~ ${new Date(weekEnd.getTime() - 1).toISOString().split('T')[0]}`;
+      
+      // 해당 주의 추천 수
+      const { data: weekRecs } = await supabase
+        .from("recommendations")
+        .select("id")
+        .gte("created_at", weekStart.toISOString())
+        .lt("created_at", weekEnd.toISOString());
+      
+      // 해당 주의 평가 수
+      const { data: weekEvals } = await supabase
+        .from("ippa_evaluations")
+        .select("id")
+        .gte("evaluated_at", weekStart.toISOString())
+        .lt("evaluated_at", weekEnd.toISOString());
+      
+      // 해당 주의 상담 수
+      const { data: weekConsults } = await supabase
+        .from("consultations")
+        .select("id, status")
+        .gte("created_at", weekStart.toISOString())
+        .lt("created_at", weekEnd.toISOString());
+      
+      weeklyTrendData.push({
+        week: weekLabel,
+        weekStart: weekStart.toISOString().split('T')[0],
+        recommendations: weekRecs?.length ?? 0,
+        ippaEvaluations: weekEvals?.length ?? 0,
+        consultations: weekConsults?.length ?? 0,
+        completedConsultations: weekConsults?.filter(c => c.status === "completed").length ?? 0,
+      });
+    }
+
+    // 월별 트렌드 (최근 12개월)
+    const monthlyTrendData: Array<{
+      month: string;
+      monthStart: string;
+      recommendations: number;
+      ippaEvaluations: number;
+      consultations: number;
+      completedConsultations: number;
+      newUsers: number;
+    }> = [];
+    
+    for (let i = 11; i >= 0; i--) {
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      monthStart.setHours(0, 0, 0, 0);
+      const monthEnd = new Date(monthStart);
+      monthEnd.setMonth(monthStart.getMonth() + 1);
+      
+      const monthLabel = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`;
+      
+      // 해당 월의 추천 수
+      const { data: monthRecs } = await supabase
+        .from("recommendations")
+        .select("id")
+        .gte("created_at", monthStart.toISOString())
+        .lt("created_at", monthEnd.toISOString());
+      
+      // 해당 월의 평가 수
+      const { data: monthEvals } = await supabase
+        .from("ippa_evaluations")
+        .select("id")
+        .gte("evaluated_at", monthStart.toISOString())
+        .lt("evaluated_at", monthEnd.toISOString());
+      
+      // 해당 월의 상담 수
+      const { data: monthConsults } = await supabase
+        .from("consultations")
+        .select("id, status")
+        .gte("created_at", monthStart.toISOString())
+        .lt("created_at", monthEnd.toISOString());
+      
+      // 해당 월의 신규 사용자 수
+      const { data: monthUsers } = await supabase
+        .from("users")
+        .select("id")
+        .gte("created_at", monthStart.toISOString())
+        .lt("created_at", monthEnd.toISOString());
+      
+      monthlyTrendData.push({
+        month: monthLabel,
+        monthStart: monthStart.toISOString().split('T')[0],
+        recommendations: monthRecs?.length ?? 0,
+        ippaEvaluations: monthEvals?.length ?? 0,
+        consultations: monthConsults?.length ?? 0,
+        completedConsultations: monthConsults?.filter(c => c.status === "completed").length ?? 0,
+        newUsers: monthUsers?.length ?? 0,
+      });
+    }
+
+    // 시간대별 활동 패턴 (24시간)
+    const hourlyActivityData: Array<{
+      hour: number;
+      consultations: number;
+      recommendationClicks: number;
+    }> = [];
+    
+    // 최근 30일 데이터로 시간대별 패턴 분석
+    const thirtyDaysAgoForHourly = new Date();
+    thirtyDaysAgoForHourly.setDate(thirtyDaysAgoForHourly.getDate() - 30);
+    
+    // 상담 시작 시간대별 집계
+    const { data: consultationsForHourly } = await supabase
+      .from("consultations")
+      .select("created_at")
+      .gte("created_at", thirtyDaysAgoForHourly.toISOString());
+    
+    const hourlyConsultations = new Map<number, number>();
+    consultationsForHourly?.forEach(consult => {
+      const hour = new Date(consult.created_at).getHours();
+      hourlyConsultations.set(hour, (hourlyConsultations.get(hour) || 0) + 1);
+    });
+    
+    // 추천 클릭 시간대별 집계 (클릭된 추천만)
+    const { data: clickedRecsForHourly } = await supabase
+      .from("recommendations")
+      .select("clicked_at")
+      .eq("is_clicked", true)
+      .not("clicked_at", "is", null)
+      .gte("clicked_at", thirtyDaysAgoForHourly.toISOString());
+    
+    const hourlyClicks = new Map<number, number>();
+    clickedRecsForHourly?.forEach(rec => {
+      if (rec.clicked_at) {
+        const hour = new Date(rec.clicked_at).getHours();
+        hourlyClicks.set(hour, (hourlyClicks.get(hour) || 0) + 1);
+      }
+    });
+    
+    // 0시부터 23시까지 데이터 생성
+    for (let hour = 0; hour < 24; hour++) {
+      hourlyActivityData.push({
+        hour,
+        consultations: hourlyConsultations.get(hour) || 0,
+        recommendationClicks: hourlyClicks.get(hour) || 0,
+      });
+    }
+
     // 추가 지표 계산
     // 1. 사용자 성장률
     const { data: usersData } = await supabase
@@ -478,6 +687,21 @@ export async function GET(request: NextRequest) {
     if (dailyStats) {
       response.dailyStats = dailyStats;
     }
+
+    // 트렌드 데이터 추가
+    response.trends = {
+      daily: dailyTrendData,
+      weekly: weeklyTrendData,
+      monthly: monthlyTrendData,
+      hourly: hourlyActivityData,
+    };
+
+    console.log("[Admin Analytics] Trends calculated:", {
+      daily: dailyTrendData.length,
+      weekly: weeklyTrendData.length,
+      monthly: monthlyTrendData.length,
+      hourly: hourlyActivityData.length,
+    });
 
     return NextResponse.json(response);
   } catch (error) {
