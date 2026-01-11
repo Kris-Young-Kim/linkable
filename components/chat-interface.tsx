@@ -1335,6 +1335,7 @@ export function ChatInterface() {
                         <div className="w-full max-w-md rounded-lg border border-border bg-card p-4 shadow-sm">
                           {message.evaluationType === "both" ? (
                             // 중요도와 어려움 정도를 동시에 선택하는 슬라이더 UI
+                            // 중요도와 어려움 정도를 동시에 선택하는 슬라이더 UI
                             <div className="space-y-6">
                               <p className="text-sm font-medium text-foreground">
                                 다음 두 가지를 체크해주시면 더 정확한 추천을 드릴 수 있어요:
@@ -1432,7 +1433,7 @@ export function ChatInterface() {
                             </div>
                           ) : (
                             // 기존 단일 평가 질문 (버튼 형태)
-                            message.evaluationType !== "both" && (
+                            (message.evaluationType === "importance" || message.evaluationType === "difficulty") && (
                               <>
                                 <p className="mb-3 text-sm font-medium text-foreground">
                                   {message.evaluationType === "importance"
