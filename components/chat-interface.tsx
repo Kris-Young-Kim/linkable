@@ -1718,7 +1718,7 @@ export function ChatInterface() {
                         href={`/recommendations/${consultationId}`}
                         className="w-full max-w-xs mx-auto shadow-lg shadow-primary/30 animate-pulse hover:animate-none transition-all duration-300 hover:scale-105"
                         disabled={isNavigatingToRecommendations}
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           if (isNavigatingToRecommendations) {
                             e.preventDefault();
                             return;
@@ -1733,18 +1733,18 @@ export function ChatInterface() {
                             has_recommendations: true,
                           });
 
-                          router.push(`/recommendations/${consultationId}`)
-                            .then(() => {
-                              console.log("[chat] Navigation successful");
-                              setTimeout(() => {
-                                setIsNavigatingToRecommendations(false);
-                              }, 1000);
-                            })
-                            .catch((error) => {
-                              console.error("[chat] Navigation failed:", error);
+                          try {
+                            await router.push(`/recommendations/${consultationId}`);
+                            console.log("[chat] Navigation successful");
+                            setTimeout(() => {
                               setIsNavigatingToRecommendations(false);
-                            });
+                            }, 1000);
+                          } catch (error) {
+                            console.error("[chat] Navigation failed:", error);
+                            setIsNavigatingToRecommendations(false);
+                          }
 
+                          // 안전장치: 5초 후 자동으로 리셋
                           setTimeout(() => {
                             setIsNavigatingToRecommendations(false);
                           }, 5000);
