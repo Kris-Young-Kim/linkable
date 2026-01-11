@@ -536,11 +536,17 @@ export function ChatInterface() {
                         | "both"
                         | undefined;
                       if (isEvaluationQuestion(updatedContent)) {
-                        // "체크" 키워드가 있고 중요도와 어려움 정도를 모두 물어보는 경우
+                        // 중요도와 어려움 정도를 모두 물어보는 경우 감지
+                        const hasImportance = updatedContent.includes("중요") || updatedContent.includes("중요도");
+                        const hasDifficulty = updatedContent.includes("어려움") || updatedContent.includes("어려운 정도") || updatedContent.includes("어려운가요");
+                        const hasCheck = updatedContent.includes("체크");
+                        const hasNumberedList = (updatedContent.includes("1.") && updatedContent.includes("2.")) || 
+                                               (updatedContent.includes("1 ") && updatedContent.includes("2 "));
+                        
+                        // 두 가지 평가를 모두 물어보는 경우 (다양한 형식 지원)
                         if (
-                          updatedContent.includes("체크") &&
-                          (updatedContent.includes("중요") || updatedContent.includes("중요도")) &&
-                          (updatedContent.includes("어려움") || updatedContent.includes("어려운 정도"))
+                          (hasImportance && hasDifficulty) && 
+                          (hasCheck || hasNumberedList || updatedContent.includes("중요도 체크") || updatedContent.includes("어려움 정도 체크"))
                         ) {
                           evaluationType = "both";
                           // 초기값 설정
@@ -548,13 +554,9 @@ export function ChatInterface() {
                             ...prev,
                             [assistantMessageId]: { importance: 3, difficulty: 3 },
                           }));
-                        } else if (updatedContent.includes("중요") || updatedContent.includes("중요도")) {
+                        } else if (hasImportance) {
                           evaluationType = "importance";
-                        } else if (
-                          updatedContent.includes("어려움") ||
-                          updatedContent.includes("어려운") ||
-                          updatedContent.includes("어려움 정도")
-                        ) {
+                        } else if (hasDifficulty) {
                           evaluationType = "difficulty";
                         }
                       }
