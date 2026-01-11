@@ -1432,42 +1432,46 @@ export function ChatInterface() {
                             </div>
                           ) : (
                             // 기존 단일 평가 질문 (버튼 형태)
-                            <>
-                              <p className="mb-3 text-sm font-medium text-foreground">
-                                {message.evaluationType === "importance"
-                                  ? "일상생활에서 얼마나 중요한가요?"
-                                  : "지금 이 활동을 하실 때 어려움 정도는 어떤가요?"}
-                              </p>
-                              <div className="flex gap-2">
-                                {[1, 2, 3, 4, 5].map((score) => (
-                                  <Button
-                                    key={score}
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className={cn(
-                                      "min-w-[48px] transition-opacity",
-                                      isSubmittingEvaluation === message.id && "opacity-50 cursor-not-allowed"
-                                    )}
-                                    onClick={() =>
-                                      handleEvaluationScoreClick(
-                                        score,
-                                        message.evaluationType!,
-                                        message.id
-                                      )
-                                    }
-                                    disabled={isTyping || isSubmittingEvaluation === message.id}
-                                  >
-                                    {score}
-                                  </Button>
-                                ))}
-                              </div>
-                              <p className="mt-2 text-xs text-muted-foreground">
-                                {message.evaluationType === "importance"
-                                  ? "1점: 별로 안 중요 → 5점: 매우 중요"
-                                  : "1점: 쉬워요 → 5점: 거의 못 해요"}
-                              </p>
-                            </>
+                            message.evaluationType !== "both" && (
+                              <>
+                                <p className="mb-3 text-sm font-medium text-foreground">
+                                  {message.evaluationType === "importance"
+                                    ? "일상생활에서 얼마나 중요한가요?"
+                                    : "지금 이 활동을 하실 때 어려움 정도는 어떤가요?"}
+                                </p>
+                                <div className="flex gap-2">
+                                  {[1, 2, 3, 4, 5].map((score) => (
+                                    <Button
+                                      key={score}
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      className={cn(
+                                        "min-w-[48px] transition-opacity",
+                                        isSubmittingEvaluation === message.id && "opacity-50 cursor-not-allowed"
+                                      )}
+                                      onClick={() => {
+                                        if (message.evaluationType === "importance" || message.evaluationType === "difficulty") {
+                                          handleEvaluationScoreClick(
+                                            score,
+                                            message.evaluationType,
+                                            message.id
+                                          );
+                                        }
+                                      }}
+                                      disabled={isTyping || isSubmittingEvaluation === message.id}
+                                    >
+                                      {score}
+                                    </Button>
+                                  ))}
+                                </div>
+                                <p className="mt-2 text-xs text-muted-foreground">
+                                  {message.evaluationType === "importance"
+                                    ? "1점: 별로 안 중요 → 5점: 매우 중요"
+                                    : "1점: 쉬워요 → 5점: 거의 못 해요"}
+                                </p>
+                              </>
+                            )
                           )}
                         </div>
                       </div>
