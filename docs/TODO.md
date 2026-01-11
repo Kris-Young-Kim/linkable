@@ -42,10 +42,10 @@
 
 #### 기술 작업 (개발 필요)
 
-1. **에러 복구 경험 개선** (1105줄) ⚠️ **부분 구현**
+1. **에러 복구 경험 개선** (1105줄) ✅ **구현 완료**
 
    - [x] 네트워크 오류 시 자동 재시도 ✅ `lib/api-utils.ts` - `fetchWithRetry`, `withRetry` 함수 구현됨, `lib/swr-provider.tsx`에 재시도 설정 구현됨
-   - [ ] 오프라인 상태 감지 및 안내 (미구현) - **진행 필요**
+   - [x] 오프라인 상태 감지 및 안내 ✅ `components/offline-detector.tsx` - `navigator.onLine` API를 사용한 오프라인/온라인 상태 감지 및 Toast 알림 구현됨, `app/layout.tsx`에 통합됨
 
 2. **전문가 상담 연결 시스템** (1160줄) - **진행 필요**
 
@@ -67,11 +67,11 @@
    - [x] `product_listings` 테이블 생성 ✅ 원천 상품 (UNIQUE 제약조건 적용됨)
    - [x] 크롤링 데이터 관리 인프라 구축 ✅ 마이그레이션 파일에 모든 테이블 및 인덱스 구현됨
 
-5. **SEO 개선** (일부 항목) - **진행 필요**
+5. **SEO 개선** (일부 항목) ✅ **구현 완료**
 
-   - [ ] 특수 문자 이스케이프 처리 (722줄)
-   - [ ] 전문가 인증 정보 표시 (746줄)
-   - [ ] 구조화된 데이터 추가 (Organization, WebSite, Product 등) (872줄)
+   - [x] 특수 문자 이스케이프 처리 ✅ `lib/utils/seo.ts` - `escapeHtml`, `escapeMetadata` 함수 구현됨
+   - [x] 전문가 인증 정보 표시 ✅ `components/pages/about-content.tsx` - 보조공학사, 작업치료사, ICF 전문가, ISO 9999 인증 배지 추가
+   - [x] 구조화된 데이터 추가 (Organization, WebSite, Product 등) ✅ `components/structured-data/organization.tsx`, `components/structured-data/website.tsx`, `components/structured-data/product.tsx` - Schema.org JSON-LD 형식으로 구현됨, `app/page.tsx`에 Organization과 WebSite 추가됨
 
 6. **URL 구조 최적화** (841줄) - **프로덕션 배포 시 확인 필요**
    - [ ] 도메인 HTTPS 리디렉션 (프로덕션 배포 시 확인)
@@ -132,6 +132,14 @@
 ## 최근 완료된 작업
 
 > **참고**: 상세한 완료 내역은 각 Phase 섹션을 참고하세요.
+
+### 2025-01-10: Hyperbrowser MCP 통합 및 오프라인 상태 감지
+
+- ✅ Hyperbrowser SDK 통합 (`@hyperbrowser/sdk`, `puppeteer-core`) - 동적 JavaScript 렌더링 페이지 크롤링 지원
+- ✅ Fallback 메커니즘 구현 - Hyperbrowser 실패 시 기존 `fetch + cheerio` 크롤러로 자동 전환
+- ✅ HTTP 429 에러 처리 개선 - 재시도 로직 및 지연 처리 추가
+- ✅ MCP 서버 설정 - `.mcp.json` 파일 생성 및 Cursor IDE 통합
+- ✅ 오프라인 상태 감지 및 안내 - `navigator.onLine` API를 사용한 네트워크 상태 감지 및 Toast 알림 구현
 
 ### 2025-02-27: AI 품질 측정 결과 저장 및 점수 반영 시스템
 
@@ -828,7 +836,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - [x] 제목은 약 60자 이내(픽셀 너비 580px) 권장 ✅ 대부분 준수
   - [x] 키워드는 제목의 시작 부분에 배치 ✅ "LinkAble — AI 기반 보조기기 매칭"
   - [x] 브랜드 접미사 포함 (예: " — LinkAble") ✅ 모든 페이지에 "LinkAble" 포함
-  - [ ] 특수 문자 이스케이프 처리 (일부 페이지 확인 필요)
+  - [x] 특수 문자 이스케이프 처리 ✅ `lib/utils/seo.ts` - `escapeHtml`, `escapeMetadata` 함수 구현됨
 
 - [x] **헤딩 구조 (Headings)**
 
@@ -852,7 +860,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
     - [x] ICF(국제기능분류) 및 ISO 9999 표준 기반 전문 콘텐츠 ✅ `docs/목적-및-핵심-가치.md`, `app/page.tsx` 메타데이터
     - [x] 보조공학 전문 용어의 정확한 사용 ✅ 프로젝트 전반에 걸쳐 사용
-    - [ ] 전문가 인증 정보 표시 (보조공학사, 작업치료사 등) (부분 구현)
+    - [x] 전문가 인증 정보 표시 (보조공학사, 작업치료사 등) ✅ `components/pages/about-content.tsx` - 보조공학사, 작업치료사, ICF 전문가, ISO 9999 인증 배지 추가
     - [ ] 전문가 프로필 및 자격 정보 페이지 제공 (권장)
     - [x] 전문가가 직접 작성/검토한 콘텐츠임을 명시 ✅ "16년 경력 보조공학 전문가" 언급 (`docs/목적-및-핵심-가치.md`)
 
@@ -975,15 +983,16 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 #### 구조화된 데이터 (Structured Data)
 
 - [x] **Schema.org 마크업**
-  - [ ] JSON-LD 형식 사용 (권장) (부분 구현 - BreadcrumbList만 마이크로데이터 형식)
-  - [x] 구조화된 데이터는 페이지 콘텐츠를 정확히 반영 (필수) ✅ BreadcrumbList 구현됨
+  - [x] JSON-LD 형식 사용 (권장) ✅ Organization, WebSite, Product, ImageObject 모두 JSON-LD 형식으로 구현됨
+  - [x] 구조화된 데이터는 페이지 콘텐츠를 정확히 반영 (필수) ✅ BreadcrumbList, Organization, WebSite, ImageObject 구현됨
   - [x] Open Graph 및 Twitter Card 마크업 구현 (필수) ✅ `app/page.tsx`, `app/dashboard/page.tsx` 등에 구현됨
-  - [ ] 주요 페이지 타입별 구조화된 데이터 구현:
-    - [ ] Organization (조직 정보) (미구현)
-    - [ ] WebSite (사이트 정보) (미구현)
+  - [x] 주요 페이지 타입별 구조화된 데이터 구현:
+    - [x] Organization (조직 정보) ✅ `components/structured-data/organization.tsx` - `app/page.tsx`, `app/about/page.tsx`에 추가됨
+    - [x] WebSite (사이트 정보) ✅ `components/structured-data/website.tsx` - `app/page.tsx`에 추가됨
     - [x] BreadcrumbList (브레드크럼) ✅ `components/navigation/breadcrumbs.tsx`
-    - [ ] Article/BlogPosting (블로그/기사) (미구현)
-    - [ ] Product (상품 정보) (미구현)
+    - [x] Product (상품 정보) ✅ `components/structured-data/product.tsx` - 상품 페이지에서 사용 가능
+    - [x] ImageObject (이미지) ✅ `components/structured-data/image-object.tsx` - `app/page.tsx`에 추가됨
+    - [ ] Article/BlogPosting (블로그/기사) (미구현 - 블로그 기능 없음)
     - [ ] FAQPage (FAQ) (미구현)
     - [ ] HowTo (사용 가이드) (미구현)
 
@@ -1081,6 +1090,14 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - [x] 보조기기 전문 쇼핑몰 지원 (7개 사이트)
   - [x] 크롤링 데이터 → DB 자동 등록 파이프라인
   - [x] 관리자 UI에 크롤링 기능 추가
+- [x] **Hyperbrowser MCP 통합** (2025-01-10 완료)
+  - [x] Hyperbrowser SDK 통합 (`@hyperbrowser/sdk`, `puppeteer-core`) ✅ `app/api/admin/products/crawl-browser/route.ts`
+  - [x] 동적 JavaScript 렌더링 페이지 크롤링 지원 ✅ Hyperbrowser를 통한 브라우저 자동화 크롤링 구현
+  - [x] Fallback 메커니즘 구현 ✅ Hyperbrowser 실패 시 기존 `fetch + cheerio` 크롤러로 자동 전환
+  - [x] HTTP 429 (Too Many Requests) 에러 처리 개선 ✅ 재시도 로직 및 지연 처리 추가
+  - [x] 디버깅 정보 강화 ✅ HTML 길이, 링크/테이블 개수, 발견된 셀렉터 등 상세 로그
+  - [x] MCP 서버 설정 ✅ `.mcp.json` 파일 생성 및 Cursor IDE 통합
+  - [x] 테스트 스크립트 작성 ✅ `scripts/test-mcp-hyperbrowser.ts` - SDK 기능 검증
 - [x] 제휴몰 API 연동
   - [x] 상품 검색 API 구현
   - [x] 상품 상세 정보 조회 API 구현
@@ -1213,7 +1230,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 - [x] **에러 복구 경험 개선** ⚠️ 부분 구현
   - [x] 네트워크 오류 시 자동 재시도 ✅ `lib/api-utils.ts` - `fetchWithRetry`, `withRetry` 함수, `lib/swr-provider.tsx` 재시도 설정
-  - [ ] 오프라인 상태 감지 및 안내 (미구현)
+  - [x] 오프라인 상태 감지 및 안내 ✅ `components/offline-detector.tsx` - 구현 완료
   - 예상 효과: 에러로 인한 이탈률 30% 감소
 
 **예상 점수 향상**: +0.4 (3.9 → 4.3)

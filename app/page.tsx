@@ -3,6 +3,8 @@ import dynamic from "next/dynamic"
 import { Suspense } from "react"
 import { ImagePreloader } from "@/components/image-preloader"
 import { ImageObject } from "@/components/structured-data/image-object"
+import { Organization } from "@/components/structured-data/organization"
+import { WebSite } from "@/components/structured-data/website"
 
 // Header는 서버 컴포넌트이지만 GlobalNav를 동적 import로 분리
 const Header = dynamic(() => import("@/components/header").then((mod) => ({ default: mod.Header })), {
@@ -148,6 +150,19 @@ export default function Home() {
     <div className="flex min-h-screen flex-col">
       {/* 메인 페이지에서만 이미지 프리로드 */}
       <ImagePreloader />
+      {/* 구조화된 데이터 (SEO) */}
+      <Organization
+        name="LinkAble"
+        url={baseUrl}
+        logo={`${baseUrl}/icon.png`}
+        description="ICF·ISO 표준을 기반으로 한 AI 상담과 추천, K-IPPA 검증까지 제공하는 디지털 보조공학 코디네이터."
+        email={process.env.NEXT_PUBLIC_EXPERT_EMAIL || "expert@linkable.ai"}
+      />
+      <WebSite
+        name="LinkAble"
+        url={baseUrl}
+        description="ICF·ISO 표준을 기반으로 한 AI 상담과 추천, K-IPPA 검증까지 제공하는 디지털 보조공학 코디네이터."
+      />
       {/* Open Graph 이미지 구조화된 데이터 */}
       <ImageObject
         imageUrl={ogImage}

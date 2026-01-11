@@ -120,6 +120,26 @@ export function AboutContent() {
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   LinkAble의 AI는 단순한 알고리즘이 아닙니다. 16년간 수천 명의 사용자와 함께한 보조공학사/작업치료사의 실제 임상 경험을 바탕으로 구축되었습니다.
                 </p>
+                {/* 전문가 인증 정보 */}
+                <div className="space-y-3 pt-4">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                      보조공학사
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                      작업치료사
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                      ICF 전문가
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+                      ISO 9999 인증
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    * LinkAble의 AI 시스템은 보조공학사 및 작업치료사 자격을 보유한 전문가가 직접 검토 및 개선하고 있습니다.
+                  </p>
+                </div>
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <div>
                     <p className="text-3xl font-black text-primary">16년</p>

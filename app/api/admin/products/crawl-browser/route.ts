@@ -1,7 +1,20 @@
+/**
+ * 크롤링 API - Puppeteer 기반
+ * 
+ * - 일반 페이지: fetch + cheerio
+ * - JavaScript 동적 로딩 페이지: Hyperbrowser + Puppeteer
+ * 
+ * MCP 서버 지원:
+ * - Cursor IDE의 MCP 서버를 통해 Hyperbrowser를 사용할 수 있습니다.
+ * - .mcp.json 파일에 hyperbrowser 서버가 설정되어 있어야 합니다.
+ * - 현재는 SDK를 직접 사용하지만, 필요시 MCP 서버로 전환 가능합니다.
+ */
 import { NextResponse } from "next/server";
 import { verifyAdminAccess } from "@/lib/auth/verify-admin";
 import * as cheerio from "cheerio";
 import iconv from "iconv-lite";
+import { connect } from "puppeteer-core";
+import { Hyperbrowser } from "@hyperbrowser/sdk";
 
 const mapReasonToStatus = (
   reason: "not_authenticated" | "insufficient_permissions" | "error"
@@ -240,6 +253,15 @@ function extractProductsFromPage(
 
   // 다양한 셀렉터 패턴 시도 (우선순위 순)
   const productSelectors = [
+    // 네이버 브랜드 스토어 특화
+    ".product_list_item",  // 네이버 브랜드 스토어 상품 아이템
+    ".productItem",  // 네이버 브랜드 스토어
+    "[class*='ProductItem']",  // 네이버 브랜드 스토어
+    "[class*='product-item']",  // 네이버 브랜드 스토어
+    "a[href*='/products/']",  // 네이버 브랜드 스토어 상품 링크
+    ".product_list a[href*='/products/']",  // 네이버 브랜드 스토어 리스트
+    "div[class*='product'] a[href*='/products/']",  // 네이버 브랜드 스토어
+    
     // willbe.kr 특화
     "dl.item-list",  // willbe.kr의 상품 리스트 구조
     ".item-cont dl.item-list",
@@ -494,6 +516,104 @@ function extractProductsFromPage(
   if (products.length === 0) {
     console.log("[Crawler] 셀렉터로 찾지 못함. 링크 기반 탐색 시도...");
     
+    // 네이버 브랜드 스토어 링크 우선 탐색
+    const naverBrandLinks = $("a[href*='/products/']");
+    if (naverBrandLinks.length > 0) {
+      console.log(`[Crawler] 네이버 브랜드 스토어 링크 발견: ${naverBrandLinks.length}개`);
+      
+      naverBrandLinks.slice(0, maxProducts * 2).each((index, linkEl) => {
+        if (products.length >= maxProducts) return false;
+        
+        const $link = $(linkEl);
+        const href = $link.attr("href");
+        if (!href || !href.includes("/products/")) return;
+        
+        // 네이버 브랜드 스토어 URL 정규화
+        let productLink = normalizeUrl(href, baseUrl);
+        if (!productLink.startsWith("http")) {
+          if (href.startsWith("/")) {
+            productLink = `${baseUrl}${href}`;
+          } else {
+            productLink = `${baseUrl}/${href}`;
+          }
+        }
+        
+        if (!productLink || globalSeenLinks.has(productLink)) return;
+        globalSeenLinks.add(productLink);
+        
+        // 상품명 추출
+        let productName = $link.text().trim() || $link.attr("title") || $link.attr("alt") || "";
+        
+        // 이미지 alt에서 찾기
+        if (!productName || productName.length < 2) {
+          const img = $link.find("img").first();
+          productName = img.attr("alt") || img.attr("title") || "";
+        }
+        
+        // 부모 요소에서 찾기
+        if (!productName || productName.length < 2) {
+          const $parent = $link.closest(".product_list_item, .productItem, [class*='ProductItem'], [class*='product-item'], li, div, article");
+          const parentTextEl = $parent.clone()
+            .find("a, img, script, style, .price, [class*='price']")
+            .remove()
+            .end();
+          const parentText = extractText(parentTextEl);
+
+          const lines = parentText.split(/[\n\r]+/)
+            .map(line => line.trim())
+            .filter(line => line.length >= 3 && 
+              !/^[\d\s,원]+$/.test(line) &&
+              !line.match(/^\d{1,3}(?:,\d{3})*\s*원?$/));
+          
+          if (lines.length > 0) {
+            productName = lines[0];
+          }
+        }
+        
+        // 가격 추출
+        const $parent = $link.closest(".product_list_item, .productItem, [class*='ProductItem'], [class*='product-item'], li, div, article");
+        const priceEl = $parent.find(".price, .prd-price, [class*='price'], strong, em").first();
+        const priceText = extractText(priceEl);
+        const parentText = extractText($parent);
+        const price = parsePrice(priceText) || parsePrice(parentText);
+        
+        // 이미지 추출
+        const imgEl = $link.find("img").first();
+        const imgSrc = imgEl.attr("src") || imgEl.attr("data-src") || imgEl.attr("data-original") || imgEl.attr("data-lazy-src");
+        const imageUrl = imgSrc ? normalizeUrl(imgSrc, baseUrl) : null;
+        
+        // 중복 체크
+        const productKey = `${productName}|${price || 'no-price'}`;
+        if (globalSeenProducts.has(productKey)) return;
+        globalSeenProducts.add(productKey);
+        
+        // 검증
+        const excludeTextPatterns = [
+          /^로그인|회원가입|장바구니|주문조회|마이페이지|공지사항|Q&A|자료실|HOME|GUIDE|TOP|검색|메뉴|카테고리|미리보기|상세보기|더보기$/i,
+          /고객센터|교환|반품|환불|배송|상품.*불량|평점|리뷰|문의|별점/i,
+        ];
+        const isExcluded = excludeTextPatterns.some(pattern => pattern.test(productName));
+        
+        if (productName && productName.length >= 3 && !isExcluded && productLink) {
+          products.push({
+            id: `crawled-${Date.now()}-naver-${index}`,
+            name: productName.substring(0, 200),
+            price,
+            purchase_link: productLink,
+            image_url: imageUrl,
+            manufacturer: null,
+            description: null,
+            category: null,
+            iso_code: null,
+          });
+        }
+      });
+      
+      if (products.length > 0) {
+        return { products, foundSelector: "a[href*='/products/']" };
+      }
+    }
+    
     const allLinks = $("a[href*='shopdetail'], a[href*='product'], a[href*='detail']");
     const excludeTextPatterns = [
       /^로그인|회원가입|장바구니|주문조회|마이페이지|공지사항|Q&A|자료실|HOME|GUIDE|TOP|검색|메뉴|카테고리|미리보기|상세보기|더보기$/i,
@@ -580,6 +700,121 @@ function extractProductsFromPage(
 }
 
 /**
+ * Hyperbrowser를 사용한 크롤링 (JavaScript 동적 로딩 페이지용)
+ */
+async function crawlWithHyperbrowser(
+  url: string,
+  maxProducts: number = 30
+): Promise<CrawlResult> {
+  const hyperbrowserApiKey = process.env.HYPERBROWSER_API_KEY;
+  
+  if (!hyperbrowserApiKey) {
+    console.warn("[Crawler] HYPERBROWSER_API_KEY가 설정되지 않아 Hyperbrowser 크롤링을 건너뜁니다.");
+    throw new Error("HYPERBROWSER_API_KEY가 설정되지 않았습니다.");
+  }
+
+  const client = new Hyperbrowser({
+    apiKey: hyperbrowserApiKey,
+  });
+
+  let session: any = null;
+  let browser: any = null;
+
+  try {
+    console.log(`[Crawler] Hyperbrowser 세션 생성 중...`);
+    session = await client.sessions.create({
+      useStealth: true,
+    });
+
+    console.log(`[Crawler] 브라우저 연결 중...`);
+    browser = await connect({
+      browserWSEndpoint: session.wsEndpoint,
+      defaultViewport: null,
+    });
+
+    // 페이지 가져오기 또는 새로 생성
+    const pages = await browser.pages();
+    let page = pages[0];
+    if (!page) {
+      console.log(`[Crawler] 새 페이지 생성 중...`);
+      page = await browser.newPage();
+    }
+    
+    console.log(`[Crawler] 페이지 준비 완료 (기존 페이지: ${pages.length}개)`);
+
+    const baseUrl = new URL(url).origin;
+    const products: CrawledProduct[] = [];
+    const globalSeenLinks = new Set<string>();
+    const globalSeenProducts = new Set<string>();
+
+    console.log(`[Crawler] 페이지 로드 중: ${url}`);
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
+    
+    // 페이지가 완전히 로드될 때까지 대기
+    await page.waitForTimeout(3000);
+
+    // HTML 가져오기
+    const html = await page.content();
+    console.log(`[Crawler] HTML 길이: ${html.length} bytes`);
+
+    // cheerio로 파싱
+    const $ = cheerio.load(html);
+
+    // 상품 추출
+    const result = extractProductsFromPage(
+      $,
+      baseUrl,
+      maxProducts,
+      globalSeenLinks,
+      globalSeenProducts,
+      products
+    );
+
+    products.push(...result.products);
+    console.log(`[Crawler] Hyperbrowser로 ${products.length}개 상품 추출 완료`);
+
+    // 디버깅 정보
+    let debugInfo: CrawlResult["debug"] = undefined;
+    if (products.length === 0) {
+      const allLinks = $("a[href]");
+      const productLinks = $("a[href*='product'], a[href*='shopdetail'], a[href*='detail'], a[href*='/products/']");
+      const tables = $("table");
+      const lists = $("ul, ol");
+      const title = $("title").text() || "";
+
+      debugInfo = {
+        htmlLength: html.length,
+        title: title.substring(0, 100),
+        linkCount: allLinks.length,
+        tableCount: tables.length,
+        listCount: lists.length,
+        foundSelector: result.foundSelector || null,
+        sampleLinks: [],
+      };
+    }
+
+    return {
+      products,
+      debug: debugInfo,
+    };
+  } catch (error) {
+    console.error("[Crawler] Hyperbrowser 크롤링 오류:", error);
+    throw error;
+  } finally {
+    try {
+      if (browser) {
+        await browser.disconnect();
+      }
+      if (session) {
+        await client.sessions.stop(session.id);
+      }
+    } catch (cleanupError) {
+      console.warn("[Crawler] Hyperbrowser 정리 중 오류:", cleanupError);
+    }
+  }
+}
+
+/**
  * 범용 HTML 크롤러 (fetch + cheerio)
  * 페이지네이션 지원 및 다양한 웹사이트 구조 대응
  */
@@ -597,6 +832,9 @@ async function crawlProducts(
     const globalSeenLinks = new Set<string>();
     const globalSeenProducts = new Set<string>();
 
+    // 첫 페이지 로드 실패 정보 저장
+    let firstPageError: { status?: number; message?: string } | null = null;
+
     // 페이지네이션 처리
     let currentPage = 1;
     const maxPages = 20; // 최대 20페이지까지 크롤링
@@ -604,16 +842,27 @@ async function crawlProducts(
     
     // 첫 페이지 로드하여 페이지네이션 링크 찾기
     try {
+      console.log(`[Crawler] 첫 페이지 요청: ${url}`);
       const firstResponse = await fetch(url, {
         headers: {
           "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
           "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+          Referer: baseUrl,
         },
         next: { revalidate: 0 },
       });
 
+      console.log(`[Crawler] 첫 페이지 응답: ${firstResponse.status} ${firstResponse.statusText}`);
+
       if (!firstResponse.ok) {
+        const errorText = await firstResponse.text().catch(() => "");
+        console.error(`[Crawler] 첫 페이지 로드 실패: HTTP ${firstResponse.status} ${firstResponse.statusText}`);
+        console.error(`[Crawler] 응답 내용: ${errorText.substring(0, 200)}`);
+        firstPageError = {
+          status: firstResponse.status,
+          message: `${firstResponse.statusText}: ${errorText.substring(0, 100)}`,
+        };
         throw new Error(`HTTP ${firstResponse.status}: ${firstResponse.statusText}`);
       }
 
@@ -654,7 +903,15 @@ async function crawlProducts(
       pagesToCrawl.push(...uniquePages.slice(0, maxPages - 1));
       console.log(`[Crawler] 크롤링할 페이지: ${pagesToCrawl.length}개 (${pagesToCrawl.map((p, i) => i + 1).join(", ")})`);
     } catch (error) {
-      console.warn(`[Crawler] 페이지네이션 링크 추출 실패, 첫 페이지만 크롤링:`, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.warn(`[Crawler] 페이지네이션 링크 추출 실패, 첫 페이지만 크롤링:`, errorMessage);
+      
+      // 첫 페이지 로드 실패 시 상품이 없으면 디버깅 정보에 포함
+      if (errorMessage.includes("HTTP") && products.length === 0) {
+        const statusMatch = errorMessage.match(/HTTP (\d+):/);
+        const status = statusMatch ? statusMatch[1] : "unknown";
+        console.log(`[Crawler] 첫 페이지 로드 실패로 인한 크롤링 불가 (HTTP ${status})`);
+      }
     }
 
     // 각 페이지 크롤링
@@ -666,27 +923,56 @@ async function crawlProducts(
       console.log(`[Crawler] 페이지 ${pageNum}/${pagesToCrawl.length} 크롤링: ${pageUrl}`);
       
       try {
+        // HTTP 429 에러 방지를 위한 딜레이
+        if (pageIndex > 0) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1초 대기
+        }
+        
         const response = await fetch(pageUrl, {
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+            Referer: baseUrl, // Referer 헤더 추가
           },
           next: { revalidate: 0 },
         });
 
+        let responseToUse = response;
+        
         if (!response.ok) {
-          console.warn(`[Crawler] 페이지 ${pageNum} 로드 실패 (HTTP ${response.status}), 건너뜀`);
-          continue;
+          if (response.status === 429) {
+            console.warn(`[Crawler] 페이지 ${pageNum} 로드 실패 (HTTP 429: Too Many Requests), 5초 대기 후 재시도...`);
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            // 재시도
+            const retryResponse = await fetch(pageUrl, {
+              headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+                Referer: baseUrl,
+              },
+              next: { revalidate: 0 },
+            });
+            
+            if (!retryResponse.ok) {
+              console.warn(`[Crawler] 페이지 ${pageNum} 재시도 실패 (HTTP ${retryResponse.status}), 건너뜀`);
+              continue;
+            }
+            responseToUse = retryResponse;
+          } else {
+            console.warn(`[Crawler] 페이지 ${pageNum} 로드 실패 (HTTP ${response.status}), 건너뜀`);
+            continue;
+          }
         }
 
         // 바이너리로 받아서 인코딩 처리
-        const arrayBuffer = await response.arrayBuffer();
+        const arrayBuffer = await responseToUse.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
         
         // 임시로 UTF-8로 디코딩하여 meta charset 확인
         const tempHtml = buffer.toString("utf-8");
-        const contentType = response.headers.get("content-type") || "";
+        const contentType = responseToUse.headers.get("content-type") || "";
         
         // 올바른 인코딩으로 디코딩
         const html = decodeHtml(buffer, contentType, tempHtml);
@@ -733,18 +1019,136 @@ async function crawlProducts(
     console.log(`[Crawler] 총 ${products.length}개 상품 추출 완료 (최대 제한: ${maxProducts}개)`);
 
     // 디버깅 정보 수집 (상품이 없을 때만)
-    const debugInfo =
-      products.length === 0
-        ? {
+    let debugInfo: CrawlResult["debug"] = undefined;
+    if (products.length === 0) {
+      try {
+        // 마지막으로 시도한 페이지의 HTML 분석
+        const lastPageUrl = pagesToCrawl[pagesToCrawl.length - 1] || url;
+        let debugResponse: Response | null = null;
+        
+        // HTTP 429 에러 처리
+        try {
+          debugResponse = await fetch(lastPageUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+              "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+              Referer: baseUrl,
+            },
+            next: { revalidate: 0 },
+          });
+          
+          if (debugResponse.status === 429) {
+            console.log("[Crawler] 디버깅 정보 수집 시 HTTP 429 발생, 5초 대기 후 재시도...");
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            debugResponse = await fetch(lastPageUrl, {
+              headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Language": "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7",
+                Referer: baseUrl,
+              },
+              next: { revalidate: 0 },
+            });
+          }
+        } catch (fetchError) {
+          console.warn("[Crawler] 디버깅 정보 수집용 fetch 실패:", fetchError);
+        }
+
+        if (debugResponse) {
+          console.log(`[Crawler] 디버깅 정보 수집 응답 상태: ${debugResponse.status} ${debugResponse.statusText}`);
+          
+          if (debugResponse.ok) {
+            const arrayBuffer = await debugResponse.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const tempHtml = buffer.toString("utf-8");
+            const contentType = debugResponse.headers.get("content-type") || "";
+            const html = decodeHtml(buffer, contentType, tempHtml);
+            const $debug = cheerio.load(html);
+
+            console.log(`[Crawler] 디버깅 HTML 길이: ${html.length} bytes, Content-Type: ${contentType}`);
+
+            // 실제 링크와 테이블 개수 계산
+            const allLinks = $debug("a[href]");
+            const productLinks = $debug("a[href*='product'], a[href*='shopdetail'], a[href*='detail'], a[href*='/products/']");
+            const tables = $debug("table");
+            const lists = $debug("ul, ol");
+            const title = $debug("title").text() || "";
+
+            // 네이버 브랜드 스토어 특정 요소 확인
+            const naverBrandItems = $debug(".product_list_item, .productItem, [class*='ProductItem'], [class*='product-item']");
+            
+            // 샘플 링크 수집
+            const sampleLinks: Array<{ href: string | undefined; text: string }> = [];
+            productLinks.slice(0, 10).each((_, el) => {
+              const $link = $debug(el);
+              sampleLinks.push({
+                href: $link.attr("href"),
+                text: $link.text().trim().substring(0, 50),
+              });
+            });
+
+            debugInfo = {
+              htmlLength: html.length,
+              title: title.substring(0, 100),
+              linkCount: allLinks.length,
+              tableCount: tables.length,
+              listCount: lists.length,
+              foundSelector: foundSelector || null,
+              sampleLinks,
+            };
+
+            console.log(`[Crawler] 디버깅 정보 수집: 링크 ${allLinks.length}개, 상품 링크 ${productLinks.length}개, 테이블 ${tables.length}개, 리스트 ${lists.length}개, 네이버 브랜드 아이템 ${naverBrandItems.length}개`);
+            
+            // 네이버 브랜드 스토어 감지
+            if (url.includes("brand.naver.com") && naverBrandItems.length === 0 && productLinks.length === 0) {
+              console.warn("[Crawler] 네이버 브랜드 스토어 페이지는 JavaScript로 동적 로드되므로 fetch로는 상품 정보를 가져올 수 없을 수 있습니다.");
+              console.warn("[Crawler] HTML 샘플 (처음 500자):", html.substring(0, 500));
+            }
+          } else {
+            // 응답이 실패한 경우
+            const errorText = await debugResponse.text().catch(() => "");
+            console.error(`[Crawler] 디버깅 정보 수집 실패: HTTP ${debugResponse.status} ${debugResponse.statusText}`);
+            console.error(`[Crawler] 응답 내용: ${errorText.substring(0, 200)}`);
+            
+            debugInfo = {
+              htmlLength: 0,
+              title: `HTTP ${debugResponse.status}: ${debugResponse.statusText}${firstPageError ? ` (첫 페이지도 실패: HTTP ${firstPageError.status})` : ""}`,
+              linkCount: 0,
+              tableCount: 0,
+              listCount: 0,
+              foundSelector: foundSelector || null,
+              sampleLinks: [],
+            };
+          }
+        } else {
+          console.warn("[Crawler] 디버깅 정보 수집용 fetch가 null입니다.");
+          const errorTitle = firstPageError 
+            ? `첫 페이지 로드 실패: HTTP ${firstPageError.status} - ${firstPageError.message}`
+            : "디버깅 정보 수집 실패: fetch 응답 없음";
+          debugInfo = {
             htmlLength: 0,
-            title: "",
+            title: errorTitle,
             linkCount: 0,
             tableCount: 0,
             listCount: 0,
             foundSelector: foundSelector || null,
             sampleLinks: [],
-          }
-        : undefined;
+          };
+        }
+      } catch (error) {
+        console.warn("[Crawler] 디버깅 정보 수집 실패:", error);
+        debugInfo = {
+          htmlLength: 0,
+          title: "",
+          linkCount: 0,
+          tableCount: 0,
+          listCount: 0,
+          foundSelector: foundSelector || null,
+          sampleLinks: [],
+        };
+      }
+    }
 
     return {
       products,
@@ -757,8 +1161,11 @@ async function crawlProducts(
 }
 
 /**
- * HTML 크롤링 API (fetch + cheerio 기반)
+ * HTML 크롤링 API (fetch + cheerio + Puppeteer/Hyperbrowser 기반)
  * Vercel 서버리스 환경에서 동작
+ * 
+ * - 일반 페이지: fetch + cheerio 사용
+ * - JavaScript 동적 로딩 페이지 (네이버 브랜드 스토어 등): Hyperbrowser + Puppeteer 사용
  */
 export async function POST(request: Request) {
   const access = await verifyAdminAccess();
@@ -784,7 +1191,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await crawlProducts(body.url, maxProducts);
+    // 네이버 브랜드 스토어는 Hyperbrowser 사용 (JavaScript 동적 로딩)
+    const useHyperbrowser = body.url.includes("brand.naver.com");
+    
+    let result: CrawlResult;
+    if (useHyperbrowser && process.env.HYPERBROWSER_API_KEY) {
+      console.log(`[Crawl API] Hyperbrowser 사용: ${body.url}`);
+      try {
+        result = await crawlWithHyperbrowser(body.url, maxProducts);
+      } catch (error) {
+        console.warn(`[Crawl API] Hyperbrowser 실패, 일반 크롤러로 폴백:`, error);
+        result = await crawlProducts(body.url, maxProducts);
+      }
+    } else {
+      result = await crawlProducts(body.url, maxProducts);
+    }
 
     return NextResponse.json({
       success: true,

@@ -11,6 +11,8 @@ import { RoleGuard } from "@/components/role-guard";
 import { SWRProvider } from "@/lib/swr-provider";
 import { SkipToMain } from "@/components/skip-to-main";
 import { WebVitalsTracker } from "@/components/performance/web-vitals-tracker";
+import { OfflineDetector } from "@/components/offline-detector";
+import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
 const inter = Inter({
@@ -172,6 +174,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <AnalyticsEventListener />
           <Analytics />
           <WebVitalsTracker />
+          <OfflineDetector />
+          <Toaster />
         </body>
       </html>
     </ClerkProvider>

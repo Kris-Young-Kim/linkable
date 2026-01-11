@@ -476,7 +476,8 @@ export function AdminProductManager({
         `[Admin Products] 크롤링 요청: URL=${normalizedUrl}, max=${maxValue}`
       );
 
-      const response = await fetch("/api/admin/products/crawl-playwright", {
+      // Puppeteer 기반 크롤러 사용 (Hyperbrowser 지원)
+      const response = await fetch("/api/admin/products/crawl-browser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
