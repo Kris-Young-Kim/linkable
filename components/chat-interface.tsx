@@ -78,13 +78,17 @@ import { useRecommendations } from "@/lib/api-hooks";
 import { cn, generateUUID, isChatEndingIntent, isVisualAidRequestIntent, isProductRecommendationRequestIntent } from "@/lib/utils";
 import { isEvaluationQuestion } from "@/core/assessment/ippa-score-parser";
 import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
-  evaluationType?: "importance" | "difficulty"; // 평가 질문 유형
+  evaluationType?: "importance" | "difficulty" | "both"; // 평가 질문 유형
+  evaluationActivityCode?: string; // 평가할 활동 ICF 코드
 }
 
 export function ChatInterface() {
@@ -129,6 +133,8 @@ export function ChatInterface() {
   const [errorState, setErrorState] = useState<string | null>(null);
   const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
   const [isSubmittingEvaluation, setIsSubmittingEvaluation] = useState<string | null>(null); // messageId로 로딩 상태 추적
+  // 평가 점수 상태 (messageId별로 중요도와 어려움 정도 저장)
+  const [evaluationScores, setEvaluationScores] = useState<Record<string, { importance: number; difficulty: number }>>({});
   const [isNavigatingToRecommendations, setIsNavigatingToRecommendations] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -527,9 +533,22 @@ export function ChatInterface() {
                       let evaluationType:
                         | "importance"
                         | "difficulty"
+                        | "both"
                         | undefined;
                       if (isEvaluationQuestion(updatedContent)) {
-                        if (updatedContent.includes("중요")) {
+                        // "체크" 키워드가 있고 중요도와 어려움 정도를 모두 물어보는 경우
+                        if (
+                          updatedContent.includes("체크") &&
+                          (updatedContent.includes("중요") || updatedContent.includes("중요도")) &&
+                          (updatedContent.includes("어려움") || updatedContent.includes("어려운 정도"))
+                        ) {
+                          evaluationType = "both";
+                          // 초기값 설정
+                          setEvaluationScores((prev) => ({
+                            ...prev,
+                            [assistantMessageId]: { importance: 3, difficulty: 3 },
+                          }));
+                        } else if (updatedContent.includes("중요") || updatedContent.includes("중요도")) {
                           evaluationType = "importance";
                         } else if (
                           updatedContent.includes("어려움") ||
@@ -724,47 +743,15 @@ export function ChatInterface() {
     }
   };
 
-  // 평가 점수 버튼 클릭 핸들러
-  const handleEvaluationScoreClick = useCallback(
+  // 내부 평가 점수 전송 로직 (공통)
+  const handleEvaluationScoreClickInternal = useCallback(
     async (
-      score: number,
-      evaluationType: "importance" | "difficulty",
-      messageId: string
+      scoreText: string,
+      assistantMessageId: string,
+      originalMessageId: string
     ) => {
-      // 이미 제출 중이면 중복 요청 방지
-      if (isSubmittingEvaluation === messageId) return;
-
-      const scoreText = `${score}점`;
-
-      // 점수를 직접 메시지로 전송
-      const userMessage: Message = {
-        id: generateUUID(),
-        role: "user",
-        content: scoreText,
-        timestamp: new Date(),
-      };
-
-      const assistantMessageId = generateUUID();
-
-      setMessages((prev) => [
-        ...prev,
-        userMessage,
-        {
-          id: assistantMessageId,
-          role: "assistant",
-          content: "",
-          timestamp: new Date(),
-        },
-      ]);
-      setInput("");
-      setTimeout(() => scrollToBottom(true), 100);
-      setIsTyping(true);
-      setSuggestedQuestions([]);
-      setIcfAnalysis(null);
-      setShowRecommendationCTA(false);
-
       try {
-        setIsSubmittingEvaluation(messageId);
+        setIsSubmittingEvaluation(originalMessageId);
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -927,6 +914,111 @@ export function ChatInterface() {
       }
     },
     [consultationId, messages, disabilityType, disabilitySeverity, t]
+  );
+
+  // 중요도와 어려움 정도를 동시에 제출하는 핸들러
+  const handleEvaluationBothSubmit = useCallback(
+    (
+      importance: number,
+      difficulty: number,
+      messageId: string
+    ) => {
+      // 이미 제출 중이면 중복 요청 방지
+      if (isSubmittingEvaluation === messageId) return;
+
+      const scoreText = `중요도 ${importance}점, 어려움 정도 ${difficulty}점`;
+
+      // 점수를 직접 메시지로 전송
+      const userMessage: Message = {
+        id: generateUUID(),
+        role: "user",
+        content: scoreText,
+        timestamp: new Date(),
+      };
+
+      const assistantMessageId = generateUUID();
+
+      setMessages((prev) => [
+        ...prev,
+        userMessage,
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          content: "",
+          timestamp: new Date(),
+        },
+      ]);
+      setInput("");
+      setTimeout(() => scrollToBottom(true), 100);
+      setIsTyping(true);
+      setSuggestedQuestions([]);
+      setIcfAnalysis(null);
+      setShowRecommendationCTA(false);
+
+      // 평가 점수 상태 초기화
+      setEvaluationScores((prev) => {
+        const next = { ...prev };
+        delete next[messageId];
+        return next;
+      });
+
+      // API 호출
+      handleEvaluationScoreClickInternal(
+        scoreText,
+        assistantMessageId,
+        messageId
+      );
+    },
+    [handleEvaluationScoreClickInternal, isSubmittingEvaluation]
+  );
+
+  // 평가 점수 버튼 클릭 핸들러
+  const handleEvaluationScoreClick = useCallback(
+    (
+      score: number,
+      evaluationType: "importance" | "difficulty",
+      messageId: string
+    ) => {
+      // 이미 제출 중이면 중복 요청 방지
+      if (isSubmittingEvaluation === messageId) return;
+
+      const scoreText = `${score}점`;
+
+      // 점수를 직접 메시지로 전송
+      const userMessage: Message = {
+        id: generateUUID(),
+        role: "user",
+        content: scoreText,
+        timestamp: new Date(),
+      };
+
+      const assistantMessageId = generateUUID();
+
+      setMessages((prev) => [
+        ...prev,
+        userMessage,
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          content: "",
+          timestamp: new Date(),
+        },
+      ]);
+      setInput("");
+      setTimeout(() => scrollToBottom(true), 100);
+      setIsTyping(true);
+      setSuggestedQuestions([]);
+      setIcfAnalysis(null);
+      setShowRecommendationCTA(false);
+
+      // 내부 함수 호출
+      handleEvaluationScoreClickInternal(
+        scoreText,
+        assistantMessageId,
+        messageId
+      );
+    },
+    [handleEvaluationScoreClickInternal, isSubmittingEvaluation]
   );
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -1232,7 +1324,7 @@ export function ChatInterface() {
                       {message.content}
                     </div>
                   </div>
-                  {/* 평가 질문에 대한 5점 척도 버튼 */}
+                  {/* 평가 질문에 대한 UI */}
                   {message.role === "assistant" &&
                     message.evaluationType &&
                     // 다음 메시지가 존재하고 사용자 메시지가 아니고, 타이핑 중이 아닐 때만 표시
@@ -1240,41 +1332,143 @@ export function ChatInterface() {
                     messages[index + 1].role !== "user" &&
                     !isTyping && (
                       <div className="flex justify-start pl-[52px]">
-                        <div className="rounded-lg border border-border bg-card p-4 shadow-sm">
-                          <p className="mb-3 text-sm font-medium text-foreground">
-                            {message.evaluationType === "importance"
-                              ? "일상생활에서 얼마나 중요한가요?"
-                              : "지금 이 활동을 하실 때 어려움 정도는 어떤가요?"}
-                          </p>
-                          <div className="flex gap-2">
-                            {[1, 2, 3, 4, 5].map((score) => (
+                        <div className="w-full max-w-md rounded-lg border border-border bg-card p-4 shadow-sm">
+                          {message.evaluationType === "both" ? (
+                            // 중요도와 어려움 정도를 동시에 선택하는 슬라이더 UI
+                            <div className="space-y-6">
+                              <p className="text-sm font-medium text-foreground">
+                                다음 두 가지를 체크해주시면 더 정확한 추천을 드릴 수 있어요:
+                              </p>
+                              
+                              {/* 중요도 슬라이더 */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm font-semibold">
+                                    1. 일상생활에서 얼마나 중요한가요?
+                                  </Label>
+                                  <Badge variant="outline" className="text-sm px-2 py-1">
+                                    {evaluationScores[message.id]?.importance || 3}/5
+                                  </Badge>
+                                </div>
+                                <Slider
+                                  value={[evaluationScores[message.id]?.importance || 3]}
+                                  onValueChange={(value) =>
+                                    setEvaluationScores((prev) => ({
+                                      ...prev,
+                                      [message.id]: {
+                                        ...(prev[message.id] || { importance: 3, difficulty: 3 }),
+                                        importance: value[0],
+                                      },
+                                    }))
+                                  }
+                                  min={1}
+                                  max={5}
+                                  step={1}
+                                  className="w-full"
+                                  disabled={isSubmittingEvaluation === message.id}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                  1점: 별로 안 중요 → 5점: 매우 중요
+                                </p>
+                              </div>
+
+                              {/* 어려움 정도 슬라이더 */}
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <Label className="text-sm font-semibold">
+                                    2. 이 활동을 수행하는 것이 얼마나 어려우신가요?
+                                  </Label>
+                                  <Badge variant="outline" className="text-sm px-2 py-1">
+                                    {evaluationScores[message.id]?.difficulty || 3}/5
+                                  </Badge>
+                                </div>
+                                <Slider
+                                  value={[evaluationScores[message.id]?.difficulty || 3]}
+                                  onValueChange={(value) =>
+                                    setEvaluationScores((prev) => ({
+                                      ...prev,
+                                      [message.id]: {
+                                        ...(prev[message.id] || { importance: 3, difficulty: 3 }),
+                                        difficulty: value[0],
+                                      },
+                                    }))
+                                  }
+                                  min={1}
+                                  max={5}
+                                  step={1}
+                                  className="w-full"
+                                  disabled={isSubmittingEvaluation === message.id}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                  1점: 쉬워요 → 5점: 거의 못 해요
+                                </p>
+                              </div>
+
+                              {/* 제출 버튼 */}
                               <Button
-                                key={score}
                                 type="button"
-                                variant="outline"
-                                size="sm"
-                                className={cn(
-                                  "min-w-[48px] transition-opacity",
-                                  isSubmittingEvaluation === message.id && "opacity-50 cursor-not-allowed"
-                                )}
-                                onClick={() =>
-                                  handleEvaluationScoreClick(
-                                    score,
-                                    message.evaluationType!,
-                                    message.id
-                                  )
-                                }
+                                onClick={() => {
+                                  const scores = evaluationScores[message.id];
+                                  if (scores) {
+                                    handleEvaluationBothSubmit(
+                                      scores.importance,
+                                      scores.difficulty,
+                                      message.id
+                                    );
+                                  }
+                                }}
                                 disabled={isTyping || isSubmittingEvaluation === message.id}
+                                className="w-full"
                               >
-                                {score}
+                                {isSubmittingEvaluation === message.id ? (
+                                  <>
+                                    <InlineSpinner size="sm" className="mr-2" />
+                                    제출 중...
+                                  </>
+                                ) : (
+                                  "체크 완료하고 추천 받기"
+                                )}
                               </Button>
-                            ))}
-                          </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            {message.evaluationType === "importance"
-                              ? "1점: 별로 안 중요 → 5점: 매우 중요"
-                              : "1점: 쉬워요 → 5점: 거의 못 해요"}
-                          </p>
+                            </div>
+                          ) : (
+                            // 기존 단일 평가 질문 (버튼 형태)
+                            <>
+                              <p className="mb-3 text-sm font-medium text-foreground">
+                                {message.evaluationType === "importance"
+                                  ? "일상생활에서 얼마나 중요한가요?"
+                                  : "지금 이 활동을 하실 때 어려움 정도는 어떤가요?"}
+                              </p>
+                              <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5].map((score) => (
+                                  <Button
+                                    key={score}
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className={cn(
+                                      "min-w-[48px] transition-opacity",
+                                      isSubmittingEvaluation === message.id && "opacity-50 cursor-not-allowed"
+                                    )}
+                                    onClick={() =>
+                                      handleEvaluationScoreClick(
+                                        score,
+                                        message.evaluationType!,
+                                        message.id
+                                      )
+                                    }
+                                    disabled={isTyping || isSubmittingEvaluation === message.id}
+                                  >
+                                    {score}
+                                  </Button>
+                                ))}
+                              </div>
+                              <p className="mt-2 text-xs text-muted-foreground">
+                                {message.evaluationType === "importance"
+                                  ? "1점: 별로 안 중요 → 5점: 매우 중요"
+                                  : "1점: 쉬워요 → 5점: 거의 못 해요"}
+                              </p>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
