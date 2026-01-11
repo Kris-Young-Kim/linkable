@@ -71,7 +71,7 @@ import { ErrorFaqModal } from "@/components/error-faq-modal";
 import { Sparkles, Send, Mic, Paperclip, ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
@@ -95,6 +95,7 @@ export function ChatInterface() {
   const { t } = useLanguage();
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [hasAcceptedDisclaimer, setHasAcceptedDisclaimer] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
@@ -136,11 +137,22 @@ export function ChatInterface() {
   // 평가 점수 상태 (messageId별로 중요도와 어려움 정도 저장)
   const [evaluationScores, setEvaluationScores] = useState<Record<string, { importance: number; difficulty: number }>>({});
   const [isNavigatingToRecommendations, setIsNavigatingToRecommendations] = useState(false);
+  // 보조기기 추천 전 평가 상태
+  const [showPreRecommendationEvaluation, setShowPreRecommendationEvaluation] = useState(false);
+  const [preRecommendationScores, setPreRecommendationScores] = useState({ importance: 3, difficulty: 3 });
+  const [isSubmittingPreRecommendationEvaluation, setIsSubmittingPreRecommendationEvaluation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isUserScrollingRef = useRef(false);
+
+  // 경로가 변경되면 네비게이션 상태 리셋
+  useEffect(() => {
+    if (pathname && pathname.startsWith("/recommendations/")) {
+      setIsNavigatingToRecommendations(false);
+    }
+  }, [pathname]);
 
   const shouldFetchRecommendations =
     showRecommendationCTA && Boolean(consultationId) && Boolean(icfAnalysis);
@@ -1504,11 +1516,11 @@ export function ChatInterface() {
                 </div>
               )}
 
-              {/* 채팅 완료 후 추천 보조기기 확인 버튼 */}
-              {showRecommendationCTA && !isTyping && consultationId && icfAnalysis && (
+              {/* 보조기기 추천 전 평가 슬라이더 */}
+              {showPreRecommendationEvaluation && !isTyping && consultationId && icfAnalysis && (
                 <div className="flex justify-center pt-4">
-                  <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 shadow-lg">
-                    <div className="text-center space-y-4">
+                  <div className="w-full max-w-md rounded-lg border-2 border-primary/20 bg-primary/5 p-6 shadow-lg">
+                    <div className="text-center space-y-6">
                       <div className="flex items-center justify-center gap-2">
                         <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
                           <Sparkles className="size-6 text-primary" aria-hidden="true" />
@@ -1518,7 +1530,187 @@ export function ChatInterface() {
                             상담이 완료되었습니다
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            맞춤형 보조기기 추천을 확인해보세요
+                            더 정확한 추천을 위해 평가해주세요
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* 중요도 슬라이더 */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-semibold">
+                            1. 일상생활에서 얼마나 중요한가요?
+                          </Label>
+                          <Badge variant="outline" className="text-sm px-2 py-1">
+                            {preRecommendationScores.importance}/5
+                          </Badge>
+                        </div>
+                        <Slider
+                          value={[preRecommendationScores.importance]}
+                          onValueChange={(value) =>
+                            setPreRecommendationScores((prev) => ({
+                              ...prev,
+                              importance: value[0],
+                            }))
+                          }
+                          min={1}
+                          max={5}
+                          step={1}
+                          className="w-full"
+                          disabled={isSubmittingPreRecommendationEvaluation}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          1점: 별로 안 중요 → 5점: 매우 중요
+                        </p>
+                      </div>
+
+                      {/* 어려움 정도 슬라이더 */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-semibold">
+                            2. 이 활동을 수행하는 것이 얼마나 어려우신가요?
+                          </Label>
+                          <Badge variant="outline" className="text-sm px-2 py-1">
+                            {preRecommendationScores.difficulty}/5
+                          </Badge>
+                        </div>
+                        <Slider
+                          value={[preRecommendationScores.difficulty]}
+                          onValueChange={(value) =>
+                            setPreRecommendationScores((prev) => ({
+                              ...prev,
+                              difficulty: value[0],
+                            }))
+                          }
+                          min={1}
+                          max={5}
+                          step={1}
+                          className="w-full"
+                          disabled={isSubmittingPreRecommendationEvaluation}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          1점: 쉬워요 → 5점: 거의 못 해요
+                        </p>
+                      </div>
+
+                      {/* 평가 완료 후 추천 받기 버튼 */}
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          if (isSubmittingPreRecommendationEvaluation) return;
+
+                          setIsSubmittingPreRecommendationEvaluation(true);
+                          
+                          try {
+                            // ICF 코드 추출 (D-Level 활동 코드)
+                            const dLevelCodes = icfAnalysis.d || [];
+                            const primaryIcfCode = dLevelCodes.length > 0 ? dLevelCodes[0] : null;
+
+                            if (primaryIcfCode) {
+                              // 평가 점수 저장 (K-IPPA API 사용)
+                              const response = await fetch("/api/consultations/ippa", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                  consultationId,
+                                  activities: [
+                                    {
+                                      icfCode: primaryIcfCode,
+                                      importance: preRecommendationScores.importance,
+                                      currentDifficulty: preRecommendationScores.difficulty,
+                                    },
+                                  ],
+                                }),
+                              });
+
+                              if (!response.ok) {
+                                const errorData = await response.json().catch(() => ({}));
+                                throw new Error(errorData.error || "Failed to save evaluation");
+                              }
+                            }
+
+                            // 평가 완료 후 추천 페이지로 이동
+                            setShowPreRecommendationEvaluation(false);
+                            setShowRecommendationCTA(true);
+                            
+                            trackEvent("pre_recommendation_evaluation_completed", {
+                              consultation_id: consultationId,
+                              importance: preRecommendationScores.importance,
+                              difficulty: preRecommendationScores.difficulty,
+                            });
+
+                            // 추천 페이지로 이동
+                            router.push(`/recommendations/${consultationId}`)
+                              .then(() => {
+                                console.log("[chat] Navigation to recommendations successful");
+                                setTimeout(() => {
+                                  setIsNavigatingToRecommendations(false);
+                                }, 1000);
+                              })
+                              .catch((error) => {
+                                console.error("[chat] Navigation failed:", error);
+                                setIsNavigatingToRecommendations(false);
+                              });
+                          } catch (error) {
+                            console.error("[chat] Failed to save evaluation:", error);
+                            alert("평가 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+                          } finally {
+                            setIsSubmittingPreRecommendationEvaluation(false);
+                          }
+                        }}
+                        disabled={isSubmittingPreRecommendationEvaluation}
+                        className="w-full max-w-xs mx-auto shadow-lg shadow-primary/30"
+                        size="lg"
+                      >
+                        {isSubmittingPreRecommendationEvaluation ? (
+                          <>
+                            <InlineSpinner size="sm" className="mr-2" />
+                            처리 중...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="mr-2 h-5 w-5" aria-hidden="true" />
+                            평가 완료하고 보조기기 추천 받기
+                            <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" />
+                          </>
+                        )}
+                      </Button>
+
+                      {/* 건너뛰기 버튼 */}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          setShowPreRecommendationEvaluation(false);
+                          setShowRecommendationCTA(true);
+                          // 건너뛰고 바로 추천 페이지로 이동
+                          router.push(`/recommendations/${consultationId}`);
+                        }}
+                        disabled={isSubmittingPreRecommendationEvaluation}
+                        className="w-full max-w-xs mx-auto text-sm text-muted-foreground"
+                      >
+                        건너뛰고 바로 추천 받기
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 평가 완료 후 추천 보조기기 확인 버튼 (평가를 건너뛴 경우) */}
+              {showRecommendationCTA && !showPreRecommendationEvaluation && !isTyping && consultationId && icfAnalysis && (
+                <div className="flex justify-center pt-4">
+                  <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-6 shadow-lg">
+                    <div className="text-center space-y-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <Sparkles className="size-6 text-primary" aria-hidden="true" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-foreground">
+                            맞춤형 보조기기 추천
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            추천 페이지에서 확인해보세요
                           </p>
                         </div>
                       </div>
@@ -1528,13 +1720,11 @@ export function ChatInterface() {
                         className="w-full max-w-xs mx-auto shadow-lg shadow-primary/30 animate-pulse hover:animate-none transition-all duration-300 hover:scale-105"
                         disabled={isNavigatingToRecommendations}
                         onClick={(e) => {
-                          // 이미 이동 중이면 중복 클릭 방지
                           if (isNavigatingToRecommendations) {
                             e.preventDefault();
                             return;
                           }
 
-                          // Link의 기본 동작 방지하고 프로그래밍 방식으로 네비게이션
                           e.preventDefault();
                           setIsNavigatingToRecommendations(true);
                           console.log("[chat] Navigating to recommendations page");
@@ -1544,8 +1734,21 @@ export function ChatInterface() {
                             has_recommendations: true,
                           });
 
-                          // 명시적으로 라우터로 이동
-                          router.push(`/recommendations/${consultationId}`);
+                          router.push(`/recommendations/${consultationId}`)
+                            .then(() => {
+                              console.log("[chat] Navigation successful");
+                              setTimeout(() => {
+                                setIsNavigatingToRecommendations(false);
+                              }, 1000);
+                            })
+                            .catch((error) => {
+                              console.error("[chat] Navigation failed:", error);
+                              setIsNavigatingToRecommendations(false);
+                            });
+
+                          setTimeout(() => {
+                            setIsNavigatingToRecommendations(false);
+                          }, 5000);
                         }}
                       >
                         {isNavigatingToRecommendations ? (
