@@ -1,13 +1,22 @@
 "use client"
 
 import { useEffect } from "react"
+import { usePathname } from "next/navigation"
 
 /**
  * 메인 페이지 Hero 섹션 이미지 프리로더
  * LCP 개선을 위해 중요한 이미지들을 미리 로드합니다.
+ * 메인 페이지(/)에서만 실행됩니다.
  */
 export function ImagePreloader() {
+  const pathname = usePathname()
+  
   useEffect(() => {
+    // 메인 페이지가 아니면 preload하지 않음
+    if (pathname !== "/") {
+      return
+    }
+
     // Hero 섹션 배경 이미지 (가장 중요)
     const preloadImage = (href: string, priority: "high" | "low" = "high") => {
       const link = document.createElement("link")
@@ -53,7 +62,7 @@ export function ImagePreloader() {
       "https://images.unsplash.com/photo-1651326659270-59bbb788199a?auto=format&fit=crop&w=600&q=80",
       "low"
     )
-  }, [])
+  }, [pathname])
 
   return null
 }

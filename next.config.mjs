@@ -28,6 +28,37 @@ const nextConfig = {
   },
   // 보안 헤더 추가
   async headers() {
+    // 개발 환경에서만 로컬 디버깅 서버 허용
+    const isDevelopment = process.env.NODE_ENV === "development";
+    const connectSrcBase = [
+      "'self'",
+      "https://www.google-analytics.com",
+      "https://www.googletagmanager.com",
+      "https://clerk.linkable.life",
+      "https://clerk.accounts.dev",
+      "https://*.clerk.accounts.dev",
+      "https://clerk.com",
+      "https://*.clerk.com",
+      "https://*.supabase.co",
+      "https://*.supabase.in",
+      "https://generativelanguage.googleapis.com",
+      "https://www.clarity.ms",
+      "https://e.clarity.ms",
+      "https://report.clarity.ms",
+      "https://www.linkable.life",
+      "https://linkable.life",
+      "https://connect.facebook.net",
+      "https://www.facebook.com",
+      "https://graph.facebook.com",
+      "https://va.vercel-scripts.com",
+      "https://*.vercel-scripts.com",
+    ];
+    
+    // 개발 환경에서만 로컬 디버깅 서버 추가
+    if (isDevelopment) {
+      connectSrcBase.push("http://127.0.0.1:7242");
+    }
+
     return [
       {
         source: "/:path*",
@@ -62,7 +93,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://*.supabase.co https://*.supabase.in https://generativelanguage.googleapis.com https://www.clarity.ms https://e.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://graph.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
+              `connect-src ${connectSrcBase.join(" ")}`,
               "frame-src 'self' https://www.googletagmanager.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://www.facebook.com",
               "object-src 'none'",
               "base-uri 'self'",

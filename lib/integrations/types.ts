@@ -28,3 +28,12 @@ export interface LinkValidationResult {
   redirectedUrl?: string
 }
 
+export interface AffiliateLinkStatus {
+  isAffiliateLink: boolean
+  platform?: "naver" | "11st" | "gmarket" | "careline" | "unknown"
+  isValid: boolean
+  statusCode?: number
+  error?: string
+  redirectedUrl?: string
+  lastChecked?: string
+}

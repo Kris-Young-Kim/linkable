@@ -421,6 +421,11 @@ export async function POST(request: Request) {
       }
     }
     
+    // 보조기기 추천 요청 의도 감지 (프롬프트 전달 전에 미리 감지)
+    const isRecommendationRequest = trimmedMessage
+      ? isProductRecommendationRequestIntent(trimmedMessage)
+      : false;
+
     const streamingPrompt = buildStreamingPrompt({
       persona: body.persona,
       history: [
@@ -431,6 +436,8 @@ export async function POST(request: Request) {
         trimmedMessage || "이미지를 첨부했습니다. 환경을 분석해 주세요.",
       mediaDescription: body.mediaDescription,
       evaluationContext,
+      isRecommendationRequest,
+      consultationId,
     });
 
     const encoder = new TextEncoder();
@@ -590,10 +597,7 @@ export async function POST(request: Request) {
             ? isGreetingMessage(trimmedMessage)
             : false;
 
-          // 보조기기 추천 요청 의도 감지
-          const isRecommendationRequest = trimmedMessage
-            ? isProductRecommendationRequestIntent(trimmedMessage)
-            : false;
+          // 보조기기 추천 요청 의도는 이미 위에서 감지됨 (424-427줄)
 
           // 추천 요청이 감지되면 ICF 코드가 없어도 기존 분석 결과를 사용하여 추천 제공
           let isoMatches: IsoMatch[] = [];

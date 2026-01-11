@@ -84,21 +84,68 @@ export async function POST(req: NextRequest) {
                 // 4. 서비스 데이터(products) 동기화
                 // TODO: 향후 별도의 매핑 엔진(Mappping Engine)으로 분리 고려
                 
-                // ISO 코드를 Division 레벨로 변환
-                let isoCode = p.iso_code || "N999999";
-                if (isoCode !== "N999999" && isoCode !== "00 00") {
+                // ISO 코드 처리: 없으면 자동 추론
+                let isoCode = p.iso_code || null;
+                
+                // ISO 코드가 없으면 자동 추론 (KS_P_ISO_9999_2022.md 기반)
+                if (!isoCode || isoCode === "N999999" || isoCode === "00 00") {
+                    try {
+                        const { inferIsoCodeFromProduct } = await import("@/core/matching/ai-iso-inference");
+                        const aiResult = await inferIsoCodeFromProduct({
+                            name: p.title,
+                            description: p.description || "",
+                        });
+                        
+                        if (aiResult && aiResult.confidence >= 0.5) {
+                            isoCode = aiResult.isoCode;
+                            console.log(`[Crawler Webhook] Auto-inferred ISO code for "${p.title}": ${isoCode} (confidence: ${aiResult.confidence})`);
+                        } else {
+                            // AI 추론 실패 시 키워드 기반 추론 시도
+                            const { searchIsoCodesAsync } = await import("@/lib/iso-9999-catalog-async");
+                            const searchResults = await searchIsoCodesAsync(p.title, supabase);
+                            if (searchResults.length > 0) {
+                                isoCode = searchResults[0].iso;
+                                console.log(`[Crawler Webhook] Keyword-matched ISO code for "${p.title}": ${isoCode}`);
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`[Crawler Webhook] ISO inference failed for "${p.title}":`, error);
+                    }
+                }
+                
+                // ISO 코드를 Division 레벨로 변환 (KS_P_ISO_9999_2022.md 기준)
+                if (isoCode && isoCode !== "N999999" && isoCode !== "00 00") {
                     const { convertToDivisionLevel } = await import("@/lib/utils/iso-code-converter");
                     const convertedCode = await convertToDivisionLevel(isoCode, supabase);
                     if (convertedCode) {
                         isoCode = convertedCode;
+                        console.log(`[Crawler Webhook] Converted to Division level: ${isoCode}`);
                     }
+                } else {
+                    // 추론 실패 시 기본값
+                    isoCode = "N999999";
+                }
+                
+                // ISO 코드 문자열을 iso_code_id로 변환
+                const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter");
+                const isoCodeId = await getIsoCodeId(isoCode, supabase);
+                
+                // ⚠️ iso_code_id가 null이면 제품 저장하지 않음 (ISO 코드가 없는 제품은 추천 불가)
+                if (!isoCodeId) {
+                    console.warn(`[Crawler Webhook] Skipping product "${p.title}": iso_code_id is null (ISO: ${isoCode})`);
+                    results.failed++;
+                    results.errors.push({ 
+                        title: p.title || 'Unknown', 
+                        error: `ISO code "${isoCode}" could not be mapped to iso_code_id. Product requires a valid ISO code.` 
+                    });
+                    continue; // 다음 제품으로
                 }
                 
                 const { error: productError } = await supabase
                     .from("products")
                     .upsert({
                         name: p.title,
-                        iso_code: isoCode,
+                        iso_code_id: isoCodeId,  // ✅ iso_code_id 사용 (null이 아님 보장)
                         price: p.price || null,
                         purchase_link: p.product_url,
                         image_url: p.image_url || null,
@@ -107,7 +154,7 @@ export async function POST(req: NextRequest) {
                         is_active: true,
                         updated_at: new Date().toISOString(),
                     }, {
-                        onConflict: 'name, iso_code'
+                        onConflict: 'name, iso_code_id'  // ✅ iso_code_id로 변경
                     });
 
                 if (productError) throw productError;

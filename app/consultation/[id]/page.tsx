@@ -323,9 +323,9 @@ export default async function ConsultationDetailPage({
           image_url,
           purchase_link,
           price,
-          iso_code,
           rating,
-          review_count
+          review_count,
+          iso_codes!iso_code_id(code, name)
         )
       `
       )
@@ -398,12 +398,49 @@ export default async function ConsultationDetailPage({
       : null;
 
   const recommendations: RecommendationRow[] =
-    data.recommendations?.map((rec) => ({
-      ...rec,
-      product: Array.isArray(rec.product)
+    data.recommendations?.map((rec) => {
+      const product = Array.isArray(rec.product)
         ? rec.product[0] ?? null
-        : rec.product,
-    })) ?? [];
+        : rec.product;
+      
+      if (!product) {
+        return {
+          ...rec,
+          product: null,
+        };
+      }
+
+      // iso_codes 조인 데이터 처리 (iso_code_id를 통해 조인된 결과)
+      // Supabase 조인 결과는 배열 또는 단일 객체일 수 있음
+      let isoCode: string | null = null;
+      
+      if ((product as any).iso_codes) {
+        const isoCodes = Array.isArray((product as any).iso_codes)
+          ? (product as any).iso_codes[0]
+          : (product as any).iso_codes;
+        isoCode = isoCodes?.code ?? null;
+      }
+      
+      // iso_code가 직접 있는 경우 (하위 호환성)
+      if (!isoCode && (product as any).iso_code) {
+        isoCode = (product as any).iso_code;
+      }
+
+      return {
+        ...rec,
+        product: {
+          id: product.id,
+          name: product.name,
+          description: product.description ?? null,
+          image_url: product.image_url ?? null,
+          iso_code: isoCode,
+          price: product.price ?? null,
+          purchase_link: product.purchase_link ?? null,
+          rating: product.rating ?? null,
+          review_count: product.review_count ?? null,
+        },
+      };
+    }) ?? [];
 
   const messages: MessageRow[] = Array.isArray(data.messages)
     ? data.messages

@@ -346,9 +346,24 @@ export async function POST(request: Request) {
   );
 
   // 상위 5개만 반환
-  const suggestions = sortedMatches
-    .slice(0, 5)
-    .map(({ matchedKeywords, ...rest }) => rest);
+  const topSuggestions = sortedMatches.slice(0, 5);
+
+  // Division 레벨로 변환 (KS_P_ISO_9999_2022.md 기준)
+  const { convertToDivisionLevel } = await import("@/lib/utils/iso-code-converter");
+  const suggestionsWithDivision = await Promise.all(
+    topSuggestions.map(async (match) => {
+      const divisionCode = await convertToDivisionLevel(match.iso, supabase);
+      return {
+        ...match,
+        iso: divisionCode || match.iso,  // Division 레벨로 변환된 코드 사용
+        originalIso: match.iso,  // 원본 코드도 포함 (참고용)
+        isDivision: divisionCode !== null && divisionCode !== match.iso,  // 변환 여부 표시
+      };
+    })
+  );
+
+  // matchedKeywords 제거하고 반환
+  const suggestions = suggestionsWithDivision.map(({ matchedKeywords, ...rest }) => rest);
 
   return NextResponse.json({
     suggestions,

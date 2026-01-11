@@ -340,6 +340,11 @@ export async function GET(request: Request) {
   // 빠른 응답이 필요한 경우 fastMatch, 정확도가 중요한 경우 accurateMatch
   const useHybridMatching = process.env.ENABLE_HYBRID_MATCHING === "true";
 
+  // 제품 추천 저장 여부 (상담 데이터는 저장하되 추천은 저장하지 않을 수 있음)
+  // 기본값: false (저장은 하되, 제품 추천은 하지 않음)
+  const shouldPersistRecommendations =
+    process.env.ENABLE_RECOMMENDATION_PERSISTENCE === "true";
+
   let isoMatches: IsoMatch[];
 
   // 사용자 ID 조회 (컨텍스트 가중치용) - Supabase users 테이블의 ID
@@ -373,6 +378,85 @@ export async function GET(request: Request) {
   }
 
   const isoCodes = isoMatches.map((match) => match.isoCode);
+
+  // 최적화된 ICF-제품 직접 매칭 시도 (새로운 함수 사용)
+  const useOptimizedMatching = process.env.USE_OPTIMIZED_ICF_MATCHING !== "false" && icfCodes.length > 0;
+  
+  if (useOptimizedMatching) {
+    try {
+      console.log("[Products API] Using optimized ICF-product matching");
+      const { getProductsByIcfCodes } = await import("@/lib/integrations/icf-product-matcher");
+      
+      const optimizedProducts = await getProductsByIcfCodes(icfCodes, {
+        limit,
+        minScore: 0.4,
+        usePrecomputed: true,
+        supabase,
+      });
+
+      if (optimizedProducts.length > 0) {
+        console.log(`[Products API] Optimized matching found ${optimizedProducts.length} products`);
+        
+        // 형식 변환
+        const formattedProducts = optimizedProducts.map((p) => ({
+          id: p.product_id,
+          name: p.product_name,
+          iso_code: p.iso_code,
+          manufacturer: p.manufacturer,
+          description: p.description,
+          image_url: p.image_url,
+          purchase_link: p.purchase_link,
+          price: p.price,
+          category: p.category,
+          match_score: p.match_score,
+          match_reason: p.match_reason,
+        }));
+
+        // 추천 저장 (consultationId가 있는 경우)
+        if (consultationId && shouldPersistRecommendations) {
+          const recommendationItems = formattedProducts.map((rec, index) => ({
+            productId: rec.id,
+            matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
+            rank: index + 1,
+          }));
+
+          await persistRecommendations(consultationId, recommendationItems, supabase);
+        }
+
+        logEvent({
+          category: "matching",
+          action: "optimized_icf_product_matching_used",
+          payload: {
+            consultationId,
+            icfCodesCount: icfCodes.length,
+            productsCount: formattedProducts.length,
+            avgScore: optimizedProducts.reduce((sum, p) => sum + p.match_score, 0) / optimizedProducts.length,
+          },
+        });
+
+        return NextResponse.json(
+          {
+            products: formattedProducts,
+            isoBreakdown: isoMatches.map((match) => ({
+              isoCode: match.isoCode,
+              productsCount: formattedProducts.filter((p) => p.iso_code === match.isoCode).length,
+              confidence: match.score,
+            })),
+          },
+          { headers }
+        );
+      }
+    } catch (error) {
+      console.error("[Products API] Optimized matching failed, falling back:", error);
+      logEvent({
+        category: "matching",
+        action: "optimized_matching_fallback",
+        payload: { error: String(error), consultationId },
+        level: "warn",
+      });
+      // 폴백: 기존 로직 사용
+    }
+  }
 
   // 고도화된 제품 추천 시스템 사용
   if (useAdvancedProductRecommendation && isoMatches.length > 0 && icfCodes.length > 0) {
@@ -415,7 +499,7 @@ export async function GET(request: Request) {
           envProducts.push({
             id: productId,
             name: isoMatch.label || `ISO ${isoCode} 보조기기`,
-            iso_code: isoCode,
+            iso_code: isoCode, // 환경 변수 제품은 문자열로 유지
             manufacturer: null,
             description: isoMatch.description || null,
             image_url: null,
@@ -477,7 +561,12 @@ export async function GET(request: Request) {
       );
 
       // 추천 저장 (consultationId가 있는 경우, 환경 변수 제품 제외)
-      if (consultationId && recommendationResult.recommendations.length > 0) {
+      // 저장은 하되, 제품 추천은 하지 않아야 하는 경우 비활성화
+      if (
+        consultationId &&
+        recommendationResult.recommendations.length > 0 &&
+        shouldPersistRecommendations
+      ) {
         const recommendationItems: RecommendationPersistenceItem[] =
           recommendationResult.recommendations
             .filter((rec) => !rec.id.startsWith("env_")) // 환경 변수 제품 제외
@@ -488,6 +577,17 @@ export async function GET(request: Request) {
             }));
 
         await persistRecommendations(consultationId, recommendationItems, supabase);
+      } else if (consultationId && !shouldPersistRecommendations) {
+        // 추천 저장이 비활성화된 경우 로그만 기록
+        logEvent({
+          category: "matching",
+          action: "recommendations_skipped",
+          payload: {
+            consultationId,
+            reason: "recommendation_persistence_disabled",
+            recommendationsCount: recommendationResult.recommendations.length,
+          },
+        });
       }
 
       logEvent({
@@ -531,11 +631,17 @@ export async function GET(request: Request) {
   // API 응답 최적화: 클라이언트에서 사용하지 않는 필드 제거
   // created_at, updated_at은 서버에서만 사용 (랭킹 계산용)
   // 하지만 랭킹 계산을 위해 SELECT에는 포함해야 함
+  // iso_code_id FK 조인 사용
   let query = supabase.from("products").select(
     `
       id,
       name,
-      iso_code,
+      iso_code_id,
+      iso_codes!iso_code_id (
+        code,
+        name,
+        level
+      ),
       manufacturer,
       description,
       image_url,
@@ -545,7 +651,8 @@ export async function GET(request: Request) {
       created_at,
       updated_at
     `
-  );
+  )
+  .not("iso_code_id", "is", null);  // ✅ iso_code_id가 null인 제품 제외 (ISO 코드 없는 제품은 추천 불가)
 
   // ICF 코드가 없으면 추천을 반환하지 않음 (consultationId만 있고 ICF 분석이 없는 경우)
   if (isoCodes.length === 0 && consultationId) {
@@ -558,8 +665,22 @@ export async function GET(request: Request) {
     return NextResponse.json({ products: [] });
   }
 
+  // ISO 코드 문자열을 iso_code_id로 변환하여 필터링
   if (isoCodes.length) {
-    query = query.in("iso_code", isoCodes);
+    const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter");
+    const isoCodeIds: string[] = [];
+    for (const isoCode of isoCodes) {
+      const isoCodeId = await getIsoCodeId(isoCode, supabase);
+      if (isoCodeId) {
+        isoCodeIds.push(isoCodeId);
+      }
+    }
+    if (isoCodeIds.length > 0) {
+      query = query.in("iso_code_id", isoCodeIds);
+    } else {
+      // iso_code_id를 찾을 수 없으면 빈 결과 반환
+      return NextResponse.json({ products: [] });
+    }
   }
 
   const { data, error } = await query.eq("is_active", true).limit(limit);
@@ -577,8 +698,10 @@ export async function GET(request: Request) {
     );
   }
 
-  // 데이터베이스에서 조회된 제품의 ISO 코드 목록
-  const foundIsoCodes = new Set((data ?? []).map((p) => p.iso_code));
+  // 데이터베이스에서 조회된 제품의 ISO 코드 목록 (조인된 필드에서 추출)
+  const foundIsoCodes = new Set(
+    (data ?? []).map((p) => (p.iso_codes as any)?.code || null).filter(Boolean)
+  );
 
   // 제품 조회 상황 로깅 (개발 환경에서만 상세 로그)
   if (process.env.NODE_ENV === "development") {
@@ -684,8 +807,15 @@ export async function GET(request: Request) {
 
   const rankingInput = await Promise.all(
     allProducts.map(async (product) => {
+      // ISO 코드 추출 (조인된 필드 또는 직접 필드)
+      // iso_codes는 배열일 수 있으므로 첫 번째 요소 사용
+      const isoCodesData = (product as any).iso_codes;
+      const productIsoCode = Array.isArray(isoCodesData)
+        ? isoCodesData[0]?.code
+        : isoCodesData?.code || (product as any).iso_code; // 환경 변수 제품은 직접 필드 사용
+      
       const isoMatch = isoMatches.find(
-        (match) => match.isoCode === product.iso_code
+        (match) => match.isoCode === productIsoCode
       );
       let icfToIsoScore = isoMatch?.score ?? (icfCodes.length > 0 ? 0.35 : 0.5);
 
@@ -699,7 +829,7 @@ export async function GET(request: Request) {
               name: product.name,
               description: product.description,
               category: product.category,
-              iso_code: product.iso_code,
+              iso_code: productIsoCode, // productIsoCode 변수 사용
             },
             icfCodes
           );
@@ -874,11 +1004,25 @@ export async function GET(request: Request) {
         rank: index + 1,
       }));
 
-    recommendationMap = await persistRecommendations(
-      consultationId,
-      persistenceItems,
-      supabase
-    );
+    // 저장은 하되, 제품 추천은 하지 않아야 하는 경우 비활성화
+    if (shouldPersistRecommendations && persistenceItems.length > 0) {
+      recommendationMap = await persistRecommendations(
+        consultationId,
+        persistenceItems,
+        supabase
+      );
+    } else if (!shouldPersistRecommendations) {
+      // 추천 저장이 비활성화된 경우 로그만 기록
+      logEvent({
+        category: "matching",
+        action: "recommendations_skipped",
+        payload: {
+          consultationId,
+          reason: "recommendation_persistence_disabled",
+          recommendationsCount: persistenceItems.length,
+        },
+      });
+    }
 
       // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
       if (icfCodes.length > 0 && recommendationMap) {
@@ -887,10 +1031,15 @@ export async function GET(request: Request) {
           // 각 추천된 제품에 대해 impression 이벤트 기록
           for (const [productId, recommendationId] of mapForLearning.entries()) {
             const product = finalRanked.find((p) => p.id === productId);
-            if (product?.iso_code) {
+            // ISO 코드 추출 (조인된 필드 또는 직접 필드)
+            const isoCodesData = product ? (product as any).iso_codes : null;
+            const productIsoCode = Array.isArray(isoCodesData)
+              ? isoCodesData[0]?.code
+              : isoCodesData?.code || (product as any)?.iso_code; // 환경 변수 제품은 직접 필드 사용
+            if (productIsoCode) {
               updateRealtimeLearningStats(
                 icfCodes,
-                product.iso_code as string,
+                productIsoCode as string,
                 "impression"
               ).catch((err) => {
                 console.error("[Products API] Realtime learning impression failed:", err);

@@ -97,16 +97,30 @@ export async function syncIsoCodeProducts(
 /**
  * ISO 코드별 활성 상품 목록 조회
  * 
- * @param isoCode ISO 9999 코드 (예: "15 09", "18 30")
+ * @param isoCode ISO 9999 코드 (예: "15 09 13", "18 30 01")
  * @returns 해당 ISO 코드의 활성 상품 목록
  */
 export async function getIsoCodeProducts(isoCode: string) {
   const supabase = getSupabaseServerClient()
+  const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter")
+
+  // ISO 코드 문자열을 iso_code_id로 변환
+  const isoCodeId = await getIsoCodeId(isoCode, supabase);
+  if (!isoCodeId) {
+    return []
+  }
 
   const { data, error } = await supabase
     .from("products")
-    .select("*")
-    .eq("iso_code", isoCode)
+    .select(`
+      *,
+      iso_codes!iso_code_id (
+        code,
+        name,
+        level
+      )
+    `)
+    .eq("iso_code_id", isoCodeId)
     .eq("is_active", true)
     .order("created_at", { ascending: false })
 
@@ -131,13 +145,33 @@ export async function getIsoCodeProducts(isoCode: string) {
  */
 export async function getMultipleIsoCodeProducts(isoCodes: string[]) {
   const supabase = getSupabaseServerClient()
+  const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter")
+
+  // 모든 ISO 코드를 iso_code_id로 변환
+  const isoCodeIds: string[] = []
+  for (const isoCode of isoCodes) {
+    const isoCodeId = await getIsoCodeId(isoCode, supabase);
+    if (isoCodeId) {
+      isoCodeIds.push(isoCodeId);
+    }
+  }
+
+  if (isoCodeIds.length === 0) {
+    return new Map<string, typeof data>()
+  }
 
   const { data, error } = await supabase
     .from("products")
-    .select("*")
-    .in("iso_code", isoCodes)
+    .select(`
+      *,
+      iso_codes!iso_code_id (
+        code,
+        name,
+        level
+      )
+    `)
+    .in("iso_code_id", isoCodeIds)
     .eq("is_active", true)
-    .order("iso_code", { ascending: true })
     .order("created_at", { ascending: false })
 
   if (error) {
@@ -150,14 +184,16 @@ export async function getMultipleIsoCodeProducts(isoCodes: string[]) {
     throw error
   }
 
-  // ISO 코드별로 그룹화
+  // ISO 코드별로 그룹화 (iso_codes 조인 결과 사용)
   const grouped = new Map<string, typeof data>()
   for (const product of data ?? []) {
-    const code = product.iso_code
-    if (!grouped.has(code)) {
-      grouped.set(code, [])
+    const code = (product.iso_codes as any)?.code || null
+    if (code) {
+      if (!grouped.has(code)) {
+        grouped.set(code, [])
+      }
+      grouped.get(code)!.push(product)
     }
-    grouped.get(code)!.push(product)
   }
 
   return grouped
@@ -181,11 +217,24 @@ export async function getIsoCodeLinks(isoCode: string): Promise<string[]> {
  */
 export async function getIsoCodeStats(isoCode: string) {
   const supabase = getSupabaseServerClient()
+  const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter")
+
+  // ISO 코드 문자열을 iso_code_id로 변환
+  const isoCodeId = await getIsoCodeId(isoCode, supabase);
+  if (!isoCodeId) {
+    return {
+      totalProducts: 0,
+      totalLinks: 0,
+      averagePrice: null,
+      minPrice: null,
+      maxPrice: null,
+    }
+  }
 
   const { data, error } = await supabase
     .from("products")
     .select("id, price, purchase_link")
-    .eq("iso_code", isoCode)
+    .eq("iso_code_id", isoCodeId)
     .eq("is_active", true)
 
   if (error) {

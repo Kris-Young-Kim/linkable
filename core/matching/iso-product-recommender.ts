@@ -186,28 +186,36 @@ export async function recommendProductsByIsoCode(
     const isSubclass = isoParts.length === 2; // Subclass 레벨 (4자리)
     const isClass = isoParts.length === 1; // Class 레벨 (2자리)
 
-    // 1. 정확한 ISO 코드 매칭 제품 검색
+    // 1. 정확한 ISO 코드 매칭 제품 검색 (iso_code_id FK 조인 사용)
     let exactQuery = supabase
       .from("products")
-      .select("*")
+      .select(`
+        *,
+        iso_codes!iso_code_id (
+          code,
+          name,
+          level
+        )
+      `)
       .eq("is_active", true)
+      .not("iso_code_id", "is", null)  // ✅ iso_code_id가 null인 제품 제외 (ISO 코드 없는 제품은 추천 불가)
       .order("created_at", { ascending: false });
 
     // Division 레벨이면 정확히 일치하는 제품만 검색
     if (isDivision) {
-      exactQuery = exactQuery.eq("iso_code", isoCode);
+      exactQuery = exactQuery.eq("iso_codes.code", isoCode);
     }
     // Subclass 레벨이면 해당 Subclass의 모든 Division 제품 검색
     else if (isSubclass) {
-      exactQuery = exactQuery.like("iso_code", `${isoCode} %`);
+      exactQuery = exactQuery.like("iso_codes.code", `${isoCode} %`);
     }
     // Class 레벨이면 해당 Class의 모든 Division 제품 검색
     else if (isClass) {
-      exactQuery = exactQuery.like("iso_code", `${isoCode} %`);
+      exactQuery = exactQuery.like("iso_codes.code", `${isoCode} %`);
     }
     // 기타는 정확히 일치
     else {
-      exactQuery = exactQuery.eq("iso_code", isoCode);
+      exactQuery = exactQuery.eq("iso_codes.code", isoCode);
     }
 
     const { data: exactProducts, error: exactError } = await exactQuery;
@@ -276,18 +284,38 @@ export async function recommendProductsByIsoCode(
         }
       }
 
-      // 관련 ISO 코드가 있을 때만 검색
+      // 관련 ISO 코드가 있을 때만 검색 (iso_code_id FK 조인 사용)
       if (relatedIsoCodes.length > 0) {
-        const { data: relatedData, error: relatedError } = await supabase
-          .from("products")
-          .select("*")
-          .in("iso_code", relatedIsoCodes)
-          .eq("is_active", true)
-          .order("created_at", { ascending: false })
-          .limit(limit - exactProducts.length); // 정확한 매칭 제품 수를 고려
+        // 관련 ISO 코드들을 iso_code_id로 변환
+        const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter");
+        const relatedIsoCodeIds: string[] = [];
+        for (const code of relatedIsoCodes) {
+          const codeId = await getIsoCodeId(code, supabase);
+          if (codeId) {
+            relatedIsoCodeIds.push(codeId);
+          }
+        }
 
-        if (!relatedError && relatedData) {
-          relatedProducts = relatedData;
+        if (relatedIsoCodeIds.length > 0) {
+          const { data: relatedData, error: relatedError } = await supabase
+            .from("products")
+            .select(`
+              *,
+              iso_codes!iso_code_id (
+                code,
+                name,
+                level
+              )
+            `)
+            .in("iso_code_id", relatedIsoCodeIds)
+            .eq("is_active", true)
+            .not("iso_code_id", "is", null)  // ✅ iso_code_id가 null인 제품 제외
+            .order("created_at", { ascending: false })
+            .limit(limit - exactProducts.length); // 정확한 매칭 제품 수를 고려
+
+          if (!relatedError && relatedData) {
+            relatedProducts = relatedData;
+          }
         }
       }
     }
@@ -318,15 +346,18 @@ export async function recommendProductsByIsoCode(
     const filteredRecommendations = recommendations
       .filter((product) => {
         // 정확한 ISO 매칭이 있으면 점수와 관계없이 포함
-        const isExact = product.iso_code === isoCode;
+        const productIsoCode = (product as any).iso_codes?.code || product.iso_code;
+        const isExact = productIsoCode === isoCode;
         if (isExact) return true;
         // 관련 제품은 최소 점수 이상이어야 함
         return product.score >= minScore;
       })
       .sort((a, b) => {
         // 1순위: 정확한 ISO 매칭 여부
-        const aExact = a.iso_code === isoCode;
-        const bExact = b.iso_code === isoCode;
+        const aIsoCode = (a as any).iso_codes?.code || a.iso_code;
+        const bIsoCode = (b as any).iso_codes?.code || b.iso_code;
+        const aExact = aIsoCode === isoCode;
+        const bExact = bIsoCode === isoCode;
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
 
@@ -520,15 +551,18 @@ async function calculateAdvancedProductScores(
         directIcfMatch: 0,
       };
 
+      // ISO 코드 추출 (조인된 필드 또는 직접 필드)
+      const productIsoCode = (product as any).iso_codes?.code || product.iso_code;
+
       // 1. ISO 코드 매칭 점수 (기본 점수) - 정확한 매칭 우선순위 대폭 강화
-      const isExactMatch = product.iso_code === targetIsoCode;
+      const isExactMatch = productIsoCode === targetIsoCode;
 
       // 관련 매칭: Subclass 레벨 필터링을 통과한 제품만 관련 제품으로 간주
       // areIsoCodesRelated 함수를 사용하여 관련 여부 확인
-      // null 체크: product.iso_code가 null이면 관련 매칭 없음
+      // null 체크: productIsoCode가 null이면 관련 매칭 없음
       let isRelatedMatch = false;
-      if (!isExactMatch && product.iso_code) {
-        isRelatedMatch = areIsoCodesRelated(targetIsoCode, product.iso_code);
+      if (!isExactMatch && productIsoCode) {
+        isRelatedMatch = areIsoCodesRelated(targetIsoCode, productIsoCode);
       }
 
       if (isExactMatch) {
@@ -570,13 +604,15 @@ async function calculateAdvancedProductScores(
 
       // 5. 제품-ICF 직접 매칭 점수
       try {
+        // productIsoCode는 555줄에서 이미 정의됨
+
         const directMatches = await matchProductToIcf(
           {
             id: product.id,
             name: product.name,
             description: product.description,
             category: product.category,
-            iso_code: product.iso_code,
+            iso_code: productIsoCode,
           },
           context.icfCodes
         );
@@ -620,11 +656,13 @@ async function calculateAdvancedProductScores(
         hasQualityMetrics: breakdown.qualityScore > 0,
       });
 
+      // productIsoCode는 555줄에서 이미 정의됨
+
       return {
         id: product.id,
         name: product.name,
         description: product.description,
-        iso_code: product.iso_code,
+        iso_code: productIsoCode, // 조인된 필드에서 추출
         category: product.category,
         manufacturer: product.manufacturer,
         price: product.price,
@@ -826,46 +864,49 @@ function calculateContextMatchScore(
 ): number {
   let score = 0.5; // 기본 점수
 
-  // 장애 유형 매칭
-  if (userProfile.disabilityType && product.category) {
-    const categoryLower = product.category.toLowerCase();
-    const typeLower = userProfile.disabilityType.toLowerCase();
+    // ISO 코드 추출 (조인된 필드 또는 직접 필드)
+    const productIsoCode = (product as any).iso_codes?.code || product.iso_code;
 
-    // 시각 장애
-    if (
-      (typeLower.includes("시각") || typeLower.includes("vision")) &&
-      (categoryLower.includes("시각") ||
-        categoryLower.includes("시력") ||
-        categoryLower.includes("눈") ||
-        product.iso_code?.startsWith("22"))
-    ) {
-      score += 0.2;
-    }
+    // 장애 유형 매칭
+    if (userProfile.disabilityType && product.category) {
+      const categoryLower = product.category.toLowerCase();
+      const typeLower = userProfile.disabilityType.toLowerCase();
 
-    // 청각 장애
-    if (
-      (typeLower.includes("청각") || typeLower.includes("hearing")) &&
-      (categoryLower.includes("청각") ||
-        categoryLower.includes("청력") ||
-        categoryLower.includes("귀") ||
-        product.iso_code?.startsWith("21"))
-    ) {
-      score += 0.2;
-    }
+      // 시각 장애
+      if (
+        (typeLower.includes("시각") || typeLower.includes("vision")) &&
+        (categoryLower.includes("시각") ||
+          categoryLower.includes("시력") ||
+          categoryLower.includes("눈") ||
+          productIsoCode?.startsWith("22"))
+      ) {
+        score += 0.2;
+      }
 
-    // 지체 장애
-    if (
-      (typeLower.includes("지체") ||
-        typeLower.includes("뇌병변") ||
-        typeLower.includes("mobility")) &&
-      (categoryLower.includes("이동") ||
-        categoryLower.includes("보행") ||
-        categoryLower.includes("휠체어") ||
-        product.iso_code?.startsWith("12"))
-    ) {
-      score += 0.2;
+      // 청각 장애
+      if (
+        (typeLower.includes("청각") || typeLower.includes("hearing")) &&
+        (categoryLower.includes("청각") ||
+          categoryLower.includes("청력") ||
+          categoryLower.includes("귀") ||
+          productIsoCode?.startsWith("21"))
+      ) {
+        score += 0.2;
+      }
+
+      // 지체 장애
+      if (
+        (typeLower.includes("지체") ||
+          typeLower.includes("뇌병변") ||
+          typeLower.includes("mobility")) &&
+        (categoryLower.includes("이동") ||
+          categoryLower.includes("보행") ||
+          categoryLower.includes("휠체어") ||
+          productIsoCode?.startsWith("12"))
+      ) {
+        score += 0.2;
+      }
     }
-  }
 
   // 심각도 매칭 (중증일수록 더 전문적인 제품 필요)
   if (userProfile.disabilitySeverity === "severe") {
@@ -1149,20 +1190,21 @@ function deduplicateAndRescoreProducts(
   const productMap = new Map<string, ProductRecommendation>();
   const isoScoreMap = new Map<string, number>();
 
-  // ISO 매칭 점수 맵 생성
-  for (const isoMatch of isoMatches) {
-    isoScoreMap.set(isoMatch.isoCode, isoMatch.score);
-  }
+    // ISO 매칭 점수 맵 생성
+    for (const isoMatch of isoMatches) {
+      isoScoreMap.set(isoMatch.isoCode, isoMatch.score);
+    }
 
-  for (const rec of recommendations) {
-    const existing = productMap.get(rec.id);
+    for (const rec of recommendations) {
+      const existing = productMap.get(rec.id);
 
-    if (!existing) {
-      productMap.set(rec.id, { ...rec });
-    } else {
-      // 중복 제품의 경우 최고 점수와 우선순위 유지
-      // ISO 매칭 점수 반영
-      const isoScore = isoScoreMap.get(rec.iso_code) || 0;
+      if (!existing) {
+        productMap.set(rec.id, { ...rec });
+      } else {
+        // 중복 제품의 경우 최고 점수와 우선순위 유지
+        // ISO 매칭 점수 반영
+        const recIsoCode = rec.iso_code || "";
+        const isoScore = isoScoreMap.get(recIsoCode) || 0;
       const adjustedScore = Math.max(
         existing.score,
         rec.score * (0.7 + isoScore * 0.3) // ISO 매칭 점수 반영

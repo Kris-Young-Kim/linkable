@@ -86,6 +86,7 @@ const fetchDashboardData = async (clerkUserId: string) => {
   }
 
   // is_favorite 컬럼이 없을 수 있으므로 먼저 시도하고, 실패하면 해당 필드 없이 재시도
+  // iso_code 컬럼은 제거되었으므로 iso_codes 테이블과 조인하여 사용
   let query = supabase
     .from("consultations")
     .select(
@@ -103,7 +104,15 @@ const fetchDashboardData = async (clerkUserId: string) => {
           is_clicked,
           created_at,
           rank,
-          product:product_id(id, name, image_url, purchase_link, price, iso_code, description)
+          product:product_id(
+            id,
+            name,
+            image_url,
+            purchase_link,
+            price,
+            description,
+            iso_codes!iso_code_id(code, name)
+          )
         )
       `,
     )
@@ -119,6 +128,7 @@ const fetchDashboardData = async (clerkUserId: string) => {
       "[dashboard] is_favorite column not found. Please run migration: supabase/migrations/20250123000000_add_favorite_to_consultations.sql",
     )
     // is_favorite 없이 재시도
+    // iso_code 컬럼은 제거되었으므로 iso_codes 테이블과 조인하여 사용
     const retryQuery = supabase
       .from("consultations")
       .select(
@@ -135,7 +145,15 @@ const fetchDashboardData = async (clerkUserId: string) => {
             is_clicked,
             created_at,
             rank,
-            product:product_id(id, name, image_url, purchase_link, price, iso_code, description)
+            product:product_id(
+              id,
+              name,
+              image_url,
+              purchase_link,
+              price,
+              description,
+              iso_codes!iso_code_id(code, name)
+            )
           )
         `,
       )
@@ -166,10 +184,26 @@ const fetchDashboardData = async (clerkUserId: string) => {
     data?.map((consultation) => ({
       ...consultation,
       is_favorite: (consultation as any).is_favorite ?? false, // 기본값 설정
-      recommendations: consultation.recommendations?.map((rec) => ({
-        ...rec,
-        product: Array.isArray(rec.product) ? rec.product[0] ?? null : rec.product ?? null,
-      })),
+      recommendations: consultation.recommendations?.map((rec) => {
+        const product = Array.isArray(rec.product) ? rec.product[0] ?? null : rec.product ?? null;
+        // iso_codes 조인 데이터 처리 (배열일 수 있음)
+        if (product && (product as any).iso_codes) {
+          const isoCodes = Array.isArray((product as any).iso_codes)
+            ? (product as any).iso_codes[0]
+            : (product as any).iso_codes;
+          return {
+            ...rec,
+            product: {
+              ...product,
+              iso_code: isoCodes?.code ?? null, // 하위 호환성을 위해 iso_code 추가
+            },
+          };
+        }
+        return {
+          ...rec,
+          product,
+        };
+      }),
     })) ?? []
 
   return { consultations: normalized as ConsultationRow[] }

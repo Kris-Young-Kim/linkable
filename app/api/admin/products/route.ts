@@ -26,7 +26,12 @@ export async function GET() {
       `
       id,
       name,
-      iso_code,
+      iso_code_id,
+      iso_codes!iso_code_id (
+        code,
+        name,
+        level
+      ),
       description,
       price,
       purchase_link,
@@ -114,17 +119,9 @@ export async function POST(request: Request) {
         continue
       }
 
-      // ISO 코드 정규화 및 Division 레벨로 변환
-      let normalizedIsoCode = product.iso_code?.trim() || "N999999";
-      
-      // Division 레벨이 아닌 경우 자동 변환
-      if (normalizedIsoCode !== "N999999" && normalizedIsoCode !== "00 00") {
-        const { convertToDivisionLevel } = await import("@/lib/utils/iso-code-converter");
-        const convertedCode = await convertToDivisionLevel(normalizedIsoCode, supabase);
-        if (convertedCode) {
-          normalizedIsoCode = convertedCode;
-        }
-      }
+      // ISO 코드 문자열을 iso_code_id로 변환
+      const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter");
+      const isoCodeId = await getIsoCodeId(product.iso_code?.trim() || null, supabase);
 
       try {
         const parsedPrice =
@@ -147,7 +144,7 @@ export async function POST(request: Request) {
             .from("products")
             .update({
               name: product.name,
-              iso_code: normalizedIsoCode,
+              iso_code_id: isoCodeId,
               description: product.description ?? null,
               price: parsedPrice,
               image_url: product.image_url ?? null,
@@ -171,7 +168,7 @@ export async function POST(request: Request) {
             .from("products")
             .insert({
               name: product.name,
-              iso_code: normalizedIsoCode,
+              iso_code_id: isoCodeId,
               description: product.description ?? null,
               price: parsedPrice,
               purchase_link: product.purchase_link ?? null,
@@ -221,8 +218,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "상품 이름은 필수입니다." }, { status: 400 })
   }
 
-  // ISO 코드 정규화 (선택 사항)
-  const normalizedIsoCode = body.iso_code?.trim() || null;
+  // ISO 코드 문자열을 iso_code_id로 변환
+  const { getIsoCodeId } = await import("@/lib/utils/iso-code-converter");
+  const isoCodeId = await getIsoCodeId(body.iso_code?.trim() || null, supabase);
 
   const parsedPrice =
     typeof body.price === "string"
@@ -235,7 +233,7 @@ export async function POST(request: Request) {
     .from("products")
     .insert({
       name: body.name,
-      iso_code: normalizedIsoCode,
+      iso_code_id: isoCodeId,
       description: body.description ?? null,
       price: parsedPrice,
       purchase_link: body.purchase_link ?? null,
@@ -248,7 +246,12 @@ export async function POST(request: Request) {
       `
       id,
       name,
-      iso_code,
+      iso_code_id,
+      iso_codes!iso_code_id (
+        code,
+        name,
+        level
+      ),
       description,
       price,
       purchase_link,

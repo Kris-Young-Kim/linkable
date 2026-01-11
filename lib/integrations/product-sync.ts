@@ -6,11 +6,11 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { logEvent } from "@/lib/logging"
 import type { ProductSyncResult } from "./types"
 import { validatePurchaseLink } from "./link-validator"
-import { convertToDivisionLevel } from "@/lib/utils/iso-code-converter"
+import { getIsoCodeId } from "@/lib/utils/iso-code-converter"
 
 export interface ProductInput {
   name: string
-  iso_code: string
+  iso_code: string // ISO 코드 문자열 (내부적으로 iso_code_id로 변환됨)
   manufacturer?: string | null
   description?: string | null
   image_url?: string | null
@@ -29,13 +29,8 @@ export async function upsertProduct(
 ): Promise<{ id: string; created: boolean }> {
   const supabase = getSupabaseServerClient()
 
-  // ISO 코드를 Division 레벨로 변환
-  if (product.iso_code && product.iso_code !== "N999999" && product.iso_code !== "00 00") {
-    const convertedCode = await convertToDivisionLevel(product.iso_code, supabase);
-    if (convertedCode) {
-      product.iso_code = convertedCode;
-    }
-  }
+  // ISO 코드 문자열을 iso_code_id로 변환
+  const isoCodeId = await getIsoCodeId(product.iso_code, supabase);
 
   // 링크 검증 (옵션)
   if (options?.validateLink && product.purchase_link) {
@@ -52,12 +47,12 @@ export async function upsertProduct(
     }
   }
 
-  // 기존 상품 확인 (이름과 ISO 코드로)
+  // 기존 상품 확인 (이름과 iso_code_id로)
   const { data: existing } = await supabase
     .from("products")
     .select("id")
     .eq("name", product.name)
-    .eq("iso_code", product.iso_code)
+    .eq("iso_code_id", isoCodeId)
     .maybeSingle()
 
   if (existing) {
@@ -65,7 +60,15 @@ export async function upsertProduct(
     const { data, error } = await supabase
       .from("products")
       .update({
-        ...product,
+        name: product.name,
+        iso_code_id: isoCodeId,
+        manufacturer: product.manufacturer,
+        description: product.description,
+        image_url: product.image_url,
+        purchase_link: product.purchase_link,
+        price: product.price,
+        category: product.category,
+        is_active: product.is_active ?? true,
         updated_at: new Date().toISOString(),
       })
       .eq("id", existing.id)
@@ -82,7 +85,14 @@ export async function upsertProduct(
     const { data, error } = await supabase
       .from("products")
       .insert({
-        ...product,
+        name: product.name,
+        iso_code_id: isoCodeId,
+        manufacturer: product.manufacturer,
+        description: product.description,
+        image_url: product.image_url,
+        purchase_link: product.purchase_link,
+        price: product.price,
+        category: product.category,
         is_active: product.is_active ?? true,
       })
       .select("id")

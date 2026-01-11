@@ -1112,9 +1112,9 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 #### 진행 중인 작업
 
 - [ ] n8n Schedule Trigger 기반 자동 크롤링 워크플로우 (제휴몰파트너스 API 확보 후)
-- [ ] 상품 데이터 검증 유닛 테스트
-- [ ] Admin UI에서 상품 수동 등록/수정 화면 추가
-- [ ] 제휴 링크 상태 체크 함수 구현
+- [x] 상품 데이터 검증 유닛 테스트 ✅ `scripts/tests/product-validation.test.ts`
+- [x] Admin UI에서 상품 수동 등록/수정 화면 추가 ✅ 이미 구현됨 (`components/admin/admin-product-manager.tsx`)
+- [x] 제휴 링크 상태 체크 함수 구현 ✅ `lib/integrations/link-validator.ts` - `checkAffiliateLinkStatus`, `checkAffiliateLinksStatus` 함수 추가, API 엔드포인트 `app/api/admin/products/check-links/route.ts` 생성
 
 #### 데이터베이스 관리 원칙 적용
 
@@ -1333,7 +1333,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 
 - [ ] **파트너 PoC 실행**
 
-  - 복지용구 센터 1곳 선정 및 연락
+  - 장애인복지기관 1곳 선정 및 연락
   - PoC 제안서 제출 및 계약
   - 파일럿 진행 (최소 3개월)
   - 예상 효과: 실제 사용 사례 확보, 피드백 수집
@@ -1405,7 +1405,7 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
   - ICF 코드 자동 확장 크론 작업 구현 (`/api/cron/icf-auto-expand`)
   - 주 1회 자동 확장 실행 (매주 수요일 새벽 3시)
   - 활성화된 설정 기반 자동 확장 후보 생성 및 실행
-- [ ] **파트너 PoC 실행**: 복지용구 센터 선정 및 파일럿 진행 (비즈니스 작업)
+- [ ] **파트너 PoC 실행**: 기관 선정 및 파일럿 진행 (비즈니스 작업)
 - [ ] **유저 인터뷰 진행**: 인터뷰 대상자 모집 및 체계적 인터뷰 진행 (비즈니스 작업)
 - [x] **KPI 대시보드 고도화**: 실시간 KPI 모니터링, 트렌드 분석 (2025-03-03 완료)
   - 트렌드 분석 API 구현 (`/api/admin/analytics/trends`)

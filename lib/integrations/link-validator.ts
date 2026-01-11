@@ -112,3 +112,142 @@ export async function validatePurchaseLinks(
   return results
 }
 
+/**
+ * 제휴 링크인지 확인
+ * @param url 확인할 URL
+ * @returns 제휴 링크 여부와 플랫폼 정보
+ */
+function detectAffiliateLink(url: string): {
+  isAffiliateLink: boolean
+  platform?: "naver" | "11st" | "gmarket" | "careline" | "unknown"
+} {
+  try {
+    const urlObj = new URL(url)
+    const hostname = urlObj.hostname.toLowerCase()
+    const pathname = urlObj.pathname.toLowerCase()
+    const searchParams = urlObj.searchParams
+
+    // 네이버 파트너스 링크 확인
+    if (hostname.includes("shopping.naver.com") || hostname.includes("naver.com")) {
+      // 네이버 파트너스 링크 특징: linkId, NaverPcid 등의 파라미터
+      if (
+        searchParams.has("linkId") ||
+        searchParams.has("NaverPcid") ||
+        pathname.includes("/partners/") ||
+        url.includes("naver.com/vp/products") ||
+        url.includes("shopping.naver.com/catalog/")
+      ) {
+        return { isAffiliateLink: true, platform: "naver" }
+      }
+    }
+
+    // 11번가 제휴 링크 확인
+    if (hostname.includes("11st.co.kr")) {
+      // 11번가 제휴 링크 특징: prdNo, trType 등의 파라미터
+      if (
+        searchParams.has("prdNo") ||
+        searchParams.has("trType") ||
+        pathname.includes("/products/")
+      ) {
+        return { isAffiliateLink: true, platform: "11st" }
+      }
+    }
+
+    // G마켓 제휴 링크 확인
+    if (hostname.includes("gmarket.co.kr")) {
+      // G마켓 제휴 링크 특징: goodscode 등의 파라미터
+      if (searchParams.has("goodscode") || pathname.includes("/item/")) {
+        return { isAffiliateLink: true, platform: "gmarket" }
+      }
+    }
+
+    // 케어라인 제휴 링크 확인
+    if (hostname.includes("careline.co.kr")) {
+      return { isAffiliateLink: true, platform: "careline" }
+    }
+
+    // 제휴 링크가 아닌 경우
+    return { isAffiliateLink: false }
+  } catch {
+    return { isAffiliateLink: false }
+  }
+}
+
+/**
+ * 제휴 링크 상태 체크 함수
+ * 제휴 링크인지 확인하고, 링크의 유효성을 검증합니다.
+ * @param url 확인할 URL
+ * @returns 제휴 링크 상태 정보
+ */
+export async function checkAffiliateLinkStatus(
+  url: string | null | undefined,
+): Promise<import("./types").AffiliateLinkStatus> {
+  console.log("[link-validator] Checking affiliate link status:", url)
+
+  if (!url) {
+    return {
+      isAffiliateLink: false,
+      isValid: false,
+      error: "URL이 제공되지 않았습니다.",
+      lastChecked: new Date().toISOString(),
+    }
+  }
+
+  // 제휴 링크인지 확인
+  const { isAffiliateLink, platform } = detectAffiliateLink(url)
+
+  if (!isAffiliateLink) {
+    // 제휴 링크가 아니어도 일반 링크 검증 수행
+    const validation = await validatePurchaseLink(url)
+    return {
+      isAffiliateLink: false,
+      isValid: validation.isValid,
+      statusCode: validation.statusCode,
+      error: validation.error,
+      redirectedUrl: validation.redirectedUrl,
+      lastChecked: new Date().toISOString(),
+    }
+  }
+
+  // 제휴 링크인 경우 상세 검증
+  const validation = await validatePurchaseLink(url)
+
+  return {
+    isAffiliateLink: true,
+    platform: platform || "unknown",
+    isValid: validation.isValid,
+    statusCode: validation.statusCode,
+    error: validation.error,
+    redirectedUrl: validation.redirectedUrl,
+    lastChecked: new Date().toISOString(),
+  }
+}
+
+/**
+ * 여러 제휴 링크 상태 일괄 체크
+ * @param urls 확인할 URL 배열
+ * @returns 제휴 링크 상태 맵
+ */
+export async function checkAffiliateLinksStatus(
+  urls: Array<{ id: string; url: string | null | undefined }>,
+): Promise<Map<string, import("./types").AffiliateLinkStatus>> {
+  const results = new Map<string, import("./types").AffiliateLinkStatus>()
+
+  // 병렬 처리 (최대 5개씩)
+  const batchSize = 5
+  for (let i = 0; i < urls.length; i += batchSize) {
+    const batch = urls.slice(i, i + batchSize)
+    const batchResults = await Promise.all(
+      batch.map(async ({ id, url }) => {
+        const result = await checkAffiliateLinkStatus(url)
+        return [id, result] as const
+      }),
+    )
+
+    batchResults.forEach(([id, result]) => {
+      results.set(id, result)
+    })
+  }
+
+  return results
+}

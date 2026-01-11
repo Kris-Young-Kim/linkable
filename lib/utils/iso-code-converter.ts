@@ -185,3 +185,58 @@ export async function convertToDivisionLevel(
   );
   return isoCode;
 }
+
+/**
+ * ISO 코드 문자열을 iso_code_id (UUID)로 변환
+ * @param isoCode ISO 코드 문자열 (예: "15 09 13")
+ * @param supabase Supabase 클라이언트 (선택적)
+ * @returns iso_code_id (UUID) 또는 null
+ */
+export async function getIsoCodeId(
+  isoCode: string | null | undefined,
+  supabase?: any
+): Promise<string | null> {
+  // null이거나 빈 문자열이면 null 반환
+  if (!isoCode || !isoCode.trim()) {
+    return null;
+  }
+
+  // 특수 코드는 null 반환 (예: "N999999", "00 00")
+  if (isoCode.startsWith("N") || isoCode === "00 00") {
+    return null;
+  }
+
+  const client = supabase || getSupabaseServerClient();
+
+  try {
+    // Division 레벨로 변환
+    const divisionCode = await convertToDivisionLevel(isoCode, client);
+    if (!divisionCode) {
+      return null;
+    }
+
+    // iso_codes 테이블에서 해당 코드의 id 조회
+    const { data: isoCodeRecord, error } = await client
+      .from("iso_codes")
+      .select("id")
+      .eq("code", divisionCode)
+      .eq("is_active", true)
+      .maybeSingle();
+
+    if (error) {
+      console.error(
+        `[getIsoCodeId] Error fetching iso_code_id for ${isoCode}:`,
+        error
+      );
+      return null;
+    }
+
+    return isoCodeRecord?.id || null;
+  } catch (error) {
+    console.error(
+      `[getIsoCodeId] Exception getting iso_code_id for ${isoCode}:`,
+      error
+    );
+    return null;
+  }
+}
