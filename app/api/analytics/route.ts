@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
           .from("recommendations")
           .select("id, is_clicked, created_at")
           .in("consultation_id", consultationIds)
-      : { data: null, error: null }
+      : { data: null, error: null } as { data: null; error: null }
 
     if (recError) {
       console.error("[Analytics] Recommendations fetch error:", recError)
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
             .in("consultation_id", consultationIds)
             .gte("created_at", date.toISOString())
             .lt("created_at", nextDate.toISOString())
-        : { data: null, error: null };
+        : { data: null, error: null } as { data: null; error: null };
       
       // 해당 날짜의 사용자 평가 수
       const { data: dayEvals } = await supabase
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
             .in("consultation_id", consultationIds)
             .gte("created_at", weekStart.toISOString())
             .lt("created_at", weekEnd.toISOString())
-        : { data: null, error: null };
+        : { data: null, error: null } as { data: null; error: null };
       
       // 해당 주의 사용자 평가 수
       const { data: weekEvals } = await supabase
@@ -252,7 +252,7 @@ export async function GET(request: NextRequest) {
             .in("consultation_id", consultationIds)
             .gte("created_at", monthStart.toISOString())
             .lt("created_at", monthEnd.toISOString())
-        : { data: null, error: null };
+        : { data: null, error: null } as { data: null; error: null };
       
       // 해당 월의 사용자 평가 수
       const { data: monthEvals } = await supabase
@@ -311,7 +311,7 @@ export async function GET(request: NextRequest) {
           .eq("is_clicked", true)
           .not("clicked_at", "is", null)
           .gte("clicked_at", thirtyDaysAgoForHourly.toISOString())
-      : { data: null, error: null };
+      : { data: null, error: null } as { data: null; error: null };
     
     const hourlyClicks = new Map<number, number>();
     clickedRecsForHourly?.forEach(rec => {

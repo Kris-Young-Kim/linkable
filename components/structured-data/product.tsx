@@ -47,7 +47,7 @@ export function Product({
     if (Array.isArray(img)) {
       return img.map((i) => (i.startsWith("http") ? i : `${baseUrl}${i.startsWith("/") ? "" : "/"}${i}`))
     }
-    return img.startsWith("http") ? img : `${baseUrl}${image?.startsWith("/") ? "" : "/"}${img}`
+    return img.startsWith("http") ? img : `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`
   }
 
   const normalizedImage = normalizeImage(image)
