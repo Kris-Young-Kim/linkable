@@ -530,7 +530,14 @@ function extractProductsFromPage(
         
         // 네이버 브랜드 스토어 URL 정규화
         let productLink = normalizeUrl(href, baseUrl);
-        if (!productLink.startsWith("http")) {
+        if (!productLink) {
+          // normalizeUrl이 null을 반환한 경우 href를 직접 사용
+          if (href.startsWith("/")) {
+            productLink = `${baseUrl}${href}`;
+          } else {
+            productLink = `${baseUrl}/${href}`;
+          }
+        } else if (!productLink.startsWith("http")) {
           if (href.startsWith("/")) {
             productLink = `${baseUrl}${href}`;
           } else {
