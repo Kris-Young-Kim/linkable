@@ -2,22 +2,22 @@
  * 상품 데이터 동기화 유틸리티
  */
 
-import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { logEvent } from "@/lib/logging"
-import type { ProductSyncResult } from "./types"
-import { validatePurchaseLink } from "./link-validator"
-import { getIsoCodeId } from "@/lib/utils/iso-code-converter"
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { logEvent } from "@/lib/logging";
+import type { ProductSyncResult } from "./types";
+import { validatePurchaseLink } from "./link-validator";
+import { getIsoCodeId } from "@/lib/utils/iso-code-converter";
 
 export interface ProductInput {
-  name: string
-  iso_code: string // ISO 코드 문자열 (내부적으로 iso_code_id로 변환됨)
-  manufacturer?: string | null
-  description?: string | null
-  image_url?: string | null
-  purchase_link?: string | null
-  price?: number | null
-  category?: string | null
-  is_active?: boolean
+  name: string;
+  iso_code: string; // ISO 코드 문자열 (내부적으로 iso_code_id로 변환됨)
+  manufacturer?: string | null;
+  description?: string | null;
+  image_url?: string | null;
+  purchase_link?: string | null;
+  price?: number | null;
+  category?: string | null;
+  is_active?: boolean;
 }
 
 /**
@@ -25,25 +25,25 @@ export interface ProductInput {
  */
 export async function upsertProduct(
   product: ProductInput,
-  options?: { validateLink?: boolean },
+  options?: { validateLink?: boolean }
 ): Promise<{ id: string; created: boolean }> {
-  const supabase = getSupabaseServerClient()
+  const supabase = getSupabaseServerClient();
 
   // ISO 코드 문자열을 iso_code_id로 변환
   const isoCodeId = await getIsoCodeId(product.iso_code, supabase);
 
   // 링크 검증 (옵션)
   if (options?.validateLink && product.purchase_link) {
-    const validation = await validatePurchaseLink(product.purchase_link)
+    const validation = await validatePurchaseLink(product.purchase_link);
     if (!validation.isValid) {
       logEvent({
         category: "product",
         action: "link_validation_failed",
         payload: { url: product.purchase_link, error: validation.error },
         level: "warn",
-      })
+      });
       // 검증 실패해도 상품은 등록 (링크만 null로 처리)
-      product.purchase_link = null
+      product.purchase_link = null;
     }
   }
 
@@ -53,7 +53,7 @@ export async function upsertProduct(
     .select("id")
     .eq("name", product.name)
     .eq("iso_code_id", isoCodeId)
-    .maybeSingle()
+    .maybeSingle();
 
   if (existing) {
     // 업데이트
@@ -73,13 +73,13 @@ export async function upsertProduct(
       })
       .eq("id", existing.id)
       .select("id")
-      .single()
+      .single();
 
     if (error) {
-      throw error
+      throw error;
     }
 
-    return { id: data.id, created: false }
+    return { id: data.id, created: false };
   } else {
     // 신규 생성
     const { data, error } = await supabase
@@ -96,13 +96,13 @@ export async function upsertProduct(
         is_active: product.is_active ?? true,
       })
       .select("id")
-      .single()
+      .single();
 
     if (error) {
-      throw error
+      throw error;
     }
 
-    return { id: data.id, created: true }
+    return { id: data.id, created: true };
   }
 }
 
@@ -111,7 +111,7 @@ export async function upsertProduct(
  */
 export async function syncProducts(
   products: ProductInput[],
-  options?: { validateLinks?: boolean },
+  options?: { validateLinks?: boolean }
 ): Promise<ProductSyncResult> {
   const result: ProductSyncResult = {
     success: true,
@@ -119,23 +119,25 @@ export async function syncProducts(
     updated: 0,
     failed: 0,
     errors: [],
-  }
+  };
 
   for (const product of products) {
     try {
-      const { created } = await upsertProduct(product, { validateLink: options?.validateLinks })
+      const { created } = await upsertProduct(product, {
+        validateLink: options?.validateLinks,
+      });
       if (created) {
-        result.created++
+        result.created++;
       } else {
-        result.updated++
+        result.updated++;
       }
     } catch (error) {
-      result.failed++
-      result.success = false
+      result.failed++;
+      result.success = false;
       result.errors?.push({
         productId: product.name,
         error: error instanceof Error ? error.message : String(error),
-      })
+      });
     }
   }
 
@@ -148,8 +150,7 @@ export async function syncProducts(
       updated: result.updated,
       failed: result.failed,
     },
-  })
+  });
 
-  return result
+  return result;
 }
-
