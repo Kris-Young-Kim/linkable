@@ -1640,17 +1640,16 @@ export function ChatInterface() {
                             });
 
                             // 추천 페이지로 이동
-                            router.push(`/recommendations/${consultationId}`)
-                              .then(() => {
-                                console.log("[chat] Navigation to recommendations successful");
-                                setTimeout(() => {
-                                  setIsNavigatingToRecommendations(false);
-                                }, 1000);
-                              })
-                              .catch((error) => {
-                                console.error("[chat] Navigation failed:", error);
+                            try {
+                              await router.push(`/recommendations/${consultationId}`);
+                              console.log("[chat] Navigation to recommendations successful");
+                              setTimeout(() => {
                                 setIsNavigatingToRecommendations(false);
-                              });
+                              }, 1000);
+                            } catch (error) {
+                              console.error("[chat] Navigation failed:", error);
+                              setIsNavigatingToRecommendations(false);
+                            }
                           } catch (error) {
                             console.error("[chat] Failed to save evaluation:", error);
                             alert("평가 저장 중 오류가 발생했습니다. 다시 시도해주세요.");
