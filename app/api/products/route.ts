@@ -380,25 +380,78 @@ export async function GET(request: Request) {
   const isoCodes = isoMatches.map((match) => match.isoCode);
 
   // 최적화된 ICF-제품 직접 매칭 시도 (새로운 함수 사용)
+  // Phase 1: recommend_products_by_icf 함수 사용 (품질 점수 반영)
   const useOptimizedMatching = process.env.USE_OPTIMIZED_ICF_MATCHING !== "false" && icfCodes.length > 0;
+  const useQualityScores = process.env.USE_PRODUCT_QUALITY_SCORES !== "false";
   
   if (useOptimizedMatching) {
     try {
-      console.log("[Products API] Using optimized ICF-product matching");
-      const { getProductsByIcfCodes } = await import("@/lib/integrations/icf-product-matcher");
+      console.log("[Products API] Using recommend_products_by_icf function with quality scores");
       
-      const optimizedProducts = await getProductsByIcfCodes(icfCodes, {
-        limit,
-        minScore: 0.4,
-        usePrecomputed: true,
-        supabase,
-      });
+      // Phase 1: 새로운 recommend_products_by_icf 함수 사용
+      const { data: recommendedProducts, error: recError } = await supabase.rpc(
+        "recommend_products_by_icf",
+        {
+          p_icf_codes: icfCodes,
+          p_limit: limit,
+          p_min_score: 0.4,
+          p_use_quality_scores: useQualityScores,
+        }
+      );
 
-      if (optimizedProducts.length > 0) {
-        console.log(`[Products API] Optimized matching found ${optimizedProducts.length} products`);
+      if (recError) {
+        console.error("[Products API] recommend_products_by_icf error:", recError);
+        // 폴백: 기존 함수 사용
+        const { getProductsByIcfCodes } = await import("@/lib/integrations/icf-product-matcher");
+        const optimizedProducts = await getProductsByIcfCodes(icfCodes, {
+          limit,
+          minScore: 0.4,
+          usePrecomputed: true,
+          supabase,
+        });
+
+        if (optimizedProducts.length > 0) {
+          const formattedProducts = optimizedProducts.map((p) => ({
+            id: p.product_id,
+            name: p.product_name,
+            iso_code: p.iso_code,
+            manufacturer: p.manufacturer,
+            description: p.description,
+            image_url: p.image_url,
+            purchase_link: p.purchase_link,
+            price: p.price,
+            category: p.category,
+            match_score: p.match_score,
+            match_reason: p.match_reason,
+          }));
+
+          if (consultationId && shouldPersistRecommendations) {
+            const recommendationItems = formattedProducts.map((rec, index) => ({
+              productId: rec.id,
+              matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
+              rank: index + 1,
+            }));
+
+            await persistRecommendations(consultationId, recommendationItems, supabase);
+          }
+
+          return NextResponse.json(
+            {
+              products: formattedProducts,
+              isoBreakdown: isoMatches.map((match) => ({
+                isoCode: match.isoCode,
+                productsCount: formattedProducts.filter((p) => p.iso_code === match.isoCode).length,
+                confidence: match.score,
+              })),
+            },
+            { headers }
+          );
+        }
+      } else if (recommendedProducts && recommendedProducts.length > 0) {
+        console.log(`[Products API] recommend_products_by_icf found ${recommendedProducts.length} products`);
         
         // 형식 변환
-        const formattedProducts = optimizedProducts.map((p) => ({
+        const formattedProducts = recommendedProducts.map((p: any) => ({
           id: p.product_id,
           name: p.product_name,
           iso_code: p.iso_code,
@@ -408,16 +461,18 @@ export async function GET(request: Request) {
           purchase_link: p.purchase_link,
           price: p.price,
           category: p.category,
-          match_score: p.match_score,
+          match_score: p.final_score,  // 최종 점수 사용
+          quality_score: p.quality_score,  // 품질 점수 추가
           match_reason: p.match_reason,
+          rank: p.rank,
         }));
 
         // 추천 저장 (consultationId가 있는 경우)
         if (consultationId && shouldPersistRecommendations) {
-          const recommendationItems = formattedProducts.map((rec, index) => ({
+          const recommendationItems = formattedProducts.map((rec) => ({
             productId: rec.id,
             matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
-            rank: index + 1,
+            rank: rec.rank || 1,
           }));
 
           await persistRecommendations(consultationId, recommendationItems, supabase);
@@ -425,12 +480,14 @@ export async function GET(request: Request) {
 
         logEvent({
           category: "matching",
-          action: "optimized_icf_product_matching_used",
+          action: "recommend_products_by_icf_used",
           payload: {
             consultationId,
             icfCodesCount: icfCodes.length,
             productsCount: formattedProducts.length,
-            avgScore: optimizedProducts.reduce((sum, p) => sum + p.match_score, 0) / optimizedProducts.length,
+            avgScore: recommendedProducts.reduce((sum: number, p: any) => sum + p.final_score, 0) / recommendedProducts.length,
+            avgQualityScore: recommendedProducts.reduce((sum: number, p: any) => sum + (p.quality_score || 0), 0) / recommendedProducts.length,
+            useQualityScores,
           },
         });
 
@@ -447,10 +504,10 @@ export async function GET(request: Request) {
         );
       }
     } catch (error) {
-      console.error("[Products API] Optimized matching failed, falling back:", error);
+      console.error("[Products API] recommend_products_by_icf failed, falling back:", error);
       logEvent({
         category: "matching",
-        action: "optimized_matching_fallback",
+        action: "recommend_products_by_icf_fallback",
         payload: { error: String(error), consultationId },
         level: "warn",
       });
