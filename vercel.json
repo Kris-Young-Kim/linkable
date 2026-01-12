@@ -5,11 +5,7 @@
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/cron/backup-database",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/update-realtime-learning",
+      "path": "/api/cron/nightly-maintenance",
       "schedule": "0 2 * * *"
     }
   ]
