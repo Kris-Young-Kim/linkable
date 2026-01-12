@@ -509,7 +509,12 @@ export async function GET(request: Request) {
 
         // 추천 저장 (consultationId가 있는 경우)
         if (consultationId && shouldPersistRecommendations) {
-          const recommendationItems = formattedProducts.map((rec) => ({
+          const recommendationItems = formattedProducts.map((rec: {
+            id: string;
+            match_reason?: string;
+            match_score?: number;
+            rank?: number;
+          }) => ({
             productId: rec.id,
             matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
             rank: rec.rank || 1,
