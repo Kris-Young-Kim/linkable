@@ -394,7 +394,7 @@ export async function GET(request: Request) {
         {
           p_icf_codes: icfCodes,
           p_limit: limit,
-          p_min_score: 0.4,
+          p_min_score: 0.5, // ✅ 개선: 최소 점수를 0.4에서 0.5로 상향 조정 (더 엄격한 필터링)
           p_use_quality_scores: useQualityScores,
         }
       );
@@ -405,7 +405,7 @@ export async function GET(request: Request) {
         const { getProductsByIcfCodes } = await import("@/lib/integrations/icf-product-matcher");
         const optimizedProducts = await getProductsByIcfCodes(icfCodes, {
           limit,
-          minScore: 0.4,
+          minScore: 0.5, // ✅ 개선: 최소 점수를 0.4에서 0.5로 상향 조정
           usePrecomputed: true,
           supabase,
         });

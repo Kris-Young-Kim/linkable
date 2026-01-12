@@ -551,14 +551,20 @@ export function ChatInterface() {
                         // 중요도와 어려움 정도를 모두 물어보는 경우 감지
                         const hasImportance = updatedContent.includes("중요") || updatedContent.includes("중요도");
                         const hasDifficulty = updatedContent.includes("어려움") || updatedContent.includes("어려운 정도") || updatedContent.includes("어려운가요");
+                        // 새로운 질문 형식 감지: "불편하다고 하신 활동이 얼마나 중요한지, 얼마나 어려운지를 답변해주시면 더 맞춤형으로 추천해드릴 수 있어요."
+                        const hasNewFormat = updatedContent.includes("불편하다고 하신 활동이") && 
+                                           updatedContent.includes("얼마나 중요한지") && 
+                                           updatedContent.includes("얼마나 어려운지를") &&
+                                           updatedContent.includes("답변해주시면");
                         const hasCheck = updatedContent.includes("체크");
                         const hasNumberedList = (updatedContent.includes("1.") && updatedContent.includes("2.")) || 
                                                (updatedContent.includes("1 ") && updatedContent.includes("2 "));
                         
-                        // 두 가지 평가를 모두 물어보는 경우 (다양한 형식 지원)
+                        // 두 가지 평가를 모두 물어보는 경우 (새로운 형식 우선, 기존 형식도 지원)
                         if (
-                          (hasImportance && hasDifficulty) && 
-                          (hasCheck || hasNumberedList || updatedContent.includes("중요도 체크") || updatedContent.includes("어려움 정도 체크"))
+                          hasNewFormat || 
+                          ((hasImportance && hasDifficulty) && 
+                          (hasCheck || hasNumberedList || updatedContent.includes("중요도 체크") || updatedContent.includes("어려움 정도 체크")))
                         ) {
                           evaluationType = "both";
                           // 초기값 설정
@@ -1348,75 +1354,68 @@ export function ChatInterface() {
                       <div className="flex justify-start pl-[52px]">
                         <div className="w-full max-w-md rounded-lg border border-border bg-card p-4 shadow-sm">
                           {message.evaluationType === "both" ? (
-                            // 중요도와 어려움 정도를 동시에 선택하는 슬라이더 UI
-                            // 중요도와 어려움 정도를 동시에 선택하는 슬라이더 UI
+                            // 중요도와 어려움 정도를 동시에 선택하는 드롭다운 UI
                             <div className="space-y-6">
-                              <p className="text-sm font-medium text-foreground">
-                                다음 두 가지를 체크해주시면 더 정확한 추천을 드릴 수 있어요:
-                              </p>
-                              
-                              {/* 중요도 슬라이더 */}
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-sm font-semibold">
-                                    1. 일상생활에서 얼마나 중요한가요?
-                                  </Label>
-                                  <Badge variant="outline" className="text-sm px-2 py-1">
-                                    {evaluationScores[message.id]?.importance || 3}/5
-                                  </Badge>
-                                </div>
-                                <Slider
-                                  value={[evaluationScores[message.id]?.importance || 3]}
+                              {/* 중요도 드롭다운 */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold">
+                                  중요도
+                                </Label>
+                                <Select
+                                  value={String(evaluationScores[message.id]?.importance || 3)}
                                   onValueChange={(value) =>
                                     setEvaluationScores((prev) => ({
                                       ...prev,
                                       [message.id]: {
                                         ...(prev[message.id] || { importance: 3, difficulty: 3 }),
-                                        importance: value[0],
+                                        importance: Number(value),
                                       },
                                     }))
                                   }
-                                  min={1}
-                                  max={5}
-                                  step={1}
-                                  className="w-full"
                                   disabled={isSubmittingEvaluation === message.id}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                  1점: 별로 안 중요 → 5점: 매우 중요
-                                </p>
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="중요도를 선택하세요" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">1점 - 별로 안 중요</SelectItem>
+                                    <SelectItem value="2">2점 - 조금 중요</SelectItem>
+                                    <SelectItem value="3">3점 - 보통</SelectItem>
+                                    <SelectItem value="4">4점 - 중요</SelectItem>
+                                    <SelectItem value="5">5점 - 매우 중요</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
 
-                              {/* 어려움 정도 슬라이더 */}
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-sm font-semibold">
-                                    2. 이 활동을 수행하는 것이 얼마나 어려우신가요?
-                                  </Label>
-                                  <Badge variant="outline" className="text-sm px-2 py-1">
-                                    {evaluationScores[message.id]?.difficulty || 3}/5
-                                  </Badge>
-                                </div>
-                                <Slider
-                                  value={[evaluationScores[message.id]?.difficulty || 3]}
+                              {/* 어려운 정도 드롭다운 */}
+                              <div className="space-y-2">
+                                <Label className="text-sm font-semibold">
+                                  어려운 정도
+                                </Label>
+                                <Select
+                                  value={String(evaluationScores[message.id]?.difficulty || 3)}
                                   onValueChange={(value) =>
                                     setEvaluationScores((prev) => ({
                                       ...prev,
                                       [message.id]: {
                                         ...(prev[message.id] || { importance: 3, difficulty: 3 }),
-                                        difficulty: value[0],
+                                        difficulty: Number(value),
                                       },
                                     }))
                                   }
-                                  min={1}
-                                  max={5}
-                                  step={1}
-                                  className="w-full"
                                   disabled={isSubmittingEvaluation === message.id}
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                  1점: 쉬워요 → 5점: 거의 못 해요
-                                </p>
+                                >
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="어려운 정도를 선택하세요" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="1">1점 - 쉬워요</SelectItem>
+                                    <SelectItem value="2">2점 - 조금 어려워요</SelectItem>
+                                    <SelectItem value="3">3점 - 보통</SelectItem>
+                                    <SelectItem value="4">4점 - 어려워요</SelectItem>
+                                    <SelectItem value="5">5점 - 거의 못 해요</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
 
                               {/* 제출 버튼 */}
@@ -1441,7 +1440,7 @@ export function ChatInterface() {
                                     제출 중...
                                   </>
                                 ) : (
-                                  "체크 완료하고 추천 받기"
+                                  "답변 완료하고 추천 받기"
                                 )}
                               </Button>
                             </div>
@@ -1535,62 +1534,60 @@ export function ChatInterface() {
                         </div>
                       </div>
 
-                      {/* 중요도 슬라이더 */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-semibold">
-                            1. 일상생활에서 얼마나 중요한가요?
-                          </Label>
-                          <Badge variant="outline" className="text-sm px-2 py-1">
-                            {preRecommendationScores.importance}/5
-                          </Badge>
-                        </div>
-                        <Slider
-                          value={[preRecommendationScores.importance]}
+                      {/* 중요도 드롭다운 */}
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">
+                          중요도
+                        </Label>
+                        <Select
+                          value={String(preRecommendationScores.importance)}
                           onValueChange={(value) =>
                             setPreRecommendationScores((prev) => ({
                               ...prev,
-                              importance: value[0],
+                              importance: Number(value),
                             }))
                           }
-                          min={1}
-                          max={5}
-                          step={1}
-                          className="w-full"
                           disabled={isSubmittingPreRecommendationEvaluation}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          1점: 별로 안 중요 → 5점: 매우 중요
-                        </p>
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="중요도를 선택하세요" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1점 - 별로 안 중요</SelectItem>
+                            <SelectItem value="2">2점 - 조금 중요</SelectItem>
+                            <SelectItem value="3">3점 - 보통</SelectItem>
+                            <SelectItem value="4">4점 - 중요</SelectItem>
+                            <SelectItem value="5">5점 - 매우 중요</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
-                      {/* 어려움 정도 슬라이더 */}
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm font-semibold">
-                            2. 이 활동을 수행하는 것이 얼마나 어려우신가요?
-                          </Label>
-                          <Badge variant="outline" className="text-sm px-2 py-1">
-                            {preRecommendationScores.difficulty}/5
-                          </Badge>
-                        </div>
-                        <Slider
-                          value={[preRecommendationScores.difficulty]}
+                      {/* 어려운 정도 드롭다운 */}
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">
+                          어려운 정도
+                        </Label>
+                        <Select
+                          value={String(preRecommendationScores.difficulty)}
                           onValueChange={(value) =>
                             setPreRecommendationScores((prev) => ({
                               ...prev,
-                              difficulty: value[0],
+                              difficulty: Number(value),
                             }))
                           }
-                          min={1}
-                          max={5}
-                          step={1}
-                          className="w-full"
                           disabled={isSubmittingPreRecommendationEvaluation}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                          1점: 쉬워요 → 5점: 거의 못 해요
-                        </p>
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="어려운 정도를 선택하세요" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="1">1점 - 쉬워요</SelectItem>
+                            <SelectItem value="2">2점 - 조금 어려워요</SelectItem>
+                            <SelectItem value="3">3점 - 보통</SelectItem>
+                            <SelectItem value="4">4점 - 어려워요</SelectItem>
+                            <SelectItem value="5">5점 - 거의 못 해요</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
                       {/* 평가 완료 후 추천 받기 버튼 */}

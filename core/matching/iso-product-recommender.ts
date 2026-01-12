@@ -171,7 +171,7 @@ export async function recommendProductsByIsoCode(
 ): Promise<IsoProductRecommendation> {
   const {
     limit = 10,
-    minScore = 0.4,
+    minScore = 0.5, // ✅ 개선: 최소 점수를 0.4에서 0.5로 상향 조정 (더 엄격한 필터링)
     includeRelated = true,
     useSemanticMatching = true,
     useQualityMetrics = true,
@@ -354,8 +354,20 @@ export async function recommendProductsByIsoCode(
         const productIsoCode = (product as any).iso_codes?.code || product.iso_code;
         const isExact = productIsoCode === isoCode;
         if (isExact) return true;
+        
+        // ✅ 핵심 개선: ISO 매칭 점수가 매우 낮은 제품(0.05점 이하)은 제외
+        const isoMatchScore = product.scoreBreakdown?.isoMatch || 0;
+        if (isoMatchScore <= 0.05) {
+          console.log(`[Product Recommender] 제품 필터링: ${product.name} (ISO 매칭 점수 ${isoMatchScore.toFixed(3)} ≤ 0.05, 관련 없는 제품으로 판단하여 제외)`);
+          return false; // 관련 없는 제품은 제외
+        }
+        
         // 관련 제품은 최소 점수 이상이어야 함
-        return product.score >= minScore;
+        const passed = product.score >= minScore;
+        if (!passed) {
+          console.log(`[Product Recommender] 제품 필터링: ${product.name} (최종 점수 ${product.score.toFixed(3)} < 최소 점수 ${minScore})`);
+        }
+        return passed;
       })
       .sort((a, b) => {
         // 1순위: 정확한 ISO 매칭 여부
@@ -378,6 +390,26 @@ export async function recommendProductsByIsoCode(
         return bQuality - aQuality;
       })
       .slice(0, limit);
+
+    // ✅ 로깅: 추천 정확도 모니터링
+    const exactCount = filteredRecommendations.filter(p => {
+      const productIsoCode = (p as any).iso_codes?.code || p.iso_code;
+      return productIsoCode === isoCode;
+    }).length;
+    const relatedCount = filteredRecommendations.length - exactCount;
+    
+    console.log(`[Product Recommender] ISO 코드 ${isoCode} 추천 결과:`, {
+      전체_후보: recommendations.length,
+      필터링_후: filteredRecommendations.length,
+      정확한_매칭: exactCount,
+      관련_매칭: relatedCount,
+      평균_점수: filteredRecommendations.length > 0 
+        ? (filteredRecommendations.reduce((sum, p) => sum + p.score, 0) / filteredRecommendations.length).toFixed(3)
+        : 0,
+      평균_ISO_매칭_점수: filteredRecommendations.length > 0
+        ? (filteredRecommendations.reduce((sum, p) => sum + (p.scoreBreakdown?.isoMatch || 0), 0) / filteredRecommendations.length).toFixed(3)
+        : 0,
+    });
 
     return {
       isoCode,
@@ -439,7 +471,7 @@ export async function recommendProductsByMultipleIsoCodes(
         { ...context, isoMatches },
         {
           limit: maxProductsPerIso,
-          minScore: 0.3,
+          minScore: 0.5, // ✅ 개선: 최소 점수를 0.3에서 0.5로 상향 조정
           useSemanticMatching,
           useQualityMetrics,
         }
@@ -639,12 +671,22 @@ async function calculateAdvancedProductScores(
       }
 
       // 최종 점수 계산 (가중 평균)
-      const finalScore = calculateWeightedScore(breakdown, {
+      let finalScore = calculateWeightedScore(breakdown, {
         isExactMatch,
         hasSemanticMatch: breakdown.semanticMatch > 0,
         hasDirectIcfMatch: breakdown.directIcfMatch > 0,
         hasQualityMetrics: breakdown.qualityScore > 0,
       });
+
+      // ✅ 핵심 개선: ISO 매칭 점수가 매우 낮은 제품(관련 없는 제품)은 최종 점수에 상한선 설정
+      // ISO 매칭 점수가 0.05점(관련 없는 제품)이면 최종 점수도 낮게 제한
+      if (!isExactMatch && !isRelatedMatch && breakdown.isoMatch <= 0.05) {
+        // 관련 없는 제품은 다른 요소로 점수를 보완해도 최대 0.3점으로 제한
+        finalScore = Math.min(finalScore, 0.3);
+      } else if (!isExactMatch && isRelatedMatch && breakdown.isoMatch < 0.3) {
+        // 관련 제품이지만 ISO 매칭 점수가 낮으면 최대 0.5점으로 제한
+        finalScore = Math.min(finalScore, 0.5);
+      }
 
       // 우선순위 계산
       const priority = calculatePriority(breakdown, product, {
@@ -739,8 +781,17 @@ function calculateWeightedScore(
     baseWeights.qualityScore = 0.05;
     baseWeights.directIcfMatch = 0.05;
   } else {
-    // 정확한 매칭이 없을 때만 시맨틱 매칭 활용
-    if (flags.hasSemanticMatch) {
+    // ✅ 개선: 정확한 매칭이 없을 때 ISO 매칭 점수가 낮으면 다른 요소의 가중치도 제한
+    const isoMatchScore = breakdown.isoMatch || 0;
+    if (isoMatchScore <= 0.05) {
+      // ISO 매칭 점수가 매우 낮으면(관련 없는 제품) 다른 요소의 가중치를 낮춤
+      baseWeights.isoMatch = 0.5; // ISO 매칭 가중치 유지 (낮은 점수 반영)
+      baseWeights.semanticMatch = 0.2; // 시맨틱 매칭 가중치 제한
+      baseWeights.directIcfMatch = 0.15; // 직접 ICF 매칭 가중치 제한
+      baseWeights.contextMatch = 0.1;
+      baseWeights.qualityScore = 0.05;
+    } else if (flags.hasSemanticMatch) {
+      // 정확한 매칭이 없지만 관련 제품인 경우
       baseWeights.semanticMatch = 0.35;
       baseWeights.isoMatch = 0.3;
     }
