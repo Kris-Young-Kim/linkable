@@ -548,24 +548,29 @@ export function ChatInterface() {
                         | "both"
                         | undefined;
                       if (isEvaluationQuestion(updatedContent)) {
-                        // 중요도와 어려움 정도를 모두 물어보는 경우 감지
-                        const hasImportance = updatedContent.includes("중요") || updatedContent.includes("중요도");
-                        const hasDifficulty = updatedContent.includes("어려움") || updatedContent.includes("어려운 정도") || updatedContent.includes("어려운가요");
-                        // 새로운 질문 형식 감지: "불편하다고 하신 활동이 얼마나 중요한지, 얼마나 어려운지를 답변해주시면 더 맞춤형으로 추천해드릴 수 있어요."
-                        const hasNewFormat = updatedContent.includes("불편하다고 하신 활동이") && 
-                                           updatedContent.includes("얼마나 중요한지") && 
-                                           updatedContent.includes("얼마나 어려운지를") &&
-                                           updatedContent.includes("답변해주시면");
-                        const hasCheck = updatedContent.includes("체크");
-                        const hasNumberedList = (updatedContent.includes("1.") && updatedContent.includes("2.")) || 
-                                               (updatedContent.includes("1 ") && updatedContent.includes("2 "));
+                        // 중요도와 어려움 정도를 모두 물어보는 경우 감지 (확장된 키워드)
+                        const hasImportance = 
+                          updatedContent.includes("중요") || 
+                          updatedContent.includes("중요도") ||
+                          updatedContent.includes("중요한지") ||
+                          updatedContent.includes("중요한가요") ||
+                          updatedContent.includes("중요한가") ||
+                          updatedContent.includes("중요한") ||
+                          updatedContent.includes("얼마나 중요한");
                         
-                        // 두 가지 평가를 모두 물어보는 경우 (새로운 형식 우선, 기존 형식도 지원)
-                        if (
-                          hasNewFormat || 
-                          ((hasImportance && hasDifficulty) && 
-                          (hasCheck || hasNumberedList || updatedContent.includes("중요도 체크") || updatedContent.includes("어려움 정도 체크")))
-                        ) {
+                        const hasDifficulty = 
+                          updatedContent.includes("어려움") || 
+                          updatedContent.includes("어려운 정도") || 
+                          updatedContent.includes("어려운지") ||
+                          updatedContent.includes("어려운가요") ||
+                          updatedContent.includes("어려운가") ||
+                          updatedContent.includes("어려운") ||
+                          updatedContent.includes("얼마나 어려운") ||
+                          updatedContent.includes("어려워요") ||
+                          updatedContent.includes("어렵나요");
+                        
+                        // 두 가지 평가를 모두 물어보는 경우 (더 유연한 감지)
+                        if (hasImportance && hasDifficulty) {
                           evaluationType = "both";
                           // 초기값 설정
                           setEvaluationScores((prev) => ({

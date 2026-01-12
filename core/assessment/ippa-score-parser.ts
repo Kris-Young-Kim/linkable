@@ -219,12 +219,19 @@ export function isEvaluationQuestion(text: string): boolean {
 
   return (
     normalized.includes("중요") ||
+    normalized.includes("중요도") ||
     normalized.includes("어려움") ||
     normalized.includes("어려운 정도") ||
+    normalized.includes("어려운지") ||
+    normalized.includes("어려운가요") ||
     normalized.includes("점수") ||
     normalized.includes("1점") ||
     normalized.includes("5점") ||
-    normalized.includes("얼마나")
+    normalized.includes("얼마나") ||
+    normalized.includes("답변해주시면") ||
+    normalized.includes("답변해주세요") ||
+    normalized.includes("선택해주시면") ||
+    normalized.includes("선택해주세요")
   );
 }
 
