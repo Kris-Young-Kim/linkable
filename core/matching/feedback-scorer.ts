@@ -74,7 +74,7 @@ export async function getFeedbackStats(
         product_id,
         is_clicked,
         purchase_completed,
-        product:product_id(iso_code)
+        product:product_id(iso_code_id, iso_codes:iso_code_id(code))
       `);
 
     // ISO 코드 필터링 (제품 조인 후 필터링)
@@ -97,14 +97,16 @@ export async function getFeedbackStats(
     >();
 
     for (const rec of recommendations || []) {
-      // Supabase 조인 결과는 배열 또는 단일 객체일 수 있음
-      const product = Array.isArray(rec.product) 
-        ? (rec.product[0] as { iso_code: string } | null)
-        : (rec.product as { iso_code: string } | null);
-      if (!product?.iso_code) continue;
+      // Supabase 조인 결과 처리
+      const productData = rec.product as unknown;
+      const product = Array.isArray(productData) ? productData[0] : productData;
+      if (!product) continue;
 
-      const isoCode = product.iso_code;
-      
+      const isoCodesData = (product as { iso_codes?: unknown }).iso_codes;
+      const isoCodesObj = Array.isArray(isoCodesData) ? isoCodesData[0] : isoCodesData;
+      const isoCode = (isoCodesObj as { code?: string } | null)?.code;
+      if (!isoCode) continue;
+
       // ISO 코드 필터링 (지정된 경우)
       if (isoCodes.length > 0 && !isoCodes.includes(isoCode)) continue;
 
@@ -127,7 +129,7 @@ export async function getFeedbackStats(
       .select(`
         product_id,
         effectiveness_score,
-        product:product_id(iso_code)
+        product:product_id(iso_code_id, iso_codes:iso_code_id(code))
       `)
       .not("effectiveness_score", "is", null);
 
@@ -149,14 +151,16 @@ export async function getFeedbackStats(
     >();
 
     for (const eval_ of evaluations || []) {
-      // Supabase 조인 결과는 배열 또는 단일 객체일 수 있음
-      const product = Array.isArray(eval_.product)
-        ? (eval_.product[0] as { iso_code: string } | null)
-        : (eval_.product as { iso_code: string } | null);
-      if (!product?.iso_code) continue;
+      // Supabase 조인 결과 처리
+      const productData = eval_.product as unknown;
+      const product = Array.isArray(productData) ? productData[0] : productData;
+      if (!product) continue;
 
-      const isoCode = product.iso_code;
-      
+      const isoCodesData = (product as { iso_codes?: unknown }).iso_codes;
+      const isoCodesObj = Array.isArray(isoCodesData) ? isoCodesData[0] : isoCodesData;
+      const isoCode = (isoCodesObj as { code?: string } | null)?.code;
+      if (!isoCode) continue;
+
       // ISO 코드 필터링 (지정된 경우)
       if (isoCodes.length > 0 && !isoCodes.includes(isoCode)) continue;
 
@@ -345,7 +349,7 @@ export async function getIcfIsoCombinationStats(
         product_id,
         is_clicked,
         purchase_completed,
-        product:product_id(iso_code)
+        product:product_id(iso_code_id, iso_codes:iso_code_id(code))
       `)
       .in("consultation_id", matchingConsultationIds);
 
@@ -366,13 +370,15 @@ export async function getIcfIsoCombinationStats(
     >();
 
     for (const rec of recommendations || []) {
-      // Supabase 조인 결과는 배열 또는 단일 객체일 수 있음
-      const product = Array.isArray(rec.product)
-        ? (rec.product[0] as { iso_code: string } | null)
-        : (rec.product as { iso_code: string } | null);
-      if (!product?.iso_code) continue;
+      // Supabase 조인 결과 처리
+      const productData = rec.product as unknown;
+      const product = Array.isArray(productData) ? productData[0] : productData;
+      if (!product) continue;
 
-      const isoCode = product.iso_code;
+      const isoCodesData = (product as { iso_codes?: unknown }).iso_codes;
+      const isoCodesObj = Array.isArray(isoCodesData) ? isoCodesData[0] : isoCodesData;
+      const isoCode = (isoCodesObj as { code?: string } | null)?.code;
+      if (!isoCode) continue;
 
       // ISO 코드 필터링 (지정된 경우)
       if (isoCodes.length > 0 && !isoCodes.includes(isoCode)) continue;
@@ -397,11 +403,11 @@ export async function getIcfIsoCombinationStats(
         product_id,
         effectiveness_score,
         recommendation_id,
-        product:product_id(iso_code),
+        product:product_id(iso_code_id, iso_codes:iso_code_id(code)),
         recommendation:recommendation_id(consultation_id)
       `)
       .not("effectiveness_score", "is", null)
-      .in("recommendation_id", 
+      .in("recommendation_id",
         recommendations?.map((r) => r.id).filter(Boolean) || []
       );
 
@@ -421,13 +427,15 @@ export async function getIcfIsoCombinationStats(
     >();
 
     for (const eval_ of evaluations || []) {
-      // Supabase 조인 결과는 배열 또는 단일 객체일 수 있음
-      const product = Array.isArray(eval_.product)
-        ? (eval_.product[0] as { iso_code: string } | null)
-        : (eval_.product as { iso_code: string } | null);
-      if (!product?.iso_code) continue;
+      // Supabase 조인 결과 처리
+      const productData = eval_.product as unknown;
+      const product = Array.isArray(productData) ? productData[0] : productData;
+      if (!product) continue;
 
-      const isoCode = product.iso_code;
+      const isoCodesData = (product as { iso_codes?: unknown }).iso_codes;
+      const isoCodesObj = Array.isArray(isoCodesData) ? isoCodesData[0] : isoCodesData;
+      const isoCode = (isoCodesObj as { code?: string } | null)?.code;
+      if (!isoCode) continue;
 
       // ISO 코드 필터링 (지정된 경우)
       if (isoCodes.length > 0 && !isoCodes.includes(isoCode)) continue;

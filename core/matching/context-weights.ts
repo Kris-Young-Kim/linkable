@@ -197,7 +197,7 @@ async function getUserPreviousProducts(
       .select(`
         product_id,
         purchase_completed,
-        product:product_id(iso_code)
+        product:product_id(iso_code_id, iso_codes:iso_code_id(code))
       `)
       .in("consultation_id", consultationIds)
       .eq("purchase_completed", true);
@@ -217,7 +217,7 @@ async function getUserPreviousProducts(
       .select(`
         product_id,
         recommendation_id,
-        product:product_id(iso_code)
+        product:product_id(iso_code_id, iso_codes:iso_code_id(code))
       `)
       .eq("user_id", userId);
 
@@ -232,22 +232,32 @@ async function getUserPreviousProducts(
 
     // 4. ISO 코드별 사용 횟수 집계
     for (const rec of purchasedRecommendations || []) {
-      const product = Array.isArray(rec.product)
-        ? (rec.product[0] as { iso_code: string } | null)
-        : (rec.product as { iso_code: string } | null);
-      if (product?.iso_code) {
-        const count = productMap.get(product.iso_code) || 0;
-        productMap.set(product.iso_code, count + 1);
+      // Supabase 조인 결과 처리
+      const productData = rec.product as unknown;
+      const product = Array.isArray(productData) ? productData[0] : productData;
+      if (!product) continue;
+
+      const isoCodesData = (product as { iso_codes?: unknown }).iso_codes;
+      const isoCodesObj = Array.isArray(isoCodesData) ? isoCodesData[0] : isoCodesData;
+      const isoCode = (isoCodesObj as { code?: string } | null)?.code;
+      if (isoCode) {
+        const count = productMap.get(isoCode) || 0;
+        productMap.set(isoCode, count + 1);
       }
     }
 
     for (const eval_ of evaluations || []) {
-      const product = Array.isArray(eval_.product)
-        ? (eval_.product[0] as { iso_code: string } | null)
-        : (eval_.product as { iso_code: string } | null);
-      if (product?.iso_code) {
-        const count = productMap.get(product.iso_code) || 0;
-        productMap.set(product.iso_code, count + 2); // 평가가 있으면 더 높은 가중치
+      // Supabase 조인 결과 처리
+      const productData = eval_.product as unknown;
+      const product = Array.isArray(productData) ? productData[0] : productData;
+      if (!product) continue;
+
+      const isoCodesData = (product as { iso_codes?: unknown }).iso_codes;
+      const isoCodesObj = Array.isArray(isoCodesData) ? isoCodesData[0] : isoCodesData;
+      const isoCode = (isoCodesObj as { code?: string } | null)?.code;
+      if (isoCode) {
+        const count = productMap.get(isoCode) || 0;
+        productMap.set(isoCode, count + 2); // 평가가 있으면 더 높은 가중치
       }
     }
   } catch (error) {

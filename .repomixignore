@@ -1,0 +1,61 @@
+# Repomix ignore file
+# 이 파일에 명시된 패턴들은 repomix 출력에서 제외됩니다
+
+# 문서 및 백업 파일
+docs/
+backups/
+prompts/
+*.md
+!README.md
+!CLAUDE.md
+
+# 테스트 파일
+tests/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+playwright.config.ts
+
+# 빌드 산출물 및 캐시
+.next/
+out/
+dist/
+build/
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+supabase/
+scripts/
+
+# 의존성 및 잠금 파일
+node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# 환경 설정 파일
+.env*
+!.env.example
+
+# 이전 repomix 출력
+repomix-output.xml
+repomix-output.md
+
+# 타입 정의 파일 (자동 생성)
+next-env.d.ts
+
+# 기타
+.DS_Store
+*.log
+*.pem
+debug-*.png
+test-*-screenshot.png
+
+# 스크립트 파일 (선택적 - 필요시 주석 해제)
+# scripts/
+
+# 마이그레이션 파일 (선택적 - 필요시 주석 해제)
+# supabase/migrations/

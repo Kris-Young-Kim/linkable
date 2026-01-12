@@ -430,6 +430,20 @@ export type Database = {
             foreignKeyName: "fk_conversion_product"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "mv_icf_iso_product_matches"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "fk_conversion_product"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_quality_scores"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "fk_conversion_product"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
@@ -737,6 +751,48 @@ export type Database = {
           },
         ]
       }
+      icf_iso_precomputed_mappings: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          icf_codes: string[]
+          icf_codes_key: string
+          id: string
+          iso_matches: Json
+          last_used_at: string | null
+          match_method: string | null
+          success_rate: number | null
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          icf_codes: string[]
+          icf_codes_key: string
+          id?: string
+          iso_matches?: Json
+          last_used_at?: string | null
+          match_method?: string | null
+          success_rate?: number | null
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          icf_codes?: string[]
+          icf_codes_key?: string
+          id?: string
+          iso_matches?: Json
+          last_used_at?: string | null
+          match_method?: string | null
+          success_rate?: number | null
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       ippa_evaluations: {
         Row: {
           activity_scores: Json | null
@@ -784,6 +840,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_ippa_product"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "mv_icf_iso_product_matches"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "fk_ippa_product"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_quality_scores"
+            referencedColumns: ["product_id"]
+          },
           {
             foreignKeyName: "fk_ippa_product"
             columns: ["product_id"]
@@ -877,6 +947,27 @@ export type Database = {
             foreignKeyName: "fk_iso_codes_parent"
             columns: ["parent_code"]
             isOneToOne: false
+            referencedRelation: "mv_icf_iso_product_matches"
+            referencedColumns: ["product_iso_code"]
+          },
+          {
+            foreignKeyName: "fk_iso_codes_parent"
+            columns: ["parent_code"]
+            isOneToOne: false
+            referencedRelation: "view_iso_code_stats"
+            referencedColumns: ["iso_code"]
+          },
+          {
+            foreignKeyName: "fk_iso_codes_parent"
+            columns: ["parent_code"]
+            isOneToOne: false
+            referencedRelation: "view_product_stats"
+            referencedColumns: ["iso_code"]
+          },
+          {
+            foreignKeyName: "fk_iso_codes_parent"
+            columns: ["parent_code"]
+            isOneToOne: false
             referencedRelation: "view_products_with_codes"
             referencedColumns: ["iso_code"]
           },
@@ -918,6 +1009,181 @@ export type Database = {
           name_en?: string | null
           updated_at?: string | null
           website_url?: string | null
+        }
+        Relationships: []
+      }
+      matching_performance_logs: {
+        Row: {
+          analysis_summary: string | null
+          average_match_score: number | null
+          consultation_id: string | null
+          created_at: string | null
+          execution_time_ms: number | null
+          feedback_rating: number | null
+          icf_code_count: number
+          icf_codes: string[]
+          id: string
+          knowledge_graph_used: boolean | null
+          match_count: number
+          matched_iso_codes: string[]
+          purchase_completed: boolean | null
+          recommendation_clicked: boolean | null
+          semantic_match_used: boolean | null
+          top_match_score: number | null
+          updated_at: string | null
+          user_id: string | null
+          weight_config_id: string | null
+          weight_config_name: string | null
+        }
+        Insert: {
+          analysis_summary?: string | null
+          average_match_score?: number | null
+          consultation_id?: string | null
+          created_at?: string | null
+          execution_time_ms?: number | null
+          feedback_rating?: number | null
+          icf_code_count: number
+          icf_codes: string[]
+          id?: string
+          knowledge_graph_used?: boolean | null
+          match_count: number
+          matched_iso_codes: string[]
+          purchase_completed?: boolean | null
+          recommendation_clicked?: boolean | null
+          semantic_match_used?: boolean | null
+          top_match_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          weight_config_id?: string | null
+          weight_config_name?: string | null
+        }
+        Update: {
+          analysis_summary?: string | null
+          average_match_score?: number | null
+          consultation_id?: string | null
+          created_at?: string | null
+          execution_time_ms?: number | null
+          feedback_rating?: number | null
+          icf_code_count?: number
+          icf_codes?: string[]
+          id?: string
+          knowledge_graph_used?: boolean | null
+          match_count?: number
+          matched_iso_codes?: string[]
+          purchase_completed?: boolean | null
+          recommendation_clicked?: boolean | null
+          semantic_match_used?: boolean | null
+          top_match_score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          weight_config_id?: string | null
+          weight_config_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matching_performance_logs_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "consultations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matching_performance_logs_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "view_consultation_icf_codes_detail"
+            referencedColumns: ["consultation_id"]
+          },
+          {
+            foreignKeyName: "matching_performance_logs_consultation_id_fkey"
+            columns: ["consultation_id"]
+            isOneToOne: false
+            referencedRelation: "view_consultation_icf_codes_jsonb"
+            referencedColumns: ["consultation_id"]
+          },
+          {
+            foreignKeyName: "matching_performance_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matching_performance_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "view_user_analytics"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "matching_performance_logs_weight_config_id_fkey"
+            columns: ["weight_config_id"]
+            isOneToOne: false
+            referencedRelation: "matching_weight_configs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matching_weight_configs: {
+        Row: {
+          ab_test_name: string | null
+          ab_test_traffic_percentage: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_ab_test_variant: boolean | null
+          is_active: boolean | null
+          is_default: boolean | null
+          min_score: number | null
+          name: string
+          similarity_threshold: number | null
+          top_k: number | null
+          updated_at: string | null
+          weight_keyword: number
+          weight_knowledge_graph: number
+          weight_rule_based: number
+          weight_semantic: number
+        }
+        Insert: {
+          ab_test_name?: string | null
+          ab_test_traffic_percentage?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_ab_test_variant?: boolean | null
+          is_active?: boolean | null
+          is_default?: boolean | null
+          min_score?: number | null
+          name: string
+          similarity_threshold?: number | null
+          top_k?: number | null
+          updated_at?: string | null
+          weight_keyword?: number
+          weight_knowledge_graph?: number
+          weight_rule_based?: number
+          weight_semantic?: number
+        }
+        Update: {
+          ab_test_name?: string | null
+          ab_test_traffic_percentage?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_ab_test_variant?: boolean | null
+          is_active?: boolean | null
+          is_default?: boolean | null
+          min_score?: number | null
+          name?: string
+          similarity_threshold?: number | null
+          top_k?: number | null
+          updated_at?: string | null
+          weight_keyword?: number
+          weight_knowledge_graph?: number
+          weight_rule_based?: number
+          weight_semantic?: number
         }
         Relationships: []
       }
@@ -1089,10 +1355,11 @@ export type Database = {
           category_id: string | null
           created_at: string | null
           description: string | null
+          embedding: string | null
+          embedding_updated_at: string | null
           id: string
           image_url: string | null
           is_active: boolean | null
-          iso_code: string | null
           iso_code_id: string | null
           manufacturer: string | null
           manufacturer_id: string | null
@@ -1108,10 +1375,11 @@ export type Database = {
           category_id?: string | null
           created_at?: string | null
           description?: string | null
+          embedding?: string | null
+          embedding_updated_at?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
-          iso_code?: string | null
           iso_code_id?: string | null
           manufacturer?: string | null
           manufacturer_id?: string | null
@@ -1127,10 +1395,11 @@ export type Database = {
           category_id?: string | null
           created_at?: string | null
           description?: string | null
+          embedding?: string | null
+          embedding_updated_at?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean | null
-          iso_code?: string | null
           iso_code_id?: string | null
           manufacturer?: string | null
           manufacturer_id?: string | null
@@ -1285,6 +1554,20 @@ export type Database = {
             foreignKeyName: "fk_recommendation_product"
             columns: ["product_id"]
             isOneToOne: false
+            referencedRelation: "mv_icf_iso_product_matches"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "fk_recommendation_product"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "product_quality_scores"
+            referencedColumns: ["product_id"]
+          },
+          {
+            foreignKeyName: "fk_recommendation_product"
+            columns: ["product_id"]
+            isOneToOne: false
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
@@ -1421,6 +1704,98 @@ export type Database = {
           total_usage_count?: number | null
           unique_consultations?: number | null
           usage_by_source?: Json | null
+        }
+        Relationships: []
+      }
+      mv_icf_iso_product_matches: {
+        Row: {
+          base_score: number | null
+          category: string | null
+          icf_codes: string[] | null
+          image_url: string | null
+          iso_label: string | null
+          manufacturer: string | null
+          mapping_description: string | null
+          mapping_id: string | null
+          mapping_iso_code: string | null
+          mapping_iso_code_id: string | null
+          mapping_iso_level: number | null
+          mapping_label: string | null
+          match_score: number | null
+          match_type: string | null
+          price: number | null
+          product_active: boolean | null
+          product_created_at: string | null
+          product_description: string | null
+          product_id: string | null
+          product_iso_code: string | null
+          product_iso_code_id: string | null
+          product_name: string | null
+          purchase_link: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_products_iso_code"
+            columns: ["product_iso_code_id"]
+            isOneToOne: false
+            referencedRelation: "iso_codes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "icf_iso_mappings_iso_code_id_fkey"
+            columns: ["mapping_iso_code_id"]
+            isOneToOne: false
+            referencedRelation: "iso_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_quality_scores: {
+        Row: {
+          average_effectiveness_score: number | null
+          average_feedback_rating: number | null
+          click_through_rate: number | null
+          iso_code_id: string | null
+          last_updated_at: string | null
+          overall_quality_score: number | null
+          product_id: string | null
+          product_name: string | null
+          total_clicks: number | null
+          total_evaluations: number | null
+          total_feedbacks: number | null
+          total_recommendations: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_products_iso_code"
+            columns: ["iso_code_id"]
+            isOneToOne: false
+            referencedRelation: "iso_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      view_ab_test_matching_results: {
+        Row: {
+          ab_test_name: string | null
+          active_days: number | null
+          avg_average_match_score: number | null
+          avg_execution_time_ms: number | null
+          avg_feedback_rating: number | null
+          avg_match_count: number | null
+          avg_top_match_score: number | null
+          click_through_rate: number | null
+          clicked_count: number | null
+          first_match_at: string | null
+          last_match_at: string | null
+          purchase_conversion_rate: number | null
+          purchase_count: number | null
+          total_matches: number | null
+          variant_name: string | null
+          weight_keyword: number | null
+          weight_knowledge_graph: number | null
+          weight_rule_based: number | null
+          weight_semantic: number | null
         }
         Relationships: []
       }
@@ -1569,6 +1944,14 @@ export type Database = {
       }
     }
     Functions: {
+      batch_update_realtime_learning_stats: {
+        Args: { p_days_back?: number; p_min_events?: number }
+        Returns: {
+          avg_weight_adjustment: number
+          total_events_processed: number
+          updated_combinations: number
+        }[]
+      }
       calculate_period_stats: {
         Args: { p_end_date: string; p_start_date: string }
         Returns: {
@@ -1608,7 +1991,157 @@ export type Database = {
       }
       get_current_user_id: { Args: never; Returns: string }
       get_current_user_role: { Args: never; Returns: string }
+      get_icf_combination_patterns: {
+        Args: {
+          p_days_back?: number
+          p_limit?: number
+          p_min_frequency?: number
+        }
+        Returns: {
+          avg_feedback_rating: number
+          click_rate: number
+          frequency: number
+          icf_codes: string[]
+          icf_codes_key: string
+          last_seen_at: string
+          preferred_iso_codes: string[]
+          purchase_rate: number
+          success_rate: number
+          unique_consultations: number
+        }[]
+      }
+      get_icf_iso_matching_stats: {
+        Args: { p_icf_codes: string[] }
+        Returns: {
+          avg_score: number
+          matched_iso_codes: number
+          matched_products: number
+          max_score: number
+          total_mappings: number
+        }[]
+      }
+      get_product_icf_scores: {
+        Args: { p_limit?: number; p_min_score?: number; p_product_id: string }
+        Returns: {
+          icf_category: string
+          icf_code: string
+          icf_name: string
+          match_method: string
+          match_reason: string
+          match_score: number
+        }[]
+      }
+      get_product_quality_stats: {
+        Args: never
+        Returns: {
+          avg_quality_score: number
+          max_quality_score: number
+          min_quality_score: number
+          products_with_clicks: number
+          products_with_effectiveness: number
+          products_with_feedback: number
+          total_products: number
+        }[]
+      }
+      get_products_by_icf_codes: {
+        Args: { p_icf_codes: string[]; p_limit?: number; p_min_score?: number }
+        Returns: {
+          category: string
+          description: string
+          image_url: string
+          iso_code: string
+          iso_code_id: string
+          iso_label: string
+          manufacturer: string
+          match_reason: string
+          match_score: number
+          price: number
+          product_id: string
+          product_name: string
+          purchase_link: string
+        }[]
+      }
+      get_products_by_icf_codes_with_cache: {
+        Args: {
+          p_icf_codes: string[]
+          p_limit?: number
+          p_min_score?: number
+          p_use_precomputed?: boolean
+        }
+        Returns: {
+          category: string
+          description: string
+          image_url: string
+          iso_code: string
+          iso_code_id: string
+          iso_label: string
+          manufacturer: string
+          match_reason: string
+          match_score: number
+          price: number
+          product_id: string
+          product_name: string
+          purchase_link: string
+          source: string
+        }[]
+      }
+      get_realtime_weight_adjustment: {
+        Args: { p_icf_codes: string[]; p_iso_code: string }
+        Returns: {
+          click_rate: number
+          purchase_rate: number
+          sample_count: number
+          weight_adjustment: number
+        }[]
+      }
       is_admin_or_manager: { Args: never; Returns: boolean }
+      recommend_products_by_icf: {
+        Args: {
+          p_icf_codes: string[]
+          p_limit?: number
+          p_min_score?: number
+          p_use_quality_scores?: boolean
+        }
+        Returns: {
+          category: string
+          description: string
+          final_score: number
+          image_url: string
+          iso_code: string
+          iso_code_id: string
+          iso_label: string
+          manufacturer: string
+          match_reason: string
+          match_score: number
+          price: number
+          product_id: string
+          product_name: string
+          purchase_link: string
+          quality_score: number
+          rank: number
+        }[]
+      }
+      refresh_materialized_view: {
+        Args: { view_name: string }
+        Returns: undefined
+      }
+      refresh_mv_icf_iso_product_matches: { Args: never; Returns: undefined }
+      search_similar_icf_iso_mappings: {
+        Args: {
+          max_results?: number
+          query_embedding: string
+          similarity_threshold?: number
+        }
+        Returns: {
+          base_score: number
+          icf_codes: string[]
+          iso_code: string
+          iso_code_id: string
+          label: string
+          mapping_id: string
+          similarity: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

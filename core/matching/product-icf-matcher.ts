@@ -64,22 +64,28 @@ export async function matchProductToIcf(
     matches.push(...categoryMatches);
   }
 
-  // 3. 시맨틱 매칭 (벡터 검색)
-  try {
-    const semanticMatches = await matchBySemantic(productText, targetIcfCodes);
-    matches.push(...semanticMatches);
-  } catch (error) {
-    console.warn("[Product-ICF Matcher] Semantic matching failed:", error);
-    // 실패해도 계속 진행
+  // 3. 시맨틱 매칭 (벡터 검색) - 사전 계산된 임베딩 없으면 비활성화
+  // 런타임 API 호출 방지: 사전 계산된 임베딩 시스템으로 대체됨
+  // 환경변수 ENABLE_RUNTIME_EMBEDDING=true로 활성화 가능
+  if (process.env.ENABLE_RUNTIME_EMBEDDING === "true") {
+    try {
+      const semanticMatches = await matchBySemantic(productText, targetIcfCodes);
+      matches.push(...semanticMatches);
+    } catch (error) {
+      console.warn("[Product-ICF Matcher] Semantic matching failed:", error);
+    }
   }
 
-  // 4. AI 기반 매칭 (Gemini API 활용)
-  try {
-    const aiMatches = await matchByAI(product, targetIcfCodes);
-    matches.push(...aiMatches);
-  } catch (error) {
-    console.warn("[Product-ICF Matcher] AI matching failed:", error);
-    // 실패해도 계속 진행
+  // 4. AI 기반 매칭 (Gemini API 활용) - 기본 비활성화
+  // 런타임 API 호출 방지: 키워드/카테고리 매칭으로 충분한 경우가 많음
+  // 환경변수 ENABLE_AI_MATCHING=true로 활성화 가능
+  if (process.env.ENABLE_AI_MATCHING === "true") {
+    try {
+      const aiMatches = await matchByAI(product, targetIcfCodes);
+      matches.push(...aiMatches);
+    } catch (error) {
+      console.warn("[Product-ICF Matcher] AI matching failed:", error);
+    }
   }
 
   // 중복 제거 및 점수 통합

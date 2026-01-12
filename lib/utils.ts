@@ -217,3 +217,33 @@ export function isProductRecommendationRequestIntent(message: string): boolean {
 
   return false;
 }
+
+/**
+ * AI 응답 텍스트에서 추천 안내 패턴을 감지합니다.
+ * AI가 "추천해드리겠습니다", "버튼을 클릭하시면" 등의 문구를 포함하면 true를 반환합니다.
+ */
+export function isAIRecommendationResponse(responseText: string): boolean {
+  if (!responseText) return false;
+
+  const trimmed = responseText.trim();
+
+  // AI 응답에서 추천 안내 패턴
+  const recommendationResponsePatterns = [
+    // 추천 안내 문구
+    /추천해\s*드리겠습니다/,
+    /추천\s*페이지로\s*이동/,
+    /맞춤형\s*보조기기를?\s*추천/,
+    /보조기기를?\s*추천해\s*드리겠습니다/,
+    /버튼을\s*클릭하시면/,
+    /아래.*버튼.*클릭/,
+    /추천\s*받기.*버튼/,
+  ];
+
+  for (const pattern of recommendationResponsePatterns) {
+    if (pattern.test(trimmed)) {
+      return true;
+    }
+  }
+
+  return false;
+}

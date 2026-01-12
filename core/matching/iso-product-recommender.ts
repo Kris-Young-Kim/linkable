@@ -97,15 +97,16 @@ function parseIsoCodeHierarchy(isoCode: string): {
 }
 
 /**
- * 두 ISO 코드가 관련되어 있는지 확인 (Division 레벨 기준)
- * 
+ * 두 ISO 코드가 관련되어 있는지 확인 (계층 구조 기반)
+ *
  * ISO 9999:2022 표준에 따라 모든 제품은 Division 레벨(6자리)에만 존재합니다.
  * 관련 제품 판단 기준:
- * - 같은 Division: 관련 없음 (정확한 매칭)
+ * - 정확한 매칭 (같은 코드 또는 Subclass-Division 포함 관계): 관련 없음 (정확한 매칭으로 처리)
+ * - 명시적 관련 매핑 (예: 수동휠체어 ↔ 전동휠체어): 관련 있음
  * - 같은 Subclass 내 다른 Division: 관련 있음
  * - 다른 Subclass: 관련 없음 (너무 넓은 매칭 방지)
- * 
- * @param targetIsoCode 목표 ISO 코드 (Division 레벨 권장)
+ *
+ * @param targetIsoCode 목표 ISO 코드 (모든 레벨 지원)
  * @param candidateIsoCode 후보 ISO 코드 (null 가능, Division 레벨 권장)
  * @returns 관련 여부
  */
@@ -121,24 +122,38 @@ function areIsoCodesRelated(
   const target = parseIsoCodeHierarchy(targetIsoCode);
   const candidate = parseIsoCodeHierarchy(candidateIsoCode);
 
-  // 정확한 매칭은 관련 제품이 아님
+  // 정확한 매칭은 관련 제품이 아님 (isExactMatch에서 처리)
   if (target.fullCode === candidate.fullCode) {
     return false;
   }
 
-  // 명시적 관련 매핑 확인 (Division 레벨 기준)
-  // Subclass 레벨 코드도 지원하지만, Division 레벨로 확장하여 비교
+  // ✅ 수정: Subclass 타겟에 해당 Subclass의 Division은 정확한 매칭으로 처리 (관련 아님)
+  // 예: "12 22" 타겟에 "12 22 03"은 isExactMatch에서 처리됨
+  if (candidateIsoCode.startsWith(targetIsoCode + " ")) {
+    return false; // 정확한 매칭으로 처리되므로 관련 아님
+  }
+
+  // 명시적 관련 매핑 확인 (Subclass 레벨 기준)
   const relatedIsoMapping: Record<string, string[]> = {
-    "12 23": ["12 22"], // 전동휠체어 → 수동휠체어 (Subclass 레벨)
-    "12 22": ["12 23"], // 수동휠체어 → 전동휠체어 (Subclass 레벨)
+    "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
+    "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
   };
 
-  // Subclass 레벨 매핑 확인 (Division 레벨 코드도 Subclass로 변환하여 비교)
-  const targetSubclass = target.division ? target.subclass : target.fullCode;
-  const candidateSubclass = candidate.division ? candidate.subclass : candidate.fullCode;
-  
-  if (relatedIsoMapping[targetSubclass || target.fullCode]?.includes(candidateSubclass || candidate.fullCode)) {
-    return true;
+  // Subclass 레벨로 변환하여 매핑 확인
+  const targetSubclass = target.subclass || target.fullCode;
+  const candidateSubclass = candidate.subclass || candidate.fullCode;
+
+  // ✅ 수정: 명시적 매핑이 있으면 관련 제품
+  // 예: "12 22" 타겟에 "12 23 03"은 관련 제품 (수동휠체어 ↔ 전동휠체어)
+  const relatedSubclasses = relatedIsoMapping[targetSubclass];
+  if (relatedSubclasses) {
+    // candidate가 관련 Subclass에 속하는지 확인
+    for (const relatedSubclass of relatedSubclasses) {
+      if (candidateSubclass === relatedSubclass ||
+          candidateIsoCode.startsWith(relatedSubclass + " ")) {
+        return true;
+      }
+    }
   }
 
   // Division 레벨: 같은 Subclass 내 다른 Division만 관련
@@ -186,39 +201,74 @@ export async function recommendProductsByIsoCode(
     const isSubclass = isoParts.length === 2; // Subclass 레벨 (4자리)
     const isClass = isoParts.length === 1; // Class 레벨 (2자리)
 
-    // 1. 정확한 ISO 코드 매칭 제품 검색 (iso_code_id FK 조인 사용)
-    let exactQuery = supabase
-      .from("products")
-      .select(`
-        *,
-        iso_codes!iso_code_id (
-          code,
-          name,
-          level
-        )
-      `)
-      .eq("is_active", true)
-      .not("iso_code_id", "is", null)  // ✅ iso_code_id가 null인 제품 제외 (ISO 코드 없는 제품은 추천 불가)
-      .order("created_at", { ascending: false });
+    // ✅ 수정: 먼저 ISO 코드 ID를 조회한 후 제품 검색 (like 필터 문제 해결)
+    // PostgREST에서 조인된 테이블의 like 필터가 작동하지 않으므로,
+    // 먼저 iso_codes 테이블에서 해당 코드들의 ID를 조회
+    let targetIsoCodeIds: string[] = [];
 
-    // Division 레벨이면 정확히 일치하는 제품만 검색
     if (isDivision) {
-      exactQuery = exactQuery.eq("iso_codes.code", isoCode);
-    }
-    // Subclass 레벨이면 해당 Subclass의 모든 Division 제품 검색
-    else if (isSubclass) {
-      exactQuery = exactQuery.like("iso_codes.code", `${isoCode} %`);
-    }
-    // Class 레벨이면 해당 Class의 모든 Division 제품 검색
-    else if (isClass) {
-      exactQuery = exactQuery.like("iso_codes.code", `${isoCode} %`);
-    }
-    // 기타는 정확히 일치
-    else {
-      exactQuery = exactQuery.eq("iso_codes.code", isoCode);
+      // Division 레벨: 정확히 일치하는 코드만
+      const { data: isoCodeData } = await supabase
+        .from("iso_codes")
+        .select("id")
+        .eq("code", isoCode)
+        .eq("is_active", true);
+      targetIsoCodeIds = isoCodeData?.map((d: any) => d.id) || [];
+    } else if (isSubclass || isClass) {
+      // Subclass/Class 레벨: 해당 레벨의 모든 하위 Division 코드 조회
+      const { data: isoCodeData } = await supabase
+        .from("iso_codes")
+        .select("id, code")
+        .like("code", `${isoCode} %`)
+        .eq("is_active", true);
+      targetIsoCodeIds = isoCodeData?.map((d: any) => d.id) || [];
+
+      // 정확히 일치하는 코드도 포함 (Subclass 자체가 코드인 경우)
+      const { data: exactIsoCodeData } = await supabase
+        .from("iso_codes")
+        .select("id")
+        .eq("code", isoCode)
+        .eq("is_active", true);
+      if (exactIsoCodeData && exactIsoCodeData.length > 0) {
+        targetIsoCodeIds.push(...exactIsoCodeData.map((d: any) => d.id));
+      }
+    } else {
+      // 기타: 정확히 일치
+      const { data: isoCodeData } = await supabase
+        .from("iso_codes")
+        .select("id")
+        .eq("code", isoCode)
+        .eq("is_active", true);
+      targetIsoCodeIds = isoCodeData?.map((d: any) => d.id) || [];
     }
 
-    const { data: exactProducts, error: exactError } = await exactQuery;
+    // 1. 정확한 ISO 코드 매칭 제품 검색
+    let exactProducts: any[] = [];
+    if (targetIsoCodeIds.length > 0) {
+      const { data: exactData, error: exactError } = await supabase
+        .from("products")
+        .select(`
+          *,
+          iso_codes!iso_code_id (
+            code,
+            name,
+            level
+          )
+        `)
+        .in("iso_code_id", targetIsoCodeIds)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (exactError) {
+        console.error("[ISO Product Recommender] Exact match error:", exactError);
+      } else {
+        exactProducts = exactData || [];
+      }
+    }
+
+    console.log(`[Product Recommender] ISO 코드 ${isoCode} 검색: targetIsoCodeIds=${targetIsoCodeIds.length}개, exactProducts=${exactProducts.length}개`);
+
+    const exactError = null; // 하위 호환성 유지
     if (exactError) {
       console.error("[ISO Product Recommender] Exact match error:", exactError);
       return {
@@ -348,33 +398,32 @@ export async function recommendProductsByIsoCode(
     );
 
     // 5. 필터링 및 제한 - 정확한 ISO 매칭 제품 우선
-    const filteredRecommendations = recommendations
+    const afterFilter = recommendations
       .filter((product) => {
         // 정확한 ISO 매칭이 있으면 점수와 관계없이 포함
+        // 계층 구조 체크: Subclass 타겟 → Division 제품도 정확한 매칭으로 처리
         const productIsoCode = (product as any).iso_codes?.code || product.iso_code;
-        const isExact = productIsoCode === isoCode;
+        const isExact = productIsoCode === isoCode ||
+          (productIsoCode && productIsoCode.startsWith(isoCode + " "));
         if (isExact) return true;
-        
-        // ✅ 핵심 개선: ISO 매칭 점수가 매우 낮은 제품(0.05점 이하)은 제외
+
+        // ISO 매칭 점수가 매우 낮은 제품(0.05점 이하)은 제외
         const isoMatchScore = product.scoreBreakdown?.isoMatch || 0;
         if (isoMatchScore <= 0.05) {
-          console.log(`[Product Recommender] 제품 필터링: ${product.name} (ISO 매칭 점수 ${isoMatchScore.toFixed(3)} ≤ 0.05, 관련 없는 제품으로 판단하여 제외)`);
-          return false; // 관련 없는 제품은 제외
+          return false;
         }
-        
+
         // 관련 제품은 최소 점수 이상이어야 함
-        const passed = product.score >= minScore;
-        if (!passed) {
-          console.log(`[Product Recommender] 제품 필터링: ${product.name} (최종 점수 ${product.score.toFixed(3)} < 최소 점수 ${minScore})`);
-        }
-        return passed;
-      })
+        return product.score >= minScore;
+      });
+
+    const filteredRecommendations = afterFilter
       .sort((a, b) => {
-        // 1순위: 정확한 ISO 매칭 여부
+        // 1순위: 정확한 ISO 매칭 여부 (계층 구조 포함)
         const aIsoCode = (a as any).iso_codes?.code || a.iso_code;
         const bIsoCode = (b as any).iso_codes?.code || b.iso_code;
-        const aExact = aIsoCode === isoCode;
-        const bExact = bIsoCode === isoCode;
+        const aExact = aIsoCode === isoCode || (aIsoCode && aIsoCode.startsWith(isoCode + " "));
+        const bExact = bIsoCode === isoCode || (bIsoCode && bIsoCode.startsWith(isoCode + " "));
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
 
@@ -394,7 +443,8 @@ export async function recommendProductsByIsoCode(
     // ✅ 로깅: 추천 정확도 모니터링
     const exactCount = filteredRecommendations.filter(p => {
       const productIsoCode = (p as any).iso_codes?.code || p.iso_code;
-      return productIsoCode === isoCode;
+      // ✅ 수정: 계층 구조 포함 (Subclass → Division도 정확한 매칭)
+      return productIsoCode === isoCode || (productIsoCode && productIsoCode.startsWith(isoCode + " "));
     }).length;
     const relatedCount = filteredRecommendations.length - exactCount;
     
@@ -592,7 +642,12 @@ async function calculateAdvancedProductScores(
       const productIsoCode = (product as any).iso_codes?.code || product.iso_code;
 
       // 1. ISO 코드 매칭 점수 (기본 점수) - 정확한 매칭 우선순위 대폭 강화
-      const isExactMatch = productIsoCode === targetIsoCode;
+      // ✅ 수정: 계층 구조를 고려한 정확한 매칭 판단
+      // - 완전 일치: "12 22 03" === "12 22 03"
+      // - Subclass 타겟 → Division 제품: "12 22" 타겟에 "12 22 03" 제품도 정확한 매칭
+      // - Class 타겟 → Division 제품: "12" 타겟에 "12 22 03" 제품도 정확한 매칭
+      const isExactMatch = productIsoCode === targetIsoCode ||
+        (productIsoCode && productIsoCode.startsWith(targetIsoCode + " "));
 
       // 관련 매칭: Subclass 레벨 필터링을 통과한 제품만 관련 제품으로 간주
       // areIsoCodesRelated 함수를 사용하여 관련 여부 확인
@@ -610,13 +665,15 @@ async function calculateAdvancedProductScores(
         breakdown.isoMatch = 0.05; // 기타 매칭: 매우 낮은 점수 (필터링 대상, 더 낮게 조정)
       }
 
-      // 2. ICF-제품 시맨틱 매칭 점수
-      if (useSemanticMatching && icfEmbedding && product.description) {
+      // 2. ICF-제품 시맨틱 매칭 점수 (사전 계산된 임베딩 사용)
+      if (useSemanticMatching && icfEmbedding) {
         try {
-          const productText = `${product.name}. ${product.description || ""}`;
-          const productEmbedding = await createEmbedding(productText);
-          const similarity = cosineSimilarity(icfEmbedding, productEmbedding);
-          breakdown.semanticMatch = similarity * 0.8; // 최대 0.8점
+          // 사전 계산된 임베딩이 있으면 바로 사용 (API 호출 없음)
+          if (product.embedding && Array.isArray(product.embedding) && product.embedding.length > 0) {
+            const similarity = cosineSimilarity(icfEmbedding, product.embedding);
+            breakdown.semanticMatch = similarity * 0.8; // 최대 0.8점
+          }
+          // 사전 임베딩이 없으면 시맨틱 매칭 스킵 (런타임 API 호출 방지)
         } catch (error) {
           console.warn(
             `[Product Recommender] Semantic matching failed for product ${product.id}:`,

@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "eslint .",
+    "repomix": "npx -y repomix",
     "start": "next start",
     "gen:types": "npx -y supabase gen types typescript --project-id \"sityptcwbnremuzsvbhx\" --schema public > database.types.ts",
     "import:products": "node scripts/ensure-utf8.js && tsx scripts/manual-product-import.ts",

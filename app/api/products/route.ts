@@ -576,6 +576,10 @@ export async function GET(request: Request) {
     try {
       console.log("[Products API] Using advanced product recommendation system");
       
+      // ✅ 수정: maxProductsPerIso 최소값 5 보장 (ISO 코드당 충분한 제품 표시)
+      const calculatedMaxPerIso = Math.ceil(limit / isoMatches.length);
+      const maxProductsPerIso = Math.max(calculatedMaxPerIso, 5);
+
       const recommendationResult = await recommendProductsByMultipleIsoCodes(
         isoMatches,
         {
@@ -592,7 +596,7 @@ export async function GET(request: Request) {
         },
         {
           limit,
-          maxProductsPerIso: Math.ceil(limit / isoMatches.length),
+          maxProductsPerIso,
           diversifyCategories: true,
           useSemanticMatching: true,
           useQualityMetrics: true,

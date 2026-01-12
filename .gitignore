@@ -42,3 +42,5 @@ next-env.d.ts
 
 .next/
 .mcp.json
+
+repomix-output.xml

@@ -75,7 +75,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useLanguage } from "@/components/language-provider";
 import { trackEvent } from "@/lib/analytics";
 import { useRecommendations } from "@/lib/api-hooks";
-import { cn, generateUUID, isChatEndingIntent, isVisualAidRequestIntent, isProductRecommendationRequestIntent } from "@/lib/utils";
+import { cn, generateUUID, isChatEndingIntent, isVisualAidRequestIntent, isProductRecommendationRequestIntent, isAIRecommendationResponse } from "@/lib/utils";
 import { isEvaluationQuestion } from "@/core/assessment/ippa-score-parser";
 import { InlineSpinner, LoadingSpinner } from "@/components/ui/loading-states";
 import { Slider } from "@/components/ui/slider";
@@ -174,6 +174,29 @@ export function ChatInterface() {
       setShowRecommendationCTA(true);
     }
   }, [chatEnded, icfAnalysis, consultationId]);
+
+  // AI 응답에서 추천 안내 패턴이 감지되면 버튼 표시
+  useEffect(() => {
+    // 마지막 어시스턴트 메시지 찾기
+    const lastAssistantMessage = [...messages].reverse().find(
+      (msg) => msg.role === "assistant"
+    );
+
+    if (
+      lastAssistantMessage &&
+      !isTyping &&
+      icfAnalysis &&
+      consultationId &&
+      !showRecommendationCTA &&
+      isAIRecommendationResponse(lastAssistantMessage.content)
+    ) {
+      console.log(
+        "[chat] AI recommendation response detected, showing recommendation CTA"
+      );
+      setChatEnded(true);
+      setShowRecommendationCTA(true);
+    }
+  }, [messages, isTyping, icfAnalysis, consultationId, showRecommendationCTA]);
 
   // 채팅이 완전히 종료되고 추천이 준비되었을 때만 모달 표시
   useEffect(() => {
