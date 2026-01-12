@@ -318,6 +318,7 @@ DECLARE
   v_avg_adjustment NUMERIC := 0;
   v_table_exists BOOLEAN := false;
   v_stats_table_exists BOOLEAN := false;
+  v_rec RECORD;
 BEGIN
   -- realtime_learning_events 테이블 존재 여부 확인
   SELECT EXISTS (
@@ -344,8 +345,9 @@ BEGIN
     RETURN;
   END IF;
 
-  -- 최근 N일간의 이벤트를 기반으로 통계 업데이트
-  WITH recent_events AS (
+  -- 최근 N일간의 이벤트 집계 및 통계 업데이트
+  -- 각 조합에 대해 통계 업데이트 함수를 호출하여 실제 업데이트 수행
+  FOR v_rec IN (
     SELECT
       icf_codes_key,
       iso_code,
@@ -355,27 +357,35 @@ BEGIN
     FROM realtime_learning_events
     WHERE created_at >= NOW() - (p_days_back || ' days')::INTERVAL
     GROUP BY icf_codes_key, iso_code, event_type, feedback_rating
-  ),
-  event_updates AS (
-    SELECT
-      re.icf_codes_key,
-      re.iso_code,
-      -- 각 이벤트 타입별로 통계 업데이트 함수 호출
-      update_realtime_learning_stats(
-        string_to_array(re.icf_codes_key, ','),
-        re.iso_code,
-        re.event_type,
-        re.feedback_rating
-      ) as update_result
-    FROM recent_events re
-    WHERE re.event_count >= p_min_events
-  )
-  SELECT
-    COUNT(DISTINCT (re.icf_codes_key, re.iso_code))::INTEGER,
-    SUM(re.event_count)::INTEGER
-  INTO v_updated_count, v_total_events
-  FROM recent_events re
-  WHERE re.event_count >= p_min_events;
+    HAVING COUNT(*) >= p_min_events
+  ) LOOP
+    -- 총 이벤트 수 누적
+    v_total_events := v_total_events + v_rec.event_count;
+    
+    -- 실제 통계 업데이트 수행
+    -- update_realtime_learning_stats는 내부적으로 집계를 처리하므로
+    -- 각 이벤트 타입별로 한 번씩 호출
+    PERFORM update_realtime_learning_stats(
+      string_to_array(v_rec.icf_codes_key, ','),
+      v_rec.iso_code,
+      v_rec.event_type,
+      v_rec.feedback_rating
+    );
+  END LOOP;
+  
+  -- 고유 조합 수 계산 (icf_codes_key, iso_code 기준)
+  -- 업데이트된 조합의 수를 정확히 계산
+  SELECT COUNT(DISTINCT (icf_codes_key, iso_code))::INTEGER
+  INTO v_updated_count
+  FROM realtime_learning_events
+  WHERE created_at >= NOW() - (p_days_back || ' days')::INTERVAL
+    AND (
+      SELECT COUNT(*)
+      FROM realtime_learning_events re2
+      WHERE re2.icf_codes_key = realtime_learning_events.icf_codes_key
+        AND re2.iso_code = realtime_learning_events.iso_code
+        AND re2.created_at >= NOW() - (p_days_back || ' days')::INTERVAL
+    ) >= p_min_events;
 
   -- 평균 가중치 조정 계산
   SELECT

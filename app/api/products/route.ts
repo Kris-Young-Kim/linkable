@@ -411,7 +411,30 @@ export async function GET(request: Request) {
         });
 
         if (optimizedProducts.length > 0) {
-          const formattedProducts = optimizedProducts.map((p) => ({
+          // 폴백 경로에서도 품질 점수 조회 (성공 경로와 동일한 구조 유지)
+          const productIds = optimizedProducts.map((p) => p.product_id);
+          let qualityScoresMap = new Map<string, number>();
+          
+          if (useQualityScores && productIds.length > 0) {
+            try {
+              const { data: qualityScores } = await supabase
+                .from("product_quality_scores")
+                .select("product_id, overall_quality_score")
+                .in("product_id", productIds);
+              
+              if (qualityScores) {
+                qualityScores.forEach((qs: any) => {
+                  qualityScoresMap.set(qs.product_id, qs.overall_quality_score || 0);
+                });
+              }
+            } catch (qualityError) {
+              console.warn("[Products API] Quality scores fetch failed in fallback:", qualityError);
+              // 품질 점수 조회 실패해도 계속 진행
+            }
+          }
+
+          // 폴백 경로에서도 성공 경로와 동일한 응답 구조 유지
+          const formattedProducts = optimizedProducts.map((p, index) => ({
             id: p.product_id,
             name: p.product_name,
             iso_code: p.iso_code,
@@ -422,18 +445,35 @@ export async function GET(request: Request) {
             price: p.price,
             category: p.category,
             match_score: p.match_score,
+            quality_score: useQualityScores ? (qualityScoresMap.get(p.product_id) ?? null) : null,
             match_reason: p.match_reason,
+            rank: index + 1, // 순서 기반 rank 추가
           }));
 
           if (consultationId && shouldPersistRecommendations) {
-            const recommendationItems = formattedProducts.map((rec, index) => ({
+            const recommendationItems = formattedProducts.map((rec) => ({
               productId: rec.id,
               matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
-              rank: index + 1,
+              rank: rec.rank || 1,
             }));
 
             await persistRecommendations(consultationId, recommendationItems, supabase);
           }
+
+          logEvent({
+            category: "matching",
+            action: "recommend_products_by_icf_fallback_used",
+            payload: {
+              consultationId,
+              icfCodesCount: icfCodes.length,
+              productsCount: formattedProducts.length,
+              avgScore: optimizedProducts.reduce((sum, p) => sum + p.match_score, 0) / optimizedProducts.length,
+              avgQualityScore: useQualityScores 
+                ? formattedProducts.reduce((sum, p) => sum + (p.quality_score || 0), 0) / formattedProducts.length
+                : null,
+              useQualityScores,
+            },
+          });
 
           return NextResponse.json(
             {
