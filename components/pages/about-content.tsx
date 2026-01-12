@@ -113,12 +113,12 @@ export function AboutContent() {
                   전문가 경험
                 </div>
                 <h2 className="text-3xl md:text-4xl font-black tracking-tight text-foreground">
-                  16년 경력 보조공학 전문가의<br />
+                  숙련된 보조공학 전문가의<br />
                   <span className="text-primary">임상 노하우</span>
                 </h2>
                 <div className="w-20 h-2 bg-primary rounded-full" />
                 <p className="text-lg text-muted-foreground leading-relaxed">
-                  LinkAble의 AI는 단순한 알고리즘이 아닙니다. 16년간 수천 명의 사용자와 함께한 보조공학사/작업치료사의 실제 임상 경험을 바탕으로 구축되었습니다.
+                  LinkAble의 AI는 단순한 알고리즘이 아닙니다. 10년 이상의 임상 경험을 가진 보조공학사/작업치료사의 실제 노하우를 바탕으로 구축되었습니다.
                 </p>
                 {/* 전문가 인증 정보 */}
                 <div className="space-y-3 pt-4">
@@ -142,7 +142,7 @@ export function AboutContent() {
                 </div>
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <div>
-                    <p className="text-3xl font-black text-primary">16년</p>
+                    <p className="text-3xl font-black text-primary">10년 이상</p>
                     <p className="text-sm text-muted-foreground font-medium">보조공학 경력</p>
                   </div>
                   <div>
