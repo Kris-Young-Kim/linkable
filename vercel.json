@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/backup-database",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/update-realtime-learning",
+      "schedule": "0 2 * * *"
     }
   ]
 }
