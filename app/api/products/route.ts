@@ -21,12 +21,12 @@ type FormattedProduct = {
   id: string;
   name: string;
   iso_code: string;
-  manufacturer: string;
-  description: string;
-  image_url: string;
-  purchase_link: string;
-  price: number;
-  category: string;
+  manufacturer: string | null;
+  description: string | null;
+  image_url: string | null;
+  purchase_link: string | null;
+  price: number | null;
+  category: string | null;
   match_score: number;
   quality_score: number | null;
   match_reason: string;
