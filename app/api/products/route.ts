@@ -17,6 +17,22 @@ import { getMultipleIsoCodeLinksFromEnv } from "@/lib/config/iso-links-env";
 
 const MAX_LIMIT = 30;
 
+type FormattedProduct = {
+  id: string;
+  name: string;
+  iso_code: string;
+  manufacturer: string;
+  description: string;
+  image_url: string;
+  purchase_link: string;
+  price: number;
+  category: string;
+  match_score: number;
+  quality_score: number | null;
+  match_reason: string;
+  rank: number;
+};
+
 type RecommendationPersistenceItem = {
   productId: string;
   matchReason?: string | null;
@@ -434,7 +450,7 @@ export async function GET(request: Request) {
           }
 
           // 폴백 경로에서도 성공 경로와 동일한 응답 구조 유지
-          const formattedProducts = optimizedProducts.map((p, index) => ({
+          const formattedProducts: FormattedProduct[] = optimizedProducts.map((p, index) => ({
             id: p.product_id,
             name: p.product_name,
             iso_code: p.iso_code,
@@ -451,7 +467,7 @@ export async function GET(request: Request) {
           }));
 
           if (consultationId && shouldPersistRecommendations) {
-            const recommendationItems = formattedProducts.map((rec) => ({
+            const recommendationItems = formattedProducts.map((rec: FormattedProduct) => ({
               productId: rec.id,
               matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
               rank: rec.rank || 1,
@@ -469,7 +485,7 @@ export async function GET(request: Request) {
               productsCount: formattedProducts.length,
               avgScore: optimizedProducts.reduce((sum, p) => sum + p.match_score, 0) / optimizedProducts.length,
               avgQualityScore: useQualityScores 
-                ? formattedProducts.reduce((sum, p) => sum + (p.quality_score || 0), 0) / formattedProducts.length
+                ? formattedProducts.reduce((sum, p: FormattedProduct) => sum + (p.quality_score || 0), 0) / formattedProducts.length
                 : null,
               useQualityScores,
             },
@@ -480,7 +496,7 @@ export async function GET(request: Request) {
               products: formattedProducts,
               isoBreakdown: isoMatches.map((match) => ({
                 isoCode: match.isoCode,
-                productsCount: formattedProducts.filter((p) => p.iso_code === match.isoCode).length,
+                productsCount: formattedProducts.filter((p: FormattedProduct) => p.iso_code === match.isoCode).length,
                 confidence: match.score,
               })),
             },
@@ -491,7 +507,7 @@ export async function GET(request: Request) {
         console.log(`[Products API] recommend_products_by_icf found ${recommendedProducts.length} products`);
         
         // 형식 변환
-        const formattedProducts = recommendedProducts.map((p: any) => ({
+        const formattedProducts: FormattedProduct[] = recommendedProducts.map((p: any) => ({
           id: p.product_id,
           name: p.product_name,
           iso_code: p.iso_code,
@@ -502,19 +518,14 @@ export async function GET(request: Request) {
           price: p.price,
           category: p.category,
           match_score: p.final_score,  // 최종 점수 사용
-          quality_score: p.quality_score,  // 품질 점수 추가
+          quality_score: p.quality_score ?? null,  // 품질 점수 추가
           match_reason: p.match_reason,
           rank: p.rank,
         }));
 
         // 추천 저장 (consultationId가 있는 경우)
         if (consultationId && shouldPersistRecommendations) {
-          const recommendationItems = formattedProducts.map((rec: {
-            id: string;
-            match_reason?: string;
-            match_score?: number;
-            rank?: number;
-          }) => ({
+          const recommendationItems = formattedProducts.map((rec: FormattedProduct) => ({
             productId: rec.id,
             matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
             rank: rec.rank || 1,
@@ -541,7 +552,7 @@ export async function GET(request: Request) {
             products: formattedProducts,
             isoBreakdown: isoMatches.map((match) => ({
               isoCode: match.isoCode,
-              productsCount: formattedProducts.filter((p) => p.iso_code === match.isoCode).length,
+              productsCount: formattedProducts.filter((p: FormattedProduct) => p.iso_code === match.isoCode).length,
               confidence: match.score,
             })),
           },
