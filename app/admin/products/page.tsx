@@ -79,7 +79,10 @@ export default async function AdminProductsPage() {
       `
       id,
       name,
-      iso_code,
+      iso_code_id,
+      iso_codes!iso_code_id (
+        code
+      ),
       description,
       price,
       purchase_link,
@@ -102,7 +105,36 @@ export default async function AdminProductsPage() {
     throw new Error(`상품 정보를 불러오지 못했습니다: ${error.message}`)
   }
 
-  console.log(`[Admin Products Page] Loaded ${data?.length ?? 0} products from database`)
+  type ProductRow = {
+    id: string
+    name: string
+    iso_codes: { code: string | null } | null
+    description: string | null
+    price: number | null
+    purchase_link: string | null
+    image_url: string | null
+    manufacturer: string | null
+    category: string | null
+    is_active: boolean
+    updated_at: string | null
+  }
+
+  const products =
+    (data as ProductRow[] | null)?.map((item) => ({
+      id: item.id,
+      name: item.name,
+      iso_code: item.iso_codes?.code ?? "",
+      description: item.description,
+      price: item.price,
+      purchase_link: item.purchase_link,
+      image_url: item.image_url,
+      manufacturer: item.manufacturer,
+      category: item.category,
+      is_active: item.is_active,
+      updated_at: item.updated_at,
+    })) ?? []
+
+  console.log(`[Admin Products Page] Loaded ${products.length} products from database`)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-10">
@@ -143,7 +175,7 @@ export default async function AdminProductsPage() {
                 </CardContent>
               </Card>
             }>
-              <AdminProductManager initialProducts={data ?? []} />
+              <AdminProductManager initialProducts={products} />
             </Suspense>
           </div>
         </div>
