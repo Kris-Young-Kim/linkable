@@ -12,6 +12,8 @@ import { SWRProvider } from "@/lib/swr-provider";
 import { SkipToMain } from "@/components/skip-to-main";
 import { WebVitalsTracker } from "@/components/performance/web-vitals-tracker";
 import { OfflineDetector } from "@/components/offline-detector";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
+import { PwaServiceWorkerRegister } from "@/components/pwa-service-worker-register";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
@@ -44,8 +46,31 @@ export const metadata: Metadata = {
     "LinkAble",
   ],
   icons: {
-    icon: [{ url: "/icon.png", type: "image/png" }],
-    apple: "/icon.png",
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.json",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: "cover",
+  },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0F766E" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F766E" },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "LinkAble",
   },
   robots: {
     index: true,
@@ -175,6 +200,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <Analytics />
           <WebVitalsTracker />
           <OfflineDetector />
+          <PwaServiceWorkerRegister />
+          <PwaInstallPrompt />
           <Toaster />
         </body>
       </html>

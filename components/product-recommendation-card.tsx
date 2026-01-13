@@ -457,10 +457,10 @@ export function ProductRecommendationCard({
 
       <CardContent className="pt-6 space-y-4">
         {/* 가격 및 리뷰 정보 */}
-        <div className="flex items-center justify-between gap-4 pb-2 border-b">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 pb-2 border-b">
           {price && (
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-foreground">
+              <span className="text-xl sm:text-2xl font-bold text-foreground">
                 {typeof price === "number"
                   ? price.toLocaleString("ko-KR")
                   : price}
@@ -485,16 +485,16 @@ export function ProductRecommendationCard({
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           {matchPercentage && (
-            <Badge variant="outline" className="text-sm">
+            <Badge variant="outline" className="text-xs sm:text-sm w-fit">
               {t("recommendations.matchScore")} {matchPercentage}
             </Badge>
           )}
           {/* 포인트 적립 안내 */}
           <Badge
             variant="secondary"
-            className="text-xs bg-primary/10 text-primary border-primary/20"
+            className="text-xs bg-primary/10 text-primary border-primary/20 w-fit"
           >
             <Sparkles className="mr-1 h-3 w-3" />
             클릭 시 10P 적립

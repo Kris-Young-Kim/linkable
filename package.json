@@ -28,7 +28,8 @@
     "deploy:edge-function": "node scripts/ensure-utf8.js && tsx scripts/deploy-edge-function.ts",
     "test:edge-function": "node scripts/ensure-utf8.js && tsx scripts/test-edge-function.ts",
     "check:clerk": "node scripts/ensure-utf8.js && tsx scripts/check-clerk-config.ts",
-    "test:mcp": "node scripts/ensure-utf8.js && tsx scripts/test-mcp-hyperbrowser.ts"
+    "test:mcp": "node scripts/ensure-utf8.js && tsx scripts/test-mcp-hyperbrowser.ts",
+    "generate:pwa-icons": "node scripts/ensure-utf8.js && tsx scripts/generate-pwa-icons.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.43",

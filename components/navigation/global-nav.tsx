@@ -61,14 +61,14 @@ export function GlobalNav() {
       {!isLoaded ? (
         // Clerk가 로드 중이거나 실패한 경우: 직접 로그인 페이지로 이동하는 버튼 표시
         <>
-          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
+          <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-3 sm:px-5 font-semibold text-sm sm:text-base" asChild>
             <Link href="/sign-in">
               {t("header.signIn")}
             </Link>
           </Button>
           <Button
             size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-5 font-semibold text-base shadow-sm"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] min-w-[44px] px-3 sm:px-5 font-semibold text-sm sm:text-base shadow-sm"
             asChild
           >
             <Link href="/sign-up">
