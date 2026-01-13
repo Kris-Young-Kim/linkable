@@ -245,7 +245,8 @@ export async function POST(request: Request) {
     }
 
     // 전환 이벤트 로깅 (Analytics 대시보드 연동)
-    await supabase.from("conversion_events").insert({
+    // ✅ 에러가 발생해도 평가는 성공 처리 (로그만 남김)
+    const { error: conversionError } = await supabase.from("conversion_events").insert({
       user_id: supabaseUserId,
       event_type: "ippa_evaluation_submit",
       recommendation_id: body.recommendationId ?? null,
@@ -256,6 +257,16 @@ export async function POST(request: Request) {
         points_earned: pointsEarned,
       },
     })
+
+    if (conversionError) {
+      // 전환 이벤트 로깅 실패는 경고만 남기고 평가는 성공 처리
+      logEvent({
+        category: "validation",
+        action: "ippa_conversion_event_error",
+        payload: { error: conversionError },
+        level: "warn",
+      })
+    }
 
     logEvent({
       category: "validation",
@@ -287,15 +298,38 @@ export async function POST(request: Request) {
         : null,
     })
   } catch (error) {
+    // ✅ 개선: 상세한 에러 정보 로깅
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    const errorStack = error instanceof Error ? error.stack : undefined
+    const errorDetails = error instanceof Error && 'code' in error ? { code: (error as any).code, details: (error as any).details, hint: (error as any).hint } : {}
+    
+    console.error("[IPPA API] Error details:", {
+      message: errorMessage,
+      stack: errorStack,
+      ...errorDetails,
+    })
+
     logEvent({
       category: "validation",
       action: "ippa_api_error",
-      payload: { error: error instanceof Error ? error.message : String(error) },
+      payload: { 
+        error: errorMessage,
+        stack: errorStack,
+        ...errorDetails,
+      },
       level: "error",
     })
 
+    // ✅ 개발 환경에서는 상세 에러 정보 반환
+    const isDevelopment = process.env.NODE_ENV === "development"
     return NextResponse.json(
-      { error: "Failed to submit evaluation. 잠시 후 다시 시도해 주세요." },
+      { 
+        error: "Failed to submit evaluation. 잠시 후 다시 시도해 주세요.",
+        ...(isDevelopment && { 
+          details: errorMessage,
+          ...errorDetails,
+        }),
+      },
       { status: 500 },
     )
   }
