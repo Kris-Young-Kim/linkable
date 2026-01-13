@@ -298,8 +298,8 @@ export function DashboardContent({ consultations }: { consultations: Consultatio
       <section className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <p className="text-sm uppercase tracking-wide text-muted-foreground">{t("dashboard.tagline")}</p>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">상담 내역</h1>
-          <p className="text-muted-foreground mt-2 text-base">나의 상담 이력과 추천 보조기기를 확인할 수 있습니다.</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">{t("dashboard.pageTitle")}</h1>
+          <p className="text-muted-foreground mt-2 text-base">{t("dashboard.pageDescription")}</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <CTAButton variant="chat" href="/chat" size="default">

@@ -8,6 +8,7 @@ export const translations = {
     "header.about": "회사 소개",
     "header.startConsultation": "상담 시작하기",
     "header.continueConsultation": "상담 이어가기",
+    "header.dashboard": "상담 내역",
     "header.signIn": "로그인",
     "header.signUp": "회원가입",
     "header.homeAria": "LinkAble 홈으로 이동",
@@ -389,6 +390,8 @@ export const translations = {
     "language.japanese": "日本語",
 
     // Dashboard additions
+    "dashboard.pageTitle": "상담 내역",
+    "dashboard.pageDescription": "나의 상담 이력과 추천 보조기기를 확인할 수 있습니다.",
     "dashboard.tagline": "LinkAble 인사이트 센터",
     "dashboard.heroDescription":
       "상담 진행 현황과 추천 활용도를 한눈에 확인하세요.",
@@ -478,6 +481,7 @@ export const translations = {
     "header.about": "Company",
     "header.startConsultation": "Start Consultation",
     "header.continueConsultation": "Continue Consultation",
+    "header.dashboard": "Consultation History",
     "header.signIn": "Sign In",
     "header.signUp": "Sign Up",
     "header.homeAria": "Go to LinkAble home",
@@ -770,6 +774,8 @@ export const translations = {
     "language.japanese": "日本語",
 
     // Dashboard additions
+    "dashboard.pageTitle": "Consultation History",
+    "dashboard.pageDescription": "Review your consultation history and recommended assistive devices.",
     "dashboard.tagline": "LinkAble Insight Center",
     "dashboard.heroDescription":
       "Review your consultation progress and recommendation activity at a glance.",
@@ -863,6 +869,7 @@ export const translations = {
     "header.about": "会社紹介",
     "header.startConsultation": "相談開始",
     "header.continueConsultation": "相談を続ける",
+    "header.dashboard": "相談履歴",
     "header.signIn": "ログイン",
     "header.signUp": "新規登録",
     "header.homeAria": "LinkAbleホームに移動",
@@ -1068,6 +1075,8 @@ export const translations = {
     "modal.disclaimer.accept": "理解して同意します",
 
     // Dashboard
+    "dashboard.pageTitle": "相談履歴",
+    "dashboard.pageDescription": "相談履歴と推奨支援機器を確認できます。",
     "dashboard.title": "K-IPPA効果性ダッシュボード",
     "dashboard.subtitle":
       "支援機器使用前後の生活の質の改善度を確認してください",

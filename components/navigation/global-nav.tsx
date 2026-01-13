@@ -84,7 +84,7 @@ export function GlobalNav() {
               <NotificationsBell />
               <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
                 <Link href="/dashboard">
-                  상담 내역
+                  {t("header.dashboard")}
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="min-h-[44px] min-w-[44px] px-5 font-semibold text-base" asChild>
@@ -190,7 +190,7 @@ export function GlobalNav() {
                 <LanguageSelector />
                 <SignedIn>
                   <Button variant="outline" className="w-full" asChild>
-                    <Link href="/dashboard">상담 내역</Link>
+                    <Link href="/dashboard">{t("header.dashboard")}</Link>
                   </Button>
                   <Button className="w-full" asChild>
                     <Link href="/chat">{t("header.continueConsultation")}</Link>
