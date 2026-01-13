@@ -168,7 +168,7 @@ export function AboutContent() {
             <div className="absolute top-0 right-0 p-12 opacity-10 animate-pulse">
               <Sparkles className="size-40" />
             </div>
-            <h2 className="text-3xl md:text-5xl font-black mb-8 leading-tight">
+            <h2 className="text-2xl md:text-3xl font-black mb-8 leading-tight">
               "기술은 인간의 한계를 <br className="md:hidden" />결정짓는 것이 아니라,<br />
               새로운 가능성을 <br className="md:hidden" />여는 수단이어야 합니다."
             </h2>
