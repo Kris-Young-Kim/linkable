@@ -2042,12 +2042,25 @@ WHERE p.iso_code_id = (SELECT id FROM iso_codes WHERE code = '12 03 03' AND leve
     -- 한글이 깨진 것으로 보이는 패턴 (바이트 시퀀스 확인)
     p.name ~ '[^\x20-\x7E가-힣]' OR
     -- 특정 깨진 패턴들
-    p.name LIKE '%%' OR
     p.name LIKE '%긴%' OR
     p.name LIKE '%Ʈ%'
   )
   AND p.name NOT ILIKE '%지팡이%'
   AND p.name NOT ILIKE '%cane%';
+
+-- 12-35. 모든 남은 non-cane 제품 처리 (catch-all)
+-- 위의 모든 규칙을 통과하지 못한 제품들은 NULL로 설정하여 수동 검토 필요
+-- 이는 마지막 안전장치로, 지팡이가 아닌 모든 제품을 처리합니다
+UPDATE products p
+SET iso_code_id = NULL,
+updated_at = NOW()
+WHERE p.iso_code_id = (SELECT id FROM iso_codes WHERE code = '12 03 03' AND level = 3)
+  AND p.is_active = true
+  AND p.name NOT ILIKE '%지팡이%'
+  AND p.name NOT ILIKE '%cane%'
+  AND p.name NOT ILIKE '%stick%'
+  AND p.name NOT ILIKE '%walking%stick%'
+  AND p.name NOT ILIKE '%walking%cane%';
 
 -- =========================================================
 -- [13] 기타 명확한 제품들

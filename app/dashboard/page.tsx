@@ -104,7 +104,7 @@ const fetchDashboardData = async (clerkUserId: string) => {
           is_clicked,
           created_at,
           rank,
-          product:product_id(
+          product:products!product_id(
             id,
             name,
             image_url,
@@ -145,7 +145,7 @@ const fetchDashboardData = async (clerkUserId: string) => {
             is_clicked,
             created_at,
             rank,
-            product:product_id(
+            product:products!product_id(
               id,
               name,
               image_url,

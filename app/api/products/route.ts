@@ -357,9 +357,10 @@ export async function GET(request: Request) {
   const useHybridMatching = process.env.ENABLE_HYBRID_MATCHING === "true";
 
   // 제품 추천 저장 여부 (상담 데이터는 저장하되 추천은 저장하지 않을 수 있음)
-  // 기본값: false (저장은 하되, 제품 추천은 하지 않음)
+  // 기본값: true (추천을 데이터베이스에 저장하여 대시보드에서 확인 가능)
+  // false로 설정하려면 환경 변수 ENABLE_RECOMMENDATION_PERSISTENCE=false로 설정
   const shouldPersistRecommendations =
-    process.env.ENABLE_RECOMMENDATION_PERSISTENCE === "true";
+    process.env.ENABLE_RECOMMENDATION_PERSISTENCE !== "false";
 
   let isoMatches: IsoMatch[];
 
