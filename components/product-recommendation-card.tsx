@@ -283,63 +283,33 @@ export function ProductRecommendationCard({
     // 기본값 (변형이 없을 때)
     if (!variant) {
       return (
-        <div className="flex gap-3 w-full">
-          <Button
-            className="flex-1 min-h-[44px]"
-            size="lg"
-            type="button"
-            onClick={() => handleClick("primary", "primary")}
-            disabled={isButtonDisabled || isPrimaryPending}
-            aria-disabled={isButtonDisabled}
-            aria-label={
-              purchaseLink
-                ? `${productName} 상품 정보 보기 (외부 링크)`
-                : `${productName} 상품 정보 (링크 없음)`
-            }
-          >
-            {isPrimaryPending ? (
-              <>
-                <InlineSpinner size="sm" className="mr-2" />
-                {t("recommendations.loading") || "처리 중..."}
-              </>
-            ) : (
-              <>
-                <ExternalLink className="mr-2 h-5 w-5" aria-hidden="true" />
-                {purchaseLink
-                  ? t("recommendations.learnMore")
-                  : t("recommendations.noLink")}
-              </>
-            )}
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 min-h-[44px] bg-transparent"
-            size="lg"
-            type="button"
-            onClick={() => handleClick("secondary", "secondary")}
-            disabled={isButtonDisabled || isSecondaryPending}
-            aria-disabled={isButtonDisabled}
-            aria-label={
-              purchaseLink
-                ? `${productName} 구매하기 (외부 링크)`
-                : `${productName} 구매하기 (링크 없음)`
-            }
-          >
-            {isSecondaryPending ? (
-              <>
-                <InlineSpinner size="sm" className="mr-2" />
-                {t("recommendations.loading") || "처리 중..."}
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
-                {purchaseLink
-                  ? t("recommendations.buyNow")
-                  : t("recommendations.noLink")}
-              </>
-            )}
-          </Button>
-        </div>
+        <Button
+          className="w-full min-h-[44px]"
+          size="lg"
+          type="button"
+          onClick={() => handleClick("primary", "primary")}
+          disabled={isButtonDisabled || isPrimaryPending}
+          aria-disabled={isButtonDisabled}
+          aria-label={
+            purchaseLink
+              ? `${productName} 구매하기 (외부 링크)`
+              : `${productName} 구매하기 (링크 없음)`
+          }
+        >
+          {isPrimaryPending ? (
+            <>
+              <InlineSpinner size="sm" className="mr-2" />
+              {t("recommendations.loading") || "처리 중..."}
+            </>
+          ) : (
+            <>
+              <ShoppingCart className="mr-2 h-5 w-5" aria-hidden="true" />
+              {purchaseLink
+                ? t("recommendations.buyNow")
+                : t("recommendations.noLink")}
+            </>
+          )}
+        </Button>
       );
     }
 
@@ -381,64 +351,33 @@ export function ProductRecommendationCard({
           </div>
         )}
 
-        {/* 버튼 그룹 */}
-        <div className="flex gap-3 w-full">
-          {/* 주요 버튼 */}
-          <Button
-            className={`flex-1 min-h-[44px] ${primaryButtonClass}`}
-            size={mapButtonSize(variant.primary_button_size)}
-            variant={variant.primary_button_variant as any}
-            type="button"
-            onClick={() => handleClick("primary", "primary")}
-            disabled={isButtonDisabled || isPrimaryPending}
-            aria-disabled={isButtonDisabled}
-            aria-label={
-              purchaseLink
-                ? `${productName} ${variant.primary_button_text} (외부 링크)`
-                : `${productName} ${variant.primary_button_text} (링크 없음)`
-            }
-          >
-            {isPrimaryPending ? (
-              <>
-                <InlineSpinner size="sm" className="mr-2" />
-                {t("recommendations.loading") || "처리 중..."}
-              </>
-            ) : (
-              <>
-                {getIcon(variant.primary_button_icon)}
-                {variant.primary_button_text}
-              </>
-            )}
-          </Button>
-
-          {/* 보조 버튼 */}
-          <Button
-            variant={variant.secondary_button_variant as any}
-            className={`flex-1 min-h-[44px] ${secondaryButtonClass}`}
-            size={mapButtonSize(variant.secondary_button_size)}
-            type="button"
-            onClick={() => handleClick("secondary", "secondary")}
-            disabled={isButtonDisabled || isSecondaryPending}
-            aria-disabled={isButtonDisabled}
-            aria-label={
-              purchaseLink
-                ? `${productName} ${variant.secondary_button_text} (외부 링크)`
-                : `${productName} ${variant.secondary_button_text} (링크 없음)`
-            }
-          >
-            {isSecondaryPending ? (
-              <>
-                <InlineSpinner size="sm" className="mr-2" />
-                {t("recommendations.loading") || "처리 중..."}
-              </>
-            ) : (
-              <>
-                {getIcon(variant.secondary_button_icon)}
-                {variant.secondary_button_text}
-              </>
-            )}
-          </Button>
-        </div>
+        {/* 구매 버튼 */}
+        <Button
+          className={`w-full min-h-[44px] ${primaryButtonClass}`}
+          size={mapButtonSize(variant.primary_button_size)}
+          variant={variant.primary_button_variant as any}
+          type="button"
+          onClick={() => handleClick("primary", "primary")}
+          disabled={isButtonDisabled || isPrimaryPending}
+          aria-disabled={isButtonDisabled}
+          aria-label={
+            purchaseLink
+              ? `${productName} ${variant.primary_button_text || t("recommendations.buyNow")} (외부 링크)`
+              : `${productName} ${variant.primary_button_text || t("recommendations.buyNow")} (링크 없음)`
+          }
+        >
+          {isPrimaryPending ? (
+            <>
+              <InlineSpinner size="sm" className="mr-2" />
+              {t("recommendations.loading") || "처리 중..."}
+            </>
+          ) : (
+            <>
+              {getIcon(variant.primary_button_icon || "ShoppingCart")}
+              {variant.primary_button_text || t("recommendations.buyNow")}
+            </>
+          )}
+        </Button>
 
         {/* 세 번째 버튼 (있는 경우) */}
         {variant.tertiary_button_text && (
