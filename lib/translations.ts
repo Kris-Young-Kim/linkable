@@ -264,6 +264,8 @@ export const translations = {
       "소중한 피드백 감사합니다. 평가 결과가 서비스 개선에 활용됩니다.",
     "ippa.effectivenessScore": "효과성 점수",
     "ippa.pointsEarned": "{points} 포인트 적립",
+    "ippa.errorTitle": "오류가 발생했습니다",
+    "ippa.errorHint": "잠시 후 다시 시도해주세요. 문제가 계속되면 고객 지원에 문의해주세요.",
 
     // Error FAQ Modal
     "errorFaq.title": "에러 대응 가이드",

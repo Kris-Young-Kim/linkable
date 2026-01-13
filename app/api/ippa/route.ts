@@ -39,12 +39,24 @@ const ensureUserRecord = async (clerkUserId: string) => {
     return data.id
   }
 
-  if (error && error.code !== "PGRST116") {
-    throw error
+  // ✅ 개선: 상세한 에러 정보 로깅
+  if (error) {
+    console.error("[IPPA API] User record lookup error:", {
+      clerkUserId,
+      errorCode: error.code,
+      errorMessage: error.message,
+      errorDetails: error.details,
+      errorHint: error.hint,
+    })
+    
+    // "not found" 에러가 아닌 경우에만 throw
+    if (error.code !== "PGRST116") {
+      throw error
+    }
   }
 
   // 사용자가 없으면 에러 (일반적으로는 이미 생성되어 있어야 함)
-  throw new Error("User record not found")
+  throw new Error(`User record not found for Clerk ID: ${clerkUserId}`)
 }
 
 /**

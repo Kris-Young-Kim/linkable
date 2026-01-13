@@ -143,7 +143,11 @@ export function IppaForm({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.error || "Failed to submit evaluation")
+        // ✅ 개선: 상세 에러 정보 포함
+        const errorMessage = errorData.error || "Failed to submit evaluation"
+        const errorDetails = errorData.details ? `\n\n상세 정보: ${errorData.details}` : ""
+        const errorCode = errorData.code ? `\n에러 코드: ${errorData.code}` : ""
+        throw new Error(errorMessage + errorDetails + errorCode)
       }
 
       const data = await response.json()
