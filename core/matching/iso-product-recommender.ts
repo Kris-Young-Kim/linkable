@@ -134,9 +134,10 @@ function areIsoCodesRelated(
   }
 
   // 명시적 관련 매핑 확인 (Subclass 레벨 기준)
+  // ✅ 수정: 수동/전동 휠체어 교차 매핑 제거 (사용자가 명시적으로 요청한 경우 혼란 방지)
   const relatedIsoMapping: Record<string, string[]> = {
-    "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
-    "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
+    // "12 23": ["12 22"], // 전동휠체어 → 수동휠체어 (제거)
+    // "12 22": ["12 23"], // 수동휠체어 → 전동휠체어 (제거)
   };
 
   // Subclass 레벨로 변환하여 매핑 확인
@@ -281,7 +282,22 @@ export async function recommendProductsByIsoCode(
 
     // 2. 관련 ISO 코드 제품 검색 (Division 레벨 기준)
     let relatedProducts: any[] = [];
-    if (includeRelated && exactProducts.length < limit) {
+    
+    // ✅ 수정: 사용자가 명시적으로 특정 제품을 요청했는지 확인
+    // "수동 휠체어", "전동 휠체어" 등 명시적 키워드가 있으면 관련 제품 제외
+    const userMessage = (context.userMessage || context.analysisSummary || "").toLowerCase();
+    const hasExplicitWheelchairType = 
+      userMessage.includes("수동") || 
+      userMessage.includes("전동") || 
+      userMessage.includes("manual") || 
+      userMessage.includes("electric") ||
+      userMessage.includes("power");
+    
+    // 휠체어 관련 ISO 코드에서 명시적 타입이 있으면 관련 제품 제외
+    const isWheelchairCode = isoCode.startsWith("12 22") || isoCode.startsWith("12 23");
+    const shouldExcludeRelated = isWheelchairCode && hasExplicitWheelchairType;
+    
+    if (includeRelated && !shouldExcludeRelated && exactProducts.length < limit) {
       // ISO 코드 계층 구조 기반 스마트 필터링
       // Division 레벨(6자리): "12 23 03" → 가장 정확, 정확히 일치하는 제품만 검색
       // Subclass 레벨(4자리): "12 23" → 해당 Subclass의 모든 Division 제품 검색
@@ -290,10 +306,11 @@ export async function recommendProductsByIsoCode(
 
       // 명시적으로 관련된 ISO 코드 매핑 (전문가 지식 기반, Subclass 레벨)
       // Division 레벨로 자동 확장됨
+      // ✅ 수정: 수동/전동 휠체어 교차 매핑 제거 (사용자가 명시적으로 요청한 경우 제외)
       const relatedIsoMapping: Record<string, string[]> = {
         // 이동 보조기기 (Class 12)
-        "12 23": ["12 22"], // 전동휠체어 → 수동휠체어
-        "12 22": ["12 23"], // 수동휠체어 → 전동휠체어
+        // "12 23": ["12 22"], // 전동휠체어 → 수동휠체어 (제거: 명시적 요청 시 혼란 방지)
+        // "12 22": ["12 23"], // 수동휠체어 → 전동휠체어 (제거: 명시적 요청 시 혼란 방지)
         "12 06": [], // 보행기 → 관련 제품 없음 (독립적)
         "12 31": [], // 체위 변경 → 관련 제품 없음 (독립적)
 

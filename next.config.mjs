@@ -43,8 +43,10 @@ const nextConfig = {
       "https://*.supabase.in",
       "https://generativelanguage.googleapis.com",
       "https://www.clarity.ms",
+      "https://b.clarity.ms", // Clarity 데이터 수집 서버
       "https://e.clarity.ms",
       "https://report.clarity.ms",
+      "https://*.clarity.ms", // 모든 Clarity 서브도메인 허용
       "https://www.linkable.life",
       "https://linkable.life",
       "https://connect.facebook.net",
@@ -87,8 +89,8 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://scripts.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://scripts.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://b.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://b.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
               "worker-src 'self' blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
