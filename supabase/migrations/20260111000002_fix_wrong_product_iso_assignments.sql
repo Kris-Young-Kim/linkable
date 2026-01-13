@@ -257,12 +257,13 @@ WHERE p.iso_code_id = (SELECT id FROM iso_codes WHERE code = '22 03 03' AND leve
   AND p.name NOT ILIKE '%필터%'
   AND p.name NOT ILIKE '%filter%';
 
--- 2-10-2. 화면 낭독기/스크린 리더 → 22 03 21 (화면 확대 소프트웨어) 또는 22 13 18 (OCR 장비 및 소프트웨어)
+-- 2-10-2-1. 화면 낭독기/스크린 리더 → 22 13 15 (텍스트 음성 변환 장치 및 소프트웨어)
+-- ✅ 수정: 화면 확대 소프트웨어(22 03 21)와 텍스트 음성 변환(22 13 15)은 전혀 다른 제품 분류
 UPDATE products p
 SET iso_code_id = (
   SELECT ic.id
   FROM iso_codes ic
-  WHERE ic.code = '22 03 21'  -- 화면 확대 소프트웨어 (화면 낭독기도 포함)
+  WHERE ic.code = '22 13 15'  -- 텍스트 음성 변환 장치 및 소프트웨어 (스크린 리더 포함)
     AND ic.level = 3
     AND ic.is_active = true
   LIMIT 1
@@ -277,10 +278,50 @@ WHERE p.iso_code_id = (SELECT id FROM iso_codes WHERE code = '22 03 03' AND leve
     p.name ILIKE '%센스리더%' OR
     p.name ILIKE '%화면%낭독%' OR
     p.name ILIKE '%screen%reader%' OR
-    p.name ILIKE '%소리안%' OR
+    p.name ILIKE '%소리안%'
+  );
+
+-- 2-10-2-2. OCR 장비 및 소프트웨어 → 22 13 18 (OCR 장비 및 OCR 소프트웨어)
+UPDATE products p
+SET iso_code_id = (
+  SELECT ic.id
+  FROM iso_codes ic
+  WHERE ic.code = '22 13 18'  -- OCR 장비 및 OCR 소프트웨어
+    AND ic.level = 3
+    AND ic.is_active = true
+  LIMIT 1
+),
+updated_at = NOW()
+WHERE p.iso_code_id = (SELECT id FROM iso_codes WHERE code = '22 03 03' AND level = 3)
+  AND (
     p.name ILIKE '%OCR%' OR
     p.name ILIKE '%광학문자%' OR
     p.name ILIKE '%노바캠%'
+  );
+
+-- 2-10-2-3. 22 03 21 (화면 확대 소프트웨어)에 잘못 배정된 화면 낭독기 → 22 13 15로 변경
+-- ✅ 중요: 화면 확대 소프트웨어(22 03 21)와 텍스트 음성 변환(22 13 15)은 전혀 다른 제품 분류
+UPDATE products p
+SET iso_code_id = (
+  SELECT ic.id
+  FROM iso_codes ic
+  WHERE ic.code = '22 13 15'  -- 텍스트 음성 변환 장치 및 소프트웨어 (스크린 리더 포함)
+    AND ic.level = 3
+    AND ic.is_active = true
+  LIMIT 1
+),
+updated_at = NOW()
+WHERE p.iso_code_id = (SELECT id FROM iso_codes WHERE code = '22 03 21' AND level = 3)
+  AND p.is_active = true
+  AND (
+    p.name ILIKE '%JAWS%' OR
+    p.name ILIKE '%NVDA%' OR
+    p.name ILIKE '%VoiceOver%' OR
+    p.name ILIKE '%Narrator%' OR
+    p.name ILIKE '%센스리더%' OR
+    p.name ILIKE '%화면%낭독%' OR
+    p.name ILIKE '%screen%reader%' OR
+    p.name ILIKE '%소리안%'
   );
 
 -- 2-10-3. 안경 → 22 03 06 (안경 및 콘택트렌즈)
@@ -531,6 +572,7 @@ BEGIN
     AND p.is_active = true;
   
   -- 22 03 03 잘못 배정된 제품 수 확인 (광 필터가 아닌 제품)
+  -- ✅ 수정: 화면 낭독기는 22 13 15로 배정되어야 하므로, 22 03 03에 있으면 잘못 배정된 것으로 간주
   SELECT COUNT(*) INTO v_wrong_22_03_03_count
   FROM products p
   JOIN iso_codes ic ON p.iso_code_id = ic.id
@@ -539,13 +581,13 @@ BEGIN
     AND (
       p.name ILIKE '%독서확대기%' OR
       p.name ILIKE '%확대기%' OR
-      p.name ILIKE '%화면%낭독%' OR
-      p.name ILIKE '%screen%reader%' OR
       p.name ILIKE '%키보드%' OR
       p.name ILIKE '%마우스%' OR
       p.name ILIKE '%모니터%' OR
       p.name ILIKE '%안경%' OR
       p.name ILIKE '%스위치%' OR
+      p.name ILIKE '%화면%낭독%' OR
+      p.name ILIKE '%screen%reader%' OR
       p.name ILIKE '%JAWS%' OR
       p.name ILIKE '%NVDA%' OR
       p.name ILIKE '%센스리더%'

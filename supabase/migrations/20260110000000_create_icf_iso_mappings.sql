@@ -216,6 +216,12 @@ INSERT INTO icf_iso_mappings (icf_codes, iso_code, label, description, base_scor
 (ARRAY['b210', 'd166'], '22 03 21', '화면 확대 소프트웨어', '컴퓨터 화면 확대 소프트웨어', 0.75, 'manual'),
 
 -- =========================================
+-- 읽기, 쓰기 및 그리기용 보조기구 (22 13 → Division)
+-- =========================================
+(ARRAY['b210', 'd166', 'd170'], '22 13 15', '텍스트 음성 변환 장치 및 소프트웨어', '스크린 리더 및 화면 낭독 프로그램 (JAWS, NVDA, 센스리더 등)', 0.80, 'manual'),
+(ARRAY['b210', 'd166'], '22 13 18', 'OCR 장비 및 OCR 소프트웨어', '인쇄된 텍스트를 디지털 형식으로 변환하는 스캐너 및 소프트웨어', 0.75, 'manual'),
+
+-- =========================================
 -- 청각 보조기기 (22 06 → Division)
 -- =========================================
 (ARRAY['b230', 'd115'], '22 06 06', '청각 증폭기', '소리를 증폭하는 청각 증폭기', 0.80, 'manual'),
@@ -282,15 +288,27 @@ WHERE m.iso_code = ic.code
 -- 4. products.iso_code → iso_code_id FK 마이그레이션
 -- =============================================================================
 
--- 기존 iso_code 문자열을 iso_code_id FK로 연결
-UPDATE products p
-SET iso_code_id = ic.id
-FROM iso_codes ic
-WHERE p.iso_code = ic.code
-  AND p.iso_code_id IS NULL;
+-- ✅ 주의: products.iso_code 컬럼은 이미 제거되었습니다 (20250120000000_remove_iso_code_column.sql)
+-- 따라서 이 마이그레이션은 이미 완료된 상태입니다.
+-- iso_code_id가 NULL인 제품이 있다면 수동으로 배정해야 합니다.
 
--- iso_code 컬럼 deprecated 처리
-COMMENT ON COLUMN products.iso_code IS 'DEPRECATED: iso_code_id FK 사용 권장. 마이그레이션 후 제거 예정';
+-- iso_code_id가 NULL인 제품 수 확인 (참고용)
+DO $$
+DECLARE
+  null_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO null_count
+  FROM products
+  WHERE iso_code_id IS NULL
+    AND is_active = true;
+  
+  IF null_count > 0 THEN
+    RAISE NOTICE '=========================================================';
+    RAISE NOTICE '참고: iso_code_id가 NULL인 활성 제품이 %개 있습니다.', null_count;
+    RAISE NOTICE '이 제품들은 ISO 코드를 배정해야 추천에 포함됩니다.';
+    RAISE NOTICE '=========================================================';
+  END IF;
+END $$;
 
 -- =============================================================================
 -- 5. RLS 정책
@@ -298,6 +316,12 @@ COMMENT ON COLUMN products.iso_code IS 'DEPRECATED: iso_code_id FK 사용 권장
 
 -- 읽기는 모든 사용자 허용
 ALTER TABLE icf_iso_mappings ENABLE ROW LEVEL SECURITY;
+
+-- 기존 정책이 있으면 삭제 후 재생성
+DROP POLICY IF EXISTS "icf_iso_mappings_select_policy" ON icf_iso_mappings;
+DROP POLICY IF EXISTS "icf_iso_mappings_insert_policy" ON icf_iso_mappings;
+DROP POLICY IF EXISTS "icf_iso_mappings_update_policy" ON icf_iso_mappings;
+DROP POLICY IF EXISTS "icf_iso_mappings_delete_policy" ON icf_iso_mappings;
 
 CREATE POLICY "icf_iso_mappings_select_policy" ON icf_iso_mappings
   FOR SELECT USING (true);
