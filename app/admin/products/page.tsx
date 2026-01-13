@@ -108,7 +108,8 @@ export default async function AdminProductsPage() {
   type ProductRow = {
     id: string
     name: string
-    iso_codes: { code: string | null } | null
+    iso_code_id: string | null
+    iso_codes: { code: string | null } | { code: string | null }[] | null
     description: string | null
     price: number | null
     purchase_link: string | null
@@ -120,19 +121,28 @@ export default async function AdminProductsPage() {
   }
 
   const products =
-    (data as ProductRow[] | null)?.map((item) => ({
-      id: item.id,
-      name: item.name,
-      iso_code: item.iso_codes?.code ?? "",
-      description: item.description,
-      price: item.price,
-      purchase_link: item.purchase_link,
-      image_url: item.image_url,
-      manufacturer: item.manufacturer,
-      category: item.category,
-      is_active: item.is_active,
-      updated_at: item.updated_at,
-    })) ?? []
+    (data as ProductRow[] | null)?.map((item) => {
+      const isoCode =
+        Array.isArray(item.iso_codes) && item.iso_codes.length > 0
+          ? item.iso_codes[0]?.code
+          : item.iso_codes && !Array.isArray(item.iso_codes)
+            ? item.iso_codes.code
+            : null
+
+      return {
+        id: item.id,
+        name: item.name,
+        iso_code: isoCode ?? "",
+        description: item.description,
+        price: item.price,
+        purchase_link: item.purchase_link,
+        image_url: item.image_url,
+        manufacturer: item.manufacturer,
+        category: item.category,
+        is_active: item.is_active,
+        updated_at: item.updated_at,
+      }
+    }) ?? []
 
   console.log(`[Admin Products Page] Loaded ${products.length} products from database`)
 
