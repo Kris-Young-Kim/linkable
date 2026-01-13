@@ -80,6 +80,42 @@ export async function POST(request: Request) {
 
     const supabaseUserId = await ensureUserRecord(userId)
 
+    // ✅ 제품 존재 여부 확인
+    const { data: productExists, error: productCheckError } = await supabase
+      .from("products")
+      .select("id")
+      .eq("id", body.productId)
+      .single()
+
+    if (productCheckError || !productExists) {
+      console.error("[IPPA API] Product not found:", {
+        productId: body.productId,
+        error: productCheckError,
+      })
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 },
+      )
+    }
+
+    // ✅ 추천 ID가 제공된 경우 존재 여부 확인
+    if (body.recommendationId) {
+      const { data: recommendationExists, error: recCheckError } = await supabase
+        .from("recommendations")
+        .select("id")
+        .eq("id", body.recommendationId)
+        .single()
+
+      if (recCheckError || !recommendationExists) {
+        console.warn("[IPPA API] Recommendation not found (continuing anyway):", {
+          recommendationId: body.recommendationId,
+          error: recCheckError,
+        })
+        // 추천 ID가 없어도 평가는 진행 가능하므로 null로 설정
+        body.recommendationId = undefined
+      }
+    }
+
     // 활동별 점수 처리 (새로운 방식)
     let activityScoresData: any = null
     let result: any
@@ -191,6 +227,7 @@ export async function POST(request: Request) {
       : null
 
     // DB에 저장
+    // ✅ 수정: effectiveness_score는 GENERATED 컬럼이므로 INSERT에서 제외
     const insertData: any = {
       user_id: supabaseUserId,
       product_id: body.productId,
@@ -199,7 +236,7 @@ export async function POST(request: Request) {
       score_importance: avgScoreImportance,
       score_difficulty_pre: avgScoreDifficultyPre,
       score_difficulty_post: avgScoreDifficultyPost,
-      effectiveness_score: result.effectivenessScore,
+      // effectiveness_score는 GENERATED ALWAYS AS로 자동 계산되므로 제외
       feedback_comment: body.feedbackComment ?? null,
     }
 
@@ -215,10 +252,30 @@ export async function POST(request: Request) {
       .single()
 
     if (insertError) {
+      // ✅ 개선: 상세한 DB 에러 정보 로깅
+      console.error("[IPPA API] Insert error details:", {
+        error: insertError,
+        code: insertError.code,
+        message: insertError.message,
+        details: insertError.details,
+        hint: insertError.hint,
+        insertData: {
+          ...insertData,
+          // 민감한 정보는 제외
+          user_id: "[REDACTED]",
+        },
+      })
+
       logEvent({
         category: "validation",
         action: "ippa_insert_error",
-        payload: { error: insertError },
+        payload: { 
+          error: insertError,
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+        },
         level: "error",
       })
       throw insertError
