@@ -157,34 +157,103 @@ const detectDisabilityType = (
     keywords.some((k) => text.includes(k));
 
   // 1. 시각 장애
-  if (has("b210") || has("b215") || 
-      includesAny(["시각", "저시력", "시력", "vision", "눈", "시야", "맹인", "실명"])) {
+  if (
+    has("b210") ||
+    has("b215") ||
+    includesAny([
+      "시각",
+      "저시력",
+      "시력",
+      "vision",
+      "눈",
+      "시야",
+      "맹인",
+      "실명",
+    ])
+  ) {
     return "visual_impairment";
   }
 
   // 2. 청각 장애
-  if (has("b230") || has("b235") || 
-      includesAny(["청각", "청력", "난청", "보청기", "hearing", "귀", "듣기", "평형", "어지럼"])) {
+  if (
+    has("b230") ||
+    has("b235") ||
+    includesAny([
+      "청각",
+      "청력",
+      "난청",
+      "보청기",
+      "hearing",
+      "귀",
+      "듣기",
+      "평형",
+      "어지럼",
+    ])
+  ) {
     return "hearing_impairment";
   }
 
   // 3. 언어/의사소통 장애
-  if (has("b240") || has("b320") || has("b330") || has("d3") ||
-      includesAny(["언어", "음성", "구어", "말하기", "발음", "발성", "의사소통", "소통", "communication", "aac"])) {
+  if (
+    has("b240") ||
+    has("b320") ||
+    has("b330") ||
+    has("d3") ||
+    includesAny([
+      "언어",
+      "음성",
+      "구어",
+      "말하기",
+      "발음",
+      "발성",
+      "의사소통",
+      "소통",
+      "communication",
+      "aac",
+    ])
+  ) {
     return "communication_impairment";
   }
 
   // 4. 지체 장애 / 뇌병변 (휠체어)
-  if (has("d46") || has("d450") || has("d465") ||
-      includesAny(["지체", "절단", "관절", "지체기능", "변형", "신체", "physical",
-                   "뇌병변", "뇌손상", "뇌졸중", "뇌성마비", "cerebral palsy", 
-                   "뇌전증", "epilepsy", "척수", "spinal", "마비", "paralysis",
-                   "휠체어", "보행", "이동", "wheelchair"])) {
+  if (
+    has("d46") ||
+    has("d450") ||
+    has("d465") ||
+    includesAny([
+      "지체",
+      "절단",
+      "관절",
+      "지체기능",
+      "변형",
+      "신체",
+      "physical",
+      "뇌병변",
+      "뇌손상",
+      "뇌졸중",
+      "뇌성마비",
+      "cerebral palsy",
+      "뇌전증",
+      "epilepsy",
+      "척수",
+      "spinal",
+      "마비",
+      "paralysis",
+      "휠체어",
+      "보행",
+      "이동",
+      "wheelchair",
+    ])
+  ) {
     return "mobility_impairment";
   }
 
   // 5. 식사/자가관리
-  if (has("d55") || has("d550") || includesAny(["식사", "먹기", "feeding", "음식"])) {
+  if (
+    has("d55") ||
+    has("d550") ||
+    includesAny(["식사", "먹기", "feeding", "음식"])
+  ) {
     return "self_care_impairment";
   }
 
@@ -398,13 +467,16 @@ export async function GET(request: Request) {
 
   // 최적화된 ICF-제품 직접 매칭 시도 (새로운 함수 사용)
   // Phase 1: recommend_products_by_icf 함수 사용 (품질 점수 반영)
-  const useOptimizedMatching = process.env.USE_OPTIMIZED_ICF_MATCHING !== "false" && icfCodes.length > 0;
+  const useOptimizedMatching =
+    process.env.USE_OPTIMIZED_ICF_MATCHING !== "false" && icfCodes.length > 0;
   const useQualityScores = process.env.USE_PRODUCT_QUALITY_SCORES !== "false";
-  
+
   if (useOptimizedMatching) {
     try {
-      console.log("[Products API] Using recommend_products_by_icf function with quality scores");
-      
+      console.log(
+        "[Products API] Using recommend_products_by_icf function with quality scores"
+      );
+
       // Phase 1: 새로운 recommend_products_by_icf 함수 사용
       const { data: recommendedProducts, error: recError } = await supabase.rpc(
         "recommend_products_by_icf",
@@ -417,9 +489,14 @@ export async function GET(request: Request) {
       );
 
       if (recError) {
-        console.error("[Products API] recommend_products_by_icf error:", recError);
+        console.error(
+          "[Products API] recommend_products_by_icf error:",
+          recError
+        );
         // 폴백: 기존 함수 사용
-        const { getProductsByIcfCodes } = await import("@/lib/integrations/icf-product-matcher");
+        const { getProductsByIcfCodes } = await import(
+          "@/lib/integrations/icf-product-matcher"
+        );
         const optimizedProducts = await getProductsByIcfCodes(icfCodes, {
           limit,
           minScore: 0.5, // ✅ 개선: 최소 점수를 0.4에서 0.5로 상향 조정
@@ -431,50 +508,68 @@ export async function GET(request: Request) {
           // 폴백 경로에서도 품질 점수 조회 (성공 경로와 동일한 구조 유지)
           const productIds = optimizedProducts.map((p) => p.product_id);
           let qualityScoresMap = new Map<string, number>();
-          
+
           if (useQualityScores && productIds.length > 0) {
             try {
               const { data: qualityScores } = await supabase
                 .from("product_quality_scores")
                 .select("product_id, overall_quality_score")
                 .in("product_id", productIds);
-              
+
               if (qualityScores) {
                 qualityScores.forEach((qs: any) => {
-                  qualityScoresMap.set(qs.product_id, qs.overall_quality_score || 0);
+                  qualityScoresMap.set(
+                    qs.product_id,
+                    qs.overall_quality_score || 0
+                  );
                 });
               }
             } catch (qualityError) {
-              console.warn("[Products API] Quality scores fetch failed in fallback:", qualityError);
+              console.warn(
+                "[Products API] Quality scores fetch failed in fallback:",
+                qualityError
+              );
               // 품질 점수 조회 실패해도 계속 진행
             }
           }
 
           // 폴백 경로에서도 성공 경로와 동일한 응답 구조 유지
-          const formattedProducts: FormattedProduct[] = optimizedProducts.map((p, index) => ({
-            id: p.product_id,
-            name: p.product_name,
-            iso_code: p.iso_code,
-            manufacturer: p.manufacturer,
-            description: p.description,
-            image_url: p.image_url,
-            purchase_link: p.purchase_link,
-            price: p.price,
-            category: p.category,
-            match_score: p.match_score,
-            quality_score: useQualityScores ? (qualityScoresMap.get(p.product_id) ?? null) : null,
-            match_reason: p.match_reason,
-            rank: index + 1, // 순서 기반 rank 추가
-          }));
+          const formattedProducts: FormattedProduct[] = optimizedProducts.map(
+            (p, index) => ({
+              id: p.product_id,
+              name: p.product_name,
+              iso_code: p.iso_code,
+              manufacturer: p.manufacturer,
+              description: p.description,
+              image_url: p.image_url,
+              purchase_link: p.purchase_link,
+              price: p.price,
+              category: p.category,
+              match_score: p.match_score,
+              quality_score: useQualityScores
+                ? qualityScoresMap.get(p.product_id) ?? null
+                : null,
+              match_reason: p.match_reason,
+              rank: index + 1, // 순서 기반 rank 추가
+            })
+          );
 
           if (consultationId && shouldPersistRecommendations) {
-            const recommendationItems = formattedProducts.map((rec: FormattedProduct) => ({
-              productId: rec.id,
-              matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
-              rank: rec.rank || 1,
-            }));
+            const recommendationItems = formattedProducts.map(
+              (rec: FormattedProduct) => ({
+                productId: rec.id,
+                matchReason:
+                  rec.match_reason ||
+                  `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
+                rank: rec.rank || 1,
+              })
+            );
 
-            await persistRecommendations(consultationId, recommendationItems, supabase);
+            await persistRecommendations(
+              consultationId,
+              recommendationItems,
+              supabase
+            );
           }
 
           logEvent({
@@ -484,9 +579,14 @@ export async function GET(request: Request) {
               consultationId,
               icfCodesCount: icfCodes.length,
               productsCount: formattedProducts.length,
-              avgScore: optimizedProducts.reduce((sum, p) => sum + p.match_score, 0) / optimizedProducts.length,
-              avgQualityScore: useQualityScores 
-                ? formattedProducts.reduce((sum, p: FormattedProduct) => sum + (p.quality_score || 0), 0) / formattedProducts.length
+              avgScore:
+                optimizedProducts.reduce((sum, p) => sum + p.match_score, 0) /
+                optimizedProducts.length,
+              avgQualityScore: useQualityScores
+                ? formattedProducts.reduce(
+                    (sum, p: FormattedProduct) => sum + (p.quality_score || 0),
+                    0
+                  ) / formattedProducts.length
                 : null,
               useQualityScores,
             },
@@ -497,7 +597,9 @@ export async function GET(request: Request) {
               products: formattedProducts,
               isoBreakdown: isoMatches.map((match) => ({
                 isoCode: match.isoCode,
-                productsCount: formattedProducts.filter((p: FormattedProduct) => p.iso_code === match.isoCode).length,
+                productsCount: formattedProducts.filter(
+                  (p: FormattedProduct) => p.iso_code === match.isoCode
+                ).length,
                 confidence: match.score,
               })),
             },
@@ -505,96 +607,154 @@ export async function GET(request: Request) {
           );
         }
       } else if (recommendedProducts && recommendedProducts.length > 0) {
-        console.log(`[Products API] recommend_products_by_icf found ${recommendedProducts.length} products`);
-        
+        console.log(
+          `[Products API] recommend_products_by_icf found ${recommendedProducts.length} products`
+        );
+
         // ✅ 추가: 사용자 요청 키워드 기반 필터링
         // 워커/보행기 요청 시 전동휠체어 제외, 전동휠체어 요청 시 워커 제외
         const userMessage = (analysisSummary || "").toLowerCase();
-        const hasWalkerKeyword = 
-          userMessage.includes("워커") || 
-          userMessage.includes("보행기") || 
+        const hasWalkerKeyword =
+          userMessage.includes("워커") ||
+          userMessage.includes("보행기") ||
           userMessage.includes("walker") ||
           userMessage.includes("보행 보조");
-        const hasWheelchairKeyword = 
-          userMessage.includes("휠체어") || 
-          userMessage.includes("wheelchair");
-        const hasElectricWheelchairKeyword = 
-          userMessage.includes("전동휠체어") || 
+        const hasWheelchairKeyword =
+          userMessage.includes("휠체어") || userMessage.includes("wheelchair");
+        const hasElectricWheelchairKeyword =
+          userMessage.includes("전동휠체어") ||
           userMessage.includes("전동 휠체어") ||
           userMessage.includes("electric wheelchair") ||
           userMessage.includes("power wheelchair");
-        const hasManualWheelchairKeyword = 
-          userMessage.includes("수동휠체어") || 
+        const hasManualWheelchairKeyword =
+          userMessage.includes("수동휠체어") ||
           userMessage.includes("수동 휠체어") ||
           userMessage.includes("manual wheelchair");
+
+        // ✅ 수정: Division 레벨(3단계) 매칭으로 변경
+        // ISO 코드 레벨 확인 함수 (Division 레벨만 허용)
+        const isDivisionLevel = (isoCode: string): boolean => {
+          if (!isoCode) return false;
+          const parts = isoCode.trim().split(" ").filter(Boolean);
+          const codeLength = parts.join("").length;
+          return codeLength === 6; // Division 레벨은 6자리
+        };
+
+        // Division 레벨 ISO 코드 확인 함수
+        const matchesDivisionPrefix = (
+          isoCode: string,
+          prefix: string
+        ): boolean => {
+          if (!isoCode || !isDivisionLevel(isoCode)) return false;
+          // Division 레벨 코드가 해당 prefix로 시작하는지 확인
+          // 예: "12 06 03"이 "12 06"으로 시작하는지 확인
+          return isoCode.startsWith(prefix + " ");
+        };
 
         // 필터링된 제품 목록
         let filteredProducts = recommendedProducts;
 
         if (hasWalkerKeyword) {
-          // 워커/보행기 요청 시: 12 06만 포함, 전동휠체어(12 23) 제외
+          // 워커/보행기 요청 시: Division 레벨 12 06 XX만 포함, 전동휠체어(12 23 XX) 제외
           filteredProducts = recommendedProducts.filter((p: any) => {
             const isoCode = p.iso_code || "";
-            const isWalker = isoCode.startsWith("12 06");
-            const isElectricWheelchair = isoCode.startsWith("12 23");
+            // Division 레벨 확인 및 Subclass prefix 매칭
+            const isWalker =
+              isDivisionLevel(isoCode) &&
+              matchesDivisionPrefix(isoCode, "12 06");
+            const isElectricWheelchair =
+              isDivisionLevel(isoCode) &&
+              matchesDivisionPrefix(isoCode, "12 23");
             return isWalker && !isElectricWheelchair;
           });
-          console.log(`[Products API] 워커 필터링: ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 06만 포함, 12 23 제외)`);
+          console.log(
+            `[Products API] 워커 필터링 (Division 레벨): ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 06 XX만 포함, 12 23 XX 제외)`
+          );
         } else if (hasElectricWheelchairKeyword) {
-          // 전동휠체어 요청 시: 12 23만 포함, 워커(12 06) 제외
+          // 전동휠체어 요청 시: Division 레벨 12 23 XX만 포함, 워커(12 06 XX) 제외
           filteredProducts = recommendedProducts.filter((p: any) => {
             const isoCode = p.iso_code || "";
-            const isElectricWheelchair = isoCode.startsWith("12 23");
-            const isWalker = isoCode.startsWith("12 06");
+            const isElectricWheelchair =
+              isDivisionLevel(isoCode) &&
+              matchesDivisionPrefix(isoCode, "12 23");
+            const isWalker =
+              isDivisionLevel(isoCode) &&
+              matchesDivisionPrefix(isoCode, "12 06");
             return isElectricWheelchair && !isWalker;
           });
-          console.log(`[Products API] 전동휠체어 필터링: ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 23만 포함, 12 06 제외)`);
+          console.log(
+            `[Products API] 전동휠체어 필터링 (Division 레벨): ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 23 XX만 포함, 12 06 XX 제외)`
+          );
         } else if (hasManualWheelchairKeyword) {
-          // 수동휠체어 요청 시: 12 22만 포함, 전동휠체어(12 23) 제외
+          // 수동휠체어 요청 시: Division 레벨 12 22 XX만 포함, 전동휠체어(12 23 XX) 제외
           filteredProducts = recommendedProducts.filter((p: any) => {
             const isoCode = p.iso_code || "";
-            const isManualWheelchair = isoCode.startsWith("12 22");
-            const isElectricWheelchair = isoCode.startsWith("12 23");
+            const isManualWheelchair =
+              isDivisionLevel(isoCode) &&
+              matchesDivisionPrefix(isoCode, "12 22");
+            const isElectricWheelchair =
+              isDivisionLevel(isoCode) &&
+              matchesDivisionPrefix(isoCode, "12 23");
             return isManualWheelchair && !isElectricWheelchair;
           });
-          console.log(`[Products API] 수동휠체어 필터링: ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 22만 포함, 12 23 제외)`);
-        } else if (hasWheelchairKeyword && !hasElectricWheelchairKeyword && !hasManualWheelchairKeyword) {
-          // 일반 휠체어 요청 시: 12 22, 12 23 모두 포함 (필터링 없음)
-          console.log(`[Products API] 일반 휠체어 요청: 모든 휠체어 포함 (12 22, 12 23)`);
+          console.log(
+            `[Products API] 수동휠체어 필터링 (Division 레벨): ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 22 XX만 포함, 12 23 XX 제외)`
+          );
+        } else if (
+          hasWheelchairKeyword &&
+          !hasElectricWheelchairKeyword &&
+          !hasManualWheelchairKeyword
+        ) {
+          // 일반 휠체어 요청 시: Division 레벨 12 22 XX, 12 23 XX 모두 포함 (필터링 없음)
+          console.log(
+            `[Products API] 일반 휠체어 요청: 모든 휠체어 포함 (Division 레벨: 12 22 XX, 12 23 XX)`
+          );
         }
 
         // 필터링 후 제품이 없으면 원본 사용 (최소한의 추천 보장)
         if (filteredProducts.length === 0 && recommendedProducts.length > 0) {
-          console.warn(`[Products API] 필터링 후 제품이 없어 원본 사용: ${recommendedProducts.length}개`);
+          console.warn(
+            `[Products API] 필터링 후 제품이 없어 원본 사용: ${recommendedProducts.length}개`
+          );
           filteredProducts = recommendedProducts;
         }
-        
+
         // 형식 변환
-        const formattedProducts: FormattedProduct[] = filteredProducts.map((p: any) => ({
-          id: p.product_id,
-          name: p.product_name,
-          iso_code: p.iso_code,
-          manufacturer: p.manufacturer,
-          description: p.description,
-          image_url: p.image_url,
-          purchase_link: p.purchase_link,
-          price: p.price,
-          category: p.category,
-          match_score: p.final_score,  // 최종 점수 사용
-          quality_score: p.quality_score ?? null,  // 품질 점수 추가
-          match_reason: p.match_reason,
-          rank: p.rank,
-        }));
+        const formattedProducts: FormattedProduct[] = filteredProducts.map(
+          (p: any) => ({
+            id: p.product_id,
+            name: p.product_name,
+            iso_code: p.iso_code,
+            manufacturer: p.manufacturer,
+            description: p.description,
+            image_url: p.image_url,
+            purchase_link: p.purchase_link,
+            price: p.price,
+            category: p.category,
+            match_score: p.final_score, // 최종 점수 사용
+            quality_score: p.quality_score ?? null, // 품질 점수 추가
+            match_reason: p.match_reason,
+            rank: p.rank,
+          })
+        );
 
         // 추천 저장 (consultationId가 있는 경우)
         if (consultationId && shouldPersistRecommendations) {
-          const recommendationItems = formattedProducts.map((rec: FormattedProduct) => ({
-            productId: rec.id,
-            matchReason: rec.match_reason || `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
-            rank: rec.rank || 1,
-          }));
+          const recommendationItems = formattedProducts.map(
+            (rec: FormattedProduct) => ({
+              productId: rec.id,
+              matchReason:
+                rec.match_reason ||
+                `ICF 코드 매칭 (점수: ${rec.match_score?.toFixed(2)})`,
+              rank: rec.rank || 1,
+            })
+          );
 
-          await persistRecommendations(consultationId, recommendationItems, supabase);
+          await persistRecommendations(
+            consultationId,
+            recommendationItems,
+            supabase
+          );
         }
 
         logEvent({
@@ -604,8 +764,16 @@ export async function GET(request: Request) {
             consultationId,
             icfCodesCount: icfCodes.length,
             productsCount: formattedProducts.length,
-            avgScore: recommendedProducts.reduce((sum: number, p: any) => sum + p.final_score, 0) / recommendedProducts.length,
-            avgQualityScore: recommendedProducts.reduce((sum: number, p: any) => sum + (p.quality_score || 0), 0) / recommendedProducts.length,
+            avgScore:
+              recommendedProducts.reduce(
+                (sum: number, p: any) => sum + p.final_score,
+                0
+              ) / recommendedProducts.length,
+            avgQualityScore:
+              recommendedProducts.reduce(
+                (sum: number, p: any) => sum + (p.quality_score || 0),
+                0
+              ) / recommendedProducts.length,
             useQualityScores,
           },
         });
@@ -615,7 +783,9 @@ export async function GET(request: Request) {
             products: formattedProducts,
             isoBreakdown: isoMatches.map((match) => ({
               isoCode: match.isoCode,
-              productsCount: formattedProducts.filter((p: FormattedProduct) => p.iso_code === match.isoCode).length,
+              productsCount: formattedProducts.filter(
+                (p: FormattedProduct) => p.iso_code === match.isoCode
+              ).length,
               confidence: match.score,
             })),
           },
@@ -623,7 +793,10 @@ export async function GET(request: Request) {
         );
       }
     } catch (error) {
-      console.error("[Products API] recommend_products_by_icf failed, falling back:", error);
+      console.error(
+        "[Products API] recommend_products_by_icf failed, falling back:",
+        error
+      );
       logEvent({
         category: "matching",
         action: "recommend_products_by_icf_fallback",
@@ -635,10 +808,16 @@ export async function GET(request: Request) {
   }
 
   // 고도화된 제품 추천 시스템 사용
-  if (useAdvancedProductRecommendation && isoMatches.length > 0 && icfCodes.length > 0) {
+  if (
+    useAdvancedProductRecommendation &&
+    isoMatches.length > 0 &&
+    icfCodes.length > 0
+  ) {
     try {
-      console.log("[Products API] Using advanced product recommendation system");
-      
+      console.log(
+        "[Products API] Using advanced product recommendation system"
+      );
+
       // ✅ 수정: maxProductsPerIso 최소값 5 보장 (ISO 코드당 충분한 제품 표시)
       const calculatedMaxPerIso = Math.ceil(limit / isoMatches.length);
       const maxProductsPerIso = Math.max(calculatedMaxPerIso, 5);
@@ -696,7 +875,9 @@ export async function GET(request: Request) {
       // 환경 변수 제품을 추천 결과에 추가 (기본 점수 부여)
       if (envProducts.length > 0) {
         const envRecommendations = envProducts.map((product, index) => {
-          const isoMatch = isoMatches.find((m) => m.isoCode === product.iso_code);
+          const isoMatch = isoMatches.find(
+            (m) => m.isoCode === product.iso_code
+          );
           return {
             id: product.id,
             name: product.name,
@@ -708,7 +889,9 @@ export async function GET(request: Request) {
             image_url: product.image_url,
             purchase_link: product.purchase_link,
             score: (isoMatch?.score || 0.7) * 0.9, // ISO 매칭 점수의 90%
-            match_reason: `ISO 코드 매칭${isoMatch ? ` (${isoMatch.label})` : ""}`,
+            match_reason: `ISO 코드 매칭${
+              isoMatch ? ` (${isoMatch.label})` : ""
+            }`,
             priority: 8, // 환경 변수 제품은 중간 우선순위
             scoreBreakdown: {
               isoMatch: isoMatch?.score || 0.7,
@@ -727,7 +910,8 @@ export async function GET(request: Request) {
           return b.score - a.score;
         });
         // 상위 limit개만 유지
-        recommendationResult.recommendations = recommendationResult.recommendations.slice(0, limit);
+        recommendationResult.recommendations =
+          recommendationResult.recommendations.slice(0, limit);
       }
 
       // 추천 결과를 기존 형식으로 변환
@@ -742,61 +926,100 @@ export async function GET(request: Request) {
 
       // ✅ 추가: 사용자 요청 키워드 기반 필터링 (고도화된 추천 시스템에도 적용)
       const userMessage = (analysisSummary || "").toLowerCase();
-      const hasWalkerKeyword = 
-        userMessage.includes("워커") || 
-        userMessage.includes("보행기") || 
+      const hasWalkerKeyword =
+        userMessage.includes("워커") ||
+        userMessage.includes("보행기") ||
         userMessage.includes("walker") ||
         userMessage.includes("보행 보조");
-      const hasWheelchairKeyword = 
-        userMessage.includes("휠체어") || 
-        userMessage.includes("wheelchair");
-      const hasElectricWheelchairKeyword = 
-        userMessage.includes("전동휠체어") || 
+      const hasWheelchairKeyword =
+        userMessage.includes("휠체어") || userMessage.includes("wheelchair");
+      const hasElectricWheelchairKeyword =
+        userMessage.includes("전동휠체어") ||
         userMessage.includes("전동 휠체어") ||
         userMessage.includes("electric wheelchair") ||
         userMessage.includes("power wheelchair");
-      const hasManualWheelchairKeyword = 
-        userMessage.includes("수동휠체어") || 
+      const hasManualWheelchairKeyword =
+        userMessage.includes("수동휠체어") ||
         userMessage.includes("수동 휠체어") ||
         userMessage.includes("manual wheelchair");
 
       const originalCount = formattedProducts.length;
 
+      // ✅ 수정: Division 레벨(3단계) 매칭으로 변경
+      // ISO 코드 레벨 확인 함수 (Division 레벨만 허용)
+      const isDivisionLevel = (isoCode: string): boolean => {
+        if (!isoCode) return false;
+        const parts = isoCode.trim().split(" ").filter(Boolean);
+        const codeLength = parts.join("").length;
+        return codeLength === 6; // Division 레벨은 6자리
+      };
+
+      // Division 레벨 ISO 코드 확인 함수
+      const matchesDivisionPrefix = (
+        isoCode: string,
+        prefix: string
+      ): boolean => {
+        if (!isoCode || !isDivisionLevel(isoCode)) return false;
+        // Division 레벨 코드가 해당 prefix로 시작하는지 확인
+        // 예: "12 06 03"이 "12 06"으로 시작하는지 확인
+        return isoCode.startsWith(prefix + " ");
+      };
+
       if (hasWalkerKeyword) {
-        // 워커/보행기 요청 시: 12 06만 포함, 전동휠체어(12 23) 제외
+        // 워커/보행기 요청 시: Division 레벨 12 06 XX만 포함, 전동휠체어(12 23 XX) 제외
         formattedProducts = formattedProducts.filter((p: FormattedProduct) => {
           const isoCode = p.iso_code || "";
-          const isWalker = isoCode.startsWith("12 06");
-          const isElectricWheelchair = isoCode.startsWith("12 23");
+          const isWalker =
+            isDivisionLevel(isoCode) && matchesDivisionPrefix(isoCode, "12 06");
+          const isElectricWheelchair =
+            isDivisionLevel(isoCode) && matchesDivisionPrefix(isoCode, "12 23");
           return isWalker && !isElectricWheelchair;
         });
-        console.log(`[Products API] [고도화 추천] 워커 필터링: ${originalCount}개 → ${formattedProducts.length}개 (12 06만 포함, 12 23 제외)`);
+        console.log(
+          `[Products API] [고도화 추천] 워커 필터링 (Division 레벨): ${originalCount}개 → ${formattedProducts.length}개 (12 06 XX만 포함, 12 23 XX 제외)`
+        );
       } else if (hasElectricWheelchairKeyword) {
-        // 전동휠체어 요청 시: 12 23만 포함, 워커(12 06) 제외
+        // 전동휠체어 요청 시: Division 레벨 12 23 XX만 포함, 워커(12 06 XX) 제외
         formattedProducts = formattedProducts.filter((p: FormattedProduct) => {
           const isoCode = p.iso_code || "";
-          const isElectricWheelchair = isoCode.startsWith("12 23");
-          const isWalker = isoCode.startsWith("12 06");
+          const isElectricWheelchair =
+            isDivisionLevel(isoCode) && matchesDivisionPrefix(isoCode, "12 23");
+          const isWalker =
+            isDivisionLevel(isoCode) && matchesDivisionPrefix(isoCode, "12 06");
           return isElectricWheelchair && !isWalker;
         });
-        console.log(`[Products API] [고도화 추천] 전동휠체어 필터링: ${originalCount}개 → ${formattedProducts.length}개 (12 23만 포함, 12 06 제외)`);
+        console.log(
+          `[Products API] [고도화 추천] 전동휠체어 필터링 (Division 레벨): ${originalCount}개 → ${formattedProducts.length}개 (12 23 XX만 포함, 12 06 XX 제외)`
+        );
       } else if (hasManualWheelchairKeyword) {
-        // 수동휠체어 요청 시: 12 22만 포함, 전동휠체어(12 23) 제외
+        // 수동휠체어 요청 시: Division 레벨 12 22 XX만 포함, 전동휠체어(12 23 XX) 제외
         formattedProducts = formattedProducts.filter((p: FormattedProduct) => {
           const isoCode = p.iso_code || "";
-          const isManualWheelchair = isoCode.startsWith("12 22");
-          const isElectricWheelchair = isoCode.startsWith("12 23");
+          const isManualWheelchair =
+            isDivisionLevel(isoCode) && matchesDivisionPrefix(isoCode, "12 22");
+          const isElectricWheelchair =
+            isDivisionLevel(isoCode) && matchesDivisionPrefix(isoCode, "12 23");
           return isManualWheelchair && !isElectricWheelchair;
         });
-        console.log(`[Products API] [고도화 추천] 수동휠체어 필터링: ${originalCount}개 → ${formattedProducts.length}개 (12 22만 포함, 12 23 제외)`);
-      } else if (hasWheelchairKeyword && !hasElectricWheelchairKeyword && !hasManualWheelchairKeyword) {
-        // 일반 휠체어 요청 시: 12 22, 12 23 모두 포함 (필터링 없음)
-        console.log(`[Products API] [고도화 추천] 일반 휠체어 요청: 모든 휠체어 포함 (12 22, 12 23)`);
+        console.log(
+          `[Products API] [고도화 추천] 수동휠체어 필터링 (Division 레벨): ${originalCount}개 → ${formattedProducts.length}개 (12 22 XX만 포함, 12 23 XX 제외)`
+        );
+      } else if (
+        hasWheelchairKeyword &&
+        !hasElectricWheelchairKeyword &&
+        !hasManualWheelchairKeyword
+      ) {
+        // 일반 휠체어 요청 시: Division 레벨 12 22 XX, 12 23 XX 모두 포함 (필터링 없음)
+        console.log(
+          `[Products API] [고도화 추천] 일반 휠체어 요청: 모든 휠체어 포함 (Division 레벨: 12 22 XX, 12 23 XX)`
+        );
       }
 
       // 필터링 후 제품이 없으면 원본 사용 (최소한의 추천 보장)
       if (formattedProducts.length === 0 && originalCount > 0) {
-        console.warn(`[Products API] [고도화 추천] 필터링 후 제품이 없어 원본 사용: ${originalCount}개`);
+        console.warn(
+          `[Products API] [고도화 추천] 필터링 후 제품이 없어 원본 사용: ${originalCount}개`
+        );
         formattedProducts = formatProductRecommendations(
           recommendationResult.recommendations,
           {
@@ -823,7 +1046,11 @@ export async function GET(request: Request) {
               rank: index + 1,
             }));
 
-        await persistRecommendations(consultationId, recommendationItems, supabase);
+        await persistRecommendations(
+          consultationId,
+          recommendationItems,
+          supabase
+        );
       } else if (consultationId && !shouldPersistRecommendations) {
         // 추천 저장이 비활성화된 경우 로그만 기록
         logEvent({
@@ -879,8 +1106,10 @@ export async function GET(request: Request) {
   // created_at, updated_at은 서버에서만 사용 (랭킹 계산용)
   // 하지만 랭킹 계산을 위해 SELECT에는 포함해야 함
   // iso_code_id FK 조인 사용
-  let query = supabase.from("products").select(
-    `
+  let query = supabase
+    .from("products")
+    .select(
+      `
       id,
       name,
       iso_code_id,
@@ -898,8 +1127,8 @@ export async function GET(request: Request) {
       created_at,
       updated_at
     `
-  )
-  .not("iso_code_id", "is", null);  // ✅ iso_code_id가 null인 제품 제외 (ISO 코드 없는 제품은 추천 불가)
+    )
+    .not("iso_code_id", "is", null); // ✅ iso_code_id가 null인 제품 제외 (ISO 코드 없는 제품은 추천 불가)
 
   // ICF 코드가 없으면 추천을 반환하지 않음 (consultationId만 있고 ICF 분석이 없는 경우)
   if (isoCodes.length === 0 && consultationId) {
@@ -1002,16 +1231,16 @@ export async function GET(request: Request) {
   }> = [];
 
   for (const [isoCode, links] of envLinksMap.entries()) {
-      const isoMatch = isoMatches.find((match) => match.isoCode === isoCode);
-      if (!isoMatch) {
-        logEvent({
-          category: "matching",
-          action: "iso_match_not_found",
-          payload: { isoCode },
-          level: "warn",
-        });
-        continue;
-      }
+    const isoMatch = isoMatches.find((match) => match.isoCode === isoCode);
+    if (!isoMatch) {
+      logEvent({
+        category: "matching",
+        action: "iso_match_not_found",
+        payload: { isoCode },
+        level: "warn",
+      });
+      continue;
+    }
 
     // 각 링크마다 별도의 제품 생성
     links.forEach((link, index) => {
@@ -1060,7 +1289,7 @@ export async function GET(request: Request) {
       const productIsoCode = Array.isArray(isoCodesData)
         ? isoCodesData[0]?.code
         : isoCodesData?.code || (product as any).iso_code; // 환경 변수 제품은 직접 필드 사용
-      
+
       const isoMatch = isoMatches.find(
         (match) => match.isoCode === productIsoCode
       );
@@ -1115,8 +1344,7 @@ export async function GET(request: Request) {
       if (ippaData?.importance) {
         // 중요도가 높을수록 매칭 점수에 가중치 적용
         // 중요도 1-5를 0.8-1.2 범위로 변환
-        const importanceMultiplier =
-          0.8 + (ippaData.importance - 1) * 0.1; // 1->0.8, 5->1.2
+        const importanceMultiplier = 0.8 + (ippaData.importance - 1) * 0.1; // 1->0.8, 5->1.2
         matchScore = Math.min(matchScore * importanceMultiplier, 1.0);
       }
 
@@ -1150,7 +1378,7 @@ export async function GET(request: Request) {
 
   // 중복 제품 제거 (강화된 정규화 및 다중 기준 체크)
   // 보조공학사 기본 지식: 같은 제품은 한 번만 추천
-  
+
   // 제품명 정규화 함수
   const normalizeName = (name: string | null | undefined): string => {
     if (!name) return "";
@@ -1161,7 +1389,7 @@ export async function GET(request: Request) {
       .replace(/[^\w가-힣\s]/g, "") // 특수문자 제거 (한글, 영문, 숫자, 공백만 유지)
       .trim();
   };
-  
+
   // URL 정규화 함수 (도메인과 경로만 추출, 쿼리 파라미터 제거)
   const normalizeUrl = (url: string | null | undefined): string => {
     if (!url) return "";
@@ -1174,36 +1402,36 @@ export async function GET(request: Request) {
       return url.toLowerCase().split("?")[0].split("#")[0].trim();
     }
   };
-  
-  const seenProducts = new Map<string, typeof ranked[0]>();
+
+  const seenProducts = new Map<string, (typeof ranked)[0]>();
   const deduplicated: typeof ranked = [];
-  
+
   for (const product of ranked) {
     const normalizedName = normalizeName(product.name);
     const normalizedLink = normalizeUrl(product.purchase_link);
-    
+
     // 중복 체크 키 생성 (여러 기준 조합)
     const keys: string[] = [];
-    
+
     // 1. purchase_link가 있으면 link 기준으로 체크
     if (normalizedLink) {
       keys.push(`link:${normalizedLink}`);
     }
-    
+
     // 2. name 기준으로 체크
     if (normalizedName) {
       keys.push(`name:${normalizedName}`);
     }
-    
+
     // 3. name + link 조합으로 체크 (더 정확한 중복 감지)
     if (normalizedName && normalizedLink) {
       keys.push(`combo:${normalizedName}|${normalizedLink}`);
     }
-    
+
     // 모든 키에 대해 중복 체크
     let isDuplicate = false;
-    let existingProduct: typeof ranked[0] | undefined;
-    
+    let existingProduct: (typeof ranked)[0] | undefined;
+
     for (const key of keys) {
       const existing = seenProducts.get(key);
       if (existing) {
@@ -1212,14 +1440,17 @@ export async function GET(request: Request) {
         break;
       }
     }
-    
+
     if (!isDuplicate) {
       // 중복이 아니면 모든 키에 추가
       for (const key of keys) {
         seenProducts.set(key, product);
       }
       deduplicated.push(product);
-    } else if (existingProduct && product.match_score > existingProduct.match_score) {
+    } else if (
+      existingProduct &&
+      product.match_score > existingProduct.match_score
+    ) {
       // 중복이지만 더 높은 점수면 교체
       const index = deduplicated.indexOf(existingProduct);
       if (index !== -1) {
@@ -1232,7 +1463,7 @@ export async function GET(request: Request) {
     }
     // 중복이고 점수가 같거나 낮으면 무시
   }
-  
+
   const finalRanked = deduplicated;
 
   let recommendationMap: Map<string, string> | null = null;
@@ -1271,12 +1502,16 @@ export async function GET(request: Request) {
       });
     }
 
-      // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
-      if (icfCodes.length > 0 && recommendationMap) {
-        const mapForLearning = recommendationMap; // 타입 가드를 위한 로컬 변수
-        import("@/lib/realtime-learning").then(({ updateRealtimeLearningStats }) => {
+    // 실시간 학습: 추천 생성 시 impression 이벤트 기록 (비동기, 에러 무시)
+    if (icfCodes.length > 0 && recommendationMap) {
+      const mapForLearning = recommendationMap; // 타입 가드를 위한 로컬 변수
+      import("@/lib/realtime-learning").then(
+        ({ updateRealtimeLearningStats }) => {
           // 각 추천된 제품에 대해 impression 이벤트 기록
-          for (const [productId, recommendationId] of mapForLearning.entries()) {
+          for (const [
+            productId,
+            recommendationId,
+          ] of mapForLearning.entries()) {
             const product = finalRanked.find((p) => p.id === productId);
             // ISO 코드 추출 (조인된 필드 또는 직접 필드)
             const isoCodesData = product ? (product as any).iso_codes : null;
@@ -1289,29 +1524,39 @@ export async function GET(request: Request) {
                 productIsoCode as string,
                 "impression"
               ).catch((err) => {
-                console.error("[Products API] Realtime learning impression failed:", err);
+                console.error(
+                  "[Products API] Realtime learning impression failed:",
+                  err
+                );
               });
             }
           }
-        });
-      }
+        }
+      );
     }
+  }
 
-    logEvent({
-      category: "matching",
-      action: "products_retrieved",
-      payload: { count: finalRanked.length, hasIcfContext: icfCodes.length > 0 },
-    });
+  logEvent({
+    category: "matching",
+    action: "products_retrieved",
+    payload: { count: finalRanked.length, hasIcfContext: icfCodes.length > 0 },
+  });
 
   // 디버깅 정보 (개발 환경에서만)
-  const debugInfo = process.env.NODE_ENV === "development" ? {
-    icfCodes,
-    isoMatches: isoMatches.map((m) => ({ isoCode: m.isoCode, label: m.label })),
-    dbProductCount: data?.length ?? 0,
-    envProductCount: envProducts.length,
-    envIsoCodes: Array.from(envLinksMap.keys()),
-    totalProducts: ranked.length,
-  } : undefined;
+  const debugInfo =
+    process.env.NODE_ENV === "development"
+      ? {
+          icfCodes,
+          isoMatches: isoMatches.map((m) => ({
+            isoCode: m.isoCode,
+            label: m.label,
+          })),
+          dbProductCount: data?.length ?? 0,
+          envProductCount: envProducts.length,
+          envIsoCodes: Array.from(envLinksMap.keys()),
+          totalProducts: ranked.length,
+        }
+      : undefined;
 
   // 응답 최적화: 불필요한 필드 제거 및 필수 필드만 반환
   const optimizedProducts = finalRanked.map((product) => {
