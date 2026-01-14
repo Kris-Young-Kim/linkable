@@ -507,8 +507,70 @@ export async function GET(request: Request) {
       } else if (recommendedProducts && recommendedProducts.length > 0) {
         console.log(`[Products API] recommend_products_by_icf found ${recommendedProducts.length} products`);
         
+        // ✅ 추가: 사용자 요청 키워드 기반 필터링
+        // 워커/보행기 요청 시 전동휠체어 제외, 전동휠체어 요청 시 워커 제외
+        const userMessage = (analysisSummary || "").toLowerCase();
+        const hasWalkerKeyword = 
+          userMessage.includes("워커") || 
+          userMessage.includes("보행기") || 
+          userMessage.includes("walker") ||
+          userMessage.includes("보행 보조");
+        const hasWheelchairKeyword = 
+          userMessage.includes("휠체어") || 
+          userMessage.includes("wheelchair");
+        const hasElectricWheelchairKeyword = 
+          userMessage.includes("전동휠체어") || 
+          userMessage.includes("전동 휠체어") ||
+          userMessage.includes("electric wheelchair") ||
+          userMessage.includes("power wheelchair");
+        const hasManualWheelchairKeyword = 
+          userMessage.includes("수동휠체어") || 
+          userMessage.includes("수동 휠체어") ||
+          userMessage.includes("manual wheelchair");
+
+        // 필터링된 제품 목록
+        let filteredProducts = recommendedProducts;
+
+        if (hasWalkerKeyword) {
+          // 워커/보행기 요청 시: 12 06만 포함, 전동휠체어(12 23) 제외
+          filteredProducts = recommendedProducts.filter((p: any) => {
+            const isoCode = p.iso_code || "";
+            const isWalker = isoCode.startsWith("12 06");
+            const isElectricWheelchair = isoCode.startsWith("12 23");
+            return isWalker && !isElectricWheelchair;
+          });
+          console.log(`[Products API] 워커 필터링: ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 06만 포함, 12 23 제외)`);
+        } else if (hasElectricWheelchairKeyword) {
+          // 전동휠체어 요청 시: 12 23만 포함, 워커(12 06) 제외
+          filteredProducts = recommendedProducts.filter((p: any) => {
+            const isoCode = p.iso_code || "";
+            const isElectricWheelchair = isoCode.startsWith("12 23");
+            const isWalker = isoCode.startsWith("12 06");
+            return isElectricWheelchair && !isWalker;
+          });
+          console.log(`[Products API] 전동휠체어 필터링: ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 23만 포함, 12 06 제외)`);
+        } else if (hasManualWheelchairKeyword) {
+          // 수동휠체어 요청 시: 12 22만 포함, 전동휠체어(12 23) 제외
+          filteredProducts = recommendedProducts.filter((p: any) => {
+            const isoCode = p.iso_code || "";
+            const isManualWheelchair = isoCode.startsWith("12 22");
+            const isElectricWheelchair = isoCode.startsWith("12 23");
+            return isManualWheelchair && !isElectricWheelchair;
+          });
+          console.log(`[Products API] 수동휠체어 필터링: ${recommendedProducts.length}개 → ${filteredProducts.length}개 (12 22만 포함, 12 23 제외)`);
+        } else if (hasWheelchairKeyword && !hasElectricWheelchairKeyword && !hasManualWheelchairKeyword) {
+          // 일반 휠체어 요청 시: 12 22, 12 23 모두 포함 (필터링 없음)
+          console.log(`[Products API] 일반 휠체어 요청: 모든 휠체어 포함 (12 22, 12 23)`);
+        }
+
+        // 필터링 후 제품이 없으면 원본 사용 (최소한의 추천 보장)
+        if (filteredProducts.length === 0 && recommendedProducts.length > 0) {
+          console.warn(`[Products API] 필터링 후 제품이 없어 원본 사용: ${recommendedProducts.length}개`);
+          filteredProducts = recommendedProducts;
+        }
+        
         // 형식 변환
-        const formattedProducts: FormattedProduct[] = recommendedProducts.map((p: any) => ({
+        const formattedProducts: FormattedProduct[] = filteredProducts.map((p: any) => ({
           id: p.product_id,
           name: p.product_name,
           iso_code: p.iso_code,
@@ -669,7 +731,7 @@ export async function GET(request: Request) {
       }
 
       // 추천 결과를 기존 형식으로 변환
-      const formattedProducts = formatProductRecommendations(
+      let formattedProducts = formatProductRecommendations(
         recommendationResult.recommendations,
         {
           includePricing: true,
@@ -677,6 +739,73 @@ export async function GET(request: Request) {
           maxDescriptionLength: 150,
         }
       );
+
+      // ✅ 추가: 사용자 요청 키워드 기반 필터링 (고도화된 추천 시스템에도 적용)
+      const userMessage = (analysisSummary || "").toLowerCase();
+      const hasWalkerKeyword = 
+        userMessage.includes("워커") || 
+        userMessage.includes("보행기") || 
+        userMessage.includes("walker") ||
+        userMessage.includes("보행 보조");
+      const hasWheelchairKeyword = 
+        userMessage.includes("휠체어") || 
+        userMessage.includes("wheelchair");
+      const hasElectricWheelchairKeyword = 
+        userMessage.includes("전동휠체어") || 
+        userMessage.includes("전동 휠체어") ||
+        userMessage.includes("electric wheelchair") ||
+        userMessage.includes("power wheelchair");
+      const hasManualWheelchairKeyword = 
+        userMessage.includes("수동휠체어") || 
+        userMessage.includes("수동 휠체어") ||
+        userMessage.includes("manual wheelchair");
+
+      const originalCount = formattedProducts.length;
+
+      if (hasWalkerKeyword) {
+        // 워커/보행기 요청 시: 12 06만 포함, 전동휠체어(12 23) 제외
+        formattedProducts = formattedProducts.filter((p: FormattedProduct) => {
+          const isoCode = p.iso_code || "";
+          const isWalker = isoCode.startsWith("12 06");
+          const isElectricWheelchair = isoCode.startsWith("12 23");
+          return isWalker && !isElectricWheelchair;
+        });
+        console.log(`[Products API] [고도화 추천] 워커 필터링: ${originalCount}개 → ${formattedProducts.length}개 (12 06만 포함, 12 23 제외)`);
+      } else if (hasElectricWheelchairKeyword) {
+        // 전동휠체어 요청 시: 12 23만 포함, 워커(12 06) 제외
+        formattedProducts = formattedProducts.filter((p: FormattedProduct) => {
+          const isoCode = p.iso_code || "";
+          const isElectricWheelchair = isoCode.startsWith("12 23");
+          const isWalker = isoCode.startsWith("12 06");
+          return isElectricWheelchair && !isWalker;
+        });
+        console.log(`[Products API] [고도화 추천] 전동휠체어 필터링: ${originalCount}개 → ${formattedProducts.length}개 (12 23만 포함, 12 06 제외)`);
+      } else if (hasManualWheelchairKeyword) {
+        // 수동휠체어 요청 시: 12 22만 포함, 전동휠체어(12 23) 제외
+        formattedProducts = formattedProducts.filter((p: FormattedProduct) => {
+          const isoCode = p.iso_code || "";
+          const isManualWheelchair = isoCode.startsWith("12 22");
+          const isElectricWheelchair = isoCode.startsWith("12 23");
+          return isManualWheelchair && !isElectricWheelchair;
+        });
+        console.log(`[Products API] [고도화 추천] 수동휠체어 필터링: ${originalCount}개 → ${formattedProducts.length}개 (12 22만 포함, 12 23 제외)`);
+      } else if (hasWheelchairKeyword && !hasElectricWheelchairKeyword && !hasManualWheelchairKeyword) {
+        // 일반 휠체어 요청 시: 12 22, 12 23 모두 포함 (필터링 없음)
+        console.log(`[Products API] [고도화 추천] 일반 휠체어 요청: 모든 휠체어 포함 (12 22, 12 23)`);
+      }
+
+      // 필터링 후 제품이 없으면 원본 사용 (최소한의 추천 보장)
+      if (formattedProducts.length === 0 && originalCount > 0) {
+        console.warn(`[Products API] [고도화 추천] 필터링 후 제품이 없어 원본 사용: ${originalCount}개`);
+        formattedProducts = formatProductRecommendations(
+          recommendationResult.recommendations,
+          {
+            includePricing: true,
+            includeManufacturer: true,
+            maxDescriptionLength: 150,
+          }
+        );
+      }
 
       // 추천 저장 (consultationId가 있는 경우, 환경 변수 제품 제외)
       // 저장은 하되, 제품 추천은 하지 않아야 하는 경우 비활성화
