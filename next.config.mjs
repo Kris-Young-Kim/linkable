@@ -55,6 +55,8 @@ const nextConfig = {
       "https://va.vercel-scripts.com",
       "https://*.vercel-scripts.com",
       "https://images.unsplash.com",
+      "https://vercel.live",
+      "https://*.vercel.live",
     ];
     
     // 개발 환경에서만 로컬 디버깅 서버 추가
@@ -90,8 +92,8 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://b.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
-              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://b.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://b.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com https://vercel.live https://*.vercel.live",
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://clerk.linkable.life https://clerk.accounts.dev https://*.clerk.accounts.dev https://clerk.com https://*.clerk.com https://www.clarity.ms https://b.clarity.ms https://scripts.clarity.ms https://*.clarity.ms https://www.linkable.life https://linkable.life https://connect.facebook.net https://www.facebook.com https://va.vercel-scripts.com https://*.vercel-scripts.com https://vercel.live https://*.vercel.live",
               "worker-src 'self' blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
