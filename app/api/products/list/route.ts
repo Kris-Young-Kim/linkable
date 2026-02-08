@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const DEFAULT_PAGE_SIZE = 24;
-const MAX_PAGE_SIZE = 100;
+const MAX_PAGE_SIZE = 48;
 
 export type ProductListItem = {
   id: string;
@@ -15,12 +15,27 @@ export type ProductListItem = {
   manufacturer: string | null;
   iso_code: string | null;
   iso_name: string | null;
+  updated_at: string | null;
 };
+
+const SORT_OPTIONS = {
+  name_asc: { column: "name", ascending: true },
+  name_desc: { column: "name", ascending: false },
+  price_asc: { column: "price", ascending: true },
+  price_desc: { column: "price", ascending: false },
+  newest: { column: "updated_at", ascending: false },
+} as const;
+
+type SortKey = keyof typeof SORT_OPTIONS;
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() || "";
   const category = searchParams.get("category")?.trim() || "";
+  const manufacturer = searchParams.get("manufacturer")?.trim() || "";
+  const priceMin = searchParams.get("price_min");
+  const priceMax = searchParams.get("price_max");
+  const sortKey = (searchParams.get("sort")?.trim() || "name_asc") as SortKey;
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
   const pageSize = Math.min(
     MAX_PAGE_SIZE,
@@ -29,6 +44,7 @@ export async function GET(request: Request) {
   const from = (page - 1) * pageSize;
 
   const supabase = getSupabaseServerClient();
+  const sort = SORT_OPTIONS[sortKey] ?? SORT_OPTIONS.name_asc;
 
   let query = supabase
     .from("products")
@@ -42,6 +58,7 @@ export async function GET(request: Request) {
       price,
       category,
       manufacturer,
+      updated_at,
       iso_code_id,
       iso_codes!iso_code_id (
         code,
@@ -51,18 +68,32 @@ export async function GET(request: Request) {
       { count: "exact" }
     )
     .eq("is_active", true)
-    .not("iso_code_id", "is", null)
-    .order("name", { ascending: true })
-    .range(from, from + pageSize - 1);
+    .not("iso_code_id", "is", null);
 
   if (category) {
     query = query.eq("category", category);
   }
+  if (manufacturer) {
+    query = query.eq("manufacturer", manufacturer);
+  }
+  if (priceMin != null && priceMin !== "") {
+    const n = parseInt(priceMin, 10);
+    if (!Number.isNaN(n) && n >= 0) query = query.gte("price", n);
+  }
+  if (priceMax != null && priceMax !== "") {
+    const n = parseInt(priceMax, 10);
+    if (!Number.isNaN(n) && n >= 0) query = query.lte("price", n);
+  }
 
   if (q) {
     const safe = q.slice(0, 100).replace(/'/g, "''");
-    query = query.or(`name.ilike.%${safe}%,description.ilike.%${safe}%,category.ilike.%${safe}%`);
+    query = query.or(
+      `name.ilike.%${safe}%,description.ilike.%${safe}%,category.ilike.%${safe}%,manufacturer.ilike.%${safe}%`
+    );
   }
+
+  query = query.order(sort.column, { ascending: sort.ascending, nullsFirst: false });
+  query = query.range(from, from + pageSize - 1);
 
   const { data, count, error } = await query;
 
@@ -85,6 +116,7 @@ export async function GET(request: Request) {
     manufacturer: p.manufacturer ?? null,
     iso_code: p.iso_codes?.code ?? null,
     iso_name: p.iso_codes?.name ?? null,
+    updated_at: p.updated_at ?? null,
   }));
 
   const total = typeof count === "number" ? count : items.length;

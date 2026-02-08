@@ -23,6 +23,7 @@ export type ProductCatalogItem = {
   manufacturer: string | null;
   iso_code: string | null;
   iso_name: string | null;
+  updated_at?: string | null;
 };
 
 interface ProductCatalogCardProps {
@@ -54,11 +55,18 @@ export function ProductCatalogCard({ product }: ProductCatalogCardProps) {
               <Package className="h-12 w-12" aria-hidden="true" />
             </div>
           )}
-          {product.category && (
-            <Badge className="absolute left-2 top-2 bg-white/90 text-xs text-foreground shadow-sm">
-              {product.category}
-            </Badge>
-          )}
+          <div className="absolute left-2 top-2 flex flex-wrap gap-1">
+            {product.category && (
+              <Badge className="bg-white/90 text-xs text-foreground shadow-sm">
+                {product.category}
+              </Badge>
+            )}
+            {product.manufacturer && (
+              <Badge variant="secondary" className="bg-white/80 text-xs shadow-sm">
+                {product.manufacturer}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-2 p-4">

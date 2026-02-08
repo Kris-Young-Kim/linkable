@@ -115,7 +115,7 @@ export function HeroSection({ language = "ko" }: HeroSectionProps) {
               variant="custom"
               href="/products"
               size="lg"
-              showArrow={false}
+              showArrow={true}
               className="border-2 border-primary/20 bg-white/70 backdrop-blur hover:border-primary hover:bg-primary/10"
             >
               {t("hero.learnMore")}
