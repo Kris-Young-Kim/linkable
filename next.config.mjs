@@ -54,6 +54,7 @@ const nextConfig = {
       "https://graph.facebook.com",
       "https://va.vercel-scripts.com",
       "https://*.vercel-scripts.com",
+      "https://images.unsplash.com",
     ];
     
     // 개발 환경에서만 로컬 디버깅 서버 추가
