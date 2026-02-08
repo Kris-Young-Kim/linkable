@@ -113,7 +113,7 @@ export function HeroSection({ language = "ko" }: HeroSectionProps) {
             </CTAButton>
             <CTAButtonSecondary
               variant="custom"
-              href="#how-it-works"
+              href="/products"
               size="lg"
               showArrow={false}
               className="border-2 border-primary/20 bg-white/70 backdrop-blur hover:border-primary hover:bg-primary/10"

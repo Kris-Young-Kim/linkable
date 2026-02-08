@@ -29,12 +29,23 @@ export const translations = {
     "hero.titleHighlight": "가능성",
     "hero.subtitle":
       "ICF & ISO 표준 기반 맞춤형 보조기기 추천입니다.\n검증된 방법론으로 전문가 매칭을 경험하세요.",
-    "hero.getStarted": "시작하기",
-    "hero.learnMore": "자세히 보기",
+    "hero.getStarted": "채팅으로 찾기",
+    "hero.learnMore": "직접 찾기",
     "hero.icfCertified": "ICF Core Set 활용",
     "hero.isoStandards": "ISO 9999 데이터 매핑",
     "hero.kippaValidated": "K-IPPA 검증",
     "hero.imageAlt": "편안한 공간에서 태블릿을 사용하는 시니어의 모습",
+
+    // Products (직접 찾기)
+    "products.title": "직접 찾기",
+    "products.subtitle": "보조기기 카탈로그에서 검색하고 필터로 찾아보세요.",
+    "products.searchPlaceholder": "제품명, 설명, 카테고리로 검색",
+    "products.filterCategory": "카테고리",
+    "products.allCategories": "전체 카테고리",
+    "products.noResults": "검색 결과가 없습니다.",
+    "products.buyLink": "구매처 보기",
+    "products.isoCode": "ISO 분류",
+    "products.backToHome": "홈으로",
 
     // Features Section
     "features.title": "LinkAble을 선택하는 이유",
@@ -502,12 +513,23 @@ export const translations = {
     "hero.titleHighlight": "AI",
     "hero.subtitle":
       "Personalized assistive technology recommendations based on ICF & ISO standards. Experience expert matching powered by proven methodologies.",
-    "hero.getStarted": "Get Started",
-    "hero.learnMore": "Learn More",
+    "hero.getStarted": "Find by Chat",
+    "hero.learnMore": "Find Directly",
     "hero.icfCertified": "ICF Certified",
     "hero.isoStandards": "ISO Standards",
     "hero.kippaValidated": "K-IPPA Validated",
     "hero.imageAlt": "Elderly person using a tablet comfortably at home",
+
+    // Products (Find Directly)
+    "products.title": "Find Directly",
+    "products.subtitle": "Search and filter the assistive products catalog.",
+    "products.searchPlaceholder": "Search by name, description, or category",
+    "products.filterCategory": "Category",
+    "products.allCategories": "All categories",
+    "products.noResults": "No results found.",
+    "products.buyLink": "View purchase link",
+    "products.isoCode": "ISO classification",
+    "products.backToHome": "Back to home",
 
     // Features Section
     "features.title": "Why Choose LinkAble",
@@ -890,12 +912,23 @@ export const translations = {
     "hero.titleHighlight": "可能性",
     "hero.subtitle":
       "ICFとISO基準に基づいたパーソナライズされた支援機器の推奨。実証された方法論による専門家マッチングを体験してください。",
-    "hero.getStarted": "始める",
-    "hero.learnMore": "詳しく見る",
+    "hero.getStarted": "チャットで探す",
+    "hero.learnMore": "直接探す",
     "hero.icfCertified": "ICF認定",
     "hero.isoStandards": "ISO基準",
     "hero.kippaValidated": "K-IPPA検証済み",
     "hero.imageAlt": "落ち着いた空間でタブレットを使うシニアの姿",
+
+    // Products (直接探す)
+    "products.title": "直接探す",
+    "products.subtitle": "支援機器カタログで検索・フィルターして探せます。",
+    "products.searchPlaceholder": "製品名・説明・カテゴリで検索",
+    "products.filterCategory": "カテゴリ",
+    "products.allCategories": "すべてのカテゴリ",
+    "products.noResults": "検索結果がありません。",
+    "products.buyLink": "購入先を見る",
+    "products.isoCode": "ISO分類",
+    "products.backToHome": "ホームへ",
 
     // Features Section
     "features.title": "LinkAbleを選ぶ理由",
