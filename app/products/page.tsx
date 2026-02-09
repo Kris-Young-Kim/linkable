@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { ProductsBrowseView } from "@/components/products-browse-view";
 import type { ProductListItem } from "@/app/api/products/list/route";
+import type { IsoCategory } from "@/lib/iso-classes";
 
 const DEFAULT_PAGE_SIZE = 24;
 
 async function fetchProductsList(params: {
   q?: string;
   category?: string;
-  manufacturer?: string;
   price_min?: string;
   price_max?: string;
   sort?: string;
@@ -16,7 +16,6 @@ async function fetchProductsList(params: {
   const searchParams = new URLSearchParams();
   if (params.q) searchParams.set("q", params.q);
   if (params.category) searchParams.set("category", params.category);
-  if (params.manufacturer) searchParams.set("manufacturer", params.manufacturer);
   if (params.price_min) searchParams.set("price_min", params.price_min);
   if (params.price_max) searchParams.set("price_max", params.price_max);
   if (params.sort) searchParams.set("sort", params.sort);
@@ -31,20 +30,12 @@ async function fetchProductsList(params: {
   return res.json();
 }
 
-async function fetchCategories(): Promise<string[]> {
+async function fetchCategories(): Promise<IsoCategory[]> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   const res = await fetch(`${baseUrl}/api/products/categories`, { cache: "no-store" });
   if (!res.ok) return [];
   const data = await res.json();
   return data.categories ?? [];
-}
-
-async function fetchManufacturers(): Promise<string[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/products/manufacturers`, { cache: "no-store" });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.manufacturers ?? [];
 }
 
 type Props = {
@@ -59,15 +50,13 @@ export default async function ProductsPage({ searchParams }: Props) {
   const resolved = await searchParams;
   const q = str(resolved.q);
   const category = str(resolved.category);
-  const manufacturer = str(resolved.manufacturer);
   const priceMin = str(resolved.price_min);
   const priceMax = str(resolved.price_max);
   const sort = str(resolved.sort) || "name_asc";
 
-  const [listData, categories, manufacturers] = await Promise.all([
-    fetchProductsList({ q, category, manufacturer, price_min: priceMin || undefined, price_max: priceMax || undefined, sort }),
+  const [listData, categories] = await Promise.all([
+    fetchProductsList({ q, category, price_min: priceMin || undefined, price_max: priceMax || undefined, sort }),
     fetchCategories(),
-    fetchManufacturers(),
   ]);
 
   return (
@@ -77,7 +66,6 @@ export default async function ProductsPage({ searchParams }: Props) {
       initialPage={listData.page}
       pageSize={listData.pageSize}
       categories={categories}
-      manufacturers={manufacturers}
     />
   );
 }

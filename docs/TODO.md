@@ -16,7 +16,8 @@
 10. [Phase 4.5 — ICF 코드 확장 전략](#phase-45--icf-코드-확장-전략)
 11. [Phase 4.6 — 매칭 정확도 개선](#phase-46--매칭-정확도-개선)
 12. [Phase 4.7 — RLS 정책 활성화 및 Clerk JWT 통합](#phase-47--rls-정책-활성화-및-clerk-jwt-통합)
-13. [Phase 5 — 프론트엔드 완성도 향상](#phase-5--프론트엔드-완성도-향상)
+13. [Phase 4.8 — RAG/GraphRAG 기반 매칭 고도화](#phase-48--raggraphrag-기반-매칭-고도화)
+14. [Phase 5 — 프론트엔드 완성도 향상](#phase-5--프론트엔드-완성도-향상)
 14. [Post-MVP 전략](#post-mvp-전략)
 
 ---
@@ -76,6 +77,11 @@
 6. **URL 구조 최적화** (841줄) - **프로덕션 배포 시 확인 필요**
    - [ ] 도메인 HTTPS 리디렉션 (프로덕션 배포 시 확인)
    - [ ] URL 구조 표준화 (하이픈 구분, 소문자 등)
+
+7. **RAG/GraphRAG 기반 매칭 고도화** (Phase 4.8) - **진행 필요**
+   - [ ] Phase 1: RAG 지식 저장소 구축 및 검색 파이프라인
+   - [ ] Phase 2: GraphRAG 그래프 확장 및 통합
+   - 참고: `docs/TODO.md` Phase 4.8 섹션
 
 #### 비즈니스 작업 (비개발자 작업)
 
@@ -736,6 +742,144 @@ Core Set에 없는 ICF 코드를 동적으로 처리하고, 사용 통계를 수
 - Clerk JWT를 Supabase JWT로 변환
 - 클라이언트 측 인증 통합
 - Supabase Edge Function 활용 (선택적)
+
+---
+
+## Phase 4.8 — RAG/GraphRAG 기반 매칭 고도화 (2025-02 추가)
+
+**배경**: Phase 4.6의 다층 매칭(규칙/시맨틱/지식그래프/피드백/상관관계/컨텍스트)에도 불구하고 매칭 실패가 반복되는 경우, **외부 전문 지식 검색**과 **LLM 추론**을 도입하여 장기미(long-tail) ICF 조합 및 새 케이스에 대응합니다.
+
+**목표**: RAG·GraphRAG를 활용하여 ICF-ISO 매칭 정확도를 85-90% 이상으로 향상
+
+### 현재 한계 요약
+
+| 항목 | 현재 상태 | 한계 |
+|------|-----------|------|
+| 지식 그래프 | `knowledge-graph.ts` 하드코딩 ~10개 관계 | 규모·확장성 제한 |
+| 시맨틱 매칭 | pgvector + 사전 임베딩 | 새 ICF 조합 콜드 스타트 |
+| 규칙 매핑 | `iso-mapping.ts` ~50개 규칙 | 장기미 케이스 커버 부족 |
+| 지식 소스 | 내부 DB 위주 | WHO ICF, ISO 9999, 학술·실무 자료 미활용 |
+
+### Phase 1: RAG 기반 매칭 (1-2개월)
+
+#### 1.1 지식 저장소 구축 (1-2주)
+
+- [x] **지식 문서 목록 정의** — `docs/` 내 수록 문서 활용
+  - `docs/icf-full-catalog.md` — ICF 전체 코드 목록 (1292개, WHO ICF Browser 기반 국·영문)
+  - `docs/KS_P_ISO_9999_2022.md` — KS P ISO 9999:2022 보조기구 분류·용어 (ICF 연계)
+  - `docs/보조기기 품목 분류체계.txt` — ISO 9999 기반 보조기기 품목 분류체계 (국문)
+  - `docs/ICF_ISO_definition.md` — ICF-ISO 매핑 개요 및 예시
+  - `docs/46qg.pdf` — ICF/ISO 참고 문서
+  - `docs/8.+[20-E-01]+보조기기성과평가도구(IPPA)+도입을+통한+장애유형상황별+자립생활+지원+보조기기+제안+가이드라인+개발+연구.pdf` — IPPA 기반 장애유형별 보조기기 제안 가이드라인
+- [x] **문서 수집·청킹 파이프라인**
+  - `scripts/rag/ingest-knowledge-docs.ts` 생성
+  - 입력: `docs/icf-full-catalog.md`, `docs/KS_P_ISO_9999_2022.md`, `docs/보조기기 품목 분류체계.txt`, `docs/ICF_ISO_definition.md` (Markdown/TXT 우선)
+  - PDF 처리: `46qg.pdf`, IPPA 가이드라인 PDF → `pdf-parse` 등으로 텍스트 추출 후 청킹 (추후)
+  - Chunk 분할 전략: ICF 코드별, ISO Division별, 300-800자
+  - 메타데이터: `source`, `icf_codes`, `iso_codes`, `doc_type`
+  - 실행: `pnpm ingest:rag`
+- [x] **벡터 저장소 확장**
+  - 마이그레이션: `icf_iso_rag_documents` 테이블 (`supabase/migrations/20260208000000_add_icf_iso_rag_documents.sql`)
+  - 필드: `id`, `content`, `embedding`, `metadata`, `created_at`
+  - 인덱스: HNSW 벡터 검색, `search_rag_documents()` 함수
+
+#### 1.2 RAG 검색 파이프라인 (2-3주)
+
+- [ ] **`core/matching/rag-matcher.ts` 생성**
+  - 입력: `icfCodes`, `userMessage`, `analysisSummary`
+  - 출력: `IsoMatch[]` (기존 형식)
+  - 흐름:
+    1. ICF 조합 + 컨텍스트로 쿼리 텍스트 생성
+    2. pgvector로 관련 문서 top-K(5-10) 검색
+    3. 검색 결과를 프롬프트 컨텍스트로 주입
+    4. Gemini가 검색 결과 근거로 ISO 코드 추천 + 설명 생성
+- [ ] **RAG 프롬프트 설계**
+  - 시스템 프롬프트: ICF-ISO 매핑 원칙, ISO 9999 구조
+  - 컨텍스트: 검색된 청크 + 기존 `icf_codes`, `iso_codes` 매핑
+  - 출력 형식: JSON `{ isoCode, label, score, reason }[]`
+- [ ] **`hybrid-matcher.ts`에 RAG 통합**
+  - 조건: 규칙/시맨틱 매칭 점수 < 임계값 또는 결과 없음 → RAG 호출
+  - 가중치: 초기 0.15~0.2 (보수적 적용)
+  - `combineMatches`에 `source: "rag"` 레이어 추가
+
+#### 1.3 검증 및 운영 (1주)
+
+- [ ] RAG 매칭 성능 측정 (A/B 또는 오프라인 테스트)
+- [ ] 관리자 대시보드에 RAG 사용률·성공률 지표 추가
+- [ ] 에러 시 기존 하이브리드 매칭으로 폴백
+
+### Phase 2: GraphRAG 도입 (2-4개월)
+
+#### 2.1 지식 그래프 확장 (2-3주)
+
+- [ ] **그래프 스키마 설계**
+  - 노드: ICF 코드, ISO 코드, 증상/활동 키워드
+  - 엣지: ICF→ISO (직접/간접), ICF→ICF (상관)
+- [ ] **관계 추출 파이프라인**
+  - `scripts/graph/extract-icf-iso-relations.ts`
+  - 소스: `icf_code_usage_logs`, `icf_iso_mappings`, RAG 문서
+  - LLM 또는 규칙 기반 관계 추출
+- [ ] **그래프 저장소**
+  - Supabase: `icf_iso_graph_edges` 테이블 (소규모)
+  - 또는 Neo4j/별도 그래프 DB (대규모 시)
+
+#### 2.2 GraphRAG 파이프라인 (3-4주)
+
+- [ ] **라이브러리 검토 및 선정**
+  - Microsoft GraphRAG: 커뮤니티 검색, 계층적 요약
+  - LlamaIndex Knowledge Graph: 엔티티·관계 추출, 경로 검색
+- [ ] **`core/matching/graph-rag-matcher.ts` 생성**
+  - 커뮤니티 검색: ICF 조합과 연결된 ISO 클러스터 탐색
+  - 경로 추론: ICF A → ICF B → ISO C 멀티홉
+  - 결과를 `IsoMatch[]` 형식으로 변환
+- [ ] **하이브리드 파이프라인 통합**
+  - RAG + GraphRAG 결과를 별도 소스로 `combineMatches`에 추가
+  - 가중치: RAG 0.2, GraphRAG 0.15 (초기)
+
+#### 2.3 학습 및 갱신 (1-2주)
+
+- [ ] 피드백 기반 그래프 관계 강도 업데이트
+- [ ] 주기적(월 1회) 문서·그래프 재구축 스케줄
+
+### 구현 체크리스트
+
+**즉시 (1-2주)**
+
+- [x] RAG용 지식 문서 목록 확정 — `docs/icf-full-catalog.md`, `docs/KS_P_ISO_9999_2022.md`, `docs/보조기기 품목 분류체계.txt`, `docs/ICF_ISO_definition.md`, `docs/*.pdf` 활용
+- [x] `icf_iso_rag_documents` 마이그레이션 작성
+- [x] 문서 수집·청킹·임베딩 파이프라인 스크립트 (`pnpm ingest:rag`)
+
+**단기 (1-2개월)**
+
+- [ ] `rag-matcher.ts` 구현 및 `hybrid-matcher.ts` 통합
+- [ ] RAG 매칭 A/B 테스트 및 정확도 측정
+
+**중기 (2-4개월)**
+
+- [ ] ICF-ISO 그래프 관계 추출 및 저장
+- [ ] GraphRAG 파이프라인 구축
+- [ ] RAG + GraphRAG 통합 하이브리드 파이프라인
+
+### 참고 라이브러리
+
+| 용도 | 라이브러리 | 비고 |
+|------|------------|------|
+| RAG | LlamaIndex, LangChain | 벡터 검색, 청킹, 프롬프트 구성 |
+| GraphRAG | Microsoft GraphRAG | 커뮤니티 검색, 계층 요약 |
+| 그래프 | Neo4j, Supabase | 관계 저장·쿼리 |
+| 임베딩 | Gemini Embedding API | 기존 `lib/embeddings/gemini-embedding.ts` 활용 |
+
+### 예상 효과
+
+| 단계 | 기간 | 예상 정확도 | 비고 |
+|------|------|-------------|------|
+| RAG 적용 | 1-2개월 | 80-88% | 장기미 ICF 조합 대응 |
+| RAG + GraphRAG | 2-4개월 | 85-92% | 멀티홉 추론, 커뮤니티 검색 |
+
+### 참고 문서
+
+- `docs/icf-iso-matching-improvement-plan.md`: 기존 매칭 개선 방안
+- `core/matching/hybrid-matcher.ts`: 하이브리드 매칭 메인 로직
 
 ---
 

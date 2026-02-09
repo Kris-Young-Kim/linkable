@@ -85,9 +85,8 @@ export function ProductCatalogCard({ product }: ProductCatalogCardProps) {
         {product.price != null && product.price > 0 && (
           <p className="text-sm font-medium text-foreground">
             {typeof product.price === "number"
-              ? product.price.toLocaleString("ko-KR")
-              : product.price}{" "}
-            원
+              ? `${product.price.toLocaleString("ko-KR")}원`
+              : `${product.price}원`}
           </p>
         )}
       </CardContent>

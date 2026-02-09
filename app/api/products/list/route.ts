@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getIsoPrefixForClass } from "@/lib/iso-classes";
 
 const DEFAULT_PAGE_SIZE = 24;
 const MAX_PAGE_SIZE = 48;
@@ -32,7 +33,6 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get("q")?.trim() || "";
   const category = searchParams.get("category")?.trim() || "";
-  const manufacturer = searchParams.get("manufacturer")?.trim() || "";
   const priceMin = searchParams.get("price_min");
   const priceMax = searchParams.get("price_max");
   const sortKey = (searchParams.get("sort")?.trim() || "name_asc") as SortKey;
@@ -71,10 +71,17 @@ export async function GET(request: Request) {
     .not("iso_code_id", "is", null);
 
   if (category) {
-    query = query.eq("category", category);
-  }
-  if (manufacturer) {
-    query = query.eq("manufacturer", manufacturer);
+    const isoPrefix = getIsoPrefixForClass(category);
+    if (isoPrefix) {
+      const { data } = await supabase
+        .from("iso_codes")
+        .select("id")
+        .ilike("code", `${isoPrefix}%`);
+      const isoIds = (data ?? []).map((r: { id: string }) => r.id);
+      if (isoIds.length > 0) {
+        query = query.in("iso_code_id", isoIds);
+      }
+    }
   }
   if (priceMin != null && priceMin !== "") {
     const n = parseInt(priceMin, 10);

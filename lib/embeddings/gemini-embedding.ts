@@ -1,11 +1,12 @@
 /**
  * Google Gemini Embedding API 연동
  *
- * text-embedding-004 모델을 사용하여 텍스트를 벡터 임베딩으로 변환합니다.
+ * gemini-embedding-001 모델을 사용하여 텍스트를 벡터 임베딩으로 변환합니다.
+ * (text-embedding-004 deprecated, 2025년부터 gemini-embedding-001 사용)
  */
 
 const GEMINI_EMBEDDING_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent";
 
 // 설정
 const MAX_RETRIES = 3;
@@ -103,7 +104,11 @@ function isRetryableError(error: unknown): boolean {
     }
 
     // 5xx 서버 에러
-    if (message.includes("500") || message.includes("502") || message.includes("503")) {
+    if (
+      message.includes("500") ||
+      message.includes("502") ||
+      message.includes("503")
+    ) {
       return true;
     }
   }
@@ -113,7 +118,10 @@ function isRetryableError(error: unknown): boolean {
 /**
  * 텍스트를 벡터 임베딩으로 변환 (내부 함수)
  */
-async function createEmbeddingInternal(text: string, apiKey: string): Promise<number[]> {
+async function createEmbeddingInternal(
+  text: string,
+  apiKey: string,
+): Promise<number[]> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -124,7 +132,7 @@ async function createEmbeddingInternal(text: string, apiKey: string): Promise<nu
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "models/text-embedding-004",
+        model: "models/gemini-embedding-001",
         content: {
           parts: [
             {
@@ -132,6 +140,7 @@ async function createEmbeddingInternal(text: string, apiKey: string): Promise<nu
             },
           ],
         },
+        output_dimensionality: 768, // 기존 DB 스키마 호환 (vector 768)
       }),
       signal: controller.signal,
     });
@@ -139,7 +148,7 @@ async function createEmbeddingInternal(text: string, apiKey: string): Promise<nu
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(
-        `Gemini Embedding API error: ${response.status} ${errorText}`
+        `Gemini Embedding API error: ${response.status} ${errorText}`,
       );
     }
 
@@ -159,7 +168,7 @@ async function createEmbeddingInternal(text: string, apiKey: string): Promise<nu
  */
 export async function createEmbedding(
   text: string,
-  throwOnError: boolean = false
+  throwOnError: boolean = false,
 ): Promise<number[]> {
   // 1. 캐시 확인
   const cached = getCachedEmbedding(text);
@@ -172,7 +181,9 @@ export async function createEmbedding(
     if (throwOnError) {
       throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is not configured");
     }
-    console.warn("[gemini-embedding] API key not configured, returning empty embedding");
+    console.warn(
+      "[gemini-embedding] API key not configured, returning empty embedding",
+    );
     return [];
   }
 
@@ -194,7 +205,7 @@ export async function createEmbedding(
           const delayMs = INITIAL_RETRY_DELAY_MS * Math.pow(2, attempt);
           console.warn(
             `[gemini-embedding] Retry ${attempt + 1}/${MAX_RETRIES} after ${delayMs}ms:`,
-            error instanceof Error ? error.message : error
+            error instanceof Error ? error.message : error,
           );
           await delay(delayMs);
           continue;
@@ -219,12 +230,12 @@ export async function createEmbedding(
 
 /**
  * 여러 텍스트를 배치로 임베딩 생성
- * 
+ *
  * @param texts 임베딩할 텍스트 배열
  * @returns 벡터 배열
  */
 export async function createEmbeddingsBatch(
-  texts: string[]
+  texts: string[],
 ): Promise<number[][]> {
   // Gemini API는 배치 요청을 지원하지 않으므로 순차적으로 처리
   // Rate limit을 고려하여 지연 시간 추가
@@ -243,7 +254,7 @@ export async function createEmbeddingsBatch(
     } catch (error) {
       console.error(
         `[gemini-embedding] Failed to create embedding for text ${i}:`,
-        error
+        error,
       );
       // 에러 발생 시 빈 벡터 추가 (나중에 재시도 가능하도록)
       embeddings.push([]);
@@ -252,4 +263,3 @@ export async function createEmbeddingsBatch(
 
   return embeddings;
 }
-

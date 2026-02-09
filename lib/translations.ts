@@ -41,12 +41,12 @@ export const translations = {
     "products.subtitle": "보조기기 카탈로그에서 검색하고 필터로 찾아보세요.",
     "products.searchPlaceholder": "제품명, 설명, 카테고리, 제조사로 검색",
     "products.searchLabel": "검색",
-    "products.filterCategory": "카테고리",
     "products.filterManufacturer": "제조사",
     "products.filterPrice": "가격 범위",
     "products.priceMin": "최소 가격 (원)",
     "products.priceMax": "최대 가격 (원)",
-    "products.allCategories": "전체 카테고리",
+    "products.allCategories": "ISO 분류",
+    "products.filterCategory": "ISO 분류",
     "products.allManufacturers": "전체 제조사",
     "products.sort": "정렬",
     "products.sortNameAsc": "이름순 (가나다)",
@@ -63,7 +63,7 @@ export const translations = {
     "products.buyLink": "구매처 보기",
     "products.isoCode": "ISO 분류",
     "products.backToHome": "홈으로",
-    "products.quickCategory": "인기 카테고리",
+    "products.quickCategory": "ISO 분류",
 
     // Features Section
     "features.title": "LinkAble을 선택하는 이유",

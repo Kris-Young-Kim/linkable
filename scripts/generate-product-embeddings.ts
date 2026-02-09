@@ -19,7 +19,7 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const GEMINI_API_KEY = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
 const GEMINI_EMBEDDING_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent";
 
 // 설정
 const BATCH_SIZE = 10; // 한 번에 처리할 제품 수
@@ -36,14 +36,18 @@ interface Product {
 async function createEmbedding(text: string): Promise<number[] | null> {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     try {
-      const response = await fetch(`${GEMINI_EMBEDDING_API_URL}?key=${GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "models/text-embedding-004",
-          content: { parts: [{ text }] },
-        }),
-      });
+      const response = await fetch(
+        `${GEMINI_EMBEDDING_API_URL}?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "models/gemini-embedding-001",
+            content: { parts: [{ text }] },
+            output_dimensionality: 768,
+          }),
+        },
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -82,7 +86,9 @@ async function main() {
 
   // 환경변수 확인
   if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-    console.error("Error: SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY가 설정되지 않았습니다.");
+    console.error(
+      "Error: SUPABASE_URL 또는 SUPABASE_SERVICE_ROLE_KEY가 설정되지 않았습니다.",
+    );
     process.exit(1);
   }
 
@@ -119,11 +125,15 @@ async function main() {
   // 배치 단위로 처리
   for (let i = 0; i < products.length; i += BATCH_SIZE) {
     const batch = products.slice(i, i + BATCH_SIZE);
-    console.log(`\n--- 배치 ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(products.length / BATCH_SIZE)} ---`);
+    console.log(
+      `\n--- 배치 ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(products.length / BATCH_SIZE)} ---`,
+    );
 
     for (const product of batch) {
       const text = buildProductText(product);
-      console.log(`[${successCount + failCount + 1}/${products.length}] ${product.name.substring(0, 40)}...`);
+      console.log(
+        `[${successCount + failCount + 1}/${products.length}] ${product.name.substring(0, 40)}...`,
+      );
 
       const embedding = await createEmbedding(text);
 

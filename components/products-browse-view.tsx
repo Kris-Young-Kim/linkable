@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ProductCatalogCard, type ProductCatalogItem } from "@/components/product-catalog-card";
+import type { IsoCategory } from "@/lib/iso-classes";
 
 const SORT_KEYS = ["name_asc", "name_desc", "price_asc", "price_desc", "newest"] as const;
 const DEBOUNCE_MS = 350;
@@ -25,8 +26,7 @@ type ProductsBrowseViewProps = {
   initialTotal: number;
   initialPage: number;
   pageSize: number;
-  categories: string[];
-  manufacturers: string[];
+  categories: IsoCategory[];
 };
 
 export function ProductsBrowseView({
@@ -35,7 +35,6 @@ export function ProductsBrowseView({
   initialPage,
   pageSize,
   categories,
-  manufacturers,
 }: ProductsBrowseViewProps) {
   const { t } = useLanguage();
   const router = useRouter();
@@ -44,7 +43,6 @@ export function ProductsBrowseView({
   const getParam = (key: string) => searchParams.get(key) ?? "";
   const [q, setQ] = useState(getParam("q"));
   const [category, setCategory] = useState(getParam("category"));
-  const [manufacturer, setManufacturer] = useState(getParam("manufacturer"));
   const [priceMin, setPriceMin] = useState(getParam("price_min"));
   const [priceMax, setPriceMax] = useState(getParam("price_max"));
   const [sort, setSort] = useState(getParam("sort") || "name_asc");
@@ -56,7 +54,7 @@ export function ProductsBrowseView({
   const [debouncedQ, setDebouncedQ] = useState(getParam("q"));
   const isInitialMount = useRef(true);
 
-  const hasActiveFilters = category || manufacturer || priceMin || priceMax || debouncedQ.trim();
+  const hasActiveFilters = category || priceMin || priceMax || debouncedQ.trim();
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedQ(q), DEBOUNCE_MS);
@@ -69,7 +67,6 @@ export function ProductsBrowseView({
       const search = (overrides.q ?? debouncedQ).trim();
       if (search) p.set("q", search);
       if (category) p.set("category", category);
-      if (manufacturer) p.set("manufacturer", manufacturer);
       if (priceMin) p.set("price_min", priceMin);
       if (priceMax) p.set("price_max", priceMax);
       if (sort && sort !== "name_asc") p.set("sort", sort);
@@ -77,7 +74,7 @@ export function ProductsBrowseView({
       if (pageNum > 1) p.set("page", String(pageNum));
       return p;
     },
-    [debouncedQ, category, manufacturer, priceMin, priceMax, sort]
+    [debouncedQ, category, priceMin, priceMax, sort]
   );
 
   const syncUrl = useCallback(() => {
@@ -97,7 +94,6 @@ export function ProductsBrowseView({
         const search = debouncedQ.trim();
         if (search) params.set("q", search);
         if (category) params.set("category", category);
-        if (manufacturer) params.set("manufacturer", manufacturer);
         if (priceMin) params.set("price_min", priceMin);
         if (priceMax) params.set("price_max", priceMax);
         params.set("sort", sort);
@@ -126,7 +122,7 @@ export function ProductsBrowseView({
         setLoadingMore(false);
       }
     },
-    [debouncedQ, category, manufacturer, priceMin, priceMax, sort]
+    [debouncedQ, category, priceMin, priceMax, sort]
   );
 
   useEffect(() => {
@@ -134,7 +130,7 @@ export function ProductsBrowseView({
     if (isInitialMount.current) isInitialMount.current = false;
     syncUrl();
     fetchProducts({ page: 1, showLoading });
-  }, [debouncedQ, category, manufacturer, priceMin, priceMax, sort]);
+  }, [debouncedQ, category, priceMin, priceMax, sort]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
@@ -147,7 +143,6 @@ export function ProductsBrowseView({
     setQ("");
     setDebouncedQ("");
     setCategory("");
-    setManufacturer("");
     setPriceMin("");
     setPriceMax("");
     setSort("name_asc");
@@ -159,8 +154,6 @@ export function ProductsBrowseView({
     total === 0
       ? t("products.resultCountNone")
       : t("products.resultCount").replace("{count}", String(total));
-
-  const quickCategories = categories.slice(0, 8);
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,52 +204,23 @@ export function ProductsBrowseView({
               )}
             </div>
 
-            {/* Quick category chips */}
-            {quickCategories.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                <span className="text-muted-foreground text-sm">{t("products.quickCategory")}:</span>
-                {quickCategories.map((c) => (
-                  <Button
-                    key={c}
-                    variant={category === c ? "default" : "outline"}
-                    size="sm"
-                    className="h-8 rounded-full"
-                    onClick={() => setCategory(category === c ? "" : c)}
-                  >
-                    {c}
-                  </Button>
-                ))}
-              </div>
-            )}
-
             {/* Filters row */}
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex flex-wrap items-center gap-2">
                 <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden="true" />
                 <Select value={category || "all"} onValueChange={(v) => setCategory(v === "all" ? "" : v)}>
-                  <SelectTrigger className="w-[160px]">
+                  <SelectTrigger className="w-[200px]">
                     <SelectValue placeholder={t("products.filterCategory")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">{t("products.allCategories")}</SelectItem>
-                    {categories.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={manufacturer || "all"} onValueChange={(v) => setManufacturer(v === "all" ? "" : v)}>
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue placeholder={t("products.filterManufacturer")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t("products.allManufacturers")}</SelectItem>
-                    {manufacturers.map((m) => (
-                      <SelectItem key={m} value={m}>
-                        {m}
-                      </SelectItem>
-                    ))}
+                    {categories
+                      .filter((c): c is IsoCategory => Boolean(c?.code))
+                      .map((c) => (
+                        <SelectItem key={c.code} value={c.code}>
+                          {c.shortLabel ?? c.label}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
                 <Input

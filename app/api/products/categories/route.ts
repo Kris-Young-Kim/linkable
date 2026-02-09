@@ -1,24 +1,15 @@
 import { NextResponse } from "next/server";
-import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { ISO_CLASSES } from "@/lib/iso-classes";
 
+/**
+ * ISO 9999 Class(대분류) 필터 옵션 반환
+ * 06 보조기 및 보철물 제외
+ */
 export async function GET() {
-  const supabase = getSupabaseServerClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("category")
-    .eq("is_active", true)
-    .not("category", "is", null);
-
-  if (error) {
-    console.error("[products/categories] fetch error:", error);
-    return NextResponse.json(
-      { error: "카테고리 목록을 불러오지 못했습니다." },
-      { status: 500 }
-    );
-  }
-
-  const categories = [...new Set((data ?? []).map((r) => r.category).filter(Boolean))] as string[];
-  categories.sort((a, b) => a.localeCompare(b, "ko"));
-
+  const categories = ISO_CLASSES.map((c) => ({
+    code: c.code,
+    label: c.label,
+    shortLabel: c.shortLabel,
+  }));
   return NextResponse.json({ categories });
 }
